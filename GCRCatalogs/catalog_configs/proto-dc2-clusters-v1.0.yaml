@@ -1,0 +1,5 @@
+subclass_name: AlphaQClusterCatalog
+
+filename: /global/projecta/projectdirs/lsst/groups/coSim/descqa/catalog/AlphaQv2_SDSSugrizbJROval42_mock_clusters.hdf5
+
+creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann', 'Joe Hollowed']   
