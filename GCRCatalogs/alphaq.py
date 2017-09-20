@@ -6,15 +6,15 @@ import os
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
-from .utils import register_reader
-from .base import BaseGalaxyCatalog
+from GCR import BaseGenericCatalog
+from .register import register_reader
 
 __all__ = ['AlphaQGalaxyCatalog']
 
-class AlphaQGalaxyCatalog(BaseGalaxyCatalog):
+class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
     Alpha Q galaxy catalog class. Uses generic quantity and filter mechanisms
-    defined by BaseGalaxyCatalog class.
+    defined by BaseGenericCatalog class.
     """
 
     def _subclass_init(self, filename, base_catalog_dir=os.curdir, **kwargs):
@@ -30,6 +30,7 @@ class AlphaQGalaxyCatalog(BaseGalaxyCatalog):
             'halo_id': 'hostIndex',
             'halo_mass': 'hostHaloMass',
             'is_central': (lambda x : x.astype(np.bool), 'nodeIsIsolated'),
+            'stellar_mass':'totalMassStellar',
         }
 
         for band in 'ugriz':
