@@ -11,10 +11,10 @@ Examples of using the GCR API can be found [here](https://github.com/LSSTDESC/gc
 
 To use these catalogs with the GCR, first clone this repository on NERSC (yes, you need a NERSC account):
 
-    git clone git@github.com:LSSTDESC/generic-catalog-reader.git
+    git clone git@github.com:LSSTDESC/gcr-catalogs.git
 
 And then, [start a NERSC notebook server](https://jupyter.nersc.gov) and browse to `generic-catalog-reader/examples` to start the example notebooks. You can copy these notebooks and then add your tests.
 
 One can also pip install the package (this does not include the yaml and example files)
 
-    pip install git+git://github.com/LSSTDESC/generic-catalog-reader.git
+    pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
