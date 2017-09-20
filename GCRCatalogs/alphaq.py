@@ -6,15 +6,15 @@ import os
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
-from GCR import BaseGenericCatalog
-from .register import register_reader
+from .utils import register_reader
+from .base import BaseGalaxyCatalog
 
 __all__ = ['AlphaQGalaxyCatalog']
 
-class AlphaQGalaxyCatalog(BaseGenericCatalog):
+class AlphaQGalaxyCatalog(BaseGalaxyCatalog):
     """
     Alpha Q galaxy catalog class. Uses generic quantity and filter mechanisms
-    defined by BaseGenericCatalog class.
+    defined by BaseGalaxyCatalog class.
     """
 
     def _subclass_init(self, filename, base_catalog_dir=os.curdir, **kwargs):
@@ -30,7 +30,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'halo_id': 'hostIndex',
             'halo_mass': 'hostHaloMass',
             'is_central': (lambda x : x.astype(np.bool), 'nodeIsIsolated'),
-            'stellar_mass': 'totalMassStellar',
         }
 
         for band in 'ugriz':
@@ -66,3 +65,57 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 # Registers the reader
 register_reader(AlphaQGalaxyCatalog)
+
+
+#=====================================================================================================
+
+
+class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
+    """
+    The galaxy cluster catalog. Inherits AlphaQGalaxyCatalog, overloading select methods. 
+
+    The AlphaQ cluster catalog is structured in the following way: under the root hdf group, there
+    is a group per each halo with SO mass above 1e14 M_sun/h. Each of these groups contains the same
+    datasets as the original AlphaQ galaxy catalog, but with only as many rows as member galaxies for
+    the halo in question. Each group has attributes which contain halo-wide quantities, such as mass, 
+    position, etc. 
+    
+    This class offers filtering on any halo quantity (group attribute), as seen in all three of the
+    methods of this class (all the group attributes are iterated over in contexts concerning the 
+    pre-filtering). The valid filtering quantities are:
+    {'fof_halo_mass', 'sod_halo_cdelta', 'sod_halo_cdelta_error', 'sod_halo_c_acc_mass', 
+     'fof_halo_tag', 'halo_index', 'halo_step', 'halo_ra', 'halo_dec', 'halo_z', 
+     'halo_z_err', 'sod_halo_radius', 'sod_halo_mass', 'sod_halo_ke', 'sod_halo_vel_disp'}
+    """
+
+
+    def _subclass_init(self, filename, base_catalog_dir=os.curdir, **kwargs):
+            super()._subclass_init(filename, base_catalog_dir, **kwargs)
+            with h5py.File(self._file, 'r') as fh:
+                self._pre_filter_quantities = set(fh[list(fh.keys())[0]].attrs)
+    
+    
+    def _iter_native_dataset(self, pre_filters=None):
+        with h5py.File(self._file, 'r') as fh:
+            for key in fh:
+                halo = fh[key]
+                d = {}
+                attrs = list(halo.attrs)
+                for attr in attrs:
+                    d[attr] = halo.attrs[attr]
+                if (not pre_filters) or all(f[0](*(d.get(val) for val in f[1:])) for f in pre_filters):
+                    yield halo
+
+
+    @staticmethod
+    def _fetch_native_quantity(dataset, native_quantity):
+        cluster_attrs = list(dataset.attrs)
+        if native_quantity in cluster_attrs:
+            data = np.empty(dataset['redshift'].shape)
+            data.fill(dataset.attrs['{}'.format(native_quantity)])
+            return data
+        return dataset[native_quantity].value
+
+
+# Registers the reader
+register_reader(AlphaQClusterCatalog)

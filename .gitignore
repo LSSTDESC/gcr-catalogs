@@ -99,3 +99,13 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# ---------- from the Vim.gitignore file at github.com/github/gitignore/blob/master/Global ----------
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-v][a-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
