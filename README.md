@@ -7,7 +7,7 @@ A full description of the `GCR` API can be found [here](https://github.com/yymao
 
 Currently there are two catalogs available (more to come):
 
-1. "Proto-DC2" (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Katrin Heitmann et al. (**NOT READY YET**)
+1. "Proto-DC2" (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. (**NOT READY YET**)
 2. Buzzard v1.5 by Joe DeRose, Risa Wechsler et al.
 
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs).
