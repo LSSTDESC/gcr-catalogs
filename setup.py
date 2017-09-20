@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='GCRCatalogs',
-    version='0.1.0',
+    version='0.1.1',
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
@@ -27,5 +27,5 @@ setup(
     keywords='GCR',
     packages=['GCRCatalogs'],
     install_requires=['numpy','h5py','astropy','GCR'],
-    package_data = {'GCRCatalogs': ['*.yaml']},
+    package_data = {'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
