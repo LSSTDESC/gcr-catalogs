@@ -145,11 +145,14 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 from lsst.sims.catUtils.exampleCatalogDefinitions import DefaultPhoSimHeaderMap
 
 cat_name = 'phosim_cat.txt'
-cat = PhoSimDESCQA(db_bulge, obs_metadata=obs, cannot_be_null=['hasBulge'])
 
+# first, query the catalog for bulges
+cat = PhoSimDESCQA(db_bulge, obs_metadata=obs, cannot_be_null=['hasBulge'])
 cat.phoSimHeaderMap = DefaultPhoSimHeaderMap
 cat.write_catalog(cat_name, chunk_size=100000)
 
+# then, query the catalog for disks, writing to the same output file
+# by specifying write_mode='a' and write_header=False
 cat = PhoSimDESCQA(db_disk, obs_metadata=obs, cannot_be_null=['hasDisk'])
 cat.write_catalog(cat_name, chunk_size=100000,
                   write_mode='a', write_header=False)
