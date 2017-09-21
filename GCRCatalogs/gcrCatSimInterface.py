@@ -20,6 +20,12 @@ from lsst.sims.utils import _angularSeparation
 
 __all__ = ["DESCQAObject"]
 
+# a cache to store loaded catalogs to prevent them
+# from being loaded more than once, eating up
+# memory; this could happen since, for instance
+# the same catalog will need to be queried twice
+# go get bulges and disks from the same galaxy
+_CATALOG_CACHE = {}
 
 class DESCQAChunkIterator(object):
     """
@@ -184,7 +190,12 @@ class DESCQAObject(object):
                                "You do not have the generic catalog reader "
                                "installed and setup")
 
-        self._catalog = load_catalog(yaml_file_name)
+        global _CATALOG_CACHE
+        if yaml_file_name in _CATALOG_CACHE:
+            self._catalog = load_catalog(yaml_file_name)
+            _CATALOG_CACHE[yaml_file_name] = self._catalog
+        else:
+            self._catalog = _CATALOG_CACHE[yaml_file_name]
 
         self.columnMap = None
         self._make_column_map()
