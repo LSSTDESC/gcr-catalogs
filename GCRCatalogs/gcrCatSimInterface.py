@@ -192,10 +192,10 @@ class DESCQAObject(object):
 
         global _CATALOG_CACHE
         if yaml_file_name in _CATALOG_CACHE:
+            self._catalog = _CATALOG_CACHE[yaml_file_name]
+        else:
             self._catalog = load_catalog(yaml_file_name)
             _CATALOG_CACHE[yaml_file_name] = self._catalog
-        else:
-            self._catalog = _CATALOG_CACHE[yaml_file_name]
 
         self.columnMap = None
         self._make_column_map()
