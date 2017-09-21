@@ -196,6 +196,12 @@ class DESCQAObject(object):
         limit is ignored
         """
 
+        if self.objectTypeId is None:
+            raise RuntimeError("Need to define objectTypeId for your DESCQAObject")
+
+        if self.idColKey is None:
+            raise RuntimeError("Need to define idColKey for your DESCQAObject")
+
         if colnames is None:
             colnames = [k for k in self.columnMap]
 
