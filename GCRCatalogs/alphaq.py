@@ -17,7 +17,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, base_catalog_dir=os.curdir, **kwargs):
+    def _subclass_init(self, filename, lightcone=True, **kwargs):
 
         self._quantity_modifiers = {
             'ra_true': (lambda x: x/3600.0, 'ra'),
@@ -39,7 +39,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'magnitude:SDSS_{}:rest'.format(band)
             self._quantity_modifiers['Mag_true_{}_any'.format(band)] = 'magnitude:SDSS_{}:rest'.format(band)
 
-        self._file = os.path.join(base_catalog_dir, filename)
+        self._file = filename
+        self.lightcone = lightcone
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(

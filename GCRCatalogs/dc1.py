@@ -1,16 +1,22 @@
 """
+DC1GalaxyCatalog by Andrew Hearin
 """
-from GCR import BaseGalaxyCatalog
+import os
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.engine import url
 from sqlalchemy import create_engine
 import pymssql
 import numpy as np
-import os
 from astropy.cosmology import FlatLambdaCDM
 
+from GCR import BaseGenericCatalog
+from .register import register_reader
 
-class DC1GalaxyCatalog(BaseGalaxyCatalog):
+
+__all__ = ['DC1GalaxyCatalog']
+
+
+class DC1GalaxyCatalog(BaseGenericCatalog):
     """
     DC1 galaxy catalog class.
     """
@@ -48,6 +54,7 @@ class DC1GalaxyCatalog(BaseGalaxyCatalog):
             }
 
         self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
+        self.lightcone = True
 
     def _read_database_info_from_file(self, db_info_fname):
         msg = ("The file {0} does not exist.\n"
@@ -102,3 +109,6 @@ class DC1GalaxyCatalog(BaseGalaxyCatalog):
 
         #  Convert to ndarray and return
         return np.array(results_list)
+
+
+register_reader(DC1GalaxyCatalog)

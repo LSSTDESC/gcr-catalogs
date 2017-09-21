@@ -4,6 +4,6 @@ from .register import *
 
 from .alphaq import *
 from .buzzard import *
-from .galacticus import *
+from .dc1 import *
 
-__version__ = '0.1.0'
+__version__ = '0.1.2'

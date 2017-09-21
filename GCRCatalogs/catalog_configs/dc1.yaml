@@ -1,0 +1,3 @@
+subclass_name: DC1GalaxyCatalog
+
+db_info_fname: /path/to/connection_info_fname

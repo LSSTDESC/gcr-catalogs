@@ -2,4 +2,6 @@ subclass_name: AlphaQGalaxyCatalog
 
 filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/AlphaQv2_SDSSugrizbJROval42_mock.hdf5
 
+lightcone: true
+
 creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann']

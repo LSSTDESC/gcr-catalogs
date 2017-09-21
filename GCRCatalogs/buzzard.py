@@ -23,7 +23,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
     """
 
     def _subclass_init(self,
-                       base_catalog_dir=os.curdir,
                        catalog_main_dir=os.curdir,
                        catalog_sub_dirs={'truth':'truth'},
                        cosmo_h=0.7,
@@ -78,10 +77,11 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
             self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
 
-        self._catalog_sub_dirs = {k: os.path.join(base_catalog_dir, catalog_main_dir, v) for k, v in catalog_sub_dirs.items()}
+        self._catalog_sub_dirs = {k: os.path.join(catalog_main_dir, v) for k, v in catalog_sub_dirs.items()}
         self._npix = npix
         self._filename_template = filename_template
         self._healpixel_list = list(range(self._npix))
+        self.lightcone = True
 
 
     def set_healpixel_list(self, healpixel_list=None):
