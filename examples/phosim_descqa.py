@@ -19,6 +19,9 @@ from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
 
 obs_gen = ObservationMetaDataGenerator(opsim_db)
 
+# The boundLength kwarg controls the radius of the field of
+# view in degrees.  If not defined, we default to 1.75,
+# which is the nominal value for LSST
 obs_list = obs_gen.getObservationMetaData(fieldRA=(86.0,90.0),
                                           fieldDec=(-2.0, 2.0),
                                           boundLength=0.1)
