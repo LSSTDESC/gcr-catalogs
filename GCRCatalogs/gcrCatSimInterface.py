@@ -1,6 +1,5 @@
 """
-This script will define classes that look like CatalogDBObject, but use
-DESCQA's generic-catalog-reader to load an arbitrary catalog
+This script will define classes that enable CatSim to interface with GCR
 """
 
 from collections import OrderedDict
@@ -23,9 +22,43 @@ __all__ = ["DESCQAObject"]
 
 
 class DESCQAChunkIterator(object):
+    """
+    This class mimics the ChunkIterator defined and used
+    by CatSim.  It accepts a query to the catalog reader
+    and allows CatSim to iterate over it one chunk at a
+    time.
+    """
 
     def __init__(self, descqa_obj, column_map, obs_metadata,
                  colnames, default_values, chunk_size):
+        """
+        Parameters
+        ----------
+        descqa_obj is the DESCQA catalog being queried
+
+        column_map is the columnMap defined in DESCQAObject
+        which controls the mapping between DESCQA columns
+        and CatSim columns
+
+        obs_metadata is an ObservationMetaData (a CatSim class)
+        defining the telescope orientation at the time of the
+        simulated observation
+
+        colnames lists the names of the quantities that need
+        to be queried from descqa_obj. These will consist of
+        column names that can be queried directly by passing
+        them to descqa_obj.get_quantities() as well as column
+        names that can be mapped using the DESCQAObject.columns
+        mapping and columns defined the
+        DESCQAObject.dbDefaultValues
+
+        default_values is a dict (dbDefaultValues defined in the
+        DESCQAObject) defining default column values to be used
+        if the catalog does not contain required quantities
+
+        chunk_size is an integer (or None) defining the number
+        of rows to be returned at a time.
+        """
         self._descqa_obj = descqa_obj
         self._catsim_colnames = colnames
         self._chunk_size = chunk_size
@@ -43,14 +76,19 @@ class DESCQAChunkIterator(object):
             avail_qties = self._descqa_obj.list_all_quantities()
             avail_native_qties = self._descqa_obj.list_all_native_quantities()
 
+            # find the list of names that need to be passed to self._descqa_obj.get_quantities()
             gcr_col_names = np.array([self._column_map[catsim_name][0] for catsim_name in self._catsim_colnames
                                       if self._column_map[catsim_name][0] in avail_qties
                                       or self._column_map[catsim_name][0] in avail_native_qties])
 
             gcr_col_names = np.unique(gcr_col_names)
-
             gcr_cat_data = self._descqa_obj.get_quantities(gcr_col_names)
+
             n_rows = len(gcr_cat_data[gcr_col_names[0]])
+
+            # now build a dict keyed to the row names in self._catsim_colnames
+            # whose values are the numpy arrays of data corresponding to those
+            # column names
             catsim_data = {}
             dtype_list = []
             for catsim_name in self._catsim_colnames:
@@ -88,6 +126,8 @@ class DESCQAChunkIterator(object):
                     for name in catsim_data:
                         catsim_data[name] = catsim_data[name][valid]
 
+            # convert catsim_data into a numpy recarray, which is what
+            # CatSim ultimately expects the ChunkIterator to deliver
             records = []
             for i_rec in range(len(catsim_data[self._catsim_colnames[0]])):
                 rec = (tuple([catsim_data[name][i_rec]
@@ -100,6 +140,7 @@ class DESCQAChunkIterator(object):
                 self._data = np.rec.array(records, dtype=dtype)
             self._start_row = 0
 
+        # iterate over the chunks of the recarray stored in self._data
         if self._chunk_size is None and self._continue and len(self._data)>0:
             output = self._data
             self._data = None
@@ -120,6 +161,10 @@ class DESCQAChunkIterator(object):
 
 
 class DESCQAObject(object):
+    """
+    This class is meant to mimic the CatalogDBObject usually used to
+    connect CatSim to a database.
+    """
 
     idColKey = None
     objectTypeId = None
@@ -185,15 +230,17 @@ class DESCQAObject(object):
         """
         Parameters
         ----------
-        colnames is a list of column names
+        colnames is a list of column names to be queried (CatSim
+        will determine which automaticall)
 
         chunk_size is the number of rows to return at a time
 
-        obs_metadata is an ObservationMetaData
+        obs_metadata is an ObservationMetaData defining the orientation
+        of the telescope
 
-        constraint is ignored
+        constraint is ignored, but needs to be here to preserve the API
 
-        limit is ignored
+        limit is ignored, but needs to be here to preserve the API
         """
 
         if self.objectTypeId is None:
