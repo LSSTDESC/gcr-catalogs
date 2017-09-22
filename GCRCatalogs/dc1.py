@@ -91,7 +91,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         yield scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
     @staticmethod
-    def _fetch_native_quantity(self, dataset, native_quantity, topN=None):
+    def _fetch_native_quantity(dataset, native_quantity, topN=None):
         """ runs query and returns numpy array
         """
         #  Write the query string
