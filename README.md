@@ -1,35 +1,56 @@
 # GCR Catalogs
 
-This repo hosts the catalogs used by [DESCQA2](https://github.com/LSSTDESC/descqa). 
+This repo hosts the mock galaxy catalogs used by [DESCQA2](https://github.com/LSSTDESC/descqa).
 
-All the catalogs can be accessed through an unified inferface, the [GCR](https://github.com/yymao/generic-catalog-reader).
-A full description of the `GCR` API can be found [here](https://github.com/yymao/generic-catalog-reader/blob/master/GCR.py).
+On a NERSC machine, all these catalogs can be directly accessed through the "Generic Catalog Reader" (GCR) inferface.
+More information about GCR can be found [here](https://github.com/yymao/generic-catalog-reader).
 
-Currently there are two catalogs available (more to come):
+Currently there are three catalogs available (more to come):
 
-1. "Proto-DC2" (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. (**NOT READY YET**)
-2. Buzzard v1.5 by Joe DeRose, Risa Wechsler et al.
+1. `proto-dc2-v1.0`: Proto-DC2 (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. (**NOT READY YET**)
+2. `buzzard_v1.5`: Buzzard catalog v1.5 by Joe DeRose, Risa Wechsler et al.
+3. `dc1`: DC1 catalog
 
-Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). 
-
-The quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
-
-
-Some examples of using `GCRCatalogs` can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/examples). (Thanks Joe for providing the CLF test!)
-
-To use these catalogs, first clone this repository on NERSC (yes, you need a NERSC account):
-
-    git clone git@github.com:LSSTDESC/gcr-catalogs.git
-
-And then, [start a NERSC notebook server](https://jupyter.nersc.gov) and browse to `gcr-catalogs/examples` to start the example notebooks (using Python 2 kernal). You can copy these notebooks and then add your tests.
+Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
 
 
-This package is also pip installable
+## Setup
 
-    pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
+`GCRCatalogs` is already installed in the DESCQA Python envoirnment at NERSC. To use it:
 
-In fact, it is already installed in the DESCQA envoirnment on NERSC. You can activate this environment by running the following on NERSC:
+### with Jypeter notebooks:
+
+First, [start a NERSC notebook server](https://jupyter.nersc.gov) and open a notebook with Python 2 kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
+
+```python
+import sys
+sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/lib/python2.7/site-packages')
+```
+
+### in a terminal:
+
+Activate DESCQA Python environment by running the following on NERSC (needs to be in `bash` or `zsh`):
 
     source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
     source activate DESCQA
+
+### with the latest version:
+
+You can install the latest version by running:
+
+   pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
+
+
+## Usage
+
+Some examples of using `GCRCatalogs` can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/examples). (Thanks to Joe DeRose for providing the CLF test example!)
+
+Here's a minimal example:
+
+```python
+import GCRCatalogs
+gc = GCRCatalogs.load_catalog('proto-dc2-v1.0')
+gc.get_quantities(['redshift_true'])
+print gc.list_all_quantities()
+```
 
