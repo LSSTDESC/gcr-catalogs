@@ -15,8 +15,13 @@ except ImportError:
     _GCR_IS_AVAILABLE = False
     pass
 
+try:
+    from lsst.sims.utils import _angularSeparation
+except ImportError:
+    from astropy.coordinates import SkyCoord
+    def _angularSeparation(ra1, dec1, ra2, dec2):
+        return SkyCoord(ra1, dec1, unit="deg").separation(SkyCoord(ra2, dec2, unit="deg")).radian
 
-from lsst.sims.utils import _angularSeparation
 
 __all__ = ["DESCQAObject"]
 
