@@ -7,7 +7,7 @@ More information about GCR can be found [here](https://github.com/yymao/generic-
 
 Currently there are three catalogs available (more to come):
 
-1. `proto-dc2-v1.0`: Proto-DC2 (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. (**NOT READY YET**)
+1. `proto-dc2-v1.0` (**NOT READY YET**): Proto-DC2 (AlphaQ) catalog by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
 2. `buzzard_v1.5`: Buzzard catalog v1.5 by Joe DeRose, Risa Wechsler et al.
 3. `dc1`: DC1 catalog
 
@@ -38,7 +38,7 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
 
 You can install the latest version by running:
 
-   pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
+    pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
 
 
 ## Usage
