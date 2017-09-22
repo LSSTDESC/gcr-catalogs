@@ -6,4 +6,6 @@ from .alphaq import *
 from .buzzard import *
 from .dc1 import *
 
+from .gcrCatSimInterface import *
+
 __version__ = '0.1.2'
