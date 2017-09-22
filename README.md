@@ -34,7 +34,8 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
     source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
     source activate DESCQA
 
-### with the latest version:
+
+### Getting latest version 
 
 You can install the latest version by running:
 
@@ -54,3 +55,6 @@ gc.get_quantities(['redshift_true'])
 print gc.list_all_quantities()
 ```
 
+### interfacing PhoSim through CatSim:
+
+See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py)
