@@ -19,7 +19,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, filename, lightcone=True, **kwargs):
 
-        assert os.path.isfile(filename)
+        assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
         self.lightcone = lightcone
 
