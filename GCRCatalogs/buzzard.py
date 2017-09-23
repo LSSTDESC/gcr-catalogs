@@ -12,10 +12,6 @@ from .register import register_reader
 __all__ = ['BuzzardGalaxyCatalog']
 
 
-def _get_fits_data(fits_file):
-    return fits_file[1].data
-
-
 class BuzzardGalaxyCatalog(BaseGenericCatalog):
     """
     Argonne galaxy catalog class. Uses generic quantity and filter mechanisms
@@ -32,7 +28,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        halo_mass_def='vir',
                        **kwargs):
 
-        assert(os.path.isdir(catalog_main_dir))
+        assert(os.path.isdir(catalog_main_dir)), 'Catalog directory {} does not exist'.format(catalog_main_dir)
         self._catalog_sub_dirs = {k: os.path.join(catalog_main_dir, v) for k, v in catalog_sub_dirs.items()}
         self._npix = npix
         self._filename_template = filename_template
@@ -104,8 +100,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         native_quantities = {'original_healpixel'}
         for _, dataset in self._iter_native_dataset():
             for k, v in dataset.items():
-                fields = _get_fits_data(v).dtype.fields
-                for name, (dt, size) in _get_fits_data(v).dtype.fields.items():
+                for name, (dt, size) in v.dtype.fields.items():
                     if dt.shape:
                         for i in range(dt.shape[0]):
                             native_quantities.add((k, name, i))
@@ -120,31 +115,41 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             if pre_filters and not all(f[0](*([i]*(len(f)-1))) for f in pre_filters):
                 continue
 
-            fp = dict()
-            for key, path in self._catalog_sub_dirs.items():
-                try:
-                    fp[key] = fits.open(os.path.join(path, self._filename_template.format(i)))
-                except (IOError, OSError):
-                    pass
+            fp = list()
+            fp_data = dict()
             try:
-                if all(k in fp for k in self._catalog_sub_dirs):
-                    yield i, fp
+                for key, path in self._catalog_sub_dirs.items():
+                    full_path = os.path.join(path, self._filename_template.format(i))
+                    if not os.path.isfile(full_path):
+                        break
+                    fp_this = fits.open(full_path, memmap=True)
+                    fp.append(fp_this)
+                    fp_data[key] = fp_this[1].data
+                else:
+                    yield i, fp_data
+                    continue
+                break
             finally:
-                for f in fp.values():
+                del fp_data
+                for f in fp:
                     f.close()
+                    del f[1].data
 
 
     @staticmethod
     def _fetch_native_quantity(dataset, native_quantity):
         healpix, fits_data = dataset
         if native_quantity == 'original_healpixel':
-            data = np.empty(_get_fits_data(fits_data.values()[0]).shape, np.int)
+            data = np.empty(fits_data.values()[0].shape, np.int)
             data.fill(healpix)
-            return data
-        data =  _get_fits_data(fits_data[native_quantity[0]])[native_quantity[1]]
-        if len(native_quantity) == 3:
-            data = data[:,native_quantity[2]]
+        elif len(native_quantity) == 2:
+            data = fits_data[native_quantity[0]][native_quantity[1]].copy()
+        elif len(native_quantity) == 3:
+            data = fits_data[native_quantity[0]][native_quantity[1]][:,native_quantity[2]].copy()
+        else:
+            raise ValueError('something wrong with the native_quantity {}'.format(native_quantity))
         return data
+
 
 # Registers the reader
 register_reader(BuzzardGalaxyCatalog)
