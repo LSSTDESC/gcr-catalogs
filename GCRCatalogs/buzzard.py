@@ -32,9 +32,16 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        halo_mass_def='vir',
                        **kwargs):
 
+        assert(os.path.isdir(catalog_main_dir))
+        self._catalog_sub_dirs = {k: os.path.join(catalog_main_dir, v) for k, v in catalog_sub_dirs.items()}
+        self._npix = npix
+        self._filename_template = filename_template
+        self._healpixel_list = list(range(self._npix))
         self._pre_filter_quantities = {'original_healpixel'}
+
+        self.lightcone = True
         self.cosmology = FlatLambdaCDM(H0=cosmo_h*100.0, Om0=cosmo_Omega_M0)
-        self._halo_mass_def = halo_mass_def
+        self.halo_mass_def = halo_mass_def
 
         _c = 299792.458
         self._quantity_modifiers = {
@@ -76,12 +83,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, ('truth', 'OMAG', i))
             self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
             self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
-
-        self._catalog_sub_dirs = {k: os.path.join(catalog_main_dir, v) for k, v in catalog_sub_dirs.items()}
-        self._npix = npix
-        self._filename_template = filename_template
-        self._healpixel_list = list(range(self._npix))
-        self.lightcone = True
 
 
     def set_healpixel_list(self, healpixel_list=None):

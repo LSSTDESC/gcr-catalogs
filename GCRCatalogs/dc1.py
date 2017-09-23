@@ -24,6 +24,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     def _subclass_init(self, db_info_fname, **kwargs):
         """
         """
+        assert os.path.isfile(db_info_fname)
         hostname, portnum, dbname, username, pwd = self._read_database_info_from_file(db_info_fname)
 
         self.dbURL = url.URL('mssql+pymssql',
