@@ -122,7 +122,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     full_path = os.path.join(path, self._filename_template.format(i))
                     if not os.path.isfile(full_path):
                         break
-                    fp_this = fits.open(full_path, memmap=True)
+                    fp_this = fits.open(full_path, mode='readonly', memmap=True, lazy_load_hdus=True)
                     fp.append(fp_this)
                     fp_data[key] = fp_this[1].data
                 else:
@@ -143,9 +143,9 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             data = np.empty(fits_data.values()[0].shape, np.int)
             data.fill(healpix)
         elif len(native_quantity) == 2:
-            data = fits_data[native_quantity[0]][native_quantity[1]].copy()
+            data = fits_data[native_quantity[0]][native_quantity[1]]
         elif len(native_quantity) == 3:
-            data = fits_data[native_quantity[0]][native_quantity[1]][:,native_quantity[2]].copy()
+            data = fits_data[native_quantity[0]][native_quantity[1]][:,native_quantity[2]]
         else:
             raise ValueError('something wrong with the native_quantity {}'.format(native_quantity))
         return data
