@@ -8,4 +8,4 @@ from .dc1 import *
 
 from .gcrCatSimInterface import *
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
