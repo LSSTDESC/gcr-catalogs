@@ -1,5 +1,7 @@
 subclass_name: AlphaQClusterCatalog
 
-filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/AlphaQv2_SDSSugrizbJROval42_mock_clusters.hdf5
+filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_SDSS_v42_clusters.hdf5
+
+lightcone: true
 
 creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann', 'Joe Hollowed']   
