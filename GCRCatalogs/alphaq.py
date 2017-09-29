@@ -86,7 +86,7 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
     This class offers filtering on any halo quantity (group attribute), as seen in all three of the
     methods of this class (all the group attributes are iterated over in contexts concerning the
     pre-filtering). The valid filtering quantities are:
-    {'fof_halo_mass', 'sod_halo_cdelta', 'sod_halo_cdelta_error', 'sod_halo_c_acc_mass',
+    {'host_halo_mass', 'sod_halo_cdelta', 'sod_halo_cdelta_error', 'sod_halo_c_acc_mass',
      'fof_halo_tag', 'halo_index', 'halo_step', 'halo_ra', 'halo_dec', 'halo_z',
      'halo_z_err', 'sod_halo_radius', 'sod_halo_mass', 'sod_halo_ke', 'sod_halo_vel_disp'}
     """
