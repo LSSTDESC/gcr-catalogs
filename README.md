@@ -14,7 +14,7 @@ Currently there are three catalogs available (more to come):
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
 
 
-## Setup
+## Use DESCQA Python envoirnment
 
 `GCRCatalogs` is already installed in the DESCQA Python envoirnment at NERSC. To use it:
 
@@ -35,9 +35,16 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
     source activate DESCQA
 
 
-### Getting latest version 
+### with a python script: 
 
-You can install the latest version by running:
+To be able to import `GCRCatalogs`, the first line of the script should be:
+
+    #!/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/bin/python 
+
+
+## Getting latest version of GCRCatalogs
+
+You can install the latest version by running (but note that you need to change the python paths accordingly) 
 
     pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
 
