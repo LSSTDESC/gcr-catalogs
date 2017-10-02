@@ -65,3 +65,21 @@ print gc.list_all_quantities()
 ### interfacing PhoSim through CatSim:
 
 See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py)
+
+
+
+## Contribute to GCRCatalogs:
+
+1. On GitHub [Fork](https://guides.github.com/activities/forking/) the GCRCatalogs GitHub repo.
+2. On NERSC
+
+       cd /your/own/directory
+       git clone git@github.com:YourGitHubUsername/gcr-catalogs.git
+
+3. Make changes
+4. Test by adding your clone to the path when running Python: 
+   ```python
+   import sys
+   sys.path.insert(0, '/your/own/directory/gcr-catalogs')
+   ```
+5. Commit and create pull requests
