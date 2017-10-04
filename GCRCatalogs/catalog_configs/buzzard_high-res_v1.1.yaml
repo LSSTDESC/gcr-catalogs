@@ -1,0 +1,19 @@
+subclass_name: BuzzardGalaxyCatalog
+
+high_res: true
+catalog_root_dir: /global/project/projectdirs/lsst/jderose/buzzard-highres
+catalog_path_template:
+    truth: truth/Buzzard-highres_galaxies_shmatch.{}.fit
+    halo: halos/Buzzard-highres_halos.{}.fit
+    lsst: lsst/Buzzard-highres_lsst.{}.fit
+    des: des/Buzzard-highres_decam.{}.fit
+    stripe82: stripe82/Buzzard-highres_Stripe82_Mock_mag.{}.fit
+
+cosmology:
+    H0: 70.0
+    Om0: 0.286
+
+halo_mass_def: vir
+lightcone: true
+
+creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
