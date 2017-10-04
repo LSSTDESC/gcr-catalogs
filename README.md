@@ -5,16 +5,16 @@ This repo hosts the mock galaxy catalogs used by [DESCQA2](https://github.com/LS
 On a NERSC machine, all these catalogs can be directly accessed through the "Generic Catalog Reader" (GCR) inferface.
 More information about GCR can be found [here](https://github.com/yymao/generic-catalog-reader).
 
-Currently these catalogs are available (more to come):
+Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
 
-1. Proto-DC2 (AlphaQ) (**NOT READY YET**): `proto-dc2-v1.0` (full catalog) and `proto-dc2-clusters-v1.0` (clusters only) by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
-2. Buzzard series: `buzzard_v1.6` (and different realizations: `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21`),  `buzzard_v1.5`, `buzzard_high-res_v1.1` by Joe DeRose, Risa Wechsler, Eli Rykoff et al. (Note: high-res reader has not been fully implemented yet. For now only native quantities work for high-res.)
+1. Proto-DC2 (AlphaQ): `proto-dc2-v1.0` (full catalog) and `proto-dc2-clusters-v1.0` (clusters only) by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
+2. Buzzard series: `buzzard_v1.6` (and different realizations: `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21`), `buzzard_v1.5`, and `buzzard_high-res_v1.1` by Joe DeRose, Risa Wechsler, Eli Rykoff et al. (Note: high-res reader has not been fully implemented yet. For now only native quantities work for high-res.)
 3. DC1 catalog: `dc1`
 
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
 
 
-## Use DESCQA Python envoirnment
+## Use GCRCatalogs under the DESCQA Python envoirnment on NERSC
 
 `GCRCatalogs` is already installed in the DESCQA Python envoirnment at NERSC. To use it:
 
@@ -42,11 +42,13 @@ To be able to import `GCRCatalogs`, the first line of the script should be:
     #!/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/bin/python 
 
 
-## Getting latest version of GCRCatalogs
+## Install GCRCatalogs on your own
 
 You can install the latest version by running (but note that you need to change the python paths accordingly) 
 
     pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
+
+But note that the actual catalogs can only be accessed on a NERSC machine. 
 
 
 ## Usage
@@ -62,7 +64,7 @@ gc.get_quantities(['redshift_true'])
 print gc.list_all_quantities()
 ```
 
-### interfacing PhoSim through CatSim:
+### Interfacing PhoSim through CatSim:
 
 See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py)
 
