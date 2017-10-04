@@ -32,11 +32,13 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
 
         self._catalog_path_template = {k: os.path.join(catalog_root_dir, v) for k, v in catalog_path_template.items()}
+        self._default_subset = 'truth' if 'truth' in self._catalog_path_template else next(iter(self._catalog_path_template.keys()))
+        self._cached_datasets = dict()
+
         self._default_healpix_pixels = tuple(healpix_pixels or self._get_healpix_pixels())
         self.healpix_pixels = None
         self.reset_healpix_pixels()
         self.check_healpix_pixels()
-
         self._pre_filter_quantities = {'healpix_pixel'}
 
         self.cosmology = FlatLambdaCDM(**cosmology)
@@ -53,50 +55,47 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
         else:
             self._quantity_modifiers = {
-                'galaxy_id': ('truth', 'ID'),
+                'galaxy_id': 'truth/ID',
                 'redshift': (lambda zt, x, y, z, vx, vy, vz: zt + (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
-                    ('truth', 'Z'), ('truth', 'PX'), ('truth', 'PY'), ('truth', 'PZ'), ('truth', 'VX'), ('truth', 'VY'), ('truth', 'VZ')),
-                'redshift_true': ('truth', 'Z'),
-                'ra': ('truth', 'RA'),
-                'dec': ('truth', 'DEC'),
-                'ra_true': ('truth', 'TRA'),
-                'dec_true': ('truth', 'TDEC'),
-                'halo_id': ('truth', 'HALOID'),
-                'halo_mass': (lambda x: x/self.cosmology.h, ('truth', 'M200')),
-                'is_central': (lambda x: x.astype(np.bool), ('truth', 'CENTRAL')),
-                'ellipticity_1': ('truth', 'EPSILON', 0),
-                'ellipticity_2': ('truth', 'EPSILON', 1),
-                'ellipticity_1_true': ('truth', 'TE', 0),
-                'ellipticity_2_true': ('truth', 'TE', 1),
-                'size': ('truth', 'SIZE'),
-                'size_true': ('truth', 'TSIZE'),
-                'shear_1': ('truth', 'GAMMA1'),
-                'shear_2': ('truth', 'GAMMA2'),
-                'convergence': ('truth', 'KAPPA'),
-                'magnification': ('truth', 'MU'),
-                'position_x': (lambda x: x/self.cosmology.h, ('truth', 'PX')),
-                'position_y': (lambda x: x/self.cosmology.h, ('truth', 'PY')),
-                'position_z': (lambda x: x/self.cosmology.h, ('truth', 'PZ')),
-                'velocity_x': ('truth', 'VX'),
-                'velocity_y': ('truth', 'VY'),
-                'velocity_z': ('truth', 'VZ'),
+                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                'redshift_true': 'truth/Z',
+                'ra': 'truth/RA',
+                'dec': 'truth/DEC',
+                'ra_true': 'truth/TRA',
+                'dec_true': 'truth/TDEC',
+                'halo_id': 'truth/HALOID',
+                'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
+                'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
+                'ellipticity_1': 'truth/EPSILON/0',
+                'ellipticity_2': 'truth/EPSILON/1',
+                'ellipticity_1_true': 'truth/TE/0',
+                'ellipticity_2_true': 'truth/TE/1',
+                'size': 'truth/SIZE',
+                'size_true': 'truth/TSIZE',
+                'shear_1': 'truth/GAMMA1',
+                'shear_2': 'truth/GAMMA2',
+                'convergence': 'truth/KAPPA',
+                'magnification': 'truth/MU',
+                'position_x': (lambda x: x/self.cosmology.h, 'truth/PX'),
+                'position_y': (lambda x: x/self.cosmology.h, 'truth/PY'),
+                'position_z': (lambda x: x/self.cosmology.h, 'truth/PZ'),
+                'velocity_x': 'truth/VX',
+                'velocity_y': 'truth/VY',
+                'velocity_z': 'truth/VZ',
             }
 
             for i, b in enumerate('grizY'):
-                self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, ('truth', 'AMAG', i))
-                self._quantity_modifiers['Mag_true_{}_any'.format(b)] = (_abs_mask_func, ('truth', 'AMAG', i))
-                self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, ('truth', 'OMAG', i))
-                self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, ('truth', 'OMAG', i))
-                self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
-                self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, ('truth', 'OMAGERR', i))
+                self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
+                self._quantity_modifiers['Mag_true_{}_any'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
+                self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
+                self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
+
 
 
     def _get_healpix_pixels(self):
-        try:
-            path = self._catalog_path_template['truth']
-        except KeyError:
-            path = next(iter(self._catalog_path_template.values()))
-
+        path = self._catalog_path_template[self._default_subset]
         fname_pattern = re.escape(os.path.basename(path)).replace(r'\{', '{').replace(r'\}', '}').format(r'(\d+)')
         path = os.path.dirname(path)
         healpix_pixels = list()
@@ -121,52 +120,47 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
     def _generate_native_quantity_list(self):
         native_quantities = {'healpix_pixel'}
-        for _, dataset in self._iter_native_dataset():
-            for k, v in dataset.items():
-                for name, (dt, size) in v.dtype.fields.items():
-                    if dt.shape:
-                        for i in range(dt.shape[0]):
-                            native_quantities.add((k, name, i))
-                    else:
-                        native_quantities.add((k, name))
-            break
+        healpix = next(iter(self.healpix_pixels))
+        for subset in self._catalog_path_template.keys():
+            data = self._open_dataset(healpix, subset)
+            for name, (dt, size) in data.dtype.fields.items():
+                if dt.shape:
+                    for i in range(dt.shape[0]):
+                        native_quantities.add('/'.join((subset, name, str(i))))
+                else:
+                    native_quantities.add('/'.join((subset, name)))
         return native_quantities
 
 
     def _iter_native_dataset(self, pre_filters=None):
         for i in self.healpix_pixels:
             args = dict(healpix_pixel=i)
-            if pre_filters and not all(f[0](*(args[k] for k in f[1:])) for f in pre_filters):
-                continue
-
-            fp = list()
-            fp_data = dict()
-            try:
-                for key, path in self._catalog_path_template.items():
-                    fp_this = fits.open(path.format(i), mode='readonly', memmap=True, lazy_load_hdus=True)
-                    fp.append(fp_this)
-                    fp_data[key] = fp_this[1].data
-                yield i, fp_data
-            finally:
-                del fp_data
-                for f in fp:
-                    f.close()
-                    del f[1].data
-                del fp
+            if (not pre_filters) or all(f[0](*(args[k] for k in f[1:])) for f in pre_filters):
+                yield i
 
 
-    @staticmethod
-    def _fetch_native_quantity(dataset, native_quantity):
-        healpix, fits_data = dataset
+    def _open_dataset(self, healpix, subset):
+        key = (healpix, subset)
+        if key not in self._cached_datasets:
+            path = self._catalog_path_template[subset].format(healpix)
+            fp = fits.open(path, mode='readonly', memmap=True, lazy_load_hdus=True)
+            self._cached_datasets[key] = fp[1].data
+        return self._cached_datasets[key]
+
+
+    def _fetch_native_quantity(self, dataset, native_quantity):
+        healpix = dataset
         if native_quantity == 'healpix_pixel':
-            data = np.empty(fits_data.values()[0].shape, np.int)
+            data = np.empty(self._open_dataset(healpix, self._default_subset).shape, np.int)
             data.fill(healpix)
-        elif len(native_quantity) == 2:
-            data = fits_data[native_quantity[0]][native_quantity[1]]
-        elif len(native_quantity) == 3:
-            data = fits_data[native_quantity[0]][native_quantity[1]][:,native_quantity[2]]
         else:
-            raise ValueError('something wrong with the native_quantity {}'.format(native_quantity))
+            native_quantity = native_quantity.split('/')
+            assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
+            subset = native_quantity.pop(0)
+            column = native_quantity.pop(0)
+            data = self._open_dataset(healpix, subset)[column]
+            if native_quantity:
+                data = data[:,int(native_quantity.pop(0))]
         return data
 
 
