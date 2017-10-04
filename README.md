@@ -8,7 +8,7 @@ More information about GCR can be found [here](https://github.com/yymao/generic-
 Currently these catalogs are available (more to come):
 
 1. Proto-DC2 (AlphaQ) (**NOT READY YET**): `proto-dc2-v1.0` (full catalog) and `proto-dc2-clusters-v1.0` (clusters only) by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
-2. Buzzard series: `buzzard_v1.6` (and different realizations: `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21`, `buzzard_v1.6_21`),  `buzzard_v1.5`, `buzzard_high-res_v1.1` by Joe DeRose, Risa Wechsler, Eli Rykoff et al. (Note: high-res reader has not been fully implemented yet. For now only native quantities work for high-res.)
+2. Buzzard series: `buzzard_v1.6` (and different realizations: `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21`),  `buzzard_v1.5`, `buzzard_high-res_v1.1` by Joe DeRose, Risa Wechsler, Eli Rykoff et al. (Note: high-res reader has not been fully implemented yet. For now only native quantities work for high-res.)
 3. DC1 catalog: `dc1`
 
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
