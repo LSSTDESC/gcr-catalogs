@@ -52,7 +52,10 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         if high_res:
             #TODO: add quantity modifiers
             print('Warning! high_res reader has not been fully implemented. For now only native quantities would work!')
-
+            self._quantity_modifiers = {
+                'ra_true': 'truth/RA',
+                'dec_true': 'truth/DEC',
+            }
         else:
             self._quantity_modifiers = {
                 'galaxy_id': 'truth/ID',
