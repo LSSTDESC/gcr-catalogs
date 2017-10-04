@@ -48,8 +48,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         _mask_func = lambda x: np.where(x==99.0, np.nan, x)
 
         if high_res:
-            print('Warning! high_res version has not been fully implemented')
-            pass #TODO: add quantity modifiers
+            #TODO: add quantity modifiers
+            print('Warning! high_res reader has not been fully implemented. For now only native quantities would work!')
 
         else:
             self._quantity_modifiers = {

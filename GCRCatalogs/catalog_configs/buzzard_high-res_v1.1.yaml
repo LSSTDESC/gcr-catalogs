@@ -4,10 +4,23 @@ high_res: true
 catalog_root_dir: /global/project/projectdirs/lsst/jderose/buzzard-highres
 catalog_path_template:
     truth: truth/Buzzard-highres_galaxies_shmatch.{}.fit
-    halo: halos/Buzzard-highres_halos.{}.fit
     lsst: lsst/Buzzard-highres_lsst.{}.fit
+    halos: halos/Buzzard-highres_halos.{}.fit
     des: des/Buzzard-highres_decam.{}.fit
     stripe82: stripe82/Buzzard-highres_Stripe82_Mock_mag.{}.fit
+    cfhtls: cfhtls/Buzzard-highres_cfhtls.{}.fit
+    candels: candels/Buzzard-highres_candels.{}.fit
+    deep: deep/Buzzard-highres_deep.{}.fit
+    euclid: euclid/Buzzard-highres_euclid.{}.fit
+    flamex: flamex/Buzzard-highres_flamex.{}.fit
+    hsc: hsc/Buzzard-highres_hsc.{}.fit
+    irac: irac/Buzzard-highres_irac.{}.fit
+    johnson: johnson/Buzzard-highres_johnson.{}.fit
+    sdss25: sdss25/Buzzard-highres_sdss25.{}.fit
+    twomass: twomass/Buzzard-highres_twomass.{}.fit
+    vista: vista/Buzzard-highres_vista.{}.fit
+    wise: wise/Buzzard-highres_wise.{}.fit
+    desy5: desy5/Buzzard-highres_DES_Mock_mag.{}.fit
 
 cosmology:
     H0: 70.0

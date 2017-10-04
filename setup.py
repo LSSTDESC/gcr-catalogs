@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name='GCRCatalogs',
-    version='0.1.6',
+    version='0.1.7',
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
