@@ -13,6 +13,19 @@ from .register import register_reader
 __all__ = ['BuzzardGalaxyCatalog']
 
 
+class FitsFile(object):
+    def __init__(self, path):
+        self._path = path
+        self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
+        self.data = self._file_handle[1].data
+
+    def __del__(self):
+        del self.data
+        del self._file_handle[1].data
+        self._file_handle.close()
+        del self._file_handle
+
+
 class BuzzardGalaxyCatalog(BaseGenericCatalog):
     """
     Buzzard galaxy catalog class. Uses generic quantity and filter mechanisms
@@ -33,7 +46,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
         self._catalog_path_template = {k: os.path.join(catalog_root_dir, v) for k, v in catalog_path_template.items()}
         self._default_subset = 'truth' if 'truth' in self._catalog_path_template else next(iter(self._catalog_path_template.keys()))
-        self._cached_datasets = dict()
 
         self._default_healpix_pixels = tuple(healpix_pixels or self._get_healpix_pixels())
         self.healpix_pixels = None
@@ -125,8 +137,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         native_quantities = {'healpix_pixel'}
         healpix = next(iter(self.healpix_pixels))
         for subset in self._catalog_path_template.keys():
-            data = self._open_dataset(healpix, subset)
-            for name, (dt, size) in data.dtype.fields.items():
+            f = self._open_dataset(healpix, subset)
+            for name, (dt, size) in f.data.dtype.fields.items():
                 if dt.shape:
                     for i in range(dt.shape[0]):
                         native_quantities.add('/'.join((subset, name, str(i))))
@@ -136,32 +148,38 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
 
     def _iter_native_dataset(self, pre_filters=None):
+        cache = dict()
         for i in self.healpix_pixels:
             args = dict(healpix_pixel=i)
             if (not pre_filters) or all(f[0](*(args[k] for k in f[1:])) for f in pre_filters):
-                yield i
+                yield i, cache
+        for key in list(cache.keys()):
+            del cache[key]
 
 
-    def _open_dataset(self, healpix, subset):
+    def _open_dataset(self, healpix, subset, use_cache=None):
+        path = self._catalog_path_template[subset].format(healpix)
+
+        if use_cache is None:
+            return FitsFile(path)
+
         key = (healpix, subset)
-        if key not in self._cached_datasets:
-            path = self._catalog_path_template[subset].format(healpix)
-            fp = fits.open(path, mode='readonly', memmap=True, lazy_load_hdus=True)
-            self._cached_datasets[key] = fp[1].data
-        return self._cached_datasets[key]
+        if key not in use_cache:
+            use_cache[key] = FitsFile(path)
+        return use_cache[key]
 
 
     def _fetch_native_quantity(self, dataset, native_quantity):
-        healpix = dataset
+        healpix, cache = dataset
         if native_quantity == 'healpix_pixel':
-            data = np.empty(self._open_dataset(healpix, self._default_subset).shape, np.int)
+            data = np.empty(self._open_dataset(healpix, self._default_subset, cache).data.shape, np.int)
             data.fill(healpix)
         else:
             native_quantity = native_quantity.split('/')
             assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
             subset = native_quantity.pop(0)
             column = native_quantity.pop(0)
-            data = self._open_dataset(healpix, subset)[column]
+            data = self._open_dataset(healpix, subset, cache).data[column]
             if native_quantity:
                 data = data[:,int(native_quantity.pop(0))]
         return data
