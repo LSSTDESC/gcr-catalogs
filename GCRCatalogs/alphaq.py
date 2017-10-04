@@ -93,7 +93,7 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
 
 
     def _subclass_init(self, filename, **kwargs):
-            super(AlphaQClusterCatalog, self)._subclass_init(filename, lightcone=False, **kwargs)
+            super(AlphaQClusterCatalog, self)._subclass_init(filename, **kwargs)
             with h5py.File(self._file, 'r') as fh:
                 self._pre_filter_quantities = set(fh[list(fh.keys())[0]].attrs)
 
