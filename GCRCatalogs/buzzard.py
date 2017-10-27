@@ -90,10 +90,10 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
 
                 if b!='u':
-                    self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'desy5/AMAG/{}'.format(i))
-                    self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'desy5/OMAG/{}'.format(i))
-                    self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i))
-                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i))
+                    self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'desy5/AMAG/{}'.format(i-1))
+                    self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'desy5/OMAG/{}'.format(i-1))
+                    self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
+                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
 
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['Mag_true_{}_any_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
