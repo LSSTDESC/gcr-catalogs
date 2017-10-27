@@ -62,12 +62,62 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         _mask_func = lambda x: np.where(x==99.0, np.nan, x)
 
         if high_res:
-            #TODO: add quantity modifiers
-            print('Warning! high_res reader has not been fully implemented. For now only native quantities would work!')
             self._quantity_modifiers = {
+                'redshift': 'truth/Z',
                 'ra_true': 'truth/RA',
                 'dec_true': 'truth/DEC',
+                'redshift_true' : (lambda zt, x, y, z, vx, vy, vz: zt - (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
+                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                'halo_id': 'truth/HALOID',
+                'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
+                'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
+                'ellipticity_1_true': 'truth/TE/0',
+                'ellipticity_2_true': 'truth/TE/1',
+                'size_true': 'truth/TSIZE',
+                'position_x': (lambda x: x/self.cosmology.h, 'truth/PX'),
+                'position_y': (lambda x: x/self.cosmology.h, 'truth/PY'),
+                'position_z': (lambda x: x/self.cosmology.h, 'truth/PZ'),
+                'velocity_x': 'truth/VX',
+                'velocity_y': 'truth/VY',
+                'velocity_z': 'truth/VZ',
             }
+
+            for i, b in enumerate('ugrizY'):
+                if b!='Y':
+                    self._quantity_modifiers['Mag_true_{}_sdss_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
+                    self._quantity_modifiers['mag_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAG/{}'.format(i))
+                    self._quantity_modifiers['magerr_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
+                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
+
+                if b!='u':
+                    self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'desy5/AMAG/{}'.format(i-1))
+                    self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'desy5/OMAG/{}'.format(i-1))
+                    self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
+                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
+
+                self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
+                self._quantity_modifiers['Mag_true_{}_any_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_lsst'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
+
+            for i, b in enumerate('ZYJHK'):
+                self._quantity_modifiers['Mag_true_{}_vista_z01'.format(b)] = (_abs_mask_func, 'vista/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_vista'.format(b)] = (_mask_func, 'vista/OMAG/{}'.format(i))
+
+            for i, b in enumerate(['acsf435w', 'acsf606w', 'acsf775w', 'acsf814w', 'acsf850lp', 'wfc3f275w', 'wfc3f336w',
+                                    'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
+                self._quantity_modifiers['Mag_true_{}_candels_z0'.format(b)] = (_abs_mask_func, 'candels/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_candels'.format(b)] = (_mask_func, 'candels/OMAG/{}'.format(i))
+
+            for i, b in enumerate(['W1', 'W2', 'W3', 'W4']):
+                self._quantity_modifiers['Mag_true_{}_wise_z0'.format(b)] = (_abs_mask_func, 'wise/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_wise'.format(b)] = (_mask_func, 'wise/OMAG/{}'.format(i))
+
+            for i, b in enumerate(['1234']):
+                self._quantity_modifiers['Mag_true_{}_irac_z0'.format(b)] = (_abs_mask_func, 'irac/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_irac'.format(b)] = (_mask_func, 'irac/OMAG/{}'.format(i))
+
+
         else:
             self._quantity_modifiers = {
                 'galaxy_id': 'truth/ID',
