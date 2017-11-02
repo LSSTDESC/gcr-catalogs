@@ -24,36 +24,54 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = lightcone
 
         self._quantity_modifiers = {
-            'ra_true': (lambda x: x/3600.0, 'ra'),
-            'dec_true': (lambda x: x/3600.0, 'dec'),
-            'redshift_true': 'redshift',
-            'shear_1': 'shear1',
-            'shear_2': 'shear2',
-            'convergence': 'k0',
-            'magnification': 'm0',
-            'halo_id': 'hostIndex',
-            'halo_mass': 'hostHaloMass',
-            'is_central': (lambda x : x.astype(np.bool), 'nodeIsIsolated'),
-            'stellar_mass': 'totalMassStellar',
+            'galaxy_id' :    'galaxyID',
+            'ra':            (lambda x: x/3600.0, 'ra'),
+            'ra_true':       (lambda x: x/3600.0, 'ra_true'),
+            'dec':           (lambda x: x/3600.0, 'dec'),
+            'dec_true':      (lambda x: x/3600.0, 'dec_true'),
+            'redshift':      'redshift',
+            'redshift_true': 'redshiftHubble',
+#            'disk_Sersic_index':'diskSersicIndex',
+#            'bulge_Sersic_index':'spheroidSersicIndex',
+            'shear_1':       'shear1',
+            'shear_2':       'shear2',
+            'convergence':   'convergence',
+            'magnification': 'magnification',
+            'halo_id':       'hostIndex',
+            'halo_mass':     'hostHaloMass',
+            'is_central':    (lambda x : x.astype(np.bool), 'isCentral'),
+            'stellar_mass':  'totalMassStellar',
+            'position_x':    'x',
+            'position_y':    'y',
+            'position_z':    'z',
+            'velocity_x':    'vx',
+            'velocity_y':    'vy',
+            'velocity_z':    'vz'
         }
 
         for band in 'ugriz':
-            self._quantity_modifiers['mag_{}_any'.format(band)] = 'magnitude:SDSS_{}:observed'.format(band)
-            self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'magnitude:SDSS_{}:observed'.format(band)
-            self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'magnitude:SDSS_{}:rest'.format(band)
-            self._quantity_modifiers['Mag_true_{}_any'.format(band)] = 'magnitude:SDSS_{}:rest'.format(band)
+            self._quantity_modifiers['mag_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
+            self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+            self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+            self._quantity_modifiers['Mag_true_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
-                H0=fh.attrs['H_0'],
-                Om0=fh.attrs['Omega_matter'],
-                Ob0=fh.attrs['Omega_b'],
+                H0=fh['metaData/simulationParameters/H_0'].value,
+                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
+                Ob0=fh['metaData/simulationParameters/Omega_b'].value
             )
 
-
+           
     def _generate_native_quantity_list(self):
         with h5py.File(self._file, 'r') as fh:
-            native_quantities = set(fh.keys())
+            hgroup = fh['galaxyProperties']
+            hobjects = []
+            #get all the names of objects in this tree
+            hgroup.visit(hobjects.append)
+            #filter out the group objects and keep the dataste objects
+            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject])==h5py.Dataset]
+            native_quantities = set(hdatasets)
         return native_quantities
 
 
@@ -64,7 +82,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _fetch_native_quantity(dataset, native_quantity):
-        return dataset[native_quantity].value
+        return dataset['galaxyProperties/'+native_quantity].value
 
 # Registers the reader
 register_reader(AlphaQGalaxyCatalog)
