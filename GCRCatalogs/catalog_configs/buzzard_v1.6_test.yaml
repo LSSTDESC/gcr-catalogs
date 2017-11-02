@@ -1,0 +1,15 @@
+subclass_name: BuzzardGalaxyCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/Buzzard/Buzzard-0/addgalspostprocess
+catalog_path_template:
+    truth: truth_v1.6/Chinchilla-0_lensed.{}.fits
+
+cosmology:
+    H0: 70.0
+    Om0: 0.286
+
+healpix_pixels: [0]
+halo_mass_def: vir
+lightcone: true
+
+creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
