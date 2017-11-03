@@ -1,6 +1,6 @@
 subclass_name: AlphaQGalaxyCatalog
 
-filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_SDSS_v42.hdf5
+filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2_small.hdf5
 
 lightcone: true
 
