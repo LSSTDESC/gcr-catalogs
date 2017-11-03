@@ -76,6 +76,9 @@ gc.get_quantities(['redshift_true'])
 print gc.list_all_quantities()
 ```
 
+Please see [this page](https://github.com/yymao/generic-catalog-reader/blob/master/GCR.py) for the complete GCR API.
+
+
 ### Interfacing PhoSim through CatSim:
 
 See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py)
@@ -99,7 +102,7 @@ See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examp
 5. Commit and create pull requests
 6. If you need to sync your forked repo, you can do the followingn in your *local*, *forked* repo:
    
-       git remote add upstream git@github.com:LSSTDESC/gcr-catalogs.git
+       git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
        git fetch upstream
        git merge upstream
        
