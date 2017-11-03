@@ -7,9 +7,21 @@ More information about GCR can be found [here](https://github.com/yymao/generic-
 
 Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
 
-1. Proto-DC2 (AlphaQ): `proto-dc2-v1.0` (full catalog) and `proto-dc2-clusters-v1.0` (clusters only) by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
-2. Buzzard series: `buzzard_v1.6` (and different realizations: `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21`), `buzzard_v1.5`, and `buzzard_high-res_v1.1` by Joe DeRose, Risa Wechsler, Eli Rykoff et al. (Note: high-res reader has not been fully implemented yet. For now only native quantities work for high-res.)
-3. DC1 catalog: `dc1`
+1. Proto-DC2 (AlphaQ): 
+   by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
+   - `proto-dc2_v2.0` (full catalog)
+   - `proto-dc2_v2.0_test` (a small subset for testing purpose)
+   - `proto-dc2_v2.0_clusters` (clusters only, to be created)
+   
+2. Buzzard series: 
+   by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
+   - `buzzard_v1.6` (full catalog, DES Y3 area)
+   - `buzzard_v1.6_test` (a small subset for testing purpose)
+   - `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21` (different realizations)
+   - `buzzard_high-res_v1.1` (higher resolution, smaller sky area)
+   
+3. DC1 catalog: 
+   - `dc1`
 
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
 
@@ -72,7 +84,7 @@ See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examp
 
 ## Contribute to GCRCatalogs:
 
-1. On GitHub [Fork](https://guides.github.com/activities/forking/) the GCRCatalogs GitHub repo.
+1. On GitHub [fork](https://guides.github.com/activities/forking/) the GCRCatalogs GitHub repo.
 2. On NERSC
 
        cd /your/own/directory
@@ -85,3 +97,9 @@ See an example [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examp
    sys.path.insert(0, '/your/own/directory/gcr-catalogs')
    ```
 5. Commit and create pull requests
+6. If you need to sync your forked repo, you can do the followingn in your *local*, *forked* repo:
+   
+       git remote add upstream git@github.com:LSSTDESC/gcr-catalogs.git
+       git fetch upstream
+       git merge upstream
+       
