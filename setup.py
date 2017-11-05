@@ -26,6 +26,6 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['numpy','h5py','astropy','pymssql','sqlalchemy','GCR'],
+    install_requires=['numpy', 'pyyaml', 'requests', 'h5py', 'astropy', 'GCR', 'sqlalchemy', 'pymssql'],
     package_data = {'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
