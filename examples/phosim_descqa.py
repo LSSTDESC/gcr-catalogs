@@ -136,7 +136,7 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
     @cached
     def get_phoSimMagNorm(self):
-        return self.column_by_name('mag_g_any')
+        return self.column_by_name('mag_g_lsst')
 
 
 ############################
