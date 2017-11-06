@@ -50,10 +50,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         }
 
         for band in 'ugriz':
-            self._quantity_modifiers['mag_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
-            self._quantity_modifiers['Mag_true_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
             self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
             self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
 
@@ -64,7 +62,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value
             )
 
-           
+
     def _generate_native_quantity_list(self):
         with h5py.File(self._file, 'r') as fh:
             hgroup = fh['galaxyProperties']
