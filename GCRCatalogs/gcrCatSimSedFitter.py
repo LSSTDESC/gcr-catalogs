@@ -2,12 +2,12 @@ import numpy as np
 import os
 
 from lsst.utils import getPackageDir
-
+from lsst.sims.photUtils import CosmologyObject
 
 __all__ = ["sed_from_galacticus_mags"]
 
 
-def sed_from_galacticus_mags(galacticus_mags):
+def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
     """
     galacticus_mags is a numpy array such that
     galacticus_mags[i][j] is the magnitude of the jth star in the ith bandpass,
@@ -41,6 +41,10 @@ def sed_from_galacticus_mags(galacticus_mags):
         sed_from_galacticus_mags._sed_mags = np.array([sed_data['mag%d' % ii]
                                                        for ii in range(30)]).transpose()
 
+    cosmology = CosmologyObject(H0=100.0*h, Om0=omega_m)
+    distance_modulus = cosmology.distanceModulus(redshift=redshift)
+    assert len(distance_modulus) == len(galacticus_mags[0])
+
     galacticus_colors = np.array([galacticus_mags[ii+1]-galacticus_mags[ii]
                                   for ii in range(29)]).transpose()
 
@@ -54,6 +58,6 @@ def sed_from_galacticus_mags(galacticus_mags):
     chosen_mags = sed_from_galacticus_mags._sed_mags[mag_dex]
     galacticus_mags_t = galacticus_mags.transpose()
     d_mag = (galacticus_mags_t - chosen_mags).sum(axis=1)/30.0
-    output_mag_norm = sed_from_galacticus_mags._mag_norm[mag_dex] + d_mag
+    output_mag_norm = sed_from_galacticus_mags._mag_norm[mag_dex] + d_mag + distance_modulus
     assert len(output_mag_norm) == len(output_names)
     return output_names, output_mag_norm
