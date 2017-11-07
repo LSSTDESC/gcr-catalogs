@@ -33,6 +33,9 @@ for bp in bp_params_dict['disk']:
 import numpy as np
 from lsst.sims.photUtils import BandpassDict, Bandpass
 
+imsim_bp = Bandpass()
+imsim_bp.imsimBandpass()
+
 wav_min = 1.0e30
 wav_max = -1.0e30
 for wav_params in bp_params_dict['disk']:
@@ -85,16 +88,17 @@ with open('CatSimColorGrid.txt', 'w') as out_file:
     out_file.write('# sed_name ')
     for bp_name in bp_dict:
         out_file.write('%s ' % bp_name)
-    out_file.write('\n')
+    out_file.write('magNorm\n')
     for file_name in sed_file_list:
         full_name = os.path.join(galaxy_sed_dir, file_name)
         spec = Sed()
         spec.readSED_flambda(full_name)
         mag_list = bp_dict.magListForSed(spec)
+        mag_norm = spec.calcMag(imsim_bp)
         out_file.write('%s ' % file_name)
         for i_filter in range(len(bp_dict)-1):
             out_file.write('%.6g ' % (mag_list[i_filter+1]-mag_list[i_filter]))
-        out_file.write('\n')
+        out_file.write('%.6g\n' % mag_norm)
         ct += 1
         if ct%10 == 0:
             elapsed = time.time()-t_start
