@@ -54,7 +54,7 @@ for wav_params in bp_params_dict['disk']:
                        sb_baseline, 0.0)
 
     bp = Bandpass(wavelen=wav_grid, sb=sb_grid)
-    bp_name_list.append(wav0)
+    bp_name_list.append(wav_params[0])
     bp_list.append(bp)
 
 bp_name_list = np.array(bp_name_list)
@@ -66,6 +66,30 @@ bp_list = bp_list[sorted_dex]
 
 bp_dict = BandpassDict(bp_list, bp_name_list)
 
+import os
+from lsst.utils import getPackageDir
 from lsst.sims.photUtils import Sed
+
+galaxy_sed_dir = os.path.join(getPackageDir('sims_sed_library'), 'galaxySED')
+sed_file_list = os.listdir(galaxy_sed_dir)
+
+ct = 0
+import time
+t_start = time.time()
+
+with open('CatSimColorGrid.txt', 'w') as out_file:
+    for file_name in sed_file_list:
+        full_name = os.path.join(galaxy_sed_dir, file_name)
+        spec = Sed()
+        spec.readSED_flambda(full_name)
+        mag_list = bp_dict.magListForSed(spec)
+        out_file.write('%s ' % file_name)
+        for i_filter in range(len(bp_dict)-1):
+            out_file.write('%.6g ' % (mag_list[i_filter+1]-mag_list[i_filter]))
+        out_file.write('\n')
+        ct += 1
+        if ct%10 == 0:
+            elapsed = time.time()-t_start
+            print('%d of %d took %e per %e' % (ct, len(sed_file_list), elapsed, elapsed/ct))
 
 
