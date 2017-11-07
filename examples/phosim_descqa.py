@@ -172,9 +172,6 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
                                'Neither appear to be in self._cannot_be_null.\n'
                                'self._cannot_be_null: %s' % self._cannot_be_null)
 
-        if len(self.column_by_name('ra_true') == 0):
-            return np.array([[], []])
-
         mag_array = np.array([-2.5*np.log10(self.column_by_name(name)) for name in flux_names])
         sed_names, mag_norms = sed_from_galacticus_mags(mag_array)
         return np.array([sed_names, mag_norms])
