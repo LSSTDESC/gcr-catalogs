@@ -42,6 +42,7 @@ import time
 t_start = time.time()
 sed_names, mag_norms = sed_from_galacticus_mags(disk_mags)
 print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
+print("mag norm %e %e %e" % (mag_norms.min(), np.median(mag_norms), mag_norms.max()))
 assert len(sed_names) == len(first_disk)
 
 
@@ -94,6 +95,7 @@ import time
 t_start = time.time()
 sed_names, mag_norms = sed_from_galacticus_mags(bulge_mags)
 print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
+print("mag norm %e %e %e\n" % (mag_norms.min(), np.median(mag_norms), mag_norms.max()))
 assert len(sed_names) == len(first_bulge)
 
 
