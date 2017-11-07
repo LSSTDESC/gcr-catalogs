@@ -12,7 +12,8 @@ import os
 
 # point this to whatever OpSim simulated cadence you have
 # available
-opsim_db = os.path.join('..', '..', 'OpSimData',
+opsim_db = os.path.join('/global', 'cscratch1', 'sd', 'danielsf',
+                        'OpSimData',
                         'minion_1016_sqlite_new_dithers.db')
 
 from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
