@@ -28,6 +28,7 @@ for name in bulge_mag_names:
 
 qty_names.append('morphology/diskRadiusArcsec')
 qty_names.append('morphology/spheroidRadiusArcsec')
+qty_names.append('redshift_true')
 
 catalog_qties = catalog.get_quantities(qty_names)
 
@@ -40,7 +41,7 @@ disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in
 
 import time
 t_start = time.time()
-sed_names, mag_norms = sed_from_galacticus_mags(disk_mags)
+sed_names, mag_norms = sed_from_galacticus_mags(disk_mags, catalog_qties['redshift_true'][first_disk])
 print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
 print("mag norm %e %e %e" % (mag_norms.min(), np.median(mag_norms), mag_norms.max()))
 assert len(sed_names) == len(first_disk)
@@ -93,7 +94,7 @@ bulge_mags = np.array([-2.5*np.log10(catalog_qties[name][first_bulge]) for name 
 
 import time
 t_start = time.time()
-sed_names, mag_norms = sed_from_galacticus_mags(bulge_mags)
+sed_names, mag_norms = sed_from_galacticus_mags(bulge_mags, catalog_qties['redshift_true'][first_bulge])
 print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
 print("mag norm %e %e %e\n" % (mag_norms.min(), np.median(mag_norms), mag_norms.max()))
 assert len(sed_names) == len(first_bulge)
