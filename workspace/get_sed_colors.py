@@ -17,7 +17,7 @@ with open('dc2_seds.txt', 'r') as input_file:
             tag = 'bulge'
         else:
             continue
-        
+
         wav0 = int(params[3])
         width= int(params[4])
         bp_params_dict[tag].append((wav0, width))
