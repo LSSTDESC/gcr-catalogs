@@ -23,7 +23,7 @@ obs_gen = ObservationMetaDataGenerator(opsim_db)
 # The boundLength kwarg controls the radius of the field of
 # view in degrees.  If not defined, we default to 1.75,
 # which is the nominal value for LSST
-obs_list = obs_gen.getObservationMetaData(fieldRA=(86.0,90.0),
+obs_list = obs_gen.getObservationMetaData(fieldRA=(-2.0,2.0),
                                           fieldDec=(-2.0, 2.0),
                                           boundLength=0.1)
 
@@ -72,7 +72,7 @@ class bulgeDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('majorAxis', 'spheroidRadius', arcsec_to_radians)]
+               ('majorAxis', 'morphology/spheroidRadiusArcsec', arcsec_to_radians)]
 
     # default values that are applied if no other source
     # for a column can be found
@@ -88,7 +88,7 @@ class diskDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('majorAxis', 'diskRadius', arcsec_to_radians)]
+               ('majorAxis', 'morphology/diskRadiusArcsec', arcsec_to_radians)]
 
     dbDefaultValues = {'sindex': 1.0}
 
@@ -118,11 +118,11 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
     # below are defined getter methods used to define CatSim value-added columns
     @cached
     def get_hasDisk(self):
-        return np.where(self.column_by_name('diskRadius')==0.0, None, 1.0)
+        return np.where(self.column_by_name('morphology/diskRadiusArcsec')==0.0, None, 1.0)
 
     @cached
     def get_hasBulge(self):
-        return np.where(self.column_by_name('spheroidRadius')==0.0, None, 1.0)
+        return np.where(self.column_by_name('morphology/spheroidRadiusArcsec')==0.0, None, 1.0)
 
     @cached
     def get_minorAxis(self):
