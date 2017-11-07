@@ -75,8 +75,12 @@ for i_star in range(len(sed_names)):
         dist += (disk_mags[i_mag][i_star] - sed_data['mag%d' % i_mag][chosen_sed] - d_mag)**2
     dist = np.sqrt(dist)
     if dist> worst_dist:
+        model_colors = np.array([disk_mags[ii+1][i_star] - disk_mags[ii][i_star] for ii in range(29)])
+        sed_colors = np.array([sed_data['mag%d' % (ii+1)][chosen_sed] - sed_data['mag%d' % ii][chosen_sed]
+                               for ii in range(29)])
+        d_color = np.sqrt(np.sum((model_colors-sed_colors)**2))
         worst_dist = dist
-        print('worst_dist %e' % worst_dist)
+        print('worst_dist %e -- %e' % (worst_dist, d_color))
 
 
 #### now do bulges
@@ -123,5 +127,9 @@ for i_star in range(len(sed_names)):
         dist += (bulge_mags[i_mag][i_star] - sed_data['mag%d' % i_mag][chosen_sed] - d_mag)**2
     dist = np.sqrt(dist)
     if dist> worst_dist:
+        model_colors = np.array([bulge_mags[ii+1][i_star] - bulge_mags[ii][i_star] for ii in range(29)])
+        sed_colors = np.array([sed_data['mag%d' % (ii+1)][chosen_sed] - sed_data['mag%d' % ii][chosen_sed]
+                               for ii in range(29)])
+        d_color = np.sqrt(np.sum((model_colors-sed_colors)**2))
         worst_dist = dist
-        print('worst_dist %e' % worst_dist)
+        print('worst_dist %e -- %e' % (worst_dist, d_color))
