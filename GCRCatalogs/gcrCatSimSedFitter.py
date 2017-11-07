@@ -32,7 +32,7 @@ def sed_from_galacticus_mags(galacticus_mags):
         dtype_list = [('name', str, 200)]
         for ii in range(30):
             dtype_list.append(('mag%d' % ii, float))
-        dtype_list.append('magNorm')
+        dtype_list.append(('magNorm', float))
         dtype = np.dtype(dtype_list)
         sed_data = np.genfromtxt(color_grid_file, dtype=dtype)
         sed_colors = np.array([sed_data['mag%d' % ii+1] - sed_data['mag%d' % ii]
