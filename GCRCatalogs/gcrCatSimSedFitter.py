@@ -1,8 +1,6 @@
 import numpy as np
 import os
 
-from scipy.spatial import KDTree
-
 from lsst.utils import getPackageDir
 
 
@@ -37,7 +35,7 @@ def sed_from_galacticus_mags(galacticus_mags):
         sed_data = np.genfromtxt(color_grid_file, dtype=dtype)
         sed_colors = np.array([sed_data['mag%d' % (ii+1)] - sed_data['mag%d' % ii]
                                for ii in range(29)])
-        sed_from_galacticus_mags._color_tree = KDTree(sed_colors.transpose(), leafsize=1)
+        sed_from_galacticus_mags._sed_colors = sed_colors.transpose()
         sed_from_galacticus_mags._sed_names = sed_data['name']
         sed_from_galacticus_mags._mag_norm = sed_data['magNorm']
         sed_from_galacticus_mags._sed_mags = np.array([sed_data['mag%d' % ii]
@@ -46,7 +44,10 @@ def sed_from_galacticus_mags(galacticus_mags):
     galacticus_colors = np.array([galacticus_mags[ii+1]-galacticus_mags[ii]
                                   for ii in range(29)]).transpose()
 
-    mag_dist, mag_dex = sed_from_galacticus_mags._color_tree.query(galacticus_colors, k=1)
+    mag_dex = np.zeros(len(galacticus_colors), dtype=int)
+    for i_star in range(len(galacticus_colors)):
+        dd = np.sum((galacticus_colors[i_star]-sed_from_galacticus_mags._sed_colors)**2, axis=1)
+        mag_dex[i_star] = np.argmin(dd)
 
     output_names = sed_from_galacticus_mags._sed_names[mag_dex]
 
