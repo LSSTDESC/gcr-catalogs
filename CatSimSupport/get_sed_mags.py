@@ -80,7 +80,7 @@ from lsst.sims.photUtils import Sed
 galaxy_sed_dir = os.path.join(getPackageDir('sims_sed_library'), 'galaxySED')
 sed_file_list = os.listdir(galaxy_sed_dir)
 
-with open('CatSimColorGrid.txt', 'w') as out_file:
+with open('CatSimMagGrid.txt', 'w') as out_file:
     out_file.write('# sed_name ')
     for bp_name in bp_dict:
         out_file.write('%s ' % bp_name)
@@ -92,7 +92,7 @@ with open('CatSimColorGrid.txt', 'w') as out_file:
         mag_list = bp_dict.magListForSed(spec)
         mag_norm = spec.calcMag(imsim_bp)
         out_file.write('%s ' % file_name)
-        for i_filter in range(len(bp_dict)-1):
-            out_file.write('%.6g ' % (mag_list[i_filter+1]-mag_list[i_filter]))
+        for i_filter in range(len(bp_dict)):
+            out_file.write('%.6g ' % mag_list[i_filter])
         out_file.write('%.6g\n' % mag_norm)
 
