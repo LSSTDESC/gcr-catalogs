@@ -5,7 +5,7 @@ from .utils import load_yaml
 _registered_readers = dict()
 _registered_catalogs = dict()
 
-__all__ = ['register_reader', 'register_catalog', 'get_available_catalogs', 'load_catalog']
+__all__ = ['register_reader', 'register_catalog', 'get_available_readers', 'get_available_catalogs', 'load_catalog']
 
 def register_reader(subclass):
     """

@@ -9,7 +9,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .register import register_reader
 
-__all__ = ['AlphaQGalaxyCatalog']
+__all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
