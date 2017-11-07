@@ -80,10 +80,6 @@ from lsst.sims.photUtils import Sed
 galaxy_sed_dir = os.path.join(getPackageDir('sims_sed_library'), 'galaxySED')
 sed_file_list = os.listdir(galaxy_sed_dir)
 
-ct = 0
-import time
-t_start = time.time()
-
 with open('CatSimColorGrid.txt', 'w') as out_file:
     out_file.write('# sed_name ')
     for bp_name in bp_dict:
@@ -99,9 +95,4 @@ with open('CatSimColorGrid.txt', 'w') as out_file:
         for i_filter in range(len(bp_dict)-1):
             out_file.write('%.6g ' % (mag_list[i_filter+1]-mag_list[i_filter]))
         out_file.write('%.6g\n' % mag_norm)
-        ct += 1
-        if ct%10 == 0:
-            elapsed = time.time()-t_start
-            print('%d of %d took %e per %e' % (ct, len(sed_file_list), elapsed, elapsed/ct))
-
 
