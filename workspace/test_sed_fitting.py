@@ -92,7 +92,6 @@ first_bulge = has_bulge[0][:10000]
 
 bulge_mags = np.array([-2.5*np.log10(catalog_qties[name][first_bulge]) for name in bulge_mag_names])
 
-import time
 t_start = time.time()
 sed_names, mag_norms = sed_from_galacticus_mags(bulge_mags, catalog_qties['redshift_true'][first_bulge])
 print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
