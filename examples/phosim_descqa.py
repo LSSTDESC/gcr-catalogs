@@ -37,6 +37,7 @@ obs = obs_list[0]
 # establish connection to the DESCQA catalog
 
 from GCRCatalogs import DESCQAObject
+from GCRCatalogs import sed_from_galacticus_mags
 from lsst.sims.utils import radiansFromArcsec
 
 def deg_to_radians(x):
@@ -100,6 +101,7 @@ db_disk = diskDESCQAObject(cat_file)
 #########################################################################
 # define a class to write the PhoSim catalog; defining necessary defaults
 
+from lsst.utils import getPackageDir
 from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
 from lsst.sims.catalogs.decorators import cached, compound
 from lsst.sims.catUtils.mixins import EBVmixin
@@ -107,8 +109,7 @@ from lsst.sims.catUtils.mixins import EBVmixin
 class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
     # default values used if the database does not provide information
-    default_columns = [('sedFilename', 'Inst.50E07.0005Z.spec.gz', str, 100),
-                       ('raOffset', 0.0, float), ('decOffset', 0.0, float),
+    default_columns = [('raOffset', 0.0, float), ('decOffset', 0.0, float),
                        ('internalExtinctionModel', 'CCM', str, 3),
                        ('internalAv', 0.1, float),
                        ('internalRv', 3.1, float),
@@ -141,9 +142,53 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         ran = self._pa_rng.random_sample(len(self.column_by_name('raJ2000')))
         return ran*2.0*np.pi
 
-    @cached
+    @compound('sedFilename', 'fittedMagNorm')
+    def get_fittedSedAndNorm(self):
+
+        if not hasattr(self, '_disk_flux_names'):
+            catsim_mag_file = os.path.join(getPackageDir('gcr_catalogs'),
+                                           'CatSimSupport', 'CatSimMagGrid.txt')
+            with open(catsim_mag_file, 'r') as input_file:
+                header = input_file.readlines()[0]
+            header = header.strip().split()
+            mag_name_list = header[2:-1]
+            assert len(mag_name_list) == 30
+            bulge_names = []
+            disk_names = []
+            for name in mag_name_list:
+                full_disk_name = 'SEDs/diskLuminositiesStellar:SED_%s:rest' % name
+                disk_names.append(full_disk_name)
+                full_bulge_name = 'SEDs/spheroidLuminositiesStellar:SED_%s:rest' % name
+                bulge_names.append(full_bulge_name)
+            self._disk_flux_names = disk_names
+            self._bulge_flux_names = bulge_names
+
+        if 'hasBulge' in self._cannot_be_null and 'hasDisk' in self._cannot_be_null:
+            raise RuntimeError('\nUnsure whether this is a disk catalog or a bulge catalog.\n'
+                               'Both appear to be in self._cannot_be_null.\n'
+                               'self._cannot_be_null: %s' % self._cannot_be_null)
+        elif 'hasBulge' in self._cannot_be_null:
+            flux_names = self._bulge_flux_names
+        elif 'hasDisk' in self._cannot_be_null:
+            flux_names = self._disk_flux_names
+        else:
+            raise RuntimeError('\nUnsure whether this is a disk catalog or a bluge catalog.\n'
+                               'Neither appear to be in self._cannot_be_null.\n'
+                               'self._cannot_be_null: %s' % self._cannot_be_null)
+
+        if len(self.column_by_name('ra_true') == 0):
+            return np.array([[], []])
+
+        mag_array = np.array([-2.5*np.log10(self.column_by_name(name)) for name in flux_names])
+        sed_names, mag_norms = sed_from_galacticus_mags(mag_array)
+        return np.array([sed_names, mag_norms])
+
     def get_phoSimMagNorm(self):
-        return self.column_by_name('mag_g_any')
+        """
+        Need to leave this method here to overload the get_phoSimMagNorm
+        in the base PhoSim InstanceCatalog classes
+        """
+        return self.column_by_name('fittedMagNorm')
 
 
 ############################
