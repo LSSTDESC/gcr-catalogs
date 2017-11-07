@@ -7,9 +7,12 @@ http://opensource.org/licenses/MIT
 
 from setuptools import setup
 
+with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
+    exec(f.read())
+
 setup(
     name='GCRCatalogs',
-    version='0.2.0',
+    version=__version__,
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
