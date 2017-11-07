@@ -44,6 +44,7 @@ for wav_params in bp_params_dict['disk']:
         wav_max = wav1
 
 bp_name_list = []
+bp_min_list = []
 bp_list = []
 wav_grid = np.arange(wav_min, wav_max, 0.1)
 sb_baseline = np.ones(len(wav_grid), dtype=float)
@@ -54,13 +55,16 @@ for wav_params in bp_params_dict['disk']:
                        sb_baseline, 0.0)
 
     bp = Bandpass(wavelen=wav_grid, sb=sb_grid)
-    bp_name_list.append(wav_params[0])
+    bp_name_list.append('%d_%d' % (wav_params[0], wav_params[1]))
+    bp_min_list.append(wav_params[0])
     bp_list.append(bp)
 
 bp_name_list = np.array(bp_name_list)
 bp_list = np.array(bp_list)
+bp_min_list = np.array(bp_min_list)
 
-sorted_dex = np.argsort(bp_name_list)
+sorted_dex = np.argsort(bp_min_list)
+bp_min_list = bp_min_list[sorted_dex]
 bp_name_list = bp_name_list[sorted_dex]
 bp_list = bp_list[sorted_dex]
 
@@ -78,6 +82,10 @@ import time
 t_start = time.time()
 
 with open('CatSimColorGrid.txt', 'w') as out_file:
+    out_file.write('# sed_name ')
+    for bp_name in bp_dict:
+        out_file.write('%s ' % bp_name)
+    out_file.write('\n')
     for file_name in sed_file_list:
         full_name = os.path.join(galaxy_sed_dir, file_name)
         spec = Sed()
