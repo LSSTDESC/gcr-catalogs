@@ -58,7 +58,7 @@ To be able to import `GCRCatalogs`, the first line of the script should be:
 
 You can install the latest version by running (but note that you need to change the python paths accordingly) 
 
-    pip install git+git://github.com/LSSTDESC/gcr-catalogs.git
+    pip install https://github.com/LSSTDESC/gcr-catalogs/archive/master.zip
 
 But note that the actual catalogs can only be accessed on a NERSC machine. 
 
