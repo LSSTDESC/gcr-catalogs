@@ -118,11 +118,11 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
     # below are defined getter methods used to define CatSim value-added columns
     @cached
     def get_hasDisk(self):
-        return np.where(self.column_by_name('morphology/diskRadiusArcsec')==0.0, None, 1.0)
+        return np.where(self.column_by_name('SEDs/diskLuminositiesStellar:SED_9395_583')>0.0, 1.0, None)
 
     @cached
     def get_hasBulge(self):
-        return np.where(self.column_by_name('morphology/spheroidRadiusArcsec')==0.0, None, 1.0)
+        return np.where(self.column_by_name('SEDs/spheroidLuminositiesStellar:SED_9395_583')>1.0, 1.0, None)
 
     @cached
     def get_minorAxis(self):
