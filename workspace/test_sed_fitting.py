@@ -31,8 +31,8 @@ qty_names.append('morphology/spheroidRadiusArcsec')
 
 catalog_qties = catalog.get_quantities(qty_names)
 
-has_disk = np.where(catalog_qties['morphology/diskRadiusArcsec']>0.0)
-has_spheroid = np.where(catalog_qties['morphology/spheroidRadiusArcsec']>0.0)
+has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
+has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
 
 first_disk = has_disk[0][:10000]
 
@@ -67,12 +67,60 @@ for i_star in range(len(sed_names)):
             break
     if chosen_sed is None:
         raise RuntimeError("Could not find sed %s" % sed_name[i_star])
-    
+
     d_mag = mag_norms[i_star] - sed_data['magNorm'][chosen_sed]
 
     dist = 0.0
     for i_mag in range(30):
         dist += (disk_mags[i_mag][i_star] - sed_data['mag%d' % i_mag][chosen_sed] - d_mag)**2
+    dist = np.sqrt(dist)
+    if dist> worst_dist:
+        worst_dist = dist
+        print('worst_dist %e' % worst_dist)
+
+
+#### now do bulges
+print('bulges')
+
+first_bulge = has_bulge[0][:10000]
+
+bulge_mags = np.array([-2.5*np.log10(catalog_qties[name][first_bulge]) for name in bulge_mag_names])
+
+import time
+t_start = time.time()
+sed_names, mag_norms = sed_from_galacticus_mags(bulge_mags)
+print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
+assert len(sed_names) == len(first_bulge)
+
+
+dtype_list = [('name', str, 200)]
+for ii in range(30):
+    dtype_list.append(('mag%d' % ii, float))
+dtype_list.append(('magNorm', float))
+
+
+catsim_name = os.path.join(getPackageDir('gcr_catalogs'), 'CatSimSupport',
+                           'CatSimMagGrid.txt')
+
+dtype = np.dtype(dtype_list)
+
+sed_data = np.genfromtxt(catsim_name, dtype=dtype)
+
+worst_dist = -1.0
+for i_star in range(len(sed_names)):
+    chosen_sed = None
+    for i_sed in range(len(sed_data)):
+        if sed_data['name'][i_sed] == sed_names[i_star]:
+            chosen_sed = i_sed
+            break
+    if chosen_sed is None:
+        raise RuntimeError("Could not find sed %s" % sed_name[i_star])
+
+    d_mag = mag_norms[i_star] - sed_data['magNorm'][chosen_sed]
+
+    dist = 0.0
+    for i_mag in range(30):
+        dist += (bulge_mags[i_mag][i_star] - sed_data['mag%d' % i_mag][chosen_sed] - d_mag)**2
     dist = np.sqrt(dist)
     if dist> worst_dist:
         worst_dist = dist
