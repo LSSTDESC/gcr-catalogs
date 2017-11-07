@@ -35,7 +35,7 @@ def sed_from_galacticus_mags(galacticus_mags):
         dtype_list.append(('magNorm', float))
         dtype = np.dtype(dtype_list)
         sed_data = np.genfromtxt(color_grid_file, dtype=dtype)
-        sed_colors = np.array([sed_data['mag%d' % ii+1] - sed_data['mag%d' % ii]
+        sed_colors = np.array([sed_data['mag%d' % (ii+1)] - sed_data['mag%d' % ii]
                                for ii in range(29)])
         sed_from_galacticus_mags._color_tree = KDTree(sed_colors.transpose(), leafsize=1)
         sed_from_galacticus_mags._sed_names = sed_data['name']
