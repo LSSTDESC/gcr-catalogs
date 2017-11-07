@@ -93,7 +93,7 @@ class diskDESCQAObject(DESCQAObject):
     dbDefaultValues = {'sindex': 1.0}
 
 
-cat_file = 'proto-dc2-v1.0'
+cat_file = 'proto-dc2_v2.0'
 db_bulge = bulgeDESCQAObject(cat_file)
 db_disk = diskDESCQAObject(cat_file)
 
