@@ -71,7 +71,7 @@ Here's a minimal example:
 
 ```python
 import GCRCatalogs
-gc = GCRCatalogs.load_catalog('proto-dc2-v1.0')
+gc = GCRCatalogs.load_catalog('proto-dc2_v2.0')
 gc.get_quantities(['redshift_true'])
 print gc.list_all_quantities()
 ```
