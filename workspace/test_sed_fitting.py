@@ -81,7 +81,14 @@ for i_star in range(len(sed_names)):
         d_color = np.sqrt(np.sum((model_colors-sed_colors)**2))
         worst_dist = dist
         print('worst_dist %e -- %e' % (worst_dist, d_color))
+        for i_mag in range(30):
+            if i_mag==0:
+                print('    ',end='')
+            print('%.3e ' % (disk_mags[i_mag][i_star]-sed_data['mag%d' % i_mag][chosen_sed]-d_mag), end='')
+            if i_mag%5==0 and i_mag>0:
+                print('\n    ',end='')
 
+        print('\n',end='')
 
 #### now do bulges
 print('bulges')
