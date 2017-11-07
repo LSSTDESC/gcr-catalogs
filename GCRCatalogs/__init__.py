@@ -7,5 +7,6 @@ from .buzzard import *
 from .dc1 import *
 
 from .gcrCatSimInterface import *
+from .gcrCatSimSedFitter import *
 
 __version__ = '0.2.0'
