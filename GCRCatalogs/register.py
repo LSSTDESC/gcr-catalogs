@@ -57,6 +57,8 @@ def load_catalog(catalog_name, config_overwrite=None):
     ------
     galaxy_catalog : subclass of BaseGalaxyCatalog
     """
+    if catalog_name not in _registered_catalogs:
+        raise KeyError("Catalog `{}` does not exist in the register (catalog_configs)".format(catalog_name))
     config = _registered_catalogs[catalog_name]
     if config_overwrite:
         config.update(config_overwrite)
