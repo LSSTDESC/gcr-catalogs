@@ -5,6 +5,7 @@ Copyright (c) 2017 LSST DESC
 http://opensource.org/licenses/MIT
 """
 
+import os
 from setuptools import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
