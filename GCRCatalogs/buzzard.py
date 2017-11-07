@@ -67,7 +67,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'ra_true': 'truth/RA',
                 'dec_true': 'truth/DEC',
                 'redshift_true' : (lambda zt, x, y, z, vx, vy, vz: zt - (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
-                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                                   'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
                 'halo_id': 'truth/HALOID',
                 'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
                 'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
@@ -101,7 +101,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 self._quantity_modifiers['mag_{}_vista'.format(b)] = (_mask_func, 'vista/OMAG/{}'.format(i))
 
             for i, b in enumerate(['acsf435w', 'acsf606w', 'acsf775w', 'acsf814w', 'acsf850lp', 'wfc3f275w', 'wfc3f336w',
-                                    'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
+                                   'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
                 self._quantity_modifiers['Mag_true_{}_candels_z0'.format(b)] = (_abs_mask_func, 'candels/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_candels'.format(b)] = (_mask_func, 'candels/OMAG/{}'.format(i))
 
@@ -118,7 +118,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers = {
                 'galaxy_id': 'truth/ID',
                 'redshift': (lambda zt, x, y, z, vx, vy, vz: zt + (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
-                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                             'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
                 'redshift_true': 'truth/Z',
                 'ra': 'truth/RA',
                 'dec': 'truth/DEC',
@@ -147,9 +147,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
             for i, b in enumerate('grizY'):
                 self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
-                 self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
+                self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
                 self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
-
 
 
     def _get_healpix_pixels(self):
