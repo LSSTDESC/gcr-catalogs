@@ -104,12 +104,12 @@ r_control, i_control, z_control, y_control):
     mag_list = lsst_bp_dict.magListForSed(sed)
 
     dd = 0.0
-    dd += (mag_list[0] + 2.5*np.log10(uuf))**2
-    dd += (mag_list[1] + 2.5*np.log10(ggf))**2
-    dd += (mag_list[2] + 2.5*np.log10(rrf))**2
-    dd += (mag_list[3] + 2.5*np.log10(iif))**2
-    dd += (mag_list[4] + 2.5*np.log10(zzf))**2
-    dd += (mag_list[5] + 2.5*np.log10(yyf))**2
+    dd += (mag_list[0] - uu)**2
+    dd += (mag_list[1] - gg)**2
+    dd += (mag_list[2] - rr)**2
+    dd += (mag_list[3] - ii)**2
+    dd += (mag_list[4] - zz)**2
+    dd += (mag_list[5] - yy)**2
     dd = np.sqrt(dd)
 
     if dd > worst_dist:
