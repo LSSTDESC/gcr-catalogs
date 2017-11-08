@@ -53,12 +53,12 @@ first_disk = has_disk[0][:10000]
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
-u_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:observed']
-g_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:observed']
-r_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:observed']
-i_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed']
-z_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed']
-y_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed']
+u_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:observed'][first_disk]
+g_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:observed'][first_disk]
+r_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:observed'][first_disk]
+i_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed'][first_disk]
+z_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed'][first_disk]
+y_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed'][first_disk]
 
 ebv_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas']) -
             np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
