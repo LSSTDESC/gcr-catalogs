@@ -30,6 +30,20 @@ qty_names.append('morphology/diskRadiusArcsec')
 qty_names.append('morphology/spheroidRadiusArcsec')
 qty_names.append('redshift_true')
 
+for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
+    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed' % filter_name)
+    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed' % filter_name)
+
+qty_names.append('otherLuminosities/diskLuminositiesStellar:V:rest')
+qty_names.append('otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas')
+qty_names.append('otherLuminosities/diskLuminositiesStellar:B:rest')
+qty_names.append('otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas')
+
+qty_names.append('otherLuminosities/spheroidLuminositiesStellar:V:rest')
+qty_names.append('otherLuminosities/spheroidLuminositiesStellar:V:rest:dustAtlas')
+qty_names.append('otherLuminosities/spheroidLuminositiesStellar:B:rest')
+qty_names.append('otherLuminosities/spheroidLuminositiesStellar:B:rest:dustAtlas')
+
 catalog_qties = catalog.get_quantities(qty_names)
 
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
@@ -39,13 +53,70 @@ first_disk = has_disk[0][:10000]
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
+u_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:observed']
+g_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:observed']
+r_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:observed']
+i_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed']
+z_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed']
+y_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed']
+
+ebv_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas']) -
+            np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
+            np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest']) +
+            np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest']))
+
+av_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
+           np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest']))
+
+ebv_list = ebv_list[first_disk]
+av_list = av_list[first_disk]
+
+redshift_list =  catalog_qties['redshift_true'][first_disk]
+
 import time
 t_start = time.time()
-sed_names, mag_norms = sed_from_galacticus_mags(disk_mags, catalog_qties['redshift_true'][first_disk])
-print("fitting %d took %.3e" % (len(sed_names), time.time()-t_start))
-print("mag norm %e %e %e" % (mag_norms.min(), np.median(mag_norms), mag_norms.max()))
-assert len(sed_names) == len(first_disk)
+sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, redshift_list)
+print("fitting %d took %.3e" % (len(sed_name_list), time.time()-t_start))
+print("mag norm %e %e %e" % (mag_norm_list.min(), np.median(mag_norm_list), mag_norm_list.max()))
+assert len(sed_name_list) == len(first_disk)
 
+sed_dir = getPackageDir('sims_sed_library')
+gal_sed_dir = os.path.join(sed_dir, 'galaxySED')
+
+from  lsst.sims.photUtils import Sed, BandpassDict, getImsimFluxNorm
+
+total_bp_dict, lsst_bp_dict = BandpassDict.loadBandpassesFromFiles()
+
+worst_dist = -1.0
+
+for sed_name, mag_norm, redshift, av, ebv, uuf, ggf, rrf, iif, zzf, yyf in \
+zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
+r_control, i_control, z_control, y_control):
+
+    sed = Sed()
+    sed.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
+    f_norm = getImsimFluxNorm(sed, mag_norm)
+    sed.multiplyFluxNorm(f_norm)
+    a_x, b_x = sed.setupCCMab()
+    R_v = av/ebv
+    sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
+    sed.redshiftSED(redshift, dimming=False)
+    mag_list = lsst_bp_dict.magListForSed(sed)
+
+    dd = 0.0
+    dd += (mag_list[0] + 2.5*np.log10(uuf))**2
+    dd += (mag_list[1] + 2.5*np.log10(ggf))**2
+    dd += (mag_list[2] + 2.5*np.log10(rrf))**2
+    dd += (mag_list[3] + 2.5*np.log10(iif))**2
+    dd += (mag_list[4] + 2.5*np.log10(zzf))**2
+    dd += (mag_list[5] + 2.5*np.log10(yyf))**2
+    dd = np.sqrt(dd)
+
+    if dd > worst_dist:
+        worst_dist = dd
+        print('worst mag dist %e -- %e %e' % (worst_dist, mag_list[2], -2.5*np.log10(ggf)))
+
+exit()
 
 dtype_list = [('name', str, 200)]
 for ii in range(30):
@@ -85,6 +156,7 @@ for i_star in range(len(sed_names)):
         print('worst_dist %e -- %e' % (worst_dist, d_color))
 
 
+exit()
 #### now do bulges
 print('bulges')
 
