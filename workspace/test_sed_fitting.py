@@ -73,6 +73,18 @@ av_list = av_list[first_disk]
 
 redshift_list =  catalog_qties['redshift_true'][first_disk]
 
+from lsst.sims.photUtils import CosmologyObject
+cosmo = CosmologyObject(H0=71.0, Om0=0.265)
+
+dm = cosmo.distanceModulus(redshift_list)
+
+u_control = -2.5*np.log10(u_control) + dm
+g_control = -2.5*np.log10(g_control) + dm
+r_control = -2.5*np.log10(r_control) + dm
+i_control = -2.5*np.log10(i_control) + dm
+z_control = -2.5*np.log10(z_control) + dm
+y_control = -2.5*np.log10(y_control) + dm
+
 import time
 t_start = time.time()
 sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, redshift_list)
@@ -89,7 +101,7 @@ total_bp_dict, lsst_bp_dict = BandpassDict.loadBandpassesFromFiles()
 
 worst_dist = -1.0
 
-for sed_name, mag_norm, redshift, av, ebv, uuf, ggf, rrf, iif, zzf, yyf in \
+for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy in \
 zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
 r_control, i_control, z_control, y_control):
 
@@ -114,7 +126,9 @@ r_control, i_control, z_control, y_control):
 
     if dd > worst_dist:
         worst_dist = dd
-        print('worst mag dist %e -- %e %e' % (worst_dist, mag_list[2], -2.5*np.log10(ggf)))
+        print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (worst_dist,mag_norm,ebv,av))
+        for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
+            print('    model %e truth %e' % (mag_list[i_filter], cc))
 
 exit()
 
