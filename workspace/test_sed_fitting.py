@@ -54,7 +54,7 @@ catalog_qties = catalog.get_quantities(qty_names)
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
 has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
 
-first_disk = has_disk[0][:5]
+first_disk = has_disk[0][:10000]
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
@@ -124,7 +124,7 @@ total_bp_dict, lsst_bp_dict = BandpassDict.loadBandpassesFromFiles()
 
 worst_dist = -1.0
 
-av_valid = np.where(np.logical_and(av_list>0.01, av_list<20.0))
+av_valid = np.where(np.logical_and(av_list>0.01, np.logical_and(ebv_list>0.0, av_list<5.0)))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
 color_dist_list = color_dist_list[av_valid]
@@ -195,17 +195,18 @@ for i_star in range(len(sed_name_list)):
     dd = np.sqrt(dd)
 
     if dd > worst_dist:
-        #worst_dist = dd
-        print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
+        print('\nworst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
         print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
         for i_filter, (cc, ccdl) in enumerate(zip((uu, gg, rr, ii, zz, yy), (udl, gdl, rdl, idl, zdl, ydl))):
-            print('    model %e model-dustless %e truth %e %e-- %e' %
+            dust_model = mag_list[i_filter] - dustless_list[i_filter]
+            dust_gal = cc - ccdl
+            worst_dist = dd
+            print('    model %e truth %e diff %e dust_diff %e' %
                   (mag_list[i_filter],
-                   mag_list[i_filter]-dustless_list[i_filter],
-                   cc, cc-ccdl, cc-mag_list[i_filter]))
-    ct += 1
-    if ct == 5:
-        exit()
+                   cc,
+                   cc-mag_list[i_filter],
+                   dust_gal-dust_model))
+
 exit()
 
 dtype_list = [('name', str, 200)]
