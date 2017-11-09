@@ -140,9 +140,12 @@ r_control, i_control, z_control, y_control):
     if dd > worst_dist:
         worst_dist = dd
         print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (worst_dist,mag_norm,ebv,av))
+        print('redshift %e' % redshift)
         for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
-            print('    model %e truth %e' % (mag_list[i_filter], cc))
+            print('    model %e truth %e -- %e' %
+                  (mag_list[i_filter], cc, cc-mag_list[i_filter]))
 
+        exit()
 exit()
 
 dtype_list = [('name', str, 200)]
