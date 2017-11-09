@@ -117,7 +117,7 @@ z_control = z_control[av_valid]
 y_control = y_control[av_valid]
 
 ct = 0
-
+print(sed_name_list)
 for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy, color_dist, mag_dist in \
 zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
 r_control, i_control, z_control, y_control, color_dist_list, mag_dist_list):
