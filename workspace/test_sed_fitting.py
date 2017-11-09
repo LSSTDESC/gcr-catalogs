@@ -101,6 +101,19 @@ total_bp_dict, lsst_bp_dict = BandpassDict.loadBandpassesFromFiles()
 
 worst_dist = -1.0
 
+av_valid = np.where(av_list<20.0)
+sed_name_list = sed_name_list[av_valid]
+mag_norm_list = mag_norm_list[av_valid]
+redshift_list = redshift_list[av_valid]
+av_list = av_list[av_valid]
+ebv_list = ebv_list[av_valid]
+u_control = u_control[av_valid]
+g_control = g_control[av_valid]
+r_control = r_control[av_valid]
+i_control = i_control[av_valid]
+z_control = z_control[av_valid]
+y_control = y_control[av_valid]
+
 for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy in \
 zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
 r_control, i_control, z_control, y_control):
