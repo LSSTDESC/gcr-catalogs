@@ -54,7 +54,7 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
         dd = np.sum((galacticus_colors[i_star]
                      -sed_from_galacticus_mags._sed_colors)**2, axis=1)
         mag_dex[i_star] = np.argmin(dd)
-        out_color_dist[i_star] = dd[mag_dex[i_star]]
+        out_color_dist[i_star] = np.sqrt(dd[mag_dex[i_star]])
 
     output_names = sed_from_galacticus_mags._sed_names[mag_dex]
 
