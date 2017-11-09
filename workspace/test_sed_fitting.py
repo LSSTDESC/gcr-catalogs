@@ -101,7 +101,7 @@ total_bp_dict, lsst_bp_dict = BandpassDict.loadBandpassesFromFiles()
 
 worst_dist = -1.0
 
-av_valid = np.where(av_list<20.0)
+av_valid = np.where(np.logical_and(av_list>0.01, av_list<20.0))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
 redshift_list = redshift_list[av_valid]
