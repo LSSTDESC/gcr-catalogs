@@ -51,7 +51,8 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
     out_color_dist = np.zeros(len(galacticus_colors), dtype=float)
     mag_dex = np.zeros(len(galacticus_colors), dtype=int)
     for i_star in range(len(galacticus_colors)):
-        dd = np.sum((galacticus_colors[i_star]-sed_from_galacticus_mags._sed_colors)**2, axis=1)
+        dd = np.sum((galacticus_colors[i_star]
+                     -sed_from_galacticus_mags._sed_colors)**2, axis=1)
         mag_dex[i_star] = np.argmin(dd)
         out_color_dist[i_star] = dd[mag_dex[i_star]]
 
