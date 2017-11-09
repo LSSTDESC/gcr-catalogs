@@ -62,4 +62,8 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
     d_mag = (galacticus_mags_t - chosen_mags).sum(axis=1)/30.0
     output_mag_norm = sed_from_galacticus_mags._mag_norm[mag_dex] + d_mag + distance_modulus
     assert len(output_mag_norm) == len(output_names)
-    return output_names, output_mag_norm, out_color_dist
+    normed_mags = np.array([chosen_mags[ii] + d_mag[ii] for ii in range(len(d_mag))])
+    out_mag_dist = np.sqrt(((galacticus_mags_t - normed_mags)**2).sum(axis=1))
+    assert len(out_mag_dist) == len(output_names)
+
+    return output_names, output_mag_norm, out_color_dist, out_mag_dist

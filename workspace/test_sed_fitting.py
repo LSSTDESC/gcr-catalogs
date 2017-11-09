@@ -87,7 +87,7 @@ y_control = -2.5*np.log10(y_control) + dm
 
 import time
 t_start = time.time()
-sed_name_list, mag_norm_list, color_dist_list = sed_from_galacticus_mags(disk_mags, redshift_list)
+sed_name_list, mag_norm_list, color_dist_list, mag_dist_list = sed_from_galacticus_mags(disk_mags, redshift_list)
 print("fitting %d took %.3e" % (len(sed_name_list), time.time()-t_start))
 print("mag norm %e %e %e" % (mag_norm_list.min(), np.median(mag_norm_list), mag_norm_list.max()))
 assert len(sed_name_list) == len(first_disk)
@@ -105,6 +105,7 @@ av_valid = np.where(np.logical_and(av_list>0.01, av_list<20.0))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
 color_dist_list = color_dist_list[av_valid]
+mag_dist_list = mag_dist_list[av_valid]
 redshift_list = redshift_list[av_valid]
 av_list = av_list[av_valid]
 ebv_list = ebv_list[av_valid]
@@ -117,9 +118,9 @@ y_control = y_control[av_valid]
 
 ct = 0
 
-for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy, color_dist in \
+for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy, color_dist, mag_dist in \
 zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
-r_control, i_control, z_control, y_control, color_dist_list):
+r_control, i_control, z_control, y_control, color_dist_list, mag_dist_list):
 
     sed = Sed()
     sed.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
@@ -143,7 +144,7 @@ r_control, i_control, z_control, y_control, color_dist_list):
     if dd > worst_dist:
         worst_dist = dd
         print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (worst_dist,mag_norm,ebv,av))
-        print('redshift %e; color_dist %e' % (redshift, color_dist))
+        print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
         for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
             print('    model %e truth %e -- %e' %
                   (mag_list[i_filter], cc, cc-mag_list[i_filter]))
