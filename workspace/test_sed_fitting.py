@@ -92,19 +92,21 @@ cosmo = CosmologyObject(H0=71.0, Om0=0.265)
 
 dm = cosmo.distanceModulus(redshift_list)
 
-u_control = -2.5*np.log10(u_control) + dm
-g_control = -2.5*np.log10(g_control) + dm
-r_control = -2.5*np.log10(r_control) + dm
-i_control = -2.5*np.log10(i_control) + dm
-z_control = -2.5*np.log10(z_control) + dm
-y_control = -2.5*np.log10(y_control) + dm
+fudge = 2.0*2.5*np.log10(1.0+redshift_list)
 
-u_dustless = -2.5*np.log10(u_dustless) + dm
-g_dustless = -2.5*np.log10(g_dustless) + dm
-r_dustless = -2.5*np.log10(r_dustless) + dm
-i_dustless = -2.5*np.log10(i_dustless) + dm
-z_dustless = -2.5*np.log10(z_dustless) + dm
-y_dustless = -2.5*np.log10(y_dustless) + dm
+u_control = -2.5*np.log10(u_control) + dm - fudge
+g_control = -2.5*np.log10(g_control) + dm - fudge
+r_control = -2.5*np.log10(r_control) + dm - fudge
+i_control = -2.5*np.log10(i_control) + dm - fudge
+z_control = -2.5*np.log10(z_control) + dm - fudge
+y_control = -2.5*np.log10(y_control) + dm - fudge
+
+u_dustless = -2.5*np.log10(u_dustless) + dm - fudge
+g_dustless = -2.5*np.log10(g_dustless) + dm - fudge
+r_dustless = -2.5*np.log10(r_dustless) + dm - fudge
+i_dustless = -2.5*np.log10(i_dustless) + dm - fudge
+z_dustless = -2.5*np.log10(z_dustless) + dm - fudge
+y_dustless = -2.5*np.log10(y_dustless) + dm - fudge
 
 import time
 t_start = time.time()
