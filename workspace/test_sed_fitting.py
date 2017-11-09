@@ -114,6 +114,8 @@ i_control = i_control[av_valid]
 z_control = z_control[av_valid]
 y_control = y_control[av_valid]
 
+ct = 0
+
 for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy in \
 zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
 r_control, i_control, z_control, y_control):
@@ -144,7 +146,8 @@ r_control, i_control, z_control, y_control):
         for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
             print('    model %e truth %e -- %e' %
                   (mag_list[i_filter], cc, cc-mag_list[i_filter]))
-
+    ct += 1
+    if ct == 5:
         exit()
 exit()
 
