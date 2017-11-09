@@ -49,7 +49,7 @@ catalog_qties = catalog.get_quantities(qty_names)
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
 has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
 
-first_disk = has_disk[0][:10000]
+first_disk = has_disk[0][:5]
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
@@ -142,8 +142,8 @@ r_control, i_control, z_control, y_control, color_dist_list, mag_dist_list):
     dd = np.sqrt(dd)
 
     if dd > worst_dist:
-        worst_dist = dd
-        print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (worst_dist,mag_norm,ebv,av))
+        #worst_dist = dd
+        print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
         print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
         for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
             print('    model %e truth %e -- %e' %
