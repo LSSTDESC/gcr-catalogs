@@ -44,24 +44,12 @@ qty_names.append('otherLuminosities/spheroidLuminositiesStellar:V:rest:dustAtlas
 qty_names.append('otherLuminosities/spheroidLuminositiesStellar:B:rest')
 qty_names.append('otherLuminosities/spheroidLuminositiesStellar:B:rest:dustAtlas')
 
-qty_names.append('galaxyID')
-
 catalog_qties = catalog.get_quantities(qty_names)
-
-v_name = 'otherLuminosities/diskLuminositiesStellar:V:rest'
-v_dust_name = 'otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas'
-
-anomalous = np.where(np.logical_and(catalog_qties[v_name]>1.0,
-                                    catalog_qties[v_dust_name]<1.0e-20))
-
-print('n anomalous %d' % len(anomalous[0]))
-print(catalog_qties[v_name][anomalous])
-print(catalog_qties[v_dust_name][anomalous])
 
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
 has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
 
-first_disk = has_disk[0]
+first_disk = has_disk[0][:10000]
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
@@ -80,15 +68,8 @@ ebv_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStell
 av_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
            np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest']))
 
-v_list = (catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest'])
-
-v_dust_list = (catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas'])
-
-galaxy_id_list = catalog_qties['galaxyID'][first_disk]
 ebv_list = ebv_list[first_disk]
 av_list = av_list[first_disk]
-v_list = v_list[first_disk]
-v_dust_list = v_dust_list[first_disk]
 
 redshift_list =  catalog_qties['redshift_true'][first_disk]
 
@@ -103,21 +84,6 @@ r_control = -2.5*np.log10(r_control) + dm
 i_control = -2.5*np.log10(i_control) + dm
 z_control = -2.5*np.log10(z_control) + dm
 y_control = -2.5*np.log10(y_control) + dm
-
-av_max_dex = np.argmax(av_list)
-print(av_list[av_max_dex], v_list[av_max_dex], v_dust_list[av_max_dex])
-
-bad_av = np.where(v_dust_list<1.0e-12)
-
-with open('bad_av_galaxies.txt', 'w') as out_file:
-    out_file.write('# galaxyID disk:Stellar:V:rest(flux) disk:Stellar:V:rest:dustAtlas(flux) mag_g\n')
-    for dex in bad_av[0]:
-        out_file.write('%d %e %e %e\n' %
-                      (galaxy_id_list[dex], v_list[dex], v_dust_list[dex], g_control[dex]))
-
-exit()
-
-
 
 import time
 t_start = time.time()
