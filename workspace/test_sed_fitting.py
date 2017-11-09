@@ -34,6 +34,11 @@ for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
     qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
     qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
 
+    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed' % filter_name)
+    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed' % filter_name)
+
+
+
 qty_names.append('otherLuminosities/diskLuminositiesStellar:V:rest')
 qty_names.append('otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas')
 qty_names.append('otherLuminosities/diskLuminositiesStellar:B:rest')
@@ -60,6 +65,15 @@ i_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed:
 z_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed:dustAtlas'][first_disk]
 y_control = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed:dustAtlas'][first_disk]
 
+u_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:observed'][first_disk]
+g_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:observed'][first_disk]
+r_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:observed'][first_disk]
+i_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed'][first_disk]
+z_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed'][first_disk]
+y_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed'][first_disk]
+
+
+
 ebv_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas']) -
             np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
             np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest']) +
@@ -84,6 +98,13 @@ r_control = -2.5*np.log10(r_control) + dm
 i_control = -2.5*np.log10(i_control) + dm
 z_control = -2.5*np.log10(z_control) + dm
 y_control = -2.5*np.log10(y_control) + dm
+
+u_dustless = -2.5*np.log10(u_dustless) + dm
+g_dustless = -2.5*np.log10(g_dustless) + dm
+r_dustless = -2.5*np.log10(r_dustless) + dm
+i_dustless = -2.5*np.log10(i_dustless) + dm
+z_dustless = -2.5*np.log10(z_dustless) + dm
+y_dustless = -2.5*np.log10(y_dustless) + dm
 
 import time
 t_start = time.time()
@@ -115,22 +136,52 @@ r_control = r_control[av_valid]
 i_control = i_control[av_valid]
 z_control = z_control[av_valid]
 y_control = y_control[av_valid]
+u_dustless = u_dustless[av_valid]
+g_dustless = g_dustless[av_valid]
+r_dustless = r_dustless[av_valid]
+i_dustless = i_dustless[av_valid]
+z_dustless = z_dustless[av_valid]
+y_dustless = y_dustless[av_valid]
+
 
 ct = 0
 print(sed_name_list)
-for sed_name, mag_norm, redshift, av, ebv, uu, gg, rr, ii, zz, yy, color_dist, mag_dist in \
-zip(sed_name_list, mag_norm_list, redshift_list, av_list, ebv_list, u_control, g_control,
-r_control, i_control, z_control, y_control, color_dist_list, mag_dist_list):
 
+for i_star in range(len(sed_name_list)):
+    sed_name = sed_name_list[i_star]
+    mag_norm = mag_norm_list[i_star]
+    redshift = redshift_list[i_star]
+    av = av_list[i_star]
+    ebv = ebv_list[i_star]
+    uu = u_control[i_star]
+    gg = g_control[i_star]
+    rr = r_control[i_star]
+    ii = i_control[i_star]
+    zz = z_control[i_star]
+    yy = y_control[i_star]
+    color_dist = color_dist_list[i_star]
+    mag_dist = mag_dist_list[i_star]
+    udl = u_dustless[i_star]
+    gdl = g_dustless[i_star]
+    rdl = r_dustless[i_star]
+    idl = i_dustless[i_star]
+    zdl = z_dustless[i_star]
+    ydl = y_dustless[i_star]
+
+    dustless = Sed()
     sed = Sed()
     sed.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
+    dustless.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
     f_norm = getImsimFluxNorm(sed, mag_norm)
     sed.multiplyFluxNorm(f_norm)
+    dustless.multiplyFluxNorm(f_norm)
     a_x, b_x = sed.setupCCMab()
     R_v = av/ebv
     sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
     sed.redshiftSED(redshift, dimming=False)
+    dustless.redshiftSED(redshift, dimming=False)
     mag_list = lsst_bp_dict.magListForSed(sed)
+    dustless_list = lsst_bp_dict.magListForSed(dustless)
 
     dd = 0.0
     dd += (mag_list[0] - uu)**2
@@ -145,9 +196,11 @@ r_control, i_control, z_control, y_control, color_dist_list, mag_dist_list):
         #worst_dist = dd
         print('worst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
         print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
-        for i_filter, cc in enumerate((uu, gg, rr, ii, zz, yy)):
-            print('    model %e truth %e -- %e' %
-                  (mag_list[i_filter], cc, cc-mag_list[i_filter]))
+        for i_filter, (cc, ccdl) in enumerate(zip((uu, gg, rr, ii, zz, yy), (udl, gdl, rdl, idl, zdl, ydl))):
+            print('    model %e model-dustless %e truth %e %e-- %e' %
+                  (mag_list[i_filter],
+                   mag_list[i_filter]-dustless_list[i_filter],
+                   cc, cc-ccdl, cc-mag_list[i_filter]))
     ct += 1
     if ct == 5:
         exit()
