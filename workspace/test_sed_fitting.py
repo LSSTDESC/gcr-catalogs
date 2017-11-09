@@ -54,7 +54,10 @@ catalog_qties = catalog.get_quantities(qty_names)
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
 has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
 
-first_disk = has_disk[0][:10000]
+#first_disk = has_disk[0]
+
+rng = np.random.RandomState(812351233)
+first_disk = rng.choice(has_disk[0], size=100000, replace=False)
 
 disk_mags = np.array([-2.5*np.log10(catalog_qties[name][first_disk]) for name in disk_mag_names])
 
@@ -149,6 +152,9 @@ y_dustless = y_dustless[av_valid]
 ct = 0
 print(sed_name_list)
 
+out_file = open('Rv_vs_magdist.txt', 'w')
+out_file.write('# Rv Av EBV d du dg dr di dz dy\n')
+
 for i_star in range(len(sed_name_list)):
     sed_name = sed_name_list[i_star]
     mag_norm = mag_norm_list[i_star]
@@ -194,6 +200,16 @@ for i_star in range(len(sed_name_list)):
     dd += (mag_list[5] - yy)**2
     dd = np.sqrt(dd)
 
+    out_file.write('%e %e %e %e ' % (av/ebv, av, ebv, dd))
+    out_file.write('%e ' % (mag_list[0]-uu))
+    out_file.write('%e ' % (mag_list[1]-gg))
+    out_file.write('%e ' % (mag_list[2]-rr))
+    out_file.write('%e ' % (mag_list[3]-ii))
+    out_file.write('%e ' % (mag_list[4]-zz))
+    out_file.write('%e ' % (mag_list[5]-yy))
+    out_file.write('\n')
+
+
     if dd > worst_dist:
         print('\nworst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
         print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
@@ -207,6 +223,7 @@ for i_star in range(len(sed_name_list)):
                    cc-mag_list[i_filter],
                    dust_gal-dust_model))
 
+out_file.close()
 exit()
 
 dtype_list = [('name', str, 200)]
