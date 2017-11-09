@@ -31,12 +31,6 @@ qty_names.append('morphology/spheroidRadiusArcsec')
 qty_names.append('redshift_true')
 
 for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
-    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
-    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
-
-    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed' % filter_name)
-    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed' % filter_name)
-
     qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:rest:dustAtlas' % filter_name)
     qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:rest:dustAtlas' % filter_name)
 
