@@ -51,12 +51,12 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
 
 For Python 3:
 
-    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
+    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py3/bin/activate
     source activate DESCQA
 
 For Python 2, the first line should be:
 
-    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py3/bin/activate
+    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
 
 
 ### with a python script: 
