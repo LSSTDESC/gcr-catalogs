@@ -34,8 +34,14 @@ Each of the catalogs is specified by a YAML config file, which can be found [her
 
 First, [start a NERSC notebook server](https://jupyter.nersc.gov) and open a notebook with Python 2 kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
 
+For Python 3:
 ```python
 import sys
+sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/lib/python3.6/site-packages')
+```
+
+For Python 2, the second line should be
+```python
 sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/lib/python2.7/site-packages')
 ```
 
@@ -43,13 +49,25 @@ sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESC
 
 Activate DESCQA Python environment by running the following on NERSC (needs to be in `bash` or `zsh`):
 
+For Python 3:
+
     source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
     source activate DESCQA
+
+For Python 2, the first line should be:
+
+    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py3/bin/activate
 
 
 ### with a python script: 
 
 To be able to import `GCRCatalogs`, the first line of the script should be:
+
+For Python 3:
+
+    #!/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/bin/python 
+
+or Python 2:
 
     #!/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/bin/python 
 
