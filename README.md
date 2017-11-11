@@ -83,18 +83,11 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 
 ## Usage
 
-Some examples of using `GCRCatalogs` can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/examples). (Thanks to Joe DeRose for providing the CLF test example!)
+- See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/GCRCatalogs%20Demo.ipynb) for a tutorial on how to use GCR Catalogs.
 
-Here's a minimal example:
+- See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/CLF%20Test.ipynb) for an actual application (the Conditional  Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
 
-```python
-import GCRCatalogs
-gc = GCRCatalogs.load_catalog('proto-dc2_v2.0')
-gc.get_quantities(['redshift_true'])
-print gc.list_all_quantities()
-```
-
-Please see [this page](https://github.com/yymao/generic-catalog-reader/blob/master/GCR.py) for the complete GCR API.
+- See [this page](https://github.com/yymao/generic-catalog-reader/blob/master/GCR.py) for the complete GCR API.
 
 
 ### Interfacing PhoSim through CatSim:
