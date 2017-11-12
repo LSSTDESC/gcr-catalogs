@@ -186,8 +186,8 @@ for i_star in range(len(sed_name_list)):
     a_x, b_x = sed.setupCCMab()
     R_v = av/ebv
     sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
-    sed.redshiftSED(redshift, dimming=False)
-    dustless.redshiftSED(redshift, dimming=False)
+    sed.redshiftSED(redshift, dimming=True)
+    dustless.redshiftSED(redshift, dimming=True)
     mag_list = lsst_bp_dict.magListForSed(sed)
     dustless_list = lsst_bp_dict.magListForSed(dustless)
 
