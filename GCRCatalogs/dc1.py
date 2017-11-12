@@ -24,12 +24,9 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     def _subclass_init(self, db_info_fname, **kwargs):
         """
         """
-        assert os.path.isfile(db_info_fname), 'Database info file {} does not exist'.format(db_info_fname)
-        hostname, portnum, dbname, username, pwd = self._read_database_info_from_file(db_info_fname)
 
-        self.dbURL = url.URL('mssql+pymssql',
-                        host=hostname, port=portnum, database=dbname,
-                        username=username, password=pwd)
+        self.dbURL = url.URL('mssql+pymssql', \
+                **self._read_database_info_from_file(db_info_fname))
 
         self.engine = create_engine(self.dbURL)
 
@@ -56,24 +53,23 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     def _read_database_info_from_file(self, db_info_fname):
         msg = ("The file {0} does not exist.\n"
             "This file is used to access connectivity information to the DC1 database.")
-        assert os.path.exists(db_info_fname), msg
-
+        assert os.path.isfile(db_info_fname), msg
+        
         try:
-            with open(db_info_fname, 'rb') as f:
-                hostname = next(f).strip()
-                portnum = int(next(f).strip())
-                dbname = next(f).strip()
-                username = next(f).strip()
-                pwd = next(f).strip()
-        except:
-            msg = ("The file {0} should be five lines of ascii with the following information:\n"
-                "hostname\n"
-                "portnum\n"
-                "dbname\n"
-                "username\n"
-                "pwd\n")
-            raise IOError(msg)
-        return hostname, portnum, dbname, username, pwd
+            with open(db_info_fname) as f:
+                lines = f.readlines()
+        except (IOError, OSError):
+            info = tuple()
+        else:
+            info = tuple((l.strip() for l in lines[:5]))
+        
+        fields = ('host', 'port', 'database', 'username', 'password')
+        
+        if len(info) != len(fields) or not all(info):
+            msg = "The file {0} should be {1} lines of ascii with the following information:\n{}\n".format(db_info_fname, len(fields), '\n'.join(fields))
+            raise ValueError(msg)
+
+        return dict(zip(fields, info))
 
     def _generate_native_quantity_list(self):
         """
@@ -96,9 +92,9 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             query = 'SELECT {0} from galaxy'.format(native_quantity)
         else:
             try:
-                assert int(topN) == topN
-            except:
-                raise ValueError("``topN`` argument must be an integer")
+                topN = int(topN)
+            except (ValueError, TypeError):
+                raise ValueError("`topN` argument must be an integer")
             query = 'SELECT TOP {0} {1} from galaxy'.format(topN, native_quantity)
 
         #  Fetch the data as a list of strings
