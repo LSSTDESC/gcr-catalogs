@@ -208,6 +208,14 @@ for i_star in range(len(sed_name_list)):
     out_file.write('%e ' % (mag_list[3]-ii))
     out_file.write('%e ' % (mag_list[4]-zz))
     out_file.write('%e ' % (mag_list[5]-yy))
+
+    out_file.write('%e ' % (dustless_list[0]-udl))
+    out_file.write('%e ' % (dustless_list[1]-gdl))
+    out_file.write('%e ' % (dustless_list[2]-rdl))
+    out_file.write('%e ' % (dustless_list[3]-idl))
+    out_file.write('%e ' % (dustless_list[4]-zdl))
+    out_file.write('%e ' % (dustless_list[5]-ydl))
+
     out_file.write('\n')
 
 
