@@ -1,4 +1,6 @@
-from GCR import BaseGenericCatalog
+import GCR
+from GCR import *
+
 from .utils import *
 from .register import *
 

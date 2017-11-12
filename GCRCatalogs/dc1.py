@@ -22,9 +22,6 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     """
 
     def _subclass_init(self, db_info_fname, **kwargs):
-        """
-        """
-
         self.dbURL = url.URL('mssql+pymssql', \
                 **self._read_database_info_from_file(db_info_fname))
 
@@ -37,7 +34,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             'galaxy_id': 'galid',
             'galaxy_id_disk': 'sedid_disk',
             'galaxy_id_bulge': 'sedid_bulge',
-            'Mag_r_lsst': 'absmag_r_total',
+            'Mag_r_lsst_z0': 'absmag_r_total',
             'disk_Sersic_index': 'disk_n',
             'bulge_Sersic_index': 'bulge_n',
             'stellar_mass': 'mass_stellar',
@@ -49,6 +46,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
 
         self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
         self.lightcone = True
+
 
     def _read_database_info_from_file(self, db_info_fname):
         msg = ("The file {0} does not exist.\n"
@@ -71,6 +69,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
 
         return dict(zip(fields, info))
 
+
     def _generate_native_quantity_list(self):
         """
         """
@@ -78,10 +77,12 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         query = "SELECT column_name FROM information_schema.columns WHERE table_name='galaxy' ORDER BY ordinal_position;"
         return [r[0] for r in session.execute(query).fetchall()]
 
-    def _iter_native_dataset(self, pre_filters=None):
+
+    def _iter_native_dataset(self, native_filters=None):
         """
         """
         yield scoped_session(sessionmaker(autoflush=True, bind=self.engine))
+
 
     @staticmethod
     def _fetch_native_quantity(dataset, native_quantity, topN=None):

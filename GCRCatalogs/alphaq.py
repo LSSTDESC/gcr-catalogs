@@ -75,7 +75,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         return native_quantities
 
 
-    def _iter_native_dataset(self, pre_filters=None):
+    def _iter_native_dataset(self, native_filters=None):
         with h5py.File(self._file, 'r') as fh:
             yield fh
 
@@ -113,10 +113,10 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
     def _subclass_init(self, filename, **kwargs):
             super(AlphaQClusterCatalog, self)._subclass_init(filename, **kwargs)
             with h5py.File(self._file, 'r') as fh:
-                self._pre_filter_quantities = set(fh[list(fh.keys())[0]].attrs)
+                self._native_filter_quantities = set(fh[list(fh.keys())[0]].attrs)
 
 
-    def _iter_native_dataset(self, pre_filters=None):
+    def _iter_native_dataset(self, native_filters=None):
         with h5py.File(self._file, 'r') as fh:
             for key in fh:
                 halo = fh[key]
@@ -124,7 +124,7 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
                 attrs = list(halo.attrs)
                 for attr in attrs:
                     d[attr] = halo.attrs[attr]
-                if (not pre_filters) or all(f[0](*(d.get(val) for val in f[1:])) for f in pre_filters):
+                if (not native_filters) or all(f[0](*(d.get(val) for val in f[1:])) for f in native_filters):
                     yield halo
 
 

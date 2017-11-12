@@ -51,7 +51,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.healpix_pixels = None
         self.reset_healpix_pixels()
         self.check_healpix_pixels()
-        self._pre_filter_quantities = {'healpix_pixel'}
+        self._native_filter_quantities = {'healpix_pixel'}
 
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
@@ -189,11 +189,11 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         return native_quantities
 
 
-    def _iter_native_dataset(self, pre_filters=None):
+    def _iter_native_dataset(self, native_filters=None):
         cache = dict()
         for i in self.healpix_pixels:
             args = dict(healpix_pixel=i)
-            if (not pre_filters) or all(f[0](*(args[k] for k in f[1:])) for f in pre_filters):
+            if (not native_filters) or all(f[0](*(args[k] for k in f[1:])) for f in native_filters):
                 yield i, cache
         for key in list(cache.keys()):
             del cache[key]
