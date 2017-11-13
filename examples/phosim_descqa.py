@@ -131,6 +131,39 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         output = np.where(self.column_by_name('SEDs/spheroidLuminositiesStellar:SED_9395_583:rest')>0.0, 1.0, None)
         return output
 
+    @compound('internalAv', 'internalRv')
+    def get_internalDustParams(self):
+        if ('hasDisk' in self._cannot_be_null and
+            'hasBulge' in self._cannot_be_null):
+
+            raise RuntimeError('\nUnsure whether this is a disk catalog '
+                               'or a bulge catalog\n'
+                               'self._cannot_be_null %s' % self._cannot_be_null)
+        elif 'hasDisk' in self._cannot_be_null:
+            lum_type = 'disk'
+        elif 'hasBulge' in self._cannot_be_null:
+            lum_type = 'spheroid'
+        else:
+             raise RuntimeError('\nUnsure whether this is a disk catalog '
+                               'or a bulge catalog\n'
+                               'self._cannot_be_null %s' % self._cannot_be_null)
+
+        b_name = 'otherLuminosities/%sLuminositiesStellar:B:rest' % lum_type
+        b_dust_name = 'otherLuminosities/%sLuminositiesStellar:B:rest:dustAtlas' % lum_type
+
+        v_name = 'otherLuminosities/%sLuminositiesStellar:V:rest' % lum_type
+        v_dust_name = 'otherLuminosities/%sLuminositiesStellar:V:rest:dustAtlas' % lum_type
+
+        av_list = -2.5*(np.log10(self.column_by_name(v_dust_name)) -
+                        np.log10(self.column_by_name(v_name)))
+
+        ebv_list = -2.5*(np.log10(self.column_by_name(b_dust_name)) -
+                         np.log10(self.column_by_name(v_dust_name)) -
+                         np.log10(self.column_by_name(b_name)) +
+                         np.log10(self.column_by_name(v_name)))
+
+        return np.array([av_list, av_list/ebv_list])
+
     @compound('sedFilename', 'fittedMagNorm')
     def get_fittedSedAndNorm(self):
 
