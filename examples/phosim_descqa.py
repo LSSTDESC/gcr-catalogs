@@ -162,7 +162,9 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
                          np.log10(self.column_by_name(b_name)) +
                          np.log10(self.column_by_name(v_name)))
 
-        return np.array([av_list, av_list/ebv_list])
+        rv_list = av_list/ebv_list
+
+        return np.array([av_list, rv_list])
 
     @compound('sedFilename', 'fittedMagNorm')
     def get_fittedSedAndNorm(self):
