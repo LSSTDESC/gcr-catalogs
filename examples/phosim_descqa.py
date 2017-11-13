@@ -74,7 +74,7 @@ class bulgeDESCQAObject(DESCQAObject):
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
                ('majorAxis', 'morphology/spheroidMajorAxisArcsec', arcsec_to_radians),
-               ('minorAis', 'morphology/spheriodMinorAxisArcsec', arcsec_to_radians)]
+               ('minorAxis', 'morphology/spheroidMinorAxisArcsec', arcsec_to_radians)]
 
     # default values that are applied if no other source
     # for a column can be found
