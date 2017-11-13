@@ -173,7 +173,11 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
                                'self._cannot_be_null: %s' % self._cannot_be_null)
 
         mag_array = np.array([-2.5*np.log10(self.column_by_name(name)) for name in flux_names])
-        sed_names, mag_norms = sed_from_galacticus_mags(mag_array)
+
+        redshift_array = self.column_by_name('redshift')
+
+        sed_names, mag_norms = sed_from_galacticus_mags(mag_array,
+                                                        redshift_array)
         return np.array([sed_names, mag_norms])
 
     def get_phoSimMagNorm(self):
