@@ -35,14 +35,14 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             'galaxy_id_disk': 'sedid_disk',
             'galaxy_id_bulge': 'sedid_bulge',
             'Mag_r_lsst_z0': 'absmag_r_total',
-            'disk_Sersic_index': 'disk_n',
-            'bulge_Sersic_index': 'bulge_n',
+            'disk_sersic_index': 'disk_n',
+            'bulge_sersic_index': 'bulge_n',
             'stellar_mass': 'mass_stellar',
             'disk_re_a_true': 'a_d',
             'disk_re_b_true': 'b_d',
             'bulge_re_a_true': 'a_b',
-            'bulge_re_b_true': 'b_b'
-            }
+            'bulge_re_b_true': 'b_b',
+        }
 
         self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
         self.lightcone = True
@@ -52,7 +52,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         msg = ("The file {0} does not exist.\n"
             "This file is used to access connectivity information to the DC1 database.")
         assert os.path.isfile(db_info_fname), msg
-        
+
         try:
             with open(db_info_fname) as f:
                 lines = f.readlines()
@@ -60,9 +60,9 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             info = tuple()
         else:
             info = tuple((l.strip() for l in lines[:5]))
-        
+
         fields = ('host', 'port', 'database', 'username', 'password')
-        
+
         if len(info) != len(fields) or not all(info):
             msg = "The file {0} should be {1} lines of ascii with the following information:\n{}\n".format(db_info_fname, len(fields), '\n'.join(fields))
             raise ValueError(msg)
@@ -70,39 +70,21 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         return dict(zip(fields, info))
 
 
-    def _generate_native_quantity_list(self):
-        """
-        """
+    def _run_sql_query(self, query):
         session = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
-        query = "SELECT column_name FROM information_schema.columns WHERE table_name='galaxy' ORDER BY ordinal_position;"
-        return [r[0] for r in session.execute(query).fetchall()]
+        return session.execute(query).fetchall()
+
+
+    def _generate_native_quantity_list(self):
+        query = 'SELECT column_name FROM information_schema.columns WHERE table_name=\'galaxy\' ORDER BY ordinal_position;'
+        return (r[0] for r in self._run_sql_query(query))
 
 
     def _iter_native_dataset(self, native_filters=None):
-        """
-        """
-        yield scoped_session(sessionmaker(autoflush=True, bind=self.engine))
-
-
-    @staticmethod
-    def _fetch_native_quantity(dataset, native_quantity, topN=None):
-        """ runs query and returns numpy array
-        """
-        #  Write the query string
-        if topN is None:
+        def native_quantity_getter(native_quantity):
             query = 'SELECT {0} from galaxy'.format(native_quantity)
-        else:
-            try:
-                topN = int(topN)
-            except (ValueError, TypeError):
-                raise ValueError("`topN` argument must be an integer")
-            query = 'SELECT TOP {0} {1} from galaxy'.format(topN, native_quantity)
-
-        #  Fetch the data as a list of strings
-        results_list = [r[0] for r in dataset.execute(query).fetchall()]
-
-        #  Convert to ndarray and return
-        return np.array(results_list)
+            return np.array([r[0] for r in self._run_sql_query(query)])
+        yield native_quantity_getter
 
 
 register_reader(DC1GalaxyCatalog)
