@@ -68,7 +68,7 @@ dtype = np.dtype([('rv', float), ('av', float), ('ebv', float),
                   ('didustless', float), ('dzdustless', float),
                   ('dydustless', float)])
 
-mag_data = np.genfromtxt('Rv_vs_magdist_rest.txt', dtype=dtype)
+mag_data = np.genfromtxt('Rv_vs_magdist.txt', dtype=dtype)
 
 valid = np.where(mag_data['rv'] < 30.0)
 rv = mag_data['rv'][valid]
@@ -110,7 +110,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     plt.yticks(yticks,ylabels)
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist_rest.png')
+plt.savefig('rv_dmag_dist.png')
 plt.close()
 
 
@@ -152,5 +152,5 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     plt.yticks(yticks,ylabels)
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist_rest_dustless.png')
+plt.savefig('rv_dmag_dist_dustless.png')
 plt.close()
