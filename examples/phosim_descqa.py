@@ -73,6 +73,7 @@ class bulgeDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
+               ('positionAngle', 'morphology/positionAngle', deg_to_radians),
                ('majorAxis', 'morphology/spheroidMajorAxisArcsec', arcsec_to_radians),
                ('minorAxis', 'morphology/spheroidMinorAxisArcsec', arcsec_to_radians)]
 
@@ -90,6 +91,7 @@ class diskDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
+               ('positionAngle', 'morphology/positionAngle', deg_to_radians),
                ('majorAxis', 'morphology/diskMajorAxisArcsec', arcsec_to_radians),
                ('minorAxis', 'morphology/diskMinorAxisArcsec', arcsec_to_radians)]
 
@@ -128,13 +130,6 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
     def get_hasBulge(self):
         output = np.where(self.column_by_name('SEDs/spheroidLuminositiesStellar:SED_9395_583:rest')>0.0, 1.0, None)
         return output
-
-    @cached
-    def get_positionAngle(self):
-        if not hasattr(self, '_pa_rng'):
-            self._pa_rng = np.random.RandomState(88)
-        ran = self._pa_rng.random_sample(len(self.column_by_name('raJ2000')))
-        return ran*2.0*np.pi
 
     @compound('sedFilename', 'fittedMagNorm')
     def get_fittedSedAndNorm(self):
