@@ -108,6 +108,8 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
         ylabels = ['%.1f' % yticks[iy] for iy in range(len(yticks))]
 
     plt.yticks(yticks,ylabels)
+    plt.axhline(y=0.0, color='r', linestyle='--', linewidth=0.5)
+
 
 plt.tight_layout()
 plt.savefig('rv_dmag_dist.png')
@@ -150,6 +152,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
         ylabels = ['%.1f' % yticks[iy] for iy in range(len(yticks))]
 
     plt.yticks(yticks,ylabels)
+    plt.axhline(y=0.0, color='r', linestyle='--', linewidth=0.5)
 
 plt.tight_layout()
 plt.savefig('rv_dmag_dist_dustless.png')
