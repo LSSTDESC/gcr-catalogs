@@ -59,7 +59,7 @@ class bulgeDESCQAObject(DESCQAObject):
 
     # this identifies the uniqueId column
     # in the source catalog
-    idColKey = 'halo_id'
+    idColKey = 'galaxy_id'
 
     # map the source catalog columns to CatSim
     # columns; each tuple is :
@@ -82,7 +82,7 @@ class bulgeDESCQAObject(DESCQAObject):
 class diskDESCQAObject(DESCQAObject):
     epoch = 2000.0
     objectTypeId = 87
-    idColKey = 'halo_id'
+    idColKey = 'galaxy_id'
     columns = [('raJ2000', 'ra_true', deg_to_radians),
                ('decJ2000', 'dec_true', deg_to_radians),
                ('shear1', 'shear_1'),
