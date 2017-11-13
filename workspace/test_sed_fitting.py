@@ -95,7 +95,7 @@ cosmo = CosmologyObject(H0=71.0, Om0=0.265)
 
 dm = cosmo.distanceModulus(redshift_list)
 
-fudge = 2.0*2.5*np.log10(1.0+redshift_list)
+fudge = 2.5*np.log10(1.0+redshift_list)
 
 u_control = -2.5*np.log10(u_control) + dm - fudge
 g_control = -2.5*np.log10(g_control) + dm - fudge
@@ -153,7 +153,7 @@ ct = 0
 print(sed_name_list)
 
 out_file = open('Rv_vs_magdist.txt', 'w')
-out_file.write('# Rv Av EBV d du dg dr di dz dy\n')
+out_file.write('# Rv Av EBV d du dg dr di dz dy du_dustless dg_dustless...\n')
 
 for i_star in range(len(sed_name_list)):
     sed_name = sed_name_list[i_star]
@@ -207,6 +207,14 @@ for i_star in range(len(sed_name_list)):
     out_file.write('%e ' % (mag_list[3]-ii))
     out_file.write('%e ' % (mag_list[4]-zz))
     out_file.write('%e ' % (mag_list[5]-yy))
+
+    out_file.write('%e ' % (dustless_list[0]-udl))
+    out_file.write('%e ' % (dustless_list[1]-gdl))
+    out_file.write('%e ' % (dustless_list[2]-rdl))
+    out_file.write('%e ' % (dustless_list[3]-idl))
+    out_file.write('%e ' % (dustless_list[4]-zdl))
+    out_file.write('%e ' % (dustless_list[5]-ydl))
+
     out_file.write('\n')
 
 
