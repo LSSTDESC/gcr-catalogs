@@ -177,6 +177,9 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
         redshift_array = self.column_by_name('redshift')
 
+        if len(redshift_array) == 0:
+            return np.array([[], []])
+
         sed_names, mag_norms = sed_from_galacticus_mags(mag_array,
                                                         redshift_array)
         return np.array([sed_names, mag_norms])
