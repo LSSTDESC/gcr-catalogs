@@ -2,10 +2,10 @@
 DC1GalaxyCatalog by Andrew Hearin
 """
 import os
+
+from sqlalchemy import engine, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.engine import url
-from sqlalchemy import create_engine
-import pymssql
+
 import numpy as np
 from astropy.cosmology import FlatLambdaCDM
 
@@ -22,10 +22,10 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     """
 
     def _subclass_init(self, db_info_fname, **kwargs):
-        self.dbURL = url.URL('mssql+pymssql', \
-                **self._read_database_info_from_file(db_info_fname))
 
-        self.engine = create_engine(self.dbURL)
+        db_url = engine.url.URL('mssql+pymssql', **self._read_database_info_from_file(db_info_fname))
+        session_factory = sessionmaker(autoflush=True, bind=create_engine(db_url))
+        self._Session = scoped_session(session_factory)
 
         self._quantity_modifiers = {
             'ra_true': 'ra',
@@ -48,7 +48,8 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         self.lightcone = True
 
 
-    def _read_database_info_from_file(self, db_info_fname):
+    @staticmethod
+    def _read_database_info_from_file(db_info_fname):
         msg = ("The file {0} does not exist.\n"
             "This file is used to access connectivity information to the DC1 database.")
         assert os.path.isfile(db_info_fname), msg
@@ -70,20 +71,17 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         return dict(zip(fields, info))
 
 
-    def _run_sql_query(self, query):
-        session = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
-        return session.execute(query).fetchall()
-
-
     def _generate_native_quantity_list(self):
+        session = self._Session()
         query = 'SELECT column_name FROM information_schema.columns WHERE table_name=\'galaxy\' ORDER BY ordinal_position;'
-        return (r[0] for r in self._run_sql_query(query))
+        return (r[0] for r in session.execute(query).fetchall())
 
 
     def _iter_native_dataset(self, native_filters=None):
+        session = self._Session()
         def native_quantity_getter(native_quantity):
             query = 'SELECT {0} from galaxy'.format(native_quantity)
-            return np.array([r[0] for r in self._run_sql_query(query)])
+            return np.array([r[0] for r in session.execute(query).fetchall()])
         yield native_quantity_getter
 
 
