@@ -73,7 +73,7 @@ class bulgeDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('positionAngle', 'morphology/positionAngle', deg_to_radians),
+               ('positionAngle', 'morphology/positionAngle'),
                ('majorAxis', 'morphology/spheroidMajorAxisArcsec', arcsec_to_radians),
                ('minorAxis', 'morphology/spheroidMinorAxisArcsec', arcsec_to_radians)]
 
@@ -91,7 +91,7 @@ class diskDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('positionAngle', 'morphology/positionAngle', deg_to_radians),
+               ('positionAngle', 'morphology/positionAngle'),
                ('majorAxis', 'morphology/diskMajorAxisArcsec', arcsec_to_radians),
                ('minorAxis', 'morphology/diskMinorAxisArcsec', arcsec_to_radians)]
 
