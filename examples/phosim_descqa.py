@@ -172,7 +172,8 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
                                'Neither appear to be in self._cannot_be_null.\n'
                                'self._cannot_be_null: %s' % self._cannot_be_null)
 
-        mag_array = np.array([-2.5*np.log10(self.column_by_name(name)) for name in flux_names])
+        mag_array = np.array([-2.5*np.log10(self.column_by_name(name))
+                              for name in flux_names])
 
         redshift_array = self.column_by_name('redshift')
 
