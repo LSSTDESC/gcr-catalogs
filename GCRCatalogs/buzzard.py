@@ -4,6 +4,7 @@ Buzzard galaxy catalog class.
 from __future__ import division, print_function
 import os
 import re
+import functools
 import numpy as np
 from astropy.io import fits
 from astropy.cosmology import FlatLambdaCDM
@@ -40,6 +41,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        lightcone=True,
                        healpix_pixels=None,
                        high_res=False,
+                       use_cache=True,
                        **kwargs):
 
         assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
@@ -52,6 +54,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.reset_healpix_pixels()
         self.check_healpix_pixels()
         self._native_filter_quantities = {'healpix_pixel'}
+
+        self.cache = dict() if use_cache else None
 
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
@@ -190,38 +194,37 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
 
     def _iter_native_dataset(self, native_filters=None):
-        cache = dict()
-        for i in self.healpix_pixels:
-            args = dict(healpix_pixel=i)
-            if (not native_filters) or all(f[0](*(args[k] for k in f[1:])) for f in native_filters):
-                yield i, cache
-        for key in list(cache.keys()):
-            del cache[key]
+        for healpix in self.healpix_pixels:
+
+            fargs = dict(healpix_pixel=healpix)
+            if native_filters and not all(f[0](*(fargs[k] for k in f[1:])) for f in native_filters):
+                continue
+
+            yield functools.partial(self._native_quantity_getter, healpix=healpix)
 
 
-    def _open_dataset(self, healpix, subset, use_cache=None):
+    def _open_dataset(self, healpix, subset):
         path = self._catalog_path_template[subset].format(healpix)
 
-        if use_cache is None:
+        if self.cache is None:
             return FitsFile(path)
 
         key = (healpix, subset)
-        if key not in use_cache:
-            use_cache[key] = FitsFile(path)
-        return use_cache[key]
+        if key not in self.cache:
+            self.cache[key] = FitsFile(path)
+        return self.cache[key]
 
 
-    def _fetch_native_quantity(self, dataset, native_quantity):
-        healpix, cache = dataset
+    def _native_quantity_getter(self, native_quantity, healpix):
         if native_quantity == 'healpix_pixel':
-            data = np.empty(self._open_dataset(healpix, self._default_subset, cache).data.shape, np.int)
+            data = np.empty(self._open_dataset(healpix, self._default_subset).data.shape, np.int)
             data.fill(healpix)
         else:
             native_quantity = native_quantity.split('/')
             assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
             subset = native_quantity.pop(0)
             column = native_quantity.pop(0)
-            data = self._open_dataset(healpix, subset, cache).data[column]
+            data = self._open_dataset(healpix, subset).data[column]
             if native_quantity:
                 data = data[:,int(native_quantity.pop(0))]
         return data

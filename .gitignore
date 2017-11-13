@@ -109,3 +109,6 @@ ENV/
 
 # Session
 Session.vim
+
+.noseids
+.vscode/
