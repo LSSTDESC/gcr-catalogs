@@ -65,7 +65,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
         fields = ('host', 'port', 'database', 'username', 'password')
 
         if len(info) != len(fields) or not all(info):
-            msg = "The file {0} should be {1} lines of ascii with the following information:\n{}\n".format(db_info_fname, len(fields), '\n'.join(fields))
+            msg = 'File "{}" should be {} lines of ascii with the following information: {}'.format(db_info_fname, len(fields), ', '.join(fields))
             raise ValueError(msg)
 
         return dict(zip(fields, info))
@@ -74,14 +74,14 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         session = self._Session()
         query = 'SELECT column_name FROM information_schema.columns WHERE table_name=\'galaxy\' ORDER BY ordinal_position;'
-        return (r[0] for r in session.execute(query).fetchall())
+        return (r[0] for r in session.execute(query))
 
 
     def _iter_native_dataset(self, native_filters=None):
         session = self._Session()
         def native_quantity_getter(native_quantity):
-            query = 'SELECT {0} from galaxy'.format(native_quantity)
-            return np.array([r[0] for r in session.execute(query).fetchall()])
+            query = 'SELECT {} from galaxy'.format(native_quantity)
+            return np.array([r[0] for r in session.execute(query)])
         yield native_quantity_getter
 
 
