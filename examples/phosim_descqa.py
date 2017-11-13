@@ -73,7 +73,8 @@ class bulgeDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('majorAxis', 'morphology/spheroidRadiusArcsec', arcsec_to_radians)]
+               ('majorAxis', 'morphology/spheroidMajorAxisArcsec', arcsec_to_radians),
+               ('minorAis', 'morphology/spheriodMinorAxisArcsec', arcsec_to_radians)]
 
     # default values that are applied if no other source
     # for a column can be found
@@ -89,7 +90,8 @@ class diskDESCQAObject(DESCQAObject):
                ('shear2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
-               ('majorAxis', 'morphology/diskRadiusArcsec', arcsec_to_radians)]
+               ('majorAxis', 'morphology/diskMajorAxisArcsec', arcsec_to_radians),
+               ('minorAxis', 'morphology/diskMinorAxisArcsec', arcsec_to_radians)]
 
     dbDefaultValues = {'sindex': 1.0}
 
@@ -126,10 +128,6 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
     def get_hasBulge(self):
         output = np.where(self.column_by_name('SEDs/spheroidLuminositiesStellar:SED_9395_583:rest')>0.0, 1.0, None)
         return output
-
-    @cached
-    def get_minorAxis(self):
-        return 0.5*self.column_by_name('majorAxis')
 
     @cached
     def get_positionAngle(self):
