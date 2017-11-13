@@ -113,7 +113,7 @@ y_dustless = -2.5*np.log10(y_dustless) + dm - fudge
 
 import time
 t_start = time.time()
-sed_name_list, mag_norm_list, color_dist_list, mag_dist_list = sed_from_galacticus_mags(disk_mags, redshift_list)
+sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, redshift_list)
 print("fitting %d took %.3e" % (len(sed_name_list), time.time()-t_start))
 print("mag norm %e %e %e" % (mag_norm_list.min(), np.median(mag_norm_list), mag_norm_list.max()))
 assert len(sed_name_list) == len(first_disk)
@@ -130,8 +130,6 @@ worst_dist = -1.0
 av_valid = np.where(np.logical_and(av_list>0.01, np.logical_and(ebv_list>0.0, av_list<5.0)))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
-color_dist_list = color_dist_list[av_valid]
-mag_dist_list = mag_dist_list[av_valid]
 redshift_list = redshift_list[av_valid]
 av_list = av_list[av_valid]
 ebv_list = ebv_list[av_valid]
@@ -167,8 +165,6 @@ for i_star in range(len(sed_name_list)):
     ii = i_control[i_star]
     zz = z_control[i_star]
     yy = y_control[i_star]
-    color_dist = color_dist_list[i_star]
-    mag_dist = mag_dist_list[i_star]
     udl = u_dustless[i_star]
     gdl = g_dustless[i_star]
     rdl = r_dustless[i_star]
@@ -220,7 +216,7 @@ for i_star in range(len(sed_name_list)):
 
     if dd > worst_dist:
         print('\nworst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
-        print('redshift %e; color_dist %e; mag_dist %e' % (redshift, color_dist, mag_dist))
+        print('redshift %e' % (redshift))
         for i_filter, (cc, ccdl) in enumerate(zip((uu, gg, rr, ii, zz, yy), (udl, gdl, rdl, idl, zdl, ydl))):
             dust_model = mag_list[i_filter] - dustless_list[i_filter]
             dust_gal = cc - ccdl
