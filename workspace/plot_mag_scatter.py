@@ -89,12 +89,20 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
-    plt.title('%s' % mag, fontsize=7)
     plt.ylim(dmag_min, dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
     #else:
     #    plt.ylim((-0.25, 0.25))
+
+    sorted_dmag = np.sort(np.abs(dmag))
+    n_dmag = len(sorted_dmag)
+
+    plt.title('%s: %.2e %.2e %.2e' %
+              (mag, sorted_dmag[n_dmag//4],
+               sorted_dmag[n_dmag//2],
+               sorted_dmag[3*n_dmag//4]), fontsize=7)
+
 
     rounded_min = np.round(dmag_min, decimals=1)
     rounded_max = np.round(dmag_max, decimals=1)
@@ -133,12 +141,21 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
-    plt.title('%s (no dust)' % mag, fontsize=7)
     plt.ylim(dmag_min, dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
     #else:
     #    plt.ylim((-0.25, 0.25))
+
+    sorted_dmag = np.sort(np.abs(dmag))
+    n_dmag = len(sorted_dmag)
+
+    plt.title('%s (no dust): %.2e %.2e %.2e' %
+              (mag, sorted_dmag[n_dmag//4],
+               sorted_dmag[n_dmag//2],
+               sorted_dmag[3*n_dmag//4]), fontsize=7)
+
+
 
     rounded_min = np.round(dmag_min, decimals=1)
     rounded_max = np.round(dmag_max, decimals=1)
