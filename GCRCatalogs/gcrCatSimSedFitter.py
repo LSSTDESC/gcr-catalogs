@@ -67,18 +67,4 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
     out_mag_dist = np.sqrt(((galacticus_mags_t - normed_mags)**2).sum(axis=1))
     assert len(out_mag_dist) == len(output_names)
 
-    """
-    for i_star in range(len(galacticus_colors)):
-        print('\ni_star %d -- dmag %e' % (i_star, d_mag[i_star]))
-        for i_filter in range(30):
-            if i_filter<29:
-                d_color = (galacticus_mags[i_filter+1][i_star] -
-                           galacticus_mags[i_filter][i_star] -
-                           chosen_mags[i_star][i_filter+1] +
-                           chosen_mags[i_star][i_filter])
-            else:
-                d_color = 999.0
-            print('    %e %e %e' % (galacticus_mags[i_filter][i_star] - chosen_mags[i_star][i_filter], galacticus_mags[i_filter][i_star]-chosen_mags[i_star][i_filter]-d_mag[i_star], d_color))
-    """
-
     return output_names, output_mag_norm, out_color_dist, out_mag_dist
