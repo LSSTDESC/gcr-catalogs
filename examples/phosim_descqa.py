@@ -164,6 +164,18 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
         rv_list = av_list/ebv_list
 
+        # this is a hack to replace anomalous values of dust extinction
+        # with more reasonable values
+        if not hasattr(self, '_dust_rng'):
+            self._dust_rng = np.random.RandomState(182314)
+
+        offensive_av = np.where(np.logical_or(av_list<0.001, av_list>3.1))
+        av_list[offensive_av] = self._dust_rng.random_sample(len(offensive_av[0]))*3.1+0.001
+
+        offensive_rv = np.where(np.logical_or(np.isnan(rv_list),
+                                np.logical_or(rv_list<1.0, rv_list>5.0)))
+        rv_list[offensive_rv] = self._dust_rng.random_sample(len(offensive_rv[0]))*4.0+1.0
+
         return np.array([av_list, rv_list])
 
     @compound('sedFilename', 'fittedMagNorm')
