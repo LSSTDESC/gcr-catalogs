@@ -9,5 +9,6 @@ from .buzzard import *
 from .dc1 import *
 
 from .gcrCatSimInterface import *
+from .gcrCatSimSedFitter import *
 
 from .version import __version__
