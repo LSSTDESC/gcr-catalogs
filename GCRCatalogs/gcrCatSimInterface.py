@@ -7,23 +7,25 @@ import numpy as np
 import gc
 import numbers
 
-_GCR_IS_AVAILABLE = True
 
+__all__ = ["DESCQAObject"]
+
+
+_GCR_IS_AVAILABLE = True
 try:
-    from GCRCatalogs import load_catalog
+    from .register import load_catalog
 except ImportError:
     _GCR_IS_AVAILABLE = False
-    pass
 
+
+_LSST_IS_AVAILABLE = True
 try:
     from lsst.sims.utils import _angularSeparation
 except ImportError:
+    _LSST_IS_AVAILABLE = False
     from astropy.coordinates import SkyCoord
     def _angularSeparation(ra1, dec1, ra2, dec2):
         return SkyCoord(ra1, dec1, unit="deg").separation(SkyCoord(ra2, dec2, unit="deg")).radian
-
-
-__all__ = ["DESCQAObject"]
 
 # a cache to store loaded catalogs to prevent them
 # from being loaded more than once, eating up
@@ -31,6 +33,7 @@ __all__ = ["DESCQAObject"]
 # the same catalog will need to be queried twice
 # go get bulges and disks from the same galaxy
 _CATALOG_CACHE = {}
+
 
 class DESCQAChunkIterator(object):
     """
@@ -189,13 +192,10 @@ class DESCQAObject(object):
         how to load the catalog
         """
 
-        global _GCR_IS_AVAILABLE
         if not _GCR_IS_AVAILABLE:
             raise RuntimeError("You cannot use DESQAObject\n"
-                               "You do not have the generic catalog reader "
-                               "installed and setup")
+                               "You do not have *GCR* installed and setup")
 
-        global _CATALOG_CACHE
         if yaml_file_name in _CATALOG_CACHE:
             self._catalog = _CATALOG_CACHE[yaml_file_name]
         else:

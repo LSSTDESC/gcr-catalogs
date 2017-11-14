@@ -1,10 +1,15 @@
 import numpy as np
 import os
 
-from lsst.utils import getPackageDir
-from lsst.sims.photUtils import CosmologyObject
-
 __all__ = ["sed_from_galacticus_mags"]
+
+
+_LSST_IS_AVAILABLE = True
+try:
+    from lsst.utils import getPackageDir
+    from lsst.sims.photUtils import CosmologyObject
+except ImportError:
+    _LSST_IS_AVAILABLE = False
 
 
 def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
@@ -15,6 +20,10 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
 
     Will return a numpy array of SED names and a numpy array of magNorms.
     """
+
+    if not _LSST_IS_AVAILABLE:
+        raise RuntimeError("You cannot use sed_from_galacticus_mags\n"
+                           "You do not have *lsst* installed and setup")
 
     if not hasattr(sed_from_galacticus_mags, '_sed_color_tree'):
         catsim_dir = os.path.join(getPackageDir('gcr_catalogs'),
