@@ -40,8 +40,9 @@ import sys
 sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/lib/python3.6/site-packages')
 ```
 
-For Python 2, the second line should be
+For Python 2
 ```python
+import sys
 sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/lib/python2.7/site-packages')
 ```
 
@@ -54,9 +55,10 @@ For Python 3:
     source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py3/bin/activate
     source activate DESCQA
 
-For Python 2, the first line should be:
+For Python 2:
 
     source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py2/bin/activate
+    source activate DESCQA
 
 
 ### with a python script: 
@@ -67,7 +69,7 @@ For Python 3:
 
     #!/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/bin/python 
 
-or Python 2:
+For Python 2:
 
     #!/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/bin/python 
 
