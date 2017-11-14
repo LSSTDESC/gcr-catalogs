@@ -26,7 +26,7 @@ Currently these sets of catalogs are available (**Note that these catalogs are n
 Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [this schema](https://docs.google.com/document/d/1rUsImkBkjjw82Xa_-3a8VMV6K9aYJ8mXioaRhz0JoqI/edit).
 
 
-## Use GCRCatalogs under the DESCQA Python envoirnment on NERSC
+## Use GCRCatalogs under the DESCQA Python environment on NERSC
 
 `GCRCatalogs` is already installed in the DESCQA Python envoirnment at NERSC. To use it:
 
