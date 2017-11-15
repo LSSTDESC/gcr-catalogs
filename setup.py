@@ -29,7 +29,8 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='GCR',
-    packages=['GCRCatalogs'],
+    packages=['GCRCatalogs', 'GCRCatSimInterface'],
     install_requires=['numpy', 'pyyaml', 'requests', 'h5py', 'astropy', 'GCR>=0.6.1', 'sqlalchemy', 'pymssql'],
-    package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
+    package_data={'GCRCatalogs': ['catalog_configs/*.yaml'],
+                  'GCRCatSimInterface': ['data/*']},
 )
