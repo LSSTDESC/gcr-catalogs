@@ -14,7 +14,7 @@ __all__ = ["DESCQAObject", "bulgeDESCQAObject", "diskDESCQAObject"]
 
 _GCR_IS_AVAILABLE = True
 try:
-    from .register import load_catalog
+    from GCRCatalogs.register import load_catalog
 except ImportError:
     _GCR_IS_AVAILABLE = False
 
