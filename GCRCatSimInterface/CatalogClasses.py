@@ -1,6 +1,6 @@
 import os
 import numpy as np
-from GCRCatSimInterface import sed_from_galacticus_mags
+from .SedFitter import sed_from_galacticus_mags
 from lsst.utils import getPackageDir
 from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
 from lsst.sims.catalogs.decorators import cached, compound
