@@ -36,7 +36,7 @@ obs = obs_list[0]
 ############################################
 # establish connection to the DESCQA catalog
 
-from GCRCatalogs import bulgeDESCQAObject, diskDESCQAObject
+from GCRCatSimInterface import bulgeDESCQAObject, diskDESCQAObject
 
 cat_file = 'proto-dc2_v2.0'
 db_bulge = bulgeDESCQAObject(cat_file)
@@ -45,7 +45,7 @@ db_disk = diskDESCQAObject(cat_file)
 ############################
 # actually write the catalog
 
-from GCRCatalogs import PhoSimDESCQA
+from GCRCatSimInterface import PhoSimDESCQA
 from lsst.sims.catUtils.exampleCatalogDefinitions import DefaultPhoSimHeaderMap
 
 cat_name = 'phosim_cat.txt'
