@@ -8,7 +8,7 @@ from .alphaq import *
 from .buzzard import *
 from .dc1 import *
 
-from .gcrCatSimInterface import *
+from .gcrCatSimDatabaseEmulator import *
 from .gcrCatSimSedFitter import *
 
 from .version import __version__
