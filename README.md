@@ -89,7 +89,7 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 
 - See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/CLF%20Test.ipynb) for an actual application (the Conditional  Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
 
-- See [the GCR source code](https://github.com/yymao/generic-catalog-reader/blob/master/GCR.py) for the complete GCR API.
+- See [GCR documentation](https://yymao.github.io/generic-catalog-reader/index.html) for the complete GCR API.
 
 - See [this script](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py) for an example of interfacing PhoSim through CatSim using GCR Catalogs.
 
