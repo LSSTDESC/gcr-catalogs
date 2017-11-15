@@ -27,7 +27,7 @@ def sed_from_galacticus_mags(galacticus_mags, redshift, h=0.71, omega_m=0.265):
 
     if not hasattr(sed_from_galacticus_mags, '_sed_color_tree'):
         catsim_dir = os.path.join(getPackageDir('gcr_catalogs'),
-                                  'CatSimSupport')
+                                  'GCRCatSimInterface', 'data')
         color_grid_file = os.path.join(catsim_dir, 'CatSimMagGrid.txt')
 
         if not os.path.exists(color_grid_file):
