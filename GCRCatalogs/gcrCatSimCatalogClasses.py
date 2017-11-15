@@ -1,3 +1,5 @@
+import os
+import numpy as np
 from GCRCatalogs import sed_from_galacticus_mags
 from lsst.utils import getPackageDir
 from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
