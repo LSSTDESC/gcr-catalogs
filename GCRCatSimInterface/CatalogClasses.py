@@ -85,7 +85,8 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
         if not hasattr(self, '_disk_flux_names'):
             catsim_mag_file = os.path.join(getPackageDir('gcr_catalogs'),
-                                           'CatSimSupport', 'CatSimMagGrid.txt')
+                                           'GCRCatSimInterface', 'data',
+                                           'CatSimMagGrid.txt')
             with open(catsim_mag_file, 'r') as input_file:
                 header = input_file.readlines()[0]
             header = header.strip().split()
