@@ -7,6 +7,12 @@ proto-dc2 simulation
 import numpy as np
 import os
 
+from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
+from lsst.sims.catUtils.exampleCatalogDefinitions import DefaultPhoSimHeaderMap
+from GCRCatSimInterface import bulgeDESCQAObject, diskDESCQAObject
+from GCRCatSimInterface import PhoSimDESCQA
+
+
 ############################################################
 # connect to OpSim simulation to get a realistic observation
 
@@ -15,8 +21,6 @@ import os
 opsim_db = os.path.join('/global', 'cscratch1', 'sd', 'danielsf',
                         'OpSimData',
                         'minion_1016_sqlite_new_dithers.db')
-
-from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
 
 obs_gen = ObservationMetaDataGenerator(opsim_db)
 
@@ -36,17 +40,12 @@ obs = obs_list[0]
 ############################################
 # establish connection to the DESCQA catalog
 
-from GCRCatSimInterface import bulgeDESCQAObject, diskDESCQAObject
-
 cat_file = 'proto-dc2_v2.0'
 db_bulge = bulgeDESCQAObject(cat_file)
 db_disk = diskDESCQAObject(cat_file)
 
 ############################
 # actually write the catalog
-
-from GCRCatSimInterface import PhoSimDESCQA
-from lsst.sims.catUtils.exampleCatalogDefinitions import DefaultPhoSimHeaderMap
 
 cat_name = 'phosim_cat.txt'
 
