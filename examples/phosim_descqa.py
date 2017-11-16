@@ -4,6 +4,8 @@ based on data provided by the GCR interface to the
 proto-dc2 simulation
 """
 
+from GCRCatalogs import *
+
 import numpy as np
 import os
 
