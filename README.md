@@ -28,6 +28,8 @@ Each of the catalogs is specified by a YAML config file, which can be found [her
 
 ## Use GCRCatalogs under the DESCQA Python environment on NERSC
 
+_Note_: These instructions about Python environment may change in the future. If you encounter issues, please check if there's any updates on these instructions.
+
 `GCRCatalogs` is already installed in the DESCQA Python envoirnment at NERSC. To use it:
 
 ### with Jypeter notebooks:
