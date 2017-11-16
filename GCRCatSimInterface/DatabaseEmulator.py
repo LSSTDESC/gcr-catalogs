@@ -3,33 +3,18 @@ This script will define classes that enable CatSim to interface with GCR
 """
 
 from collections import OrderedDict
-import numpy as np
 import gc
 import numbers
-from lsst.sims.utils import radiansFromArcsec
-
+import numpy as np
+from GCRCatalogs import load_catalog
+from lsst.sims.utils import radiansFromArcsec, _angularSeparation
 
 __all__ = ["DESCQAObject", "bulgeDESCQAObject", "diskDESCQAObject"]
 
 
-_GCR_IS_AVAILABLE = True
-try:
-    from GCRCatalogs.register import load_catalog
-except ImportError:
-    _GCR_IS_AVAILABLE = False
-
-
-_LSST_IS_AVAILABLE = True
-try:
-    from lsst.sims.utils import _angularSeparation
-except ImportError:
-    _LSST_IS_AVAILABLE = False
-    from astropy.coordinates import SkyCoord
-    def _angularSeparation(ra1, dec1, ra2, dec2):
-        return SkyCoord(ra1, dec1, unit="deg").separation(SkyCoord(ra2, dec2, unit="deg")).radian
-
 def deg_to_radians(x):
     return np.radians(x).astype(np.float)
+
 
 def arcsec_to_radians(x):
     return radiansFromArcsec(x).astype(np.float)
@@ -199,10 +184,6 @@ class DESCQAObject(object):
         yaml_file_name is the name of the yaml file that will tell DESCQA
         how to load the catalog
         """
-
-        if not _GCR_IS_AVAILABLE:
-            raise RuntimeError("You cannot use DESQAObject\n"
-                               "You do not have *GCR* installed and setup")
 
         if yaml_file_name in _CATALOG_CACHE:
             self._catalog = _CATALOG_CACHE[yaml_file_name]
