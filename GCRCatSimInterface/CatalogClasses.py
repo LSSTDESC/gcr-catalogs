@@ -87,6 +87,16 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
             catsim_mag_file = os.path.join(getPackageDir('gcr_catalogs'),
                                            'GCRCatSimInterface', 'data',
                                            'CatSimMagGrid.txt')
+
+            if not os.path.exists(catsim_mag_file):
+                catsim_dir = os.path.join(getPackageDir('gcr_catalogs'),
+                                          'GCRCatSimInterface',
+                                          'data')
+                msg = '\n%s does not exist\n' % catsim_mag_file
+                msg += 'Go into the directory %s ' % catsim_dir
+                msg += 'and run the script get_sed_mags.py'
+                raise RuntimeError(msg)
+
             with open(catsim_mag_file, 'r') as input_file:
                 header = input_file.readlines()[0]
             header = header.strip().split()
