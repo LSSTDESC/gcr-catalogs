@@ -1,7 +1,8 @@
 """
 This script will define classes that enable CatSim to interface with GCR
 """
-
+from future.builtins import next
+from future.builtins import object
 from collections import OrderedDict
 import numpy as np
 import gc
