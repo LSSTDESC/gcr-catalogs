@@ -30,6 +30,7 @@ for name in bulge_mag_names:
 qty_names.append('morphology/diskRadiusArcsec')
 qty_names.append('morphology/spheroidRadiusArcsec')
 qty_names.append('redshift_true')
+qty_names.append('redshift')
 
 for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
     qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
@@ -89,14 +90,15 @@ av_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStella
 ebv_list = ebv_list[first_disk]
 av_list = av_list[first_disk]
 
-redshift_list =  catalog_qties['redshift_true'][first_disk]
+true_redshift_list =  catalog_qties['redshift_true'][first_disk]
+full_redshift_list = catalog_qties['redshift'][first_disk]
 
 from lsst.sims.photUtils import CosmologyObject
 cosmo = CosmologyObject(H0=71.0, Om0=0.265)
 
-dm = cosmo.distanceModulus(redshift_list)
+dm = cosmo.distanceModulus(true_redshift_list)
 
-fudge = 2.5*np.log10(1.0+redshift_list)
+fudge = 2.5*np.log10(1.0+full_redshift_list)
 
 u_control = -2.5*np.log10(u_control) + dm - fudge
 g_control = -2.5*np.log10(g_control) + dm - fudge
@@ -114,7 +116,7 @@ y_dustless = -2.5*np.log10(y_dustless) + dm - fudge
 
 import time
 t_start = time.time()
-sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, redshift_list)
+sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, true_redshift_list)
 print("fitting %d took %.3e" % (len(sed_name_list), time.time()-t_start))
 print("mag norm %e %e %e" % (mag_norm_list.min(), np.median(mag_norm_list), mag_norm_list.max()))
 assert len(sed_name_list) == len(first_disk)
@@ -131,7 +133,8 @@ worst_dist = -1.0
 av_valid = np.where(np.logical_and(av_list>0.01, np.logical_and(ebv_list>0.0, av_list<5.0)))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
-redshift_list = redshift_list[av_valid]
+true_redshift_list = true_redshift_list[av_valid]
+full_redshift_list = full_redshift_list[av_valid]
 av_list = av_list[av_valid]
 ebv_list = ebv_list[av_valid]
 u_control = u_control[av_valid]
@@ -157,7 +160,8 @@ out_file.write('# Rv Av EBV d du dg dr di dz dy du_dustless dg_dustless...\n')
 for i_star in range(len(sed_name_list)):
     sed_name = sed_name_list[i_star]
     mag_norm = mag_norm_list[i_star]
-    redshift = redshift_list[i_star]
+    true_redshift = true_redshift_list[i_star]
+    full_redshift = full_redshift_list[i_star]
     av = av_list[i_star]
     ebv = ebv_list[i_star]
     uu = u_control[i_star]
@@ -183,8 +187,8 @@ for i_star in range(len(sed_name_list)):
     a_x, b_x = sed.setupCCMab()
     R_v = av/ebv
     sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
-    sed.redshiftSED(redshift, dimming=True)
-    dustless.redshiftSED(redshift, dimming=True)
+    sed.redshiftSED(full_redshift, dimming=True)
+    dustless.redshiftSED(full_redshift, dimming=True)
     mag_list = lsst_bp_dict.magListForSed(sed)
     dustless_list = lsst_bp_dict.magListForSed(dustless)
 
@@ -217,7 +221,7 @@ for i_star in range(len(sed_name_list)):
 
     if dd > worst_dist:
         print('\nworst mag dist %.3e -- magnorm %.3e ebv %.3e av %.3e' % (dd,mag_norm,ebv,av))
-        print('redshift %e' % (redshift))
+        print('redshift %e' % (true_redshift))
         for i_filter, (cc, ccdl) in enumerate(zip((uu, gg, rr, ii, zz, yy), (udl, gdl, rdl, idl, zdl, ydl))):
             dust_model = mag_list[i_filter] - dustless_list[i_filter]
             dust_gal = cc - ccdl
