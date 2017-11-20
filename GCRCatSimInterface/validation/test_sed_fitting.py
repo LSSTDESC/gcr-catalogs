@@ -2,7 +2,7 @@ import numpy as np
 import os
 
 from GCRCatalogs import load_catalog
-from GCRCatalogs import sed_from_galacticus_mags
+from GCRCatSimInterface import sed_from_galacticus_mags
 
 from lsst.utils import getPackageDir
 
