@@ -9,7 +9,8 @@ from lsst.utils import getPackageDir
 catalog = load_catalog('proto-dc2_v2.0')
 
 qty_names = []
-with open(os.path.join(getPackageDir('gcr_catalogs'), 'CatSimSupport', 'CatSimMagGrid.txt'), 'r') as in_file:
+with open(os.path.join(getPackageDir('gcr_catalogs'), 'GCRCatSimInterface',
+          'data', 'CatSimMagGrid.txt'), 'r') as in_file:
     header = in_file.readlines()[0]
 
 header = header.strip().split()
