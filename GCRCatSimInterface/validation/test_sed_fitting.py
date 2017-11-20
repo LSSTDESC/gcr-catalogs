@@ -98,7 +98,7 @@ cosmo = CosmologyObject(H0=71.0, Om0=0.265)
 
 dm = cosmo.distanceModulus(true_redshift_list)
 
-fudge = 2.5*np.log10(1.0+full_redshift_list)
+fudge = 2.5*np.log10(1.0+true_redshift_list)
 
 u_control = -2.5*np.log10(u_control) + dm - fudge
 g_control = -2.5*np.log10(g_control) + dm - fudge
