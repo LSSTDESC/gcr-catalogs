@@ -100,17 +100,17 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 
 1. On GitHub [fork](https://guides.github.com/activities/forking/) the GCRCatalogs GitHub repo.
 
-2. On NERSC
+2. On NERSC, clone your fork (you can skip this if you've done it)
 
        cd /your/own/directory
        git clone git@github.com:YourGitHubUsername/gcr-catalogs.git
+       git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
 
 
-3. Sync with the current master branch
+3. Sync with the upstream master branch
 
        cd /your/own/directory/gcr-catalogs
        git checkout master
-       git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
        git pull upstream master
        git push origin master
 
