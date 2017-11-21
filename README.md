@@ -99,21 +99,40 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 ## Contribute to GCRCatalogs:
 
 1. On GitHub [fork](https://guides.github.com/activities/forking/) the GCRCatalogs GitHub repo.
+
 2. On NERSC
 
        cd /your/own/directory
        git clone git@github.com:YourGitHubUsername/gcr-catalogs.git
 
-3. Make changes
-4. Test by adding your clone to the path when running Python: 
+
+3. Sync with the current master branch
+
+       cd /your/own/directory/gcr-catalogs
+       git checkout master
+       git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
+       git pull upstream master
+       git push origin master
+
+
+4. Create a new branch for this edit:
+
+       git checkout -b newBranchName
+
+
+5. Make changes
+
+6. Test by adding your clone to the path when running Python: 
    ```python
    import sys
    sys.path.insert(0, '/your/own/directory/gcr-catalogs')
    ```
-5. Commit and create pull requests
-6. If you need to sync your forked repo, you can do the followingn in your *local*, *forked* repo:
-   
-       git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
-       git fetch upstream
-       git merge upstream
-       
+
+7. Commit and push to your forked repo
+
+       git add <files changed>
+       git commit -m <short but meaningful message>
+       git push origin newBranchName
+
+
+8. Go to your forked repo's GitHub page and "create a pull request". 
