@@ -3,16 +3,11 @@ This script uses CatSim to produce a PhoSim InstanceCatalog
 based on data provided by the GCR interface to the
 proto-dc2 simulation
 """
-
-from GCRCatalogs import *
-
-import numpy as np
 import os
-
+import numpy as np
+from GCRCatSimInterface import PhoSimDESCQA, bulgeDESCQAObject, diskDESCQAObject
 from lsst.sims.catUtils.utils import ObservationMetaDataGenerator
 from lsst.sims.catUtils.exampleCatalogDefinitions import DefaultPhoSimHeaderMap
-from GCRCatSimInterface import bulgeDESCQAObject, diskDESCQAObject
-from GCRCatSimInterface import PhoSimDESCQA
 
 
 ############################################################

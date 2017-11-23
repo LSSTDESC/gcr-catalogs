@@ -1,10 +1,11 @@
 import os
 import numpy as np
-from .SedFitter import sed_from_galacticus_mags
 from lsst.utils import getPackageDir
-from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
 from lsst.sims.catalogs.decorators import cached, compound
+from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
 from lsst.sims.catUtils.mixins import EBVmixin
+
+from .SedFitter import sed_from_galacticus_mags
 
 __all__ = ["PhoSimDESCQA"]
 
@@ -143,4 +144,3 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         in the base PhoSim InstanceCatalog classes
         """
         return self.column_by_name('fittedMagNorm')
-
