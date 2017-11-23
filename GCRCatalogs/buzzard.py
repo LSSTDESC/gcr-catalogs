@@ -9,7 +9,6 @@ import numpy as np
 from astropy.io import fits
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from .register import register_reader
 
 __all__ = ['BuzzardGalaxyCatalog']
 
@@ -228,7 +227,3 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             if native_quantity:
                 data = data[:,int(native_quantity.pop(0))]
         return data
-
-
-# Registers the reader
-register_reader(BuzzardGalaxyCatalog)

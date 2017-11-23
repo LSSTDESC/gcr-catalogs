@@ -7,7 +7,6 @@ import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from .register import register_reader
 
 __all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
 
@@ -86,12 +85,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             yield native_quantity_getter
 
 
-# Registers the reader
-register_reader(AlphaQGalaxyCatalog)
-
-
 #=====================================================================================================
-
 
 class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
     """
@@ -130,7 +124,3 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
                     raise NotImplementedError
 
                 yield native_quantity_getter
-
-
-# Registers the reader
-register_reader(AlphaQClusterCatalog)

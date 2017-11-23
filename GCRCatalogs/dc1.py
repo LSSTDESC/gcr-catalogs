@@ -10,7 +10,6 @@ import numpy as np
 from astropy.cosmology import FlatLambdaCDM
 
 from GCR import BaseGenericCatalog
-from .register import register_reader
 
 
 __all__ = ['DC1GalaxyCatalog']
@@ -83,6 +82,3 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             query = 'SELECT {} from galaxy'.format(native_quantity)
             return np.array([r[0] for r in session.execute(query)])
         yield native_quantity_getter
-
-
-register_reader(DC1GalaxyCatalog)
