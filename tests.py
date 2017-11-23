@@ -13,4 +13,4 @@ def test_available_catalogs():
 def test_readers():
     readers = set((v['subclass_name'] for v in GCRCatalogs.available_catalogs.values()))
     for reader in readers:
-        GCRCatalogs.utils.import_subclass(reader, 'GCRCatalogs', GCRCatalogs.BaseGenericCatalog)
+        GCRCatalogs.register.import_subclass(reader, 'GCRCatalogs', GCRCatalogs.BaseGenericCatalog)
