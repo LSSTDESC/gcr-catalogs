@@ -1,4 +1,4 @@
-subclass_name: AlphaQGalaxyCatalog
+subclass_name: alphaq.AlphaQGalaxyCatalog
 
 filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2_small.hdf5
 
