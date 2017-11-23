@@ -9,7 +9,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .register import register_reader
 
-__all__ = ['AlphaQGalaxyCatalog']
+__all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -31,8 +31,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'dec_true':      (lambda x: x/3600.0, 'dec_true'),
             'redshift':      'redshift',
             'redshift_true': 'redshiftHubble',
-            'disk_Sersic_index':'diskSersicIndex',
-            'bulge_Sersic_index':'spheroidSersicIndex',
+            'disk_sersic_index':'diskSersicIndex',
+            'bulge_sersic_index':'spheroidSersicIndex',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
             'convergence':   'convergence',
@@ -50,10 +50,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         }
 
         for band in 'ugriz':
-            self._quantity_modifiers['mag_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
             self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
-            self._quantity_modifiers['Mag_true_{}_any'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
+
+        self._quantity_modifiers['mag_Y_lsst'] = 'LSST_filters/magnitude:LSST_y:observed'
+        self._quantity_modifiers['Mag_true_Y_lsst_z0'] = 'LSST_filters/magnitude:LSST_y:rest'
+
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
@@ -75,14 +79,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         return native_quantities
 
 
-    def _iter_native_dataset(self, pre_filters=None):
+    def _iter_native_dataset(self, native_filters=None):
+        assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
-            yield fh
+            def native_quantity_getter(native_quantity):
+                return fh['galaxyProperties/{}'.format(native_quantity)].value
+            yield native_quantity_getter
 
-
-    @staticmethod
-    def _fetch_native_quantity(dataset, native_quantity):
-        return dataset['galaxyProperties/'+native_quantity].value
 
 # Registers the reader
 register_reader(AlphaQGalaxyCatalog)
@@ -111,33 +114,24 @@ class AlphaQClusterCatalog(AlphaQGalaxyCatalog):
 
 
     def _subclass_init(self, filename, **kwargs):
-            super(AlphaQClusterCatalog, self)._subclass_init(filename, **kwargs)
-            with h5py.File(self._file, 'r') as fh:
-                self._pre_filter_quantities = set(fh[list(fh.keys())[0]].attrs)
+        super(AlphaQClusterCatalog, self)._subclass_init(filename, **kwargs)
+        with h5py.File(self._file, 'r') as fh:
+            self._native_filter_quantities = set(fh[next(fh.keys())].attrs)
 
 
-    def _iter_native_dataset(self, pre_filters=None):
+    def _iter_native_dataset(self, native_filters=None):
         with h5py.File(self._file, 'r') as fh:
             for key in fh:
                 halo = fh[key]
-                d = {}
-                attrs = list(halo.attrs)
-                for attr in attrs:
-                    d[attr] = halo.attrs[attr]
-                if (not pre_filters) or all(f[0](*(d.get(val) for val in f[1:])) for f in pre_filters):
-                    yield halo
 
+                if native_filters and not all(f[0](*(halo.attrs[k] for k in f[1:])) for f in native_filters):
+                    continue
 
-    @staticmethod
-    def _fetch_native_quantity(dataset, native_quantity):
-        cluster_attrs = list(dataset.attrs)
-        if native_quantity in cluster_attrs:
-            data = np.empty(dataset['redshift'].shape)
-            data.fill(dataset.attrs['{}'.format(native_quantity)])
-            return data
-        return dataset[native_quantity].value
+                def native_quantity_getter(native_quantity):
+                    raise NotImplementedError
+
+                yield native_quantity_getter
 
 
 # Registers the reader
 register_reader(AlphaQClusterCatalog)
-
