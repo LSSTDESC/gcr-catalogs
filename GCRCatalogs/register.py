@@ -1,25 +1,18 @@
 import os
 import importlib
 import yaml
-import requests
 from GCR import BaseGenericCatalog
 
 
-__all__ = ['available_catalogs', 'load_catalog', 'load_catalog_from_config_dict']
+__all__ = ['available_catalogs', 'get_available_catalogs', 'load_catalog']
 
 
 def load_yaml(yaml_file):
     """
     Load *yaml_file*. Ruturn a dictionary.
     """
-    try:
-        r = requests.get(yaml_file, stream=True)
-    except requests.exceptions.MissingSchema:
-        with open(yaml_file) as f:
-            config = yaml.load(f)
-    else:
-        r.raw.decode_content = True
-        config = yaml.load(r.raw)
+    with open(yaml_file) as f:
+        config = yaml.load(f)
     return config
 
 
@@ -53,6 +46,13 @@ def get_available_configs(config_dir, register=None):
         register[name] = config
 
     return register
+
+
+def get_available_catalogs():
+    """
+    Return *available_catalogs* as a dictionary
+    """
+    return available_catalogs
 
 
 def load_catalog_from_config_dict(catalog_config):
