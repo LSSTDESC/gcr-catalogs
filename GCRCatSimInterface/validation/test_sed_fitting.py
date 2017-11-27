@@ -182,12 +182,12 @@ i_rest = -2.5*np.log10(i_rest)
 z_rest = -2.5*np.log10(z_rest)
 y_rest = -2.5*np.log10(y_rest)
 
-u_rest_dustless = -2.5*np.log10(u_dustless)
-g_rest_dustless = -2.5*np.log10(g_dustless)
-r_rest_dustless = -2.5*np.log10(r_dustless)
-i_rest_dustless = -2.5*np.log10(i_dustless)
-z_rest_dustless = -2.5*np.log10(z_dustless)
-y_rest_dustless = -2.5*np.log10(y_dustless)
+u_rest_dustless = -2.5*np.log10(u_rest_dustless)
+g_rest_dustless = -2.5*np.log10(g_rest_dustless)
+r_rest_dustless = -2.5*np.log10(r_rest_dustless)
+i_rest_dustless = -2.5*np.log10(i_rest_dustless)
+z_rest_dustless = -2.5*np.log10(z_rest_dustless)
+y_rest_dustless = -2.5*np.log10(y_rest_dustless)
 
 import time
 t_start = time.time()
