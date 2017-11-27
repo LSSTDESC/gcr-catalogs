@@ -175,6 +175,20 @@ i_dustless = -2.5*np.log10(i_dustless) + dm - fudge
 z_dustless = -2.5*np.log10(z_dustless) + dm - fudge
 y_dustless = -2.5*np.log10(y_dustless) + dm - fudge
 
+u_rest = -2.5*np.log10(u_rest) + dm
+g_rest = -2.5*np.log10(g_rest) + dm
+r_rest = -2.5*np.log10(r_rest) + dm
+i_rest = -2.5*np.log10(i_rest) + dm
+z_rest = -2.5*np.log10(z_rest) + dm
+y_rest = -2.5*np.log10(y_rest) + dm
+
+u_rest_dustless = -2.5*np.log10(u_dustless) + dm
+g_rest_dustless = -2.5*np.log10(g_dustless) + dm
+r_rest_dustless = -2.5*np.log10(r_dustless) + dm
+i_rest_dustless = -2.5*np.log10(i_dustless) + dm
+z_rest_dustless = -2.5*np.log10(z_dustless) + dm
+y_rest_dustless = -2.5*np.log10(y_dustless) + dm
+
 import time
 t_start = time.time()
 sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, true_redshift_list)
