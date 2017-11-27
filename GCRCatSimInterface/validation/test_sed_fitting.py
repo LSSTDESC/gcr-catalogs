@@ -175,23 +175,27 @@ i_dustless = -2.5*np.log10(i_dustless) + dm - fudge
 z_dustless = -2.5*np.log10(z_dustless) + dm - fudge
 y_dustless = -2.5*np.log10(y_dustless) + dm - fudge
 
-u_rest = -2.5*np.log10(u_rest) + dm
-g_rest = -2.5*np.log10(g_rest) + dm
-r_rest = -2.5*np.log10(r_rest) + dm
-i_rest = -2.5*np.log10(i_rest) + dm
-z_rest = -2.5*np.log10(z_rest) + dm
-y_rest = -2.5*np.log10(y_rest) + dm
+u_rest = -2.5*np.log10(u_rest)
+g_rest = -2.5*np.log10(g_rest)
+r_rest = -2.5*np.log10(r_rest)
+i_rest = -2.5*np.log10(i_rest)
+z_rest = -2.5*np.log10(z_rest)
+y_rest = -2.5*np.log10(y_rest)
 
-u_rest_dustless = -2.5*np.log10(u_dustless) + dm
-g_rest_dustless = -2.5*np.log10(g_dustless) + dm
-r_rest_dustless = -2.5*np.log10(r_dustless) + dm
-i_rest_dustless = -2.5*np.log10(i_dustless) + dm
-z_rest_dustless = -2.5*np.log10(z_dustless) + dm
-y_rest_dustless = -2.5*np.log10(y_dustless) + dm
+u_rest_dustless = -2.5*np.log10(u_dustless)
+g_rest_dustless = -2.5*np.log10(g_dustless)
+r_rest_dustless = -2.5*np.log10(r_dustless)
+i_rest_dustless = -2.5*np.log10(i_dustless)
+z_rest_dustless = -2.5*np.log10(z_dustless)
+y_rest_dustless = -2.5*np.log10(y_dustless)
 
 import time
 t_start = time.time()
 sed_name_list, mag_norm_list = sed_from_galacticus_mags(disk_mags, true_redshift_list)
+rest_sed_name_list, rest_mag_norm_list=sed_from_galacticus_mags(disk_mags, np.zeros(len(true_redshift_list), dtype=float))
+
+np.testing.assert_array_equal(sed_name_list, rest_sed_name_list)
+
 print("fitting %d took %.3e" % (len(sed_name_list), time.time()-t_start))
 print("mag norm %e %e %e" % (mag_norm_list.min(), np.median(mag_norm_list), mag_norm_list.max()))
 assert len(sed_name_list) == len(first_disk)
@@ -208,6 +212,7 @@ worst_dist = -1.0
 av_valid = np.where(np.logical_and(av_list>0.01, np.logical_and(ebv_list>0.0, av_list<5.0)))
 sed_name_list = sed_name_list[av_valid]
 mag_norm_list = mag_norm_list[av_valid]
+rest_mag_norm_list = rest_mag_norm_list[av_valid]
 true_redshift_list = true_redshift_list[av_valid]
 full_redshift_list = full_redshift_list[av_valid]
 av_list = av_list[av_valid]
@@ -250,6 +255,7 @@ out_file.write('# Rv Av EBV d du dg... du_dustless dg_dustless... du_rest dg_res
 for i_star in range(len(sed_name_list)):
     sed_name = sed_name_list[i_star]
     mag_norm = mag_norm_list[i_star]
+    rest_mag_norm = rest_mag_norm_list[i_star]
     true_redshift = true_redshift_list[i_star]
     full_redshift = full_redshift_list[i_star]
     av = av_list[i_star]
@@ -294,6 +300,8 @@ for i_star in range(len(sed_name_list)):
     f_norm = getImsimFluxNorm(sed, mag_norm)
     sed.multiplyFluxNorm(f_norm)
     dustless.multiplyFluxNorm(f_norm)
+
+    f_norm = getImsimFluxNorm(rest_sed, rest_mag_norm)
     rest_sed.multiplyFluxNorm(f_norm)
     rest_sed_dustless.multiplyFluxNorm(f_norm)
 
