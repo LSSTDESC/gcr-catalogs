@@ -66,6 +66,7 @@ qty_names.append('morphology/diskRadiusArcsec')
 qty_names.append('morphology/spheroidRadiusArcsec')
 qty_names.append('redshift_true')
 qty_names.append('redshift')
+qty_names.append('step')
 
 for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
     qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed:dustAtlas' % filter_name)
@@ -112,7 +113,19 @@ i_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:observed
 z_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:observed'][first_disk]
 y_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:observed'][first_disk]
 
+u_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:rest:dustAtlas'][first_disk]
+g_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:rest:dustAtlas'][first_disk]
+r_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:rest:dustAtlas'][first_disk]
+i_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:rest:dustAtlas'][first_disk]
+z_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:rest:dustAtlas'][first_disk]
+y_rest = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:rest:dustAtlas'][first_disk]
 
+u_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_u:rest'][first_disk]
+g_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_g:rest'][first_disk]
+r_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_r:rest'][first_disk]
+i_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_i:rest'][first_disk]
+z_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_z:rest'][first_disk]
+y_rest_dustless = catalog_qties['LSST_filters/diskLuminositiesStellar:LSST_y:rest'][first_disk]
 
 ebv_list = -2.5*(np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas']) -
             np.log10(catalog_qties['otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas']) -
@@ -127,6 +140,14 @@ av_list = av_list[first_disk]
 
 true_redshift_list =  catalog_qties['redshift_true'][first_disk]
 full_redshift_list = catalog_qties['redshift'][first_disk]
+
+# hack to use the redshift at the snapshot of the galaxy
+true_redshift_list = []
+for step in catalog_qties['step'][first_disk]:
+    true_redshift_list.append(step_to_z[step])
+true_redshift_list = np.array(true_redshift_list)
+full_redshift_list = true_redshift_list
+
 
 from lsst.sims.photUtils import CosmologyObject
 cosmo = CosmologyObject(H0=71.0, Om0=0.265)
@@ -172,12 +193,14 @@ true_redshift_list = true_redshift_list[av_valid]
 full_redshift_list = full_redshift_list[av_valid]
 av_list = av_list[av_valid]
 ebv_list = ebv_list[av_valid]
+
 u_control = u_control[av_valid]
 g_control = g_control[av_valid]
 r_control = r_control[av_valid]
 i_control = i_control[av_valid]
 z_control = z_control[av_valid]
 y_control = y_control[av_valid]
+
 u_dustless = u_dustless[av_valid]
 g_dustless = g_dustless[av_valid]
 r_dustless = r_dustless[av_valid]
@@ -185,12 +208,25 @@ i_dustless = i_dustless[av_valid]
 z_dustless = z_dustless[av_valid]
 y_dustless = y_dustless[av_valid]
 
+u_rest = u_rest[av_valid]
+g_rest = g_rest[av_valid]
+r_rest = r_rest[av_valid]
+i_rest = i_rest[av_valid]
+z_rest = z_rest[av_valid]
+y_rest = y_rest[av_valid]
+
+u_rest_dustless = u_rest_dustless[av_valid]
+g_rest_dustless = g_rest_dustless[av_valid]
+r_rest_dustless = r_rest_dustless[av_valid]
+i_rest_dustless = i_rest_dustless[av_valid]
+z_rest_dustless = z_rest_dustless[av_valid]
+y_rest_dustless = y_rest_dustless[av_valid]
 
 ct = 0
 print(sed_name_list)
 
 out_file = open('Rv_vs_magdist.txt', 'w')
-out_file.write('# Rv Av EBV d du dg dr di dz dy du_dustless dg_dustless...\n')
+out_file.write('# Rv Av EBV d du dg... du_dustless dg_dustless... du_rest dg_rest... du_rest_dustless dg_rest_dustless...\n')
 
 for i_star in range(len(sed_name_list)):
     sed_name = sed_name_list[i_star]
@@ -212,20 +248,48 @@ for i_star in range(len(sed_name_list)):
     zdl = z_dustless[i_star]
     ydl = y_dustless[i_star]
 
+    urest = u_rest[i_star]
+    grest = g_rest[i_star]
+    rrest = r_rest[i_star]
+    irest = i_rest[i_star]
+    zrest = z_rest[i_star]
+    yrest = y_rest[i_star]
+    udlrest = u_rest_dustless[i_star]
+    gdlrest = g_rest_dustless[i_star]
+    rdlrest = r_rest_dustless[i_star]
+    idlrest = i_rest_dustless[i_star]
+    zdlrest = z_rest_dustless[i_star]
+    ydlrest = y_rest_dustless[i_star]
+
     dustless = Sed()
     sed = Sed()
-    sed.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
-    dustless.readSED_flambda(os.path.join(gal_sed_dir, sed_name))
+    rest_sed = Sed()
+    rest_sed_dustless = Sed()
+
+    full_sed_name = os.path.join(gal_sed_dir, sed_name)
+    sed.readSED_flambda(full_sed_name)
+    dustless.readSED_flambda(full_sed_name)
+    rest_sed.readSED_flambda(full_sed_name)
+    rest_sed_dustless.readSED_flambda(full_sed_name)
+
     f_norm = getImsimFluxNorm(sed, mag_norm)
     sed.multiplyFluxNorm(f_norm)
     dustless.multiplyFluxNorm(f_norm)
+    rest_sed.multiplyFluxNorm(f_norm)
+    rest_sed_dustless.multiplyFluxNorm(f_norm)
+
     a_x, b_x = sed.setupCCMab()
     R_v = av/ebv
     sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
+    rest_sed.addCCMDust(a_x, b_x, ebv=ebv, R_v=R_v)
+
     sed.redshiftSED(full_redshift, dimming=True)
     dustless.redshiftSED(full_redshift, dimming=True)
+
     mag_list = lsst_bp_dict.magListForSed(sed)
     dustless_list = lsst_bp_dict.magListForSed(dustless)
+    rest_list = lsst_bp_dict.magListForSed(rest_sed)
+    rest_dustless_list = lsst_bp_dict.magListForSed(rest_sed_dustless)
 
     dd = 0.0
     dd += (mag_list[0] - uu)**2
@@ -250,6 +314,21 @@ for i_star in range(len(sed_name_list)):
     out_file.write('%e ' % (dustless_list[3]-idl))
     out_file.write('%e ' % (dustless_list[4]-zdl))
     out_file.write('%e ' % (dustless_list[5]-ydl))
+
+    out_file.write('%e ' % (rest_list[0]-urest))
+    out_file.write('%e ' % (rest_list[1]-grest))
+    out_file.write('%e ' % (rest_list[2]-rrest))
+    out_file.write('%e ' % (rest_list[3]-irest))
+    out_file.write('%e ' % (rest_list[4]-zrest))
+    out_file.write('%e ' % (rest_list[5]-yrest))
+
+    out_file.write('%e ' % (rest_dustless_list[0]-udlrest))
+    out_file.write('%e ' % (rest_dustless_list[1]-gdlrest))
+    out_file.write('%e ' % (rest_dustless_list[2]-rdlrest))
+    out_file.write('%e ' % (rest_dustless_list[3]-idlrest))
+    out_file.write('%e ' % (rest_dustless_list[4]-zdlrest))
+    out_file.write('%e ' % (rest_dustless_list[5]-ydlrest))
+
 
     out_file.write('\n')
 
