@@ -12,3 +12,8 @@ halo_mass_def: vir
 lightcone: true
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
+description: |
+    Buzzard galaxy catalog v1.6 (realization 2).
+    This is a 10,000-square-degree catalog created with the ADDGALS algorithm.
+    It has galaxies down to 2 magnitudes fainter than projected DES Y5 magnitude limits.
+    Read more at https://confluence.slac.stanford.edu/x/4o2bDQ
