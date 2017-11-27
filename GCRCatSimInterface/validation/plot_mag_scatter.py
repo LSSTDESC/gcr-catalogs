@@ -66,7 +66,16 @@ dtype = np.dtype([('rv', float), ('av', float), ('ebv', float),
                   ('dy', float), ('dudustless', float),
                   ('dgdustless', float), ('drdustless', float),
                   ('didustless', float), ('dzdustless', float),
-                  ('dydustless', float)])
+                  ('dydustless', float),
+                  ('du_rest', float), ('dg_rest', float),
+                  ('dr_rest', float), ('di_rest', float),
+                  ('dz_rest', float), ('dy_rest', float),
+                  ('du_rest_dustless', float),
+                  ('dg_rest_dustless', float),
+                  ('dr_rest_dustless', float),
+                  ('di_rest_dustless', float),
+                  ('dz_rest_dustless', float),
+                  ('dy_rest_dustless', float)])
 
 mag_data = np.genfromtxt('Rv_vs_magdist.txt', dtype=dtype)
 
@@ -173,4 +182,104 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
 
 plt.tight_layout()
 plt.savefig('rv_dmag_dist_dustless.png')
+plt.close()
+
+
+plt.figsize = (30,30)
+
+for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
+    plt.subplot(3,2,i_fig+1)
+
+    dmag = mag_data['d%s_rest' % mag][valid]
+
+    for_lim = dmag[np.where(rv<10.0)]
+
+    dmag_min = for_lim.min()
+    dmag_max = for_lim.max()
+
+    plot_color_mesh(rv, dmag, 0.1, 0.02)
+    if i_fig == 0:
+        plt.xlabel('Rv', fontsize=9)
+        plt.ylabel('SED-Galacticus', fontsize=9)
+    plt.ylim(dmag_min, dmag_max)
+    #if mag == 'u' or mag == 'g':
+    #    plt.ylim((-2.0,1.0))
+    #else:
+    #    plt.ylim((-0.25, 0.25))
+
+    sorted_dmag = np.sort(np.abs(dmag))
+    n_dmag = len(sorted_dmag)
+
+    plt.title('%s: %.2e %.2e %.2e' %
+              (mag, sorted_dmag[n_dmag//4],
+               sorted_dmag[n_dmag//2],
+               sorted_dmag[3*n_dmag//4]), fontsize=7)
+
+
+    rounded_min = np.round(dmag_min, decimals=1)
+    rounded_max = np.round(dmag_max, decimals=1)
+    yticks = np.arange(rounded_min, rounded_max+0.05, 0.1)
+    if mag != 'x':
+        zero_tick = np.argmin(np.abs(yticks))
+        ylabels = ['' if (np.abs(iy-zero_tick)%5!=0 and iy!=0 and iy!=len(yticks)-1) else' %.1f' % yticks[iy]
+                   for iy in range(len(yticks))]
+    else:
+        yticks = [yy for yy in yticks if yy%0.5<0.0001 ]
+        ylabels = ['%.1f' % yticks[iy] for iy in range(len(yticks))]
+
+    plt.yticks(yticks,ylabels)
+    plt.axhline(y=0.0, color='r', linestyle='--', linewidth=0.5)
+
+
+plt.tight_layout()
+plt.savefig('rv_dmag_dist_rest.png')
+plt.close()
+
+
+for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
+    plt.subplot(3,2,i_fig+1)
+
+    dmag = mag_data['d%s_rest_dustless' % mag][valid]
+
+    for_lim = dmag[np.where(rv<10.0)]
+
+    dmag_min = for_lim.min()
+    dmag_max = for_lim.max()
+
+    plot_color_mesh(rv, dmag, 0.1, 0.02)
+    if i_fig == 0:
+        plt.xlabel('Rv', fontsize=9)
+        plt.ylabel('SED-Galacticus', fontsize=9)
+    plt.ylim(dmag_min, dmag_max)
+    #if mag == 'u' or mag == 'g':
+    #    plt.ylim((-2.0,1.0))
+    #else:
+    #    plt.ylim((-0.25, 0.25))
+
+    sorted_dmag = np.sort(np.abs(dmag))
+    n_dmag = len(sorted_dmag)
+
+    plt.title('%s: %.2e %.2e %.2e' %
+              (mag, sorted_dmag[n_dmag//4],
+               sorted_dmag[n_dmag//2],
+               sorted_dmag[3*n_dmag//4]), fontsize=7)
+
+
+    rounded_min = np.round(dmag_min, decimals=1)
+    rounded_max = np.round(dmag_max, decimals=1)
+    yticks = np.arange(rounded_min, rounded_max+0.05, 0.1)
+    if mag != 'x':
+        zero_tick = np.argmin(np.abs(yticks))
+        ylabels = ['' if (np.abs(iy-zero_tick)%5!=0 and iy!=0 and iy!=len(yticks)-1) else' %.1f' % yticks[iy]
+                   for iy in range(len(yticks))]
+    else:
+        yticks = [yy for yy in yticks if yy%0.5<0.0001 ]
+        ylabels = ['%.1f' % yticks[iy] for iy in range(len(yticks))]
+
+    plt.yticks(yticks,ylabels)
+    plt.axhline(y=0.0, color='r', linestyle='--', linewidth=0.5)
+
+
+plt.tight_layout()
+plt.savefig('rv_dmag_dist_rest_dustless.png')
 plt.close()
