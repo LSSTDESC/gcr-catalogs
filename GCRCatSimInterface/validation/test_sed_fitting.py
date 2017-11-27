@@ -75,6 +75,11 @@ for filter_name in ('u', 'g', 'r', 'i', 'z', 'y'):
     qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:observed' % filter_name)
     qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:observed' % filter_name)
 
+    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:rest:dustAtlas' % filter_name)
+    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:rest:dustAtlas' % filter_name)
+
+    qty_names.append('LSST_filters/diskLuminositiesStellar:LSST_%s:rest' % filter_name)
+    qty_names.append('LSST_filters/spheroidLuminositiesStellar:LSST_%s:rest' % filter_name)
 
 
 qty_names.append('otherLuminosities/diskLuminositiesStellar:V:rest')
