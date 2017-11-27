@@ -6,6 +6,41 @@ from GCRCatSimInterface import sed_from_galacticus_mags
 
 from lsst.utils import getPackageDir
 
+step_to_z ={}
+step_to_z[499]=0.0
+step_to_z[487]=0.0245
+step_to_z[475]=0.0502
+step_to_z[464]=0.0749
+step_to_z[453]=0.1008
+step_to_z[442]=0.1279
+step_to_z[432]=0.1538
+step_to_z[421]=0.1837
+step_to_z[411]=0.2123
+step_to_z[401]=0.2423
+step_to_z[392]=0.2705
+step_to_z[382]=0.3035
+step_to_z[373]=0.3347
+step_to_z[365]=0.3636
+step_to_z[355]=0.4017
+step_to_z[347]=0.4337
+step_to_z[338]=0.4714
+step_to_z[331]=0.5022
+step_to_z[323]=0.5391
+step_to_z[315]=0.5777
+step_to_z[307]=0.6184
+step_to_z[300]=0.6557
+step_to_z[293]=0.6948
+step_to_z[286]=0.7358
+step_to_z[279]=0.7788
+step_to_z[272]=0.8240
+step_to_z[266]=0.8646
+step_to_z[259]=0.9143
+step_to_z[253]=0.9591
+step_to_z[247]=1.0060
+step_to_z[241]=1.0552
+step_to_z[235]=1.1069
+
+
 catalog = load_catalog('proto-dc2_v2.0')
 
 qty_names = []
