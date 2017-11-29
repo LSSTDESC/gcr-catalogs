@@ -1,3 +1,10 @@
+"""
+This script loops over 100,000 random galaxy disks, fitting them to SEDs
+and comparing the catalog-provided LSST magnitudes to the LSST magnitudes of
+the SED fits using all combinations of rest/observer frame and with/without
+dust extinction.  Results are saved in the Rv_vs_magdist.txt file.
+"""
+
 import numpy as np
 import os
 
@@ -96,8 +103,6 @@ catalog_qties = catalog.get_quantities(qty_names)
 
 has_disk = np.where(catalog_qties[disk_mag_names[0]]>0.0)
 has_bulge = np.where(catalog_qties[bulge_mag_names[0]]>0.0)
-
-#first_disk = has_disk[0]
 
 rng = np.random.RandomState(812351233)
 first_disk = rng.choice(has_disk[0], size=100000, replace=False)
