@@ -309,8 +309,8 @@ class bulgeDESCQAObject(DESCQAObject):
     #  optional transformation to get from one to the other)
     columns = [('raJ2000', 'ra_true', deg_to_radians),
                ('decJ2000', 'dec_true', deg_to_radians),
-               ('shear1', 'shear_1'),
-               ('shear2', 'shear_2'),
+               ('gamma1', 'shear_1'),
+               ('gamma2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
                ('positionAngle', 'morphology/positionAngle'),
@@ -328,8 +328,8 @@ class diskDESCQAObject(DESCQAObject):
     idColKey = 'galaxy_id'
     columns = [('raJ2000', 'ra_true', deg_to_radians),
                ('decJ2000', 'dec_true', deg_to_radians),
-               ('shear1', 'shear_1'),
-               ('shear2', 'shear_2'),
+               ('gamma1', 'shear_1'),
+               ('gamma2', 'shear_2'),
                ('kappa', 'convergence'),
                ('redshift', 'redshift_true'),
                ('positionAngle', 'morphology/positionAngle'),
