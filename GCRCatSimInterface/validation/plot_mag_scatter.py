@@ -98,7 +98,9 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
-    plt.ylim(dmag_min, dmag_max)
+    dmag_min=-0.3
+    dmag_max=0.3
+    plt.ylim(dmag_min,dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
     #else:
@@ -107,7 +109,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     sorted_dmag = np.sort(np.abs(dmag))
     n_dmag = len(sorted_dmag)
 
-    plt.title('%s: %.2e %.2e %.2e' %
+    plt.title('%s (observer frame):\n%.2e %.2e %.2e' %
               (mag, sorted_dmag[n_dmag//4],
                sorted_dmag[n_dmag//2],
                sorted_dmag[3*n_dmag//4]), fontsize=7)
@@ -129,7 +131,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
 
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist.png')
+plt.savefig('observer_frame.png')
 plt.close()
 
 
@@ -150,6 +152,8 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
+    dmag_min=-0.3
+    dmag_max=0.3
     plt.ylim(dmag_min, dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
@@ -159,7 +163,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     sorted_dmag = np.sort(np.abs(dmag))
     n_dmag = len(sorted_dmag)
 
-    plt.title('%s (no dust): %.2e %.2e %.2e' %
+    plt.title('%s (observer frame; no dust):\n%.2e %.2e %.2e' %
               (mag, sorted_dmag[n_dmag//4],
                sorted_dmag[n_dmag//2],
                sorted_dmag[3*n_dmag//4]), fontsize=7)
@@ -181,7 +185,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     plt.axhline(y=0.0, color='r', linestyle='--', linewidth=0.5)
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist_dustless.png')
+plt.savefig('observer_frame_no_dust.png')
 plt.close()
 
 
@@ -201,7 +205,9 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
-    plt.ylim(dmag_min, dmag_max)
+    dmag_min=-0.3
+    dmag_max=0.3
+    plt.ylim(dmag_min,dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
     #else:
@@ -210,7 +216,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     sorted_dmag = np.sort(np.abs(dmag))
     n_dmag = len(sorted_dmag)
 
-    plt.title('%s: %.2e %.2e %.2e' %
+    plt.title('%s (rest frame):\n%.2e %.2e %.2e' %
               (mag, sorted_dmag[n_dmag//4],
                sorted_dmag[n_dmag//2],
                sorted_dmag[3*n_dmag//4]), fontsize=7)
@@ -232,7 +238,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
 
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist_rest.png')
+plt.savefig('rest_frame.png')
 plt.close()
 
 
@@ -250,7 +256,9 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     if i_fig == 0:
         plt.xlabel('Rv', fontsize=9)
         plt.ylabel('SED-Galacticus', fontsize=9)
-    plt.ylim(dmag_min, dmag_max)
+    dmag_min=-0.3
+    dmag_max=0.3
+    plt.ylim(dmag_min,dmag_max)
     #if mag == 'u' or mag == 'g':
     #    plt.ylim((-2.0,1.0))
     #else:
@@ -259,7 +267,7 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
     sorted_dmag = np.sort(np.abs(dmag))
     n_dmag = len(sorted_dmag)
 
-    plt.title('%s: %.2e %.2e %.2e' %
+    plt.title('%s (rest frame; no dust):\n%.2e %.2e %.2e' %
               (mag, sorted_dmag[n_dmag//4],
                sorted_dmag[n_dmag//2],
                sorted_dmag[3*n_dmag//4]), fontsize=7)
@@ -281,5 +289,5 @@ for i_fig, mag in enumerate(('u', 'g', 'r', 'i', 'z', 'y')):
 
 
 plt.tight_layout()
-plt.savefig('rv_dmag_dist_rest_dustless.png')
+plt.savefig('rest_frame_no_dust.png')
 plt.close()
