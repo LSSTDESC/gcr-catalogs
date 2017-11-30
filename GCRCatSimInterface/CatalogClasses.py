@@ -128,7 +128,7 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         mag_array = np.array([-2.5*np.log10(self.column_by_name(name))
                               for name in flux_names])
 
-        redshift_array = self.column_by_name('redshift')
+        redshift_array = self.column_by_name('true_redshift')
 
         if len(redshift_array) == 0:
             return np.array([[], []])
