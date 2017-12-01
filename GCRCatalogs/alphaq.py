@@ -21,8 +21,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
-        self.lightcone = lightcone
+        majorVersion = 0
+        minorVersion = 0
+        with h5py.File(self._file, 'r') as fh:
+            self.cosmology = FlatLambdaCDM(
+                H0=fh['metaData/simulationParameters/H_0'].value,
+                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
+                Ob0=fh['metaData/simulationParameters/Omega_b'].value
+            )
+            if "metaData/majorVersion" in fh:
+                majorVersion = hf['metaData/majorVersion'].value
+                minorVersion = hf['metaData/minorVersion'].value
 
+
+        self.lightcone = lightcone
+        
         self._quantity_modifiers = {
             'galaxy_id' :    'galaxyID',
             'ra':            (lambda x: x/3600.0, 'ra'),
@@ -31,8 +44,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'dec_true':      (lambda x: x/3600.0, 'dec_true'),
             'redshift':      'redshift',
             'redshift_true': 'redshiftHubble',
-            'disk_sersic_index':'diskSersicIndex',
-            'bulge_sersic_index':'spheroidSersicIndex',
+            'disk_sersic_index':'morphology/diskSersicIndex',
+            'bulge_sersic_index':'morphology/spheroidSersicIndex',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
             'convergence':   'convergence',
@@ -41,6 +54,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x : x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
+            'size_disk_true':'morphology/diskHalfLightRadius',
+            'size_bulge_true':'morphology/spheroidHalfLightRadius',
             'position_x':    'x',
             'position_y':    'y',
             'position_z':    'z',
@@ -48,6 +63,17 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y':    'vy',
             'velocity_z':    'vz'
         }
+        if(majorVersion >= 2 and minorVersion >= 1):
+            quantity_mod_v2_01 = {
+                #now stored as degrees
+                'ra':  'ra',
+                'dec': 'dec',
+                'ra_true': 'ra_true',
+                'dec_true': 'dec_true',
+                'ellipticity_1_true': 'ellipticity_1',
+                'ellipticity_2_true': 'ellipticity_2'
+            }
+            self._quantity_modifiers.update(quanity_mod_v2_0)
 
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
@@ -59,14 +85,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._quantity_modifiers['Mag_true_Y_lsst_z0'] = 'LSST_filters/magnitude:LSST_y:rest'
 
 
-        with h5py.File(self._file, 'r') as fh:
-            self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value
-            )
-
-           
+    
     def _generate_native_quantity_list(self):
         with h5py.File(self._file, 'r') as fh:
             hgroup = fh['galaxyProperties']
@@ -86,6 +105,42 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value
             yield native_quantity_getter
 
+    def _get_native_quantity_info_dict(self,quantity,default=None):
+        with h5py.File(self._file,'r') as fh:
+            if 'galaxyProperties/'+quantity not in fh:
+                return default
+            else:
+                info_dict = dict()
+                for key in fh['galaxyProperties/'+quantity].attrs.keys():
+                    info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key]
+                return info_dict
+    
+    def _get_quantity_info_dict(self, quantity, default=None):
+        return default
+        #TODO needs some fixing
+        print "in get quantity"
+        native_name = None
+        if quantity in self._quantity_modifiers:
+            print "in quant modifers"
+            q_mod = self._quantity_modifiers[quantity]
+            if isinstance(q_mod,(tuple,list)):
+                print "it's a list object, len:",len(length)
+
+                if(len(length) > 2):
+                    return default #This value is composed of a function on 
+                    #native quantities. So we have no idea what the units are
+                else:
+                    #Note: This is just a renamed column.
+                    return self._get_native_quantity_info_dict(q_mod[1],default)
+            else:
+                print "it's a string: ",q_mod
+                return self._get_native_quantity_info_dict(q_mod,default)
+        elif quantity in self._native_quantities:
+            print "in get native quant"
+            return self._get_native_quantity_info_dict(quantity,default)
+        
+                
+        
 
 # Registers the reader
 register_reader(AlphaQGalaxyCatalog)
