@@ -84,7 +84,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._quantity_modifiers['mag_Y_lsst'] = 'LSST_filters/magnitude:LSST_y:observed'
         self._quantity_modifiers['Mag_true_Y_lsst_z0'] = 'LSST_filters/magnitude:LSST_y:rest'
 
-
+        with h5py.File(self._file, 'r') as fh:
+            self.cosmology = FlatLambdaCDM(
+                H0=fh['metaData/simulationParameters/H_0'].value,
+                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
+                Ob0=fh['metaData/simulationParameters/Omega_b'].value
+            )
     
     def _generate_native_quantity_list(self):
         with h5py.File(self._file, 'r') as fh:
