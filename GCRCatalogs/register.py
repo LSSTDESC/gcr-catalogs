@@ -118,13 +118,14 @@ def load_catalog(catalog_name, config_overwrite=None, check_version=True):
         try:
             online_config = load_yaml('{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name))
         except requests.RequestException:
-            warnings.warn('Cannot retrive the latest config file on the Internet. Skipping version check.')
-        if config.get('version') != online_config.get('version'):
-            warnings.warn('The catalog `{}` has a local version {} that differs from the online version {}!'.format(
-                catalog_name,
-                config.get('version'),
-                online_config.get('version'),
-            ))
+            warnings.warn('Cannot retrive online config file. Skipping version check.')
+        else:
+            if config.get('version') != online_config.get('version'):
+                warnings.warn('Catalog `{}` has a local version {} that differs from online version {}'.format(
+                    catalog_name,
+                    config.get('version'),
+                    online_config.get('version'),
+                ))
 
     if config_overwrite:
         config = config.copy()
