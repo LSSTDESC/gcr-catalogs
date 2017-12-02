@@ -23,8 +23,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._file = filename
         majorVersion = 0
         minorVersion = 0
-        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('.'.join((majorVersion, minorVersion))):
-            raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
@@ -38,6 +36,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
         self.lightcone = lightcone
+        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('.'.join((majorVersion, minorVersion))):
+            raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
         self._quantity_modifiers = {
             'galaxy_id' :        'galaxyID',
@@ -69,10 +69,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if(majorVersion >= 2 and minorVersion >= 1):
             quantity_mod_v2_01 = {
                 #now stored as degrees
-                'ra':  'ra',
-                'dec': 'dec',
-                'ra_true': 'ra_true',
-                'dec_true': 'dec_true',
+                'ra':                 'ra',
+                'dec':                'dec',
+                'ra_true':            'ra_true',
+                'dec_true':           'dec_true',
                 'ellipticity_1_true': 'ellipticity_1',
                 'ellipticity_2_true': 'ellipticity_2'
             }
