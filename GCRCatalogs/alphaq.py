@@ -23,6 +23,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._file = filename
         majorVersion = 0
         minorVersion = 0
+        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('.'.join((majorVersion, minorVersion))):
+            raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
+        
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
                 H0=fh['metaData/simulationParameters/H_0'].value,
@@ -37,31 +40,31 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = lightcone
         
         self._quantity_modifiers = {
-            'galaxy_id' :    'galaxyID',
-            'ra':            (lambda x: x/3600.0, 'ra'),
-            'ra_true':       (lambda x: x/3600.0, 'ra_true'),
-            'dec':           (lambda x: x/3600.0, 'dec'),
-            'dec_true':      (lambda x: x/3600.0, 'dec_true'),
-            'redshift':      'redshift',
-            'redshift_true': 'redshiftHubble',
-            'disk_sersic_index':'morphology/diskSersicIndex',
-            'bulge_sersic_index':'morphology/spheroidSersicIndex',
-            'shear_1':       'shear1',
-            'shear_2':       'shear2',
-            'convergence':   'convergence',
-            'magnification': 'magnification',
-            'halo_id':       'hostIndex',
-            'halo_mass':     'hostHaloMass',
-            'is_central':    (lambda x : x.astype(np.bool), 'isCentral'),
-            'stellar_mass':  'totalMassStellar',
-            'size_disk_true':'morphology/diskHalfLightRadius',
-            'size_bulge_true':'morphology/spheroidHalfLightRadius',
-            'position_x':    'x',
-            'position_y':    'y',
-            'position_z':    'z',
-            'velocity_x':    'vx',
-            'velocity_y':    'vy',
-            'velocity_z':    'vz'
+            'galaxy_id' :        'galaxyID',
+            'ra':                 (lambda x: x/3600.0, 'ra'),
+            'ra_true':            (lambda x: x/3600.0, 'ra_true'),
+            'dec':                (lambda x: x/3600.0, 'dec'),
+            'dec_true':           (lambda x: x/3600.0, 'dec_true'),
+            'redshift':           'redshift',
+            'redshift_true':      'redshiftHubble',
+            'disk_sersic_index':  'morphology/diskSersicIndex',
+            'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+            'shear_1':            'shear1',
+            'shear_2':            'shear2',
+            'convergence':        'convergence',
+            'magnification':      'magnification',
+            'halo_id':            'hostIndex',
+            'halo_mass':          'hostHaloMass',
+            'is_central':         (lambda x : x.astype(np.bool), 'isCentral'),
+            'stellar_mass':       'totalMassStellar',
+            'size_disk_true':     'morphology/diskHalfLightRadius',
+            'size_bulge_true':    'morphology/spheroidHalfLightRadius',
+            'position_x':         'x',
+            'position_y':         'y',
+            'position_z':         'z',
+            'velocity_x':         'vx',
+            'velocity_y':         'vy',
+            'velocity_z':         'vz'
         }
         if(majorVersion >= 2 and minorVersion >= 1):
             quantity_mod_v2_01 = {
@@ -110,39 +113,39 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value
             yield native_quantity_getter
 
-    def _get_native_quantity_info_dict(self,quantity,default=None):
+    def _get_native_quantity_info_dict(self, quantity, default=None):
         with h5py.File(self._file,'r') as fh:
             if 'galaxyProperties/'+quantity not in fh:
                 return default
             else:
                 info_dict = dict()
-                for key in fh['galaxyProperties/'+quantity].attrs.keys():
+                for key in fh['galaxyProperties/'+quantity].attrs:
                     info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key]
                 return info_dict
     
     def _get_quantity_info_dict(self, quantity, default=None):
         return default
         #TODO needs some fixing
-        print "in get quantity"
-        native_name = None
-        if quantity in self._quantity_modifiers:
-            print "in quant modifers"
-            q_mod = self._quantity_modifiers[quantity]
-            if isinstance(q_mod,(tuple,list)):
-                print "it's a list object, len:",len(length)
+        # print "in get quantity"
+        # native_name = None
+        # if quantity in self._quantity_modifiers:
+        #     print "in quant modifers"
+        #     q_mod = self._quantity_modifiers[quantity]
+        #     if isinstance(q_mod,(tuple,list)):
+        #         print "it's a list object, len:",len(length)
 
-                if(len(length) > 2):
-                    return default #This value is composed of a function on 
-                    #native quantities. So we have no idea what the units are
-                else:
-                    #Note: This is just a renamed column.
-                    return self._get_native_quantity_info_dict(q_mod[1],default)
-            else:
-                print "it's a string: ",q_mod
-                return self._get_native_quantity_info_dict(q_mod,default)
-        elif quantity in self._native_quantities:
-            print "in get native quant"
-            return self._get_native_quantity_info_dict(quantity,default)
+        #         if(len(length) > 2):
+        #             return default #This value is composed of a function on 
+        #             #native quantities. So we have no idea what the units are
+        #         else:
+        #             #Note: This is just a renamed column.
+        #             return self._get_native_quantity_info_dict(q_mod[1],default)
+        #     else:
+        #         print "it's a string: ",q_mod
+        #         return self._get_native_quantity_info_dict(q_mod,default)
+        # elif quantity in self._native_quantities:
+        #     print "in get native quant"
+        #     return self._get_native_quantity_info_dict(quantity,default)
         
                 
         
