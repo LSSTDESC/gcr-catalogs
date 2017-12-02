@@ -4,6 +4,8 @@ filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_
 
 lightcone: true
 
+version: "2.0"
+
 creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann', 'Andrew Benson']
 
 description: |
