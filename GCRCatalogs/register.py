@@ -1,18 +1,29 @@
 import os
 import importlib
+import warnings
 import yaml
+import requests
 from GCR import BaseGenericCatalog
 
 
 __all__ = ['available_catalogs', 'get_available_catalogs', 'load_catalog']
+
+_CONFIG_DIRNAME = 'catalog_configs'
+_GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
 
 
 def load_yaml(yaml_file):
     """
     Load *yaml_file*. Ruturn a dictionary.
     """
-    with open(yaml_file) as f:
-        config = yaml.load(f)
+    try:
+        r = requests.get(yaml_file, stream=True)
+    except requests.exceptions.MissingSchema:
+        with open(yaml_file) as f:
+            config = yaml.load(f)
+    else:
+        r.raw.decode_content = True
+        config = yaml.load(r.raw)
     return config
 
 
@@ -77,7 +88,7 @@ def load_catalog_from_config_dict(catalog_config):
                            BaseGenericCatalog)(**catalog_config)
 
 
-def load_catalog(catalog_name, config_overwrite=None):
+def load_catalog(catalog_name, config_overwrite=None, check_version=True):
     """
     Load a galaxy catalog as specified in one of the yaml file in catalog_configs.
 
@@ -87,6 +98,9 @@ def load_catalog(catalog_name, config_overwrite=None):
         name of the catalog (without '.yaml')
     config_overwrite : dict, optional
         a dictionary of config options to overwrite
+    check_version : bool, optional
+        whether or not to check if the current version is up-to-date.
+        (Default: True)
 
     Return
     ------
@@ -100,6 +114,18 @@ def load_catalog(catalog_name, config_overwrite=None):
 
     config = available_catalogs[catalog_name]
 
+    if check_version:
+        try:
+            online_config = load_yaml('{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name))
+        except requests.RequestException:
+            warnings.warn('Cannot retrive the latest config file on the Internet. Skipping version check.')
+        if config.get('version') != online_config.get('version'):
+            warnings.warn('The catalog `{}` has a local version {} that differs from the online version {}!'.format(
+                catalog_name,
+                config.get('version'),
+                online_config.get('version'),
+            ))
+
     if config_overwrite:
         config = config.copy()
         config.update(config_overwrite)
@@ -107,4 +133,4 @@ def load_catalog(catalog_name, config_overwrite=None):
     return load_catalog_from_config_dict(config)
 
 
-available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), 'catalog_configs'))
+available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
