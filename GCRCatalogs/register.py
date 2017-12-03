@@ -1,19 +1,39 @@
 import os
 import importlib
+import warnings
 import yaml
+import requests
 from GCR import BaseGenericCatalog
 
 
 __all__ = ['available_catalogs', 'get_available_catalogs', 'load_catalog']
+
+_CONFIG_DIRNAME = 'catalog_configs'
+_GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
 
 
 def load_yaml(yaml_file):
     """
     Load *yaml_file*. Ruturn a dictionary.
     """
-    with open(yaml_file) as f:
-        config = yaml.load(f)
+    try:
+        r = requests.get(yaml_file, stream=True)
+    except (requests.exceptions.MissingSchema, requests.exceptions.URLRequired):
+        with open(yaml_file) as f:
+            config = yaml.load(f)
+    else:
+        if r.status_code == 404:
+            raise requests.RequestException('404 Not Found!')
+        r.raw.decode_content = True
+        config = yaml.load(r.raw)
     return config
+
+
+def strip_yaml_extension(filename):
+    """
+    remove ending '.yaml' in *filename*
+    """
+    return filename[:-5] if filename.lower().endswith('.yaml') else filename
 
 
 def import_subclass(subclass_path, package=None, required_base_class=None):
@@ -41,17 +61,21 @@ def get_available_configs(config_dir, register=None):
         if config_file.startswith('_') or not config_file.lower().endswith('.yaml'):
             continue
 
-        name = os.path.splitext(config_file)[0]
+        name = strip_yaml_extension(config_file)
         config = load_yaml(os.path.join(config_dir, config_file))
         register[name] = config
 
     return register
 
 
-def get_available_catalogs():
+def get_available_catalogs(include_default_only=True):
     """
     Return *available_catalogs* as a dictionary
+
+    If *include_default_only* is set to False, return all catalogs.
     """
+    if include_default_only:
+        return {k: v for k, v in available_catalogs.items() if v.get('included_by_default')}
     return available_catalogs
 
 
@@ -92,19 +116,38 @@ def load_catalog(catalog_name, config_overwrite=None):
     ------
     galaxy_catalog : instance of a subclass of BaseGalaxyCatalog
     """
-    if catalog_name.lower().endswith('.yaml'):
-        catalog_name = catalog_name[:-5]
+    catalog_name = strip_yaml_extension(catalog_name)
 
     if catalog_name not in available_catalogs:
         raise KeyError("Catalog `{}` does not exist in the register. See `available_catalogs`.".format(catalog_name))
 
     config = available_catalogs[catalog_name]
 
+    if config.get('alias'):
+        if strip_yaml_extension(config['alias']) == catalog_name:
+            raise ValueError('Oops, config {} alias itself!'.format(catalog_name))
+        url = '{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name)
+        try:
+            online_config = load_yaml(url)
+        except (requests.RequestException, yaml.error.YAMLError):
+            warnings.warn('Version check skipped. Not able to retrive or load online config file {}'.format(url))
+        else:
+            if config['alias'] != online_config.get('alias'):
+                warnings.warn('`{}` points to local version `{}`, differs from online version `{}`'.format(
+                    catalog_name,
+                    config['alias'],
+                    online_config.get('alias'),
+                ))
+
+        return load_catalog(config['alias'], config_overwrite)
+
     if config_overwrite:
+        if 'alias' in config_overwrite:
+            raise ValueError('`config_overwrite` cannot specify `alias`!')
         config = config.copy()
         config.update(config_overwrite)
 
     return load_catalog_from_config_dict(config)
 
 
-available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), 'catalog_configs'))
+available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
