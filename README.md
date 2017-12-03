@@ -7,19 +7,17 @@ More information about GCR can be found [here](https://github.com/yymao/generic-
 
 Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
 
-1. Proto-DC2 (AlphaQ): 
+1. protoDC2: 
    by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
-   - `proto-dc2_v2.0` (full catalog)
-   - `proto-dc2_v2.0_test` (a small subset for testing purpose)
-   - `proto-dc2_v2.0_clusters` (clusters only, to be created)
+   - `protoDC2` (full catalog)
    
 2. Buzzard series: 
    by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
-   - `buzzard_v1.6` (full catalog, DES Y3 area)
-   - `buzzard_v1.6_test` (a small subset for testing purpose)
-   - `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21` (different realizations)
-   - `buzzard_high-res_v1.1` (higher resolution, smaller sky area)
-   
+   - `buzzard` (full catalog, DES Y3 area)
+   - `buzzard_test` (same as `buzzard` but a small subset for testing purpose)
+   - `buzzard_high-res` (higher resolution, smaller sky area)
+   - `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21` (different realizations of `buzzard`)
+      
 3. DC1 catalog: 
    - `dc1`
 
