@@ -18,10 +18,12 @@ def load_yaml(yaml_file):
     """
     try:
         r = requests.get(yaml_file, stream=True)
-    except requests.exceptions.MissingSchema:
+    except (requests.exceptions.MissingSchema, requests.exceptions.URLRequired):
         with open(yaml_file) as f:
             config = yaml.load(f)
     else:
+        if r.status_code == 404:
+            raise requests.RequestException('404 Not Found!')
         r.raw.decode_content = True
         config = yaml.load(r.raw)
     return config
@@ -124,13 +126,14 @@ def load_catalog(catalog_name, config_overwrite=None):
     if config.get('alias'):
         if strip_yaml_extension(config['alias']) == catalog_name:
             raise ValueError('Oops, config {} alias itself!'.format(catalog_name))
+        url = '{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name)
         try:
-            online_config = load_yaml('{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name))
-        except requests.RequestException:
-            warnings.warn('Cannot retrive online config file. Skipping version check.')
+            online_config = load_yaml(url)
+        except (requests.RequestException, yaml.error.YAMLError):
+            warnings.warn('Cannot retrive or load online config file {} \nSkipping version check.'.format(url))
         else:
             if config['alias'] != online_config.get('alias'):
-                warnings.warn('`{}` points to local version {}, differs from online version {}'.format(
+                warnings.warn('`{}` points to local version `{}`, differs from online version `{}`'.format(
                     catalog_name,
                     config['alias'],
                     online_config.get('alias'),
