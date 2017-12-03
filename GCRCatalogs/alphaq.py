@@ -46,8 +46,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'dec_true':           (lambda x: x/3600.0, 'dec_true'),
             'redshift':           'redshift',
             'redshift_true':      'redshiftHubble',
-            'disk_sersic_index':  'morphology/diskSersicIndex',
-            'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+            'disk_sersic_index':  'diskSersicIndex',
+            'bulge_sersic_index': 'spheroidSersicIndex',
             'shear_1':            'shear1',
             'shear_2':            'shear2',
             'convergence':        'convergence',
@@ -63,19 +63,18 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'position_z':         'z',
             'velocity_x':         'vx',
             'velocity_y':         'vy',
-            'velocity_z':         'vz'
+            'velocity_z':         'vz',
         }
+        
         if(majorVersion >= 2 and minorVersion >= 1):
-            quantity_mod_v2_01 = {
-                #now stored as degrees
-                'ra':                 'ra',
+            self._quantity_modifiers.update({
+                'ra':                 'ra', #now stored as degrees
                 'dec':                'dec',
                 'ra_true':            'ra_true',
                 'dec_true':           'dec_true',
                 'ellipticity_1_true': 'ellipticity_1',
-                'ellipticity_2_true': 'ellipticity_2'
-            }
-            self._quantity_modifiers.update(quanity_mod_v2_0)
+                'ellipticity_2_true': 'ellipticity_2',
+            })
 
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
@@ -92,7 +91,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value
             )
-    
+
+
     def _generate_native_quantity_list(self):
         with h5py.File(self._file, 'r') as fh:
             hgroup = fh['galaxyProperties']
