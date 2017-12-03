@@ -27,6 +27,13 @@ def load_yaml(yaml_file):
     return config
 
 
+def strip_yaml_extension(filename):
+    """
+    remove ending '.yaml' in *filename*
+    """
+    return filename[:-5] if filename.lower().endswith('.yaml') else filename
+
+
 def import_subclass(subclass_path, package=None, required_base_class=None):
     """
     Import and return a subclass.
@@ -52,7 +59,7 @@ def get_available_configs(config_dir, register=None):
         if config_file.startswith('_') or not config_file.lower().endswith('.yaml'):
             continue
 
-        name = os.path.splitext(config_file)[0]
+        name = strip_yaml_extension(config_file)
         config = load_yaml(os.path.join(config_dir, config_file))
         register[name] = config
 
@@ -107,8 +114,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     ------
     galaxy_catalog : instance of a subclass of BaseGalaxyCatalog
     """
-    if catalog_name.lower().endswith('.yaml'):
-        catalog_name = catalog_name[:-5]
+    catalog_name = strip_yaml_extension(catalog_name)
 
     if catalog_name not in available_catalogs:
         raise KeyError("Catalog `{}` does not exist in the register. See `available_catalogs`.".format(catalog_name))
@@ -116,19 +122,25 @@ def load_catalog(catalog_name, config_overwrite=None):
     config = available_catalogs[catalog_name]
 
     if config.get('alias'):
+        if strip_yaml_extension(config['alias']) == catalog_name:
+            raise ValueError('Oops, config {} alias itself!'.format(catalog_name))
         try:
             online_config = load_yaml('{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name))
         except requests.RequestException:
             warnings.warn('Cannot retrive online config file. Skipping version check.')
         else:
-            if config.get('alias') != online_config.get('alias'):
+            if config['alias'] != online_config.get('alias'):
                 warnings.warn('`{}` points to local version {}, differs from online version {}'.format(
                     catalog_name,
-                    config.get('alias'),
+                    config['alias'],
                     online_config.get('alias'),
                 ))
 
+        return load_catalog(config['alias'], config_overwrite)
+
     if config_overwrite:
+        if 'alias' in config_overwrite:
+            raise ValueError('`config_overwrite` cannot specify `alias`!')
         config = config.copy()
         config.update(config_overwrite)
 
