@@ -59,10 +59,14 @@ def get_available_configs(config_dir, register=None):
     return register
 
 
-def get_available_catalogs():
+def get_available_catalogs(include_default_only=True):
     """
     Return *available_catalogs* as a dictionary
+
+    If *include_default_only* is set to False, return all catalogs.
     """
+    if include_default_only:
+        return {k: v for k, v in available_catalogs.items() if v.get('included_by_default')}
     return available_catalogs
 
 
@@ -88,7 +92,7 @@ def load_catalog_from_config_dict(catalog_config):
                            BaseGenericCatalog)(**catalog_config)
 
 
-def load_catalog(catalog_name, config_overwrite=None, check_version=True):
+def load_catalog(catalog_name, config_overwrite=None):
     """
     Load a galaxy catalog as specified in one of the yaml file in catalog_configs.
 
@@ -98,9 +102,6 @@ def load_catalog(catalog_name, config_overwrite=None, check_version=True):
         name of the catalog (without '.yaml')
     config_overwrite : dict, optional
         a dictionary of config options to overwrite
-    check_version : bool, optional
-        whether or not to check if the current version is up-to-date.
-        (Default: True)
 
     Return
     ------
@@ -114,17 +115,17 @@ def load_catalog(catalog_name, config_overwrite=None, check_version=True):
 
     config = available_catalogs[catalog_name]
 
-    if check_version:
+    if config.get('alias'):
         try:
             online_config = load_yaml('{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name))
         except requests.RequestException:
             warnings.warn('Cannot retrive online config file. Skipping version check.')
         else:
-            if config.get('version') != online_config.get('version'):
-                warnings.warn('Catalog `{}` has a local version {} that differs from online version {}'.format(
+            if config.get('alias') != online_config.get('alias'):
+                warnings.warn('`{}` points to local version {}, differs from online version {}'.format(
                     catalog_name,
-                    config.get('version'),
-                    online_config.get('version'),
+                    config.get('alias'),
+                    online_config.get('alias'),
                 ))
 
     if config_overwrite:
