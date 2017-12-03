@@ -130,7 +130,7 @@ def load_catalog(catalog_name, config_overwrite=None):
         try:
             online_config = load_yaml(url)
         except (requests.RequestException, yaml.error.YAMLError):
-            warnings.warn('Cannot retrive or load online config file {} \nSkipping version check.'.format(url))
+            warnings.warn('Version check skipped. Not able to retrive or load online config file {}'.format(url))
         else:
             if config['alias'] != online_config.get('alias'):
                 warnings.warn('`{}` points to local version `{}`, differs from online version `{}`'.format(
