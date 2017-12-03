@@ -6,7 +6,7 @@ import requests
 from GCR import BaseGenericCatalog
 
 
-__all__ = ['available_catalogs', 'get_available_catalogs', 'load_catalog']
+__all__ = ['available_catalogs', 'get_catalog_config', 'get_available_catalogs', 'load_catalog']
 
 _CONFIG_DIRNAME = 'catalog_configs'
 _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
@@ -68,15 +68,34 @@ def get_available_configs(config_dir, register=None):
     return register
 
 
+def resolve_config_alias(config_dict, last_alias=None):
+    """
+    resolve the alias in *config_dict* and return resolved config dict
+    """
+    if config_dict.get('alias'):
+        alias = strip_yaml_extension(config_dict.get('alias', ''))
+        if alias not in available_catalogs:
+            raise KeyError('Catalog {} does not exist in available catalogs.'.format(alias))
+        if last_alias and last_alias == alias:
+            raise ValueError('alias points to itself!')
+        return resolve_config_alias(available_catalogs[alias], alias)
+    return config_dict
+
+
+def get_catalog_config(catalog):
+    """
+    get the config dict of *catalog*
+    """
+    return resolve_config_alias(available_catalogs[catalog])
+
+
 def get_available_catalogs(include_default_only=True):
     """
     Return *available_catalogs* as a dictionary
 
     If *include_default_only* is set to False, return all catalogs.
     """
-    if include_default_only:
-        return {k: v for k, v in available_catalogs.items() if v.get('included_by_default')}
-    return available_catalogs
+    return _available_catalogs_default if include_default_only else available_catalogs
 
 
 def load_catalog_from_config_dict(catalog_config):
@@ -124,7 +143,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     config = available_catalogs[catalog_name]
 
     if config.get('alias'):
-        if strip_yaml_extension(config['alias']) == catalog_name:
+        if strip_yaml_extension(config.get('alias', '')) == catalog_name:
             raise ValueError('Oops, config {} alias itself!'.format(catalog_name))
         url = '{}/{}/{}.yaml'.format(_GITHUB_URL, _CONFIG_DIRNAME, catalog_name)
         try:
@@ -151,3 +170,4 @@ def load_catalog(catalog_name, config_overwrite=None):
 
 
 available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
+_available_catalogs_default = {k: resolve_config_alias(v) for k, v in available_catalogs.items() if v.get('included_by_default')}
