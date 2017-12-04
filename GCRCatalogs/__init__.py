@@ -1,11 +1,5 @@
-from GCR import BaseGenericCatalog
-from .utils import *
+import GCR
+from GCR import *
+
 from .register import *
-
-from .alphaq import *
-from .buzzard import *
-from .dc1 import *
-
-from .gcrCatSimInterface import *
-
-__version__ = '0.1.8'
+from .version import __version__

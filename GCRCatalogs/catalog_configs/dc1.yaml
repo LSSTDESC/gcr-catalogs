@@ -1,3 +1,4 @@
-subclass_name: DC1GalaxyCatalog
-
+subclass_name: dc1.DC1GalaxyCatalog
 db_info_fname: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/dc1_db_info.txt
+description: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")
+included_by_default: true

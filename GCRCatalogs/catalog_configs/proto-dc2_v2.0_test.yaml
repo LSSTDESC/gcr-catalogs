@@ -1,0 +1,13 @@
+subclass_name: alphaq.AlphaQGalaxyCatalog
+
+filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2_small.hdf5
+
+lightcone: true
+
+version: "2.0"
+
+creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann']
+
+description: |
+          This test version of ProtoDC2 is a small subset of protoDC2 that can be used for code testing and development.
+          For a description of the catalog and the methods, please see https://goo.gl/fXDQwP
