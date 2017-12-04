@@ -39,7 +39,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
         self.lightcone = lightcone
-        if (majorVersion or minorVersion)  not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
+        if not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
             raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
         self._quantity_modifiers = {
