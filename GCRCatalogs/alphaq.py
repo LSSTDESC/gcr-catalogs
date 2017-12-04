@@ -20,7 +20,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
-        majorVersion = 0
+        majorVersion = 2
         minorVersion = 0
         
         with h5py.File(self._file, 'r') as fh:
@@ -32,10 +32,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if "metaData/versionMajor" in fh:
                 majorVersion = fh['metaData/versionMajor'].value
                 minorVersion = fh['metaData/versionMinor'].value
+            else:
+                #If no version is specified, it's version 2.0
+                majorVersion = 2
+                minorVersion = 0
 
 
         self.lightcone = lightcone
-        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
+        if (majorVersion or minorVersion)  not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
             raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
         self._quantity_modifiers = {
