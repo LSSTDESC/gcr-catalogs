@@ -29,13 +29,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value
             )
-            if "metaData/majorVersion" in fh:
-                majorVersion = hf['metaData/majorVersion'].value
-                minorVersion = hf['metaData/minorVersion'].value
+            if "metaData/versionMajor" in fh:
+                majorVersion = fh['metaData/versionMajor'].value
+                minorVersion = fh['metaData/versionMinor'].value
 
 
         self.lightcone = lightcone
-        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('.'.join((majorVersion, minorVersion))):
+        if (majorVersion or minorVersion) and not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
             raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
         self._quantity_modifiers = {
@@ -71,9 +71,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'ra':                 'ra', #now stored as degrees
                 'dec':                'dec',
                 'ra_true':            'ra_true',
-                'dec_true':           'dec_true',
-                'ellipticity_1_true': 'ellipticity_1',
-                'ellipticity_2_true': 'ellipticity_2',
+                'dec_true':           'dec_true'
             })
 
         for band in 'ugriz':
