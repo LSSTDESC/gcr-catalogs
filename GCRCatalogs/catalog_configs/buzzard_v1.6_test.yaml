@@ -8,9 +8,10 @@ cosmology:
     H0: 70.0
     Om0: 0.286
 
-healpix_pixels: [0]
+healpix_pixels: [42]
 halo_mass_def: vir
 lightcone: true
+sky_area : 53.71
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
 description: |
