@@ -20,7 +20,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
-        majorVersion = 2
+        majorVersion = 0
         minorVersion = 0
         
         with h5py.File(self._file, 'r') as fh:
