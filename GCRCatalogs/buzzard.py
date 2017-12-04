@@ -38,6 +38,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        cosmology,
                        halo_mass_def='vir',
                        lightcone=True,
+                       sky_area=10000.0,
                        healpix_pixels=None,
                        high_res=False,
                        use_cache=True,
@@ -59,6 +60,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
         self.lightcone = bool(lightcone)
+        self.sky_area  = float(sky_area)
 
         _c = 299792.458
         _abs_mask_func = lambda x: np.where(x==99.0, np.nan, x + 5 * np.log10(self.cosmology.h))
