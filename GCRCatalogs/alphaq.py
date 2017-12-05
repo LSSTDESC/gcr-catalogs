@@ -5,9 +5,10 @@ from __future__ import division
 import os
 import numpy as np
 import h5py
+import warnings
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-
+from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
 
 
@@ -23,24 +24,28 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._file = filename
         self.lightcone = kwargs.get('lightcone')
 
+
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
                 H0=fh['metaData/simulationParameters/H_0'].value,
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value,
             )
-            try:
-                catalog_version = '{}.{}'.format(
-                    fh['metaData/versionMajor'].value,
-                    fh['metaData/versionMinor'].value,
-                )
-            except KeyError:
-                #If no version is specified, it's version 2.0
-                catalog_version = '2.0'
+            
+            catalog_version = list()
+            for version_label in ('Major', 'Minor', 'MinorMinor'):
+                try:
+                    catalog_version.append(fh['/metaData/version' + version_label].value)
+                except KeyError:
+                    break
+                if not catalog_version:
+                    catalog_version = [2, 0]
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version)))
 
-        config_version = kwargs.get('version', '')
+        config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
+
 
         self._quantity_modifiers = {
             'galaxy_id' :         'galaxyID',
@@ -50,8 +55,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'dec_true':           'dec_true',
             'redshift':           'redshift',
             'redshift_true':      'redshiftHubble',
-            'disk_sersic_index':  'diskSersicIndex',
-            'bulge_sersic_index': 'spheroidSersicIndex',
             'shear_1':            'shear1',
             'shear_2':            'shear2',
             'convergence':        'convergence',
@@ -62,6 +65,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'stellar_mass':       'totalMassStellar',
             'size_disk_true':     'morphology/diskHalfLightRadius',
             'size_bulge_true':    'morphology/spheroidHalfLightRadius',
+            'disk_sersic_index':  'morphology/diskSersicIndex',
+            'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+            'ellipticity_1':      'morphology/totalEllipticity1',
+            'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
             'position_z':         'z',
@@ -70,14 +77,23 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_z':         'vz',
         }
 
-        if catalog_version == '2.0': # to be backward compatible
+        if catalog_version < StrictVersion('2.1.1'):
+            self._quantity_modifiers.update({
+                'disk_sersic_index':  'diskSersicIndex',
+                'bulge_sersic_index': 'spheroidSersicIndex',
+            })
+            del self._quantity_modifiers['ellipticity_1']
+            del self._quantity_modifiers['ellipticity_2']
+
+        if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
                 'ra_true':  (lambda x: x/3600, 'ra_true'),
                 'dec':      (lambda x: x/3600, 'dec'),
                 'dec_true': (lambda x: x/3600, 'dec_true'),
             })
-
+                        
+              
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
@@ -115,40 +131,23 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             yield native_quantity_getter
 
 
-    def _get_native_quantity_info_dict(self, quantity, default=None):
-        with h5py.File(self._file,'r') as fh:
-            if 'galaxyProperties/'+quantity not in fh:
-                return default
-            else:
-                info_dict = dict()
-                for key in fh['galaxyProperties/'+quantity].attrs:
-                    info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key]
-                return info_dict
 
+    def _get_native_quantity_info_dict(self, quantity, default=None):
+        with h5py.File(self._file, 'r') as fh:
+            quantity_key = 'galaxyProperties/' + quantity
+            if quantity_key not in fh:
+                return default
+            modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
+            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
+            
 
     def _get_quantity_info_dict(self, quantity, default=None):
-        return default
-        #TODO needs some fixing
-        # print "in get quantity"
-        # native_name = None
-        # if quantity in self._quantity_modifiers:
-        #     print "in quant modifers"
-        #     q_mod = self._quantity_modifiers[quantity]
-        #     if isinstance(q_mod,(tuple,list)):
-        #         print "it's a list object, len:",len(length)
-
-        #         if(len(length) > 2):
-        #             return default #This value is composed of a function on
-        #             #native quantities. So we have no idea what the units are
-        #         else:
-        #             #Note: This is just a renamed column.
-        #             return self._get_native_quantity_info_dict(q_mod[1],default)
-        #     else:
-        #         print "it's a string: ",q_mod
-        #         return self._get_native_quantity_info_dict(q_mod,default)
-        # elif quantity in self._native_quantities:
-        #     print "in get native quant"
-        #     return self._get_native_quantity_info_dict(quantity,default)
+        q_mod = self.get_quantity_modifier(quantity)
+        if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
+            warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
+            return default
+        return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+            
 
 
 
