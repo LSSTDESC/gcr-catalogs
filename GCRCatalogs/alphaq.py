@@ -131,13 +131,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
-        with h5py.File(self._file,'r') as fh:
+        with h5py.File(self._file, 'r') as fh:
             if 'galaxyProperties/'+quantity not in fh:
                 return default
             else:
                 info_dict = dict()
                 for key in fh['galaxyProperties/'+quantity].attrs:
-                    info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key]
+                    info_dict[key] = str(fh['galaxyProperties/'+quantity].attrs[key])
                 return info_dict
 
 
@@ -145,17 +145,17 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         native_name = None
         if quantity in self._quantity_modifiers:
             q_mod = self._quantity_modifiers[quantity]
-            if isinstance(q_mod,(tuple,list)):
+            if isinstance(q_mod, (tuple,list)):
                 if(len(length) > 2):
                     return default #This value is composed of a function on
                     #native quantities. So we have no idea what the units are
                 else:
                     #Note: This is just a renamed column.
-                    return self._get_native_quantity_info_dict(q_mod[1],default)
+                    return self._get_native_quantity_info_dict(q_mod[1], default)
             else:
-                return self._get_native_quantity_info_dict(q_mod,default)
+                return self._get_native_quantity_info_dict(q_mod, default)
         elif quantity in self._native_quantities:
-            return self._get_native_quantity_info_dict(quantity,default)
+            return self._get_native_quantity_info_dict(quantity, default)
 
 
 
