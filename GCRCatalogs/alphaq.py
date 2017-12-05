@@ -77,7 +77,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'position_z':         'z',
             'velocity_x':         'vx',
             'velocity_y':         'vy',
-            'velocity_z':         'vz'
+            'velocity_z':         'vz',
         }
 
         if catalog_version == '2.0': # to be backward compatible
@@ -93,8 +93,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'disk_sersic_index':  'morphology/diskSersicIndex',
                 'bulge_sersic_index': 'morphology/spheroidSersicIndex',
                 'ellipticity_1':      'morphology/totalEllipticity1',
-                'ellipticity_2':      'morphology/totalEllipticity2'
-            
+                'ellipticity_2':      'morphology/totalEllipticity2',
             })
             
               
