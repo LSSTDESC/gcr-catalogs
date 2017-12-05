@@ -22,7 +22,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._file = filename
         majorVersion = 0
         minorVersion = 0
-        
+        minorMinorVersion = 0
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
                 H0=fh['metaData/simulationParameters/H_0'].value,
@@ -36,9 +36,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 #If no version is specified, it's version 2.0
                 majorVersion = 2
                 minorVersion = 0
+            if "metaData/versionMinorMinor" in fh:
+                minorMinorVersion = fh["metaData/versionMinorMinor"].value
 
 
         self.lightcone = lightcone
+        self.sky_area = 25 #default value if not specified
         if not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
             raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
         
@@ -77,7 +80,15 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'ra_true':            'ra_true',
                 'dec_true':           'dec_true'
             })
-
+            if(minorMinorVersion >= 1):
+              self._quantity_modifiers.update({
+                  'disk_sersic_index':  'morphology/diskSersicIndex',
+                  'bulge_sersic_index': 'morphology/spheroidSersicIndex'             
+              })
+              with h5py.File(self._file, 'r') as fh:
+                  self.sky_area = fh['/metaData/skyArea'].value
+                  
+              
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
