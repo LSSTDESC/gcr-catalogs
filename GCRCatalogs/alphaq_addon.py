@@ -25,8 +25,6 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
 
         self._quantity_modifiers = {
             'galaxy_id': None,
-            'tidal_eigvals': 'eigvals',
-            'tidal_eigvects': 'eigvects',
         }
         for i in range(3):
             self._quantity_modifiers['tidal_eigvals[{}]'.format(i)] = 'eigvals/{}'.format(i)
@@ -42,17 +40,18 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
                 native_quantities.add(name)
                 if dt.shape:
                     for indices in product(*map(range, dt.shape)):
-                        native_quantities.add((name + '/' + '/'.join(map(str, indices))))
+                        native_quantities.add((name + '/' + '/'.join(map(str, indices))).strip('/'))
         return native_quantities
 
 
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._filename, 'r') as fh:
             data = fh['tidal'].value
             def native_quantity_getter(native_quantity):
+                if '/' not in native_quantity:
+                    return data[native_quantity]
                 items = native_quantity.split('/')
                 name = items[0]
-                cols = tuple(items[1:])
-                return data[name][(...,)+cols] if cols else data[name]
+                cols = (...,) + tuple((int(i) for i in items[1:]))
+                return data[name][cols]
             yield native_quantity_getter
