@@ -142,7 +142,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
     def _get_quantity_info_dict(self, quantity, default=None):
-        print "in get quantity"
         native_name = None
         if quantity in self._quantity_modifiers:
             q_mod = self._quantity_modifiers[quantity]
