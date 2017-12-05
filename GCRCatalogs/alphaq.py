@@ -70,7 +70,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'position_z':         'z',
             'velocity_x':         'vx',
             'velocity_y':         'vy',
-            'velocity_z':         'vz',
+            'velocity_z':         'vz'
         }
         
         if(majorVersion >= 2 and minorVersion >= 1):
@@ -83,7 +83,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if(minorMinorVersion >= 1):
               self._quantity_modifiers.update({
                   'disk_sersic_index':  'morphology/diskSersicIndex',
-                  'bulge_sersic_index': 'morphology/spheroidSersicIndex'             
+                  'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+                  'ellipticity_1':      'morphology/totalEllipticity1',
+                  'ellipticity_2':      'morphology/totalEllipticity2'
+
               })
               with h5py.File(self._file, 'r') as fh:
                   self.sky_area = fh['/metaData/skyArea'].value
