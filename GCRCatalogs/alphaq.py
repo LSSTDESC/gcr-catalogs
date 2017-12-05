@@ -142,28 +142,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
     def _get_quantity_info_dict(self, quantity, default=None):
-        return default
-        #TODO needs some fixing
-        # print "in get quantity"
-        # native_name = None
-        # if quantity in self._quantity_modifiers:
-        #     print "in quant modifers"
-        #     q_mod = self._quantity_modifiers[quantity]
-        #     if isinstance(q_mod,(tuple,list)):
-        #         print "it's a list object, len:",len(length)
-
-        #         if(len(length) > 2):
-        #             return default #This value is composed of a function on
-        #             #native quantities. So we have no idea what the units are
-        #         else:
-        #             #Note: This is just a renamed column.
-        #             return self._get_native_quantity_info_dict(q_mod[1],default)
-        #     else:
-        #         print "it's a string: ",q_mod
-        #         return self._get_native_quantity_info_dict(q_mod,default)
-        # elif quantity in self._native_quantities:
-        #     print "in get native quant"
-        #     return self._get_native_quantity_info_dict(quantity,default)
+        print "in get quantity"
+        native_name = None
+        if quantity in self._quantity_modifiers:
+            q_mod = self._quantity_modifiers[quantity]
+            if isinstance(q_mod,(tuple,list)):
+                if(len(length) > 2):
+                    return default #This value is composed of a function on
+                    #native quantities. So we have no idea what the units are
+                else:
+                    #Note: This is just a renamed column.
+                    return self._get_native_quantity_info_dict(q_mod[1],default)
+            else:
+                return self._get_native_quantity_info_dict(q_mod,default)
+        elif quantity in self._native_quantities:
+            return self._get_native_quantity_info_dict(quantity,default)
 
 
 
