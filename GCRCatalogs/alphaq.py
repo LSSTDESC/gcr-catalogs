@@ -76,7 +76,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_z':         'vz',
         }
 
-        if(catalog_version < StrictVersion('2.1.1')):
+        if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
                 'bulge_sersic_index': 'spheroidSersicIndex',
