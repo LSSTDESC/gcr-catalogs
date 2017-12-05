@@ -5,6 +5,7 @@ from __future__ import division
 import os
 import numpy as np
 import h5py
+import warning
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
