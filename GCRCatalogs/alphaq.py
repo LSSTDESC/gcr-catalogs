@@ -60,8 +60,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'dec_true':           'dec_true',
             'redshift':           'redshift',
             'redshift_true':      'redshiftHubble',
-            'disk_sersic_index':  'diskSersicIndex',
-            'bulge_sersic_index': 'spheroidSersicIndex',
             'shear_1':            'shear1',
             'shear_2':            'shear2',
             'convergence':        'convergence',
@@ -72,6 +70,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'stellar_mass':       'totalMassStellar',
             'size_disk_true':     'morphology/diskHalfLightRadius',
             'size_bulge_true':    'morphology/spheroidHalfLightRadius',
+            'disk_sersic_index':  'morphology/diskSersicIndex',
+            'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+            'ellipticity_1':      'morphology/totalEllipticity1',
+            'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
             'position_z':         'z',
@@ -80,6 +82,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_z':         'vz',
         }
 
+        if(catalog_version < StrictVersion('2.1.1')):
+            self._quantity_modifiers.update({
+                'disk_sersic_index':  'diskSersicIndex',
+                'bulge_sersic_index': 'spheroidSersicIndex',
+            })
+            del self._quantity_modifiers['ellipticity_1']
+            del self._quantity_modifiers['ellipticity_2']
+
         if catalog_version == '2.0': # to be backward compatible
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
@@ -87,15 +97,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'dec':      (lambda x: x/3600, 'dec'),
                 'dec_true': (lambda x: x/3600, 'dec_true'),
             })
-            
-        if(catalog_version >= StrictVersion('2.1.1')):
-            self._quantity_modifiers.update({
-                'disk_sersic_index':  'morphology/diskSersicIndex',
-                'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-                'ellipticity_1':      'morphology/totalEllipticity1',
-                'ellipticity_2':      'morphology/totalEllipticity2',
-            })
-            
+                        
               
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
