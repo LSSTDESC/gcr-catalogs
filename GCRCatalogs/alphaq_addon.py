@@ -39,8 +39,10 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
         with h5py.File(self._filename, 'r') as fh:
             data = fh['tidal'].value
             for name, (dt, _) in data.dtype.fields.items():
-                for indices in product(*map(range, dt.shape)):
-                    native_quantities.add((name + '/' + '/'.join(map(str, indices))).strip('/'))
+                native_quantities.add(name)
+                if dt.shape:
+                    for indices in product(*map(range, dt.shape)):
+                        native_quantities.add((name + '/' + '/'.join(map(str, indices))))
         return native_quantities
 
 
