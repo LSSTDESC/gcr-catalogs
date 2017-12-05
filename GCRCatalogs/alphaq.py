@@ -130,34 +130,23 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             yield native_quantity_getter
 
 
+
     def _get_native_quantity_info_dict(self, quantity, default=None):
         with h5py.File(self._file, 'r') as fh:
-            if 'galaxyProperties/'+quantity not in fh:
+            quantity_key = 'galaxyProperties/' + quantity
+            if quantity_key not in fh:
                 return default
-            else:
-                info_dict = dict()
-                for key in fh['galaxyProperties/'+quantity].attrs:
-                    info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key].decode()
-                if info_dict['description']=='None given':
-                    info_dict['description']=None
-                return info_dict
-
+            modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
+            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
+            
 
     def _get_quantity_info_dict(self, quantity, default=None):
-        native_name = None
-        if quantity in self._quantity_modifiers:
-            q_mod = self._quantity_modifiers[quantity]
-            if isinstance(q_mod, (tuple,list)):
-                if(len(length) > 2):
-                    return default #This value is composed of a function on
-                    #native quantities. So we have no idea what the units are
-                else:
-                    #Note: This is just a renamed column.
-                    return self._get_native_quantity_info_dict(q_mod[1], default)
-            else:
-                return self._get_native_quantity_info_dict(q_mod, default)
-        elif quantity in self._native_quantities:
-            return self._get_native_quantity_info_dict(quantity, default)
+        q_mod = self.get_quantity_modifier(quantity)
+        if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
+            warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
+            return default
+        return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+            
 
 
 
