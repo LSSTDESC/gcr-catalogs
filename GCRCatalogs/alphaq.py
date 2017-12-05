@@ -138,6 +138,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 info_dict = dict()
                 for key in fh['galaxyProperties/'+quantity].attrs:
                     info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key].decode()
+                if info_dict['description']=='None given':
+                    info_dict['description']=None
                 return info_dict
 
 
