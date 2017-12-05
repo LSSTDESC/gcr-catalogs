@@ -7,8 +7,9 @@ import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-
+from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
+
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -16,41 +17,47 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, lightcone=True, **kwargs):
+    def _subclass_init(self, filename, **kwargs):
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
-        majorVersion = 0
-        minorVersion = 0
-        minorMinorVersion = 0
+        self.lightcone = kwargs.get('lightcone')
+
+
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
                 H0=fh['metaData/simulationParameters/H_0'].value,
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value
+                Ob0=fh['metaData/simulationParameters/Omega_b'].value,
             )
-            if "metaData/versionMajor" in fh:
-                majorVersion = fh['metaData/versionMajor'].value
-                minorVersion = fh['metaData/versionMinor'].value
-            else:
+            try:
+                catalog_version_str = '{}.{}'.format(
+                    fh['metaData/versionMajor'].value,
+                    fh['metaData/versionMinor'].value,
+                )
+            except KeyError:
                 #If no version is specified, it's version 2.0
-                majorVersion = 2
-                minorVersion = 0
-            if "metaData/versionMinorMinor" in fh:
-                minorMinorVersion = fh["metaData/versionMinorMinor"].value
+                catalog_version_str = '2.0'
+            try:
+                catalog_version_str = '{}.{}.{}'.format(
+                    fh['metaData/versionMajor'].value,
+                    fh['metaData/versionMinor'].value,
+                    fh['metaData/versionMinorMinor'].value,
+                )
+            except KeyError:
+                pass
+            catalog_version = StrictVersion(catalog_version_str)
+        config_version = StrictVersion(kwargs.get('version', ''))
+        if config_version != catalog_version:
+            raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
 
 
-        self.lightcone = lightcone
-        self.sky_area = 25 #default value if not specified
-        if not kwargs.get('version', '').startswith('{}.{}'.format(majorVersion,minorVersion)):
-            raise ValueError('Catalog file version {}.{} does not match config version {}'.format(majorVersion, minorVersion, kwargs.get('version', '')))
-        
         self._quantity_modifiers = {
-            'galaxy_id' :        'galaxyID',
-            'ra':                 (lambda x: x/3600.0, 'ra'),
-            'ra_true':            (lambda x: x/3600.0, 'ra_true'),
-            'dec':                (lambda x: x/3600.0, 'dec'),
-            'dec_true':           (lambda x: x/3600.0, 'dec_true'),
+            'galaxy_id' :         'galaxyID',
+            'ra':                 'ra',
+            'dec':                'dec',
+            'ra_true':            'ra_true',
+            'dec_true':           'dec_true',
             'redshift':           'redshift',
             'redshift_true':      'redshiftHubble',
             'disk_sersic_index':  'diskSersicIndex',
@@ -72,25 +79,24 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y':         'vy',
             'velocity_z':         'vz'
         }
-        
-        if(majorVersion >= 2 and minorVersion >= 1):
-            self._quantity_modifiers.update({
-                'ra':                 'ra', #now stored as degrees
-                'dec':                'dec',
-                'ra_true':            'ra_true',
-                'dec_true':           'dec_true'
-            })
-            if(minorMinorVersion >= 1):
-              self._quantity_modifiers.update({
-                  'disk_sersic_index':  'morphology/diskSersicIndex',
-                  'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-                  'ellipticity_1':      'morphology/totalEllipticity1',
-                  'ellipticity_2':      'morphology/totalEllipticity2'
 
-              })
-              with h5py.File(self._file, 'r') as fh:
-                  self.sky_area = fh['/metaData/skyArea'].value
-                  
+        if catalog_version == '2.0': # to be backward compatible
+            self._quantity_modifiers.update({
+                'ra':       (lambda x: x/3600, 'ra'),
+                'ra_true':  (lambda x: x/3600, 'ra_true'),
+                'dec':      (lambda x: x/3600, 'dec'),
+                'dec_true': (lambda x: x/3600, 'dec_true'),
+            })
+            
+        if(catalog_version >= StrictVersion('2.1.1')):
+            self._quantity_modifiers.update({
+                'disk_sersic_index':  'morphology/diskSersicIndex',
+                'bulge_sersic_index': 'morphology/spheroidSersicIndex',
+                'ellipticity_1':      'morphology/totalEllipticity1',
+                'ellipticity_2':      'morphology/totalEllipticity2'
+            
+            })
+            
               
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
@@ -116,7 +122,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             #get all the names of objects in this tree
             hgroup.visit(hobjects.append)
             #filter out the group objects and keep the dataste objects
-            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject])==h5py.Dataset]
+            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject]) == h5py.Dataset]
             native_quantities = set(hdatasets)
         return native_quantities
 
@@ -128,6 +134,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value
             yield native_quantity_getter
 
+
     def _get_native_quantity_info_dict(self, quantity, default=None):
         with h5py.File(self._file,'r') as fh:
             if 'galaxyProperties/'+quantity not in fh:
@@ -137,7 +144,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 for key in fh['galaxyProperties/'+quantity].attrs:
                     info_dict[key] = fh['galaxyProperties/'+quantity].attrs[key]
                 return info_dict
-    
+
+
     def _get_quantity_info_dict(self, quantity, default=None):
         return default
         #TODO needs some fixing
@@ -150,7 +158,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         #         print "it's a list object, len:",len(length)
 
         #         if(len(length) > 2):
-        #             return default #This value is composed of a function on 
+        #             return default #This value is composed of a function on
         #             #native quantities. So we have no idea what the units are
         #         else:
         #             #Note: This is just a renamed column.
@@ -161,9 +169,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         # elif quantity in self._native_quantities:
         #     print "in get native quant"
         #     return self._get_native_quantity_info_dict(quantity,default)
-        
-                
-        
+
+
+
 
 #=====================================================================================================
 

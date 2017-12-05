@@ -38,6 +38,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        cosmology,
                        halo_mass_def='vir',
                        lightcone=True,
+                       sky_area=10000.0,
                        healpix_pixels=None,
                        high_res=False,
                        use_cache=True,
@@ -59,6 +60,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
         self.lightcone = bool(lightcone)
+        self.sky_area  = float(sky_area)
 
         _c = 299792.458
         _abs_mask_func = lambda x: np.where(x==99.0, np.nan, x + 5 * np.log10(self.cosmology.h))
@@ -105,6 +107,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
             for i, b in enumerate(['acsf435w', 'acsf606w', 'acsf775w', 'acsf814w', 'acsf850lp', 'wfc3f275w', 'wfc3f336w',
                                    'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
+
                 self._quantity_modifiers['Mag_true_{}_candels_z0'.format(b)] = (_abs_mask_func, 'candels/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_candels'.format(b)] = (_mask_func, 'candels/OMAG/{}'.format(i))
 
