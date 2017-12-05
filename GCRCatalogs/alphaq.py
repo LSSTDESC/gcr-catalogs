@@ -84,7 +84,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             del self._quantity_modifiers['ellipticity_1']
             del self._quantity_modifiers['ellipticity_2']
 
-        if catalog_version == '2.0': # to be backward compatible
+        if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
                 'ra_true':  (lambda x: x/3600, 'ra_true'),
