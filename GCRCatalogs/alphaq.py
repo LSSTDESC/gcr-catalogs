@@ -30,24 +30,18 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value,
             )
-            try:
-                catalog_version_str = '{}.{}'.format(
-                    fh['metaData/versionMajor'].value,
-                    fh['metaData/versionMinor'].value,
-                )
-            except KeyError:
-                #If no version is specified, it's version 2.0
-                catalog_version_str = '2.0'
-            try:
-                catalog_version_str = '{}.{}.{}'.format(
-                    fh['metaData/versionMajor'].value,
-                    fh['metaData/versionMinor'].value,
-                    fh['metaData/versionMinorMinor'].value,
-                )
-            except KeyError:
-                pass
-            catalog_version = StrictVersion(catalog_version_str)
-        config_version = StrictVersion(kwargs.get('version', ''))
+            
+            catalog_version = list()
+            for version_label in ('Major', 'Minor', 'MinorMinor'):
+                try:
+                    catalog_version.append(fh['/metaData/version' + version_label].value)
+                except KeyError:
+                    break
+                if not catalog_version:
+                    catalog_version = [2, 0]
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version)))
+
+        config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
 
