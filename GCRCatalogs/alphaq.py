@@ -6,7 +6,7 @@ import os
 import numpy as np
 import h5py
 import warnings
-from astropy.cosmology import FlatLambdaCDM
+from .cosmology import Cosmology
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog', 'AlphaQClusterCatalog']
@@ -24,24 +24,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self._file = filename
         self.lightcone = kwargs.get('lightcone')
 
-
         with h5py.File(self._file, 'r') as fh:
-            self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value,
-            )
-            
+            H0 = fh['metaData/simulationParameters/H_0'].value,
+            Omega_m = fh['metaData/simulationParameters/Omega_matter'].value
+            Omega_b = fh['metaData/simulationParameters/Omega_b'].value
+
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
                 try:
                     catalog_version.append(fh['/metaData/version' + version_label].value)
                 except KeyError:
                     break
-                if not catalog_version:
-                    catalog_version = [2, 0]
-            catalog_version = StrictVersion('.'.join(map(str, catalog_version)))
 
+        self.cosmology = Cosmology(Omega_c=Omega_m-Omega_b, Omega_b=Omega_b, h=H0/100.0)
+
+        catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
         config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
@@ -77,6 +74,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_z':         'vz',
         }
 
+        # to be backward compatible
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
@@ -85,15 +83,17 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             del self._quantity_modifiers['ellipticity_1']
             del self._quantity_modifiers['ellipticity_2']
 
-        if catalog_version == StrictVersion('2.0'): # to be backward compatible
+        if catalog_version == StrictVersion('2.0'):
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
                 'ra_true':  (lambda x: x/3600, 'ra_true'),
                 'dec':      (lambda x: x/3600, 'dec'),
                 'dec_true': (lambda x: x/3600, 'dec_true'),
             })
-                        
-              
+
+        if catalog_version < StrictVersion('2.0'):
+            raise ValueError('That is not possible!')
+
         for band in 'ugriz':
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
             self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
@@ -102,13 +102,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         self._quantity_modifiers['mag_Y_lsst'] = 'LSST_filters/magnitude:LSST_y:observed'
         self._quantity_modifiers['Mag_true_Y_lsst_z0'] = 'LSST_filters/magnitude:LSST_y:rest'
-
-        with h5py.File(self._file, 'r') as fh:
-            self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value
-            )
 
 
     def _generate_native_quantity_list(self):
@@ -139,7 +132,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 return default
             modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
-            
+
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
@@ -147,7 +140,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
-            
+
 
 
 

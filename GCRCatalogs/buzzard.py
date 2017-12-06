@@ -7,7 +7,7 @@ import re
 import functools
 import numpy as np
 from astropy.io import fits
-from astropy.cosmology import FlatLambdaCDM
+from .cosmology import Cosmology
 from GCR import BaseGenericCatalog
 
 __all__ = ['BuzzardGalaxyCatalog']
@@ -35,8 +35,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
     def _subclass_init(self,
                        catalog_root_dir,
                        catalog_path_template,
-                       cosmology,
-                       halo_mass_def='vir',
                        lightcone=True,
                        sky_area=None,
                        healpix_pixels=None,
@@ -57,8 +55,10 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
         self.cache = dict() if use_cache else None
 
-        self.cosmology = FlatLambdaCDM(**cosmology)
-        self.halo_mass_def = halo_mass_def
+        # hard coded these now since they are same for all buzzards
+        self.cosmology = Cosmology(Omega_c=0.286-0.047, Omega_b=0.047, h=0.7, n_s=0.96, sigma8=0.82)
+        self.halo_mass_def = 'vir'
+
         self.lightcone = bool(lightcone)
         self.sky_area  = float(sky_area or np.nan)
 

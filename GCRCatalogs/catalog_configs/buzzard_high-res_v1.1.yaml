@@ -22,11 +22,6 @@ catalog_path_template:
     wise: wise/Buzzard-highres_wise.{}.fit
     desy5: desy5/Buzzard-highres_DES_Mock_mag.{}.fit
 
-cosmology:
-    H0: 70.0
-    Om0: 0.286
-
-halo_mass_def: vir
 lightcone: true
 sky_area : 400.0
 
