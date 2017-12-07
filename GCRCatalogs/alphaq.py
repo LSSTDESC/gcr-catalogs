@@ -67,7 +67,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':    'morphology/spheroidHalfLightRadius',
             'disk_sersic_index':  'morphology/diskSersicIndex',
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-            'ellipticity_1':      'morphology/totalEllipticity1',
+            'position_angle':     (lambda pos_angle: pos_angle*(180.0/np.pi)**2,'morphology/positionAngle'),
+            'ellipticity_1':      (lambda ellip2, pos_angle : ellip2/np.tan(2*pos_angle*(180.0/np.pi)) , 'morphology/totalEllipticity2','morphology/positionAngle'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
@@ -76,7 +77,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y':         'vy',
             'velocity_z':         'vz',
         }
-
+        
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
