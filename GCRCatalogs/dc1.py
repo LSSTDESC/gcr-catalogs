@@ -45,6 +45,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
 
         self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
         self.lightcone = True
+        self.sky_area = float(kwargs.get('sky_area', np.nan))
 
 
     @staticmethod

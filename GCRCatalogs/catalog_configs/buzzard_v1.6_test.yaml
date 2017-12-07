@@ -11,7 +11,7 @@ cosmology:
 healpix_pixels: [42]
 halo_mass_def: vir
 lightcone: true
-sky_area : 53.71
+sky_area : 53.7148
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
 description: |
