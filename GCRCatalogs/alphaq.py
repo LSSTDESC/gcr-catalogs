@@ -69,6 +69,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
             'position_angle':     (lambda pos_angle: pos_angle*(180.0/np.pi)**2,'morphology/positionAngle'),
             'ellipticity_1':      (lambda ellip2, pos_angle : ellip2/np.tan(2*pos_angle*(180.0/np.pi)) , 'morphology/totalEllipticity2','morphology/positionAngle'),
+            'size_true':          (lambda size1,size2,lum1,lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),'morphology/diskHalfLightRadius','morphology/spheroidHalfLightRadius','LSST_filters/diskLuminositiesStellar:LSST_r:rest','LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
