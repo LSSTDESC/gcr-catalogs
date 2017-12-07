@@ -221,12 +221,13 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         if native_quantity == 'healpix_pixel':
             data = np.empty(self._open_dataset(healpix, self._default_subset).data.shape, np.int)
             data.fill(healpix)
-        else:
-            native_quantity = native_quantity.split('/')
-            assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
-            subset = native_quantity.pop(0)
-            column = native_quantity.pop(0)
-            data = self._open_dataset(healpix, subset).data[column]
-            if native_quantity:
-                data = data[:,int(native_quantity.pop(0))]
-        return data
+            return data
+
+        native_quantity = native_quantity.split('/')
+        assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
+        subset = native_quantity.pop(0)
+        column = native_quantity.pop(0)
+        data = self._open_dataset(healpix, subset).data[column]
+        if native_quantity:
+            data = data[:,int(native_quantity.pop(0))]
+        return data.byteswap().newbyteorder()
