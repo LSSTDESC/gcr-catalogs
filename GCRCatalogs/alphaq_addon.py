@@ -52,6 +52,6 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
                     return data[native_quantity]
                 items = native_quantity.split('/')
                 name = items[0]
-                cols = (...,) + tuple((int(i) for i in items[1:]))
+                cols = (slice(None),) + tuple((int(i) for i in items[1:]))
                 return data[name][cols]
             yield native_quantity_getter
