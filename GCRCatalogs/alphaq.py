@@ -10,6 +10,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog']
+__version__ = '2.1.1.1' #version 1 for the 2.1.1 catalog reader
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -23,7 +24,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
         self.lightcone = kwargs.get('lightcone')
-
+        
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
@@ -38,8 +39,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                     catalog_version.append(fh['/metaData/version' + version_label].value)
                 except KeyError:
                     break
-
-        catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
+            if catalog_version >= StrictVersion("2.1.1"):
+                self.sky_area = float(fh['metaData/skyArea'].value)
+            else:
+                self.sky_area = 25.0 #If the sky area isn't specified use the default value of the sky area.
+        
         config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
@@ -65,7 +70,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':    'morphology/spheroidHalfLightRadius',
             'disk_sersic_index':  'morphology/diskSersicIndex',
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-            'ellipticity_1':      'morphology/totalEllipticity1',
+            'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*np.rad2deg(pos_angle)), 'morphology/totalEllipticity2', 'morphology/positionAngle'), # Two points: pos_angle needs to be converted to radians from the over converted value. ellip_1 should equal |ellip|*cos(2*pos_angle) but was assigned |ellip|*sin(2*pos_angle)
+            'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadius', 'morphology/spheroidHalfLightRadius', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
@@ -129,6 +136,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             yield native_quantity_getter
 
 
+
     def _get_native_quantity_info_dict(self, quantity, default=None):
         with h5py.File(self._file, 'r') as fh:
             quantity_key = 'galaxyProperties/' + quantity
@@ -137,6 +145,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
+            
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
