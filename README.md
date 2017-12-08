@@ -37,7 +37,7 @@ First, [start a NERSC notebook server](https://jupyter.nersc.gov) and open a not
 For Python 3:
 ```python
 import sys
-sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/lib/python3.6/site-packages')
+sys.path.insert(0, '/global/common/software/lsst/common/miniconda/py3-4.2.12/lib/python3.6/site-packages')
 ```
 
 For Python 2
