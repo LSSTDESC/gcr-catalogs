@@ -41,7 +41,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                     break
             catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
             if catalog_version >= StrictVersion("2.1.1"):
-                self.sky_area = fh['metaData/skyArea'].value
+                self.sky_area = float(fh['metaData/skyArea'].value)
             else:
                 self.sky_area = 25 #If the sky area isn't specified use the default value of the sky area.
         
