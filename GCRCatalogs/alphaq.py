@@ -24,7 +24,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
         self.lightcone = kwargs.get('lightcone')
-
+        
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
@@ -39,8 +39,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                     catalog_version.append(fh['/metaData/version' + version_label].value)
                 except KeyError:
                     break
-
-        catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
+            if catalog_version >= StrictVersion("2.1.1"):
+                self.sky_area = fh['metaData/skyArea'].value
+            else:
+                self.sky_area = 25 #If the sky area isn't specified use the default value of the sky area.
+        
         config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
@@ -67,7 +71,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'disk_sersic_index':  'morphology/diskSersicIndex',
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
             'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
-            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*pos_angle*(180.0/np.pi)), 'morphology/totalEllipticity2', 'morphology/positionAngle'),
+            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*pos_angle*(180.0/np.pi)), 'morphology/totalEllipticity2', 'morphology/positionAngle'), #By accident used a sin instead of cos when computing the value
             'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadius', 'morphology/spheroidHalfLightRadius', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
