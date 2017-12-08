@@ -4,13 +4,8 @@ catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/Buzzard/Buzzard-0/
 catalog_path_template:
     truth: truth_v1.6/Chinchilla-0_lensed.{}.fits
 
-cosmology:
-    H0: 70.0
-    Om0: 0.286
-
-healpix_pixels: [42]
-halo_mass_def: vir
 lightcone: true
+healpix_pixels: [42]
 sky_area : 53.7148
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']

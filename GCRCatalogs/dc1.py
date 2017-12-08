@@ -7,7 +7,7 @@ from sqlalchemy import engine, create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 import numpy as np
-from astropy.cosmology import FlatLambdaCDM
+from .cosmology import Cosmology
 
 from GCR import BaseGenericCatalog
 
@@ -43,7 +43,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
             'bulge_re_b_true': 'b_b',
         }
 
-        self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
+        self.cosmology = Cosmology(Omega_c=0.25-0.045, Omega_b=0.045, h=0.73)
         self.lightcone = True
         self.sky_area = float(kwargs.get('sky_area', np.nan))
 

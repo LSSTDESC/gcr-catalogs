@@ -4,11 +4,6 @@ catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/Buzzard/Buzzard-2/
 catalog_path_template:
     truth: truth_v1.6/Chinchilla-2_lensed.{}.fits
 
-cosmology:
-    H0: 70.0
-    Om0: 0.286
-
-halo_mass_def: vir
 lightcone: true
 sky_area : 10313.24
 

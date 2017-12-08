@@ -1,9 +1,7 @@
 from __future__ import unicode_literals, absolute_import, print_function
 import numpy as np
-from astropy.cosmology import FlatLambdaCDM
-from GCR import GCRQuery
 import GCRCatalogs
-
+from GCRCatalogs.cosmology import Cosmology
 
 gc = GCRCatalogs.load_catalog('protoDC2')
 print('cosmology: {}'.format(gc.cosmology))
@@ -13,8 +11,8 @@ def test_lightcone():
     assert gc.lightcone, 'Must be lightcone'
 
 def test_cosmology():
-    assert isinstance(gc.cosmology, FlatLambdaCDM), 'Must be FlatLambdaCDM'
-    
+    assert isinstance(gc.cosmology, Cosmology), 'Must be GCRCatalogs.cosmology.Cosmology'
+
 def test_info():
     for q in sorted(gc.list_all_native_quantities()):
         assert gc.get_quantity_info(q), '{} does not have quantity_info'.format(q)
