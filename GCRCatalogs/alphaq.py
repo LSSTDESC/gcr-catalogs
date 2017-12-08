@@ -71,7 +71,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'disk_sersic_index':  'morphology/diskSersicIndex',
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
             'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
-            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*pos_angle*(180.0/np.pi)), 'morphology/totalEllipticity2', 'morphology/positionAngle'), #By accident used a sin instead of cos when computing the value
+            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*np.rad2deg(pos_angle)), 'morphology/totalEllipticity2', 'morphology/positionAngle'), # Two points: pos_angle needs to be converted to radians from the over converted value. ellip_1 should equal |ellip|*cos(2*pos_angle) but was assigned |ellip|*sin(2*pos_angle)
             'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadius', 'morphology/spheroidHalfLightRadius', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
