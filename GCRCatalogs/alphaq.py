@@ -10,7 +10,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog']
-
+__version__ = '2.1.1.1' #version 1 for the 2.1.1 catalog reader
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -66,9 +66,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':    'morphology/spheroidHalfLightRadius',
             'disk_sersic_index':  'morphology/diskSersicIndex',
             'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-            'position_angle':     (lambda pos_angle: pos_angle*(180.0/np.pi)**2,'morphology/positionAngle'),
-            'ellipticity_1':      (lambda ellip2, pos_angle : ellip2/np.tan(2*pos_angle*(180.0/np.pi)) , 'morphology/totalEllipticity2','morphology/positionAngle'),
-            'size_true':          (lambda size1,size2,lum1,lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),'morphology/diskHalfLightRadius','morphology/spheroidHalfLightRadius','LSST_filters/diskLuminositiesStellar:LSST_r:rest','LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
+            'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*pos_angle*(180.0/np.pi)), 'morphology/totalEllipticity2', 'morphology/positionAngle'),
+            'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadius', 'morphology/spheroidHalfLightRadius', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'ellipticity_2':      'morphology/totalEllipticity2',
             'position_x':         'x',
             'position_y':         'y',
@@ -77,7 +77,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y':         'vy',
             'velocity_z':         'vz',
         }
-        
+
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
@@ -93,7 +93,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'dec':      (lambda x: x/3600, 'dec'),
                 'dec_true': (lambda x: x/3600, 'dec_true'),
             })
-
 
 
         for band in 'ugriz':
