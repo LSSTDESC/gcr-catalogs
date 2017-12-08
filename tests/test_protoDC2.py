@@ -24,3 +24,8 @@ def test_angles():
     angular_quantities = [q for q in sorted(gc.list_all_native_quantities()) if gc.get_quantity_info(q, default={}).get('unit') in units]
     for q in angular_quantities:
         print('{}: min={:13.4g} max={:13.4g}'.format(q, np.min(gc[q]), np.max(gc[q])))
+
+def test_skyarea():
+    assert hasattr(gc,'sky_area'), 'Must have sky area'
+    assert isinstance(gc.sky_area, float), 'Must be float'
+    print('sky area = {}'.format(gc.sky_area)) 
