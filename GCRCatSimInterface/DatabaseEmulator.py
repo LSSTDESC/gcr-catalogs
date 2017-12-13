@@ -156,28 +156,29 @@ class DESCQAObject(object):
                                "You do not have *GCR* installed and setup")
 
         if yaml_file_name not in _CATALOG_CACHE:
-            _CATALOG_CACHE[yaml_file_name] = GCRCatalogs.load_catalog(yaml_file_name, config_overwrite)
+            gc = GCRCatalogs.load_catalog(yaml_file_name, config_overwrite)
+
+            gc.add_modifier_on_derived_quantities('raJ2000', np.deg2rad, 'ra_true')
+            gc.add_modifier_on_derived_quantities('decJ2000', np.deg2rad, 'dec_true')
+
+            gc.add_quantity_modifier('redshift', gc.get_quantity_modifier('redshift_true'), overwrite=True)
+            gc.add_quantity_modifier('gamma1', gc.get_quantity_modifier('shear_1'))
+            gc.add_quantity_modifier('gamma2', gc.get_quantity_modifier('shear_2'))
+            gc.add_quantity_modifier('kappa', gc.get_quantity_modifier('convergence'))
+            gc.add_quantity_modifier('positionAngle', gc.get_quantity_modifier('position_angle'))
+
+            gc.add_quantity_modifier('majorAxis_disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis_disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
+
+            gc.add_quantity_modifier('sindex_disk', gc.get_quantity_modifier('disk_sersic_index'))
+            gc.add_quantity_modifier('sindex_bulge', gc.get_quantity_modifier('bulge_sersic_index'))
+
+            _CATALOG_CACHE[yaml_file_name] = gc
 
         self._catalog = _CATALOG_CACHE[yaml_file_name]
         self.columnMap = None
-
-        self._catalog.add_modifier_on_derived_quantities('raJ2000', np.deg2rad, 'ra_true')
-        self._catalog.add_modifier_on_derived_quantities('decJ2000', np.deg2rad, 'dec_true')
-
-        self._catalog.add_quantity_modifier('redshift', self._catalog.get_quantity_modifier('redshift_true'), overwrite=True)
-        self._catalog.add_quantity_modifier('gamma1', self._catalog.get_quantity_modifier('shear_1'))
-        self._catalog.add_quantity_modifier('gamma2', self._catalog.get_quantity_modifier('shear_2'))
-        self._catalog.add_quantity_modifier('kappa', self._catalog.get_quantity_modifier('convergence'))
-        self._catalog.add_quantity_modifier('positionAngle', self._catalog.get_quantity_modifier('position_angle'))
-
-        self._catalog.add_quantity_modifier('majorAxis_disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
-        self._catalog.add_quantity_modifier('minorAxis_disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
-        self._catalog.add_quantity_modifier('majorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
-        self._catalog.add_quantity_modifier('minorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
-
-        self._catalog.add_quantity_modifier('sindex_disk', self._catalog.get_quantity_modifier('disk_sersic_index'))
-        self._catalog.add_quantity_modifier('sindex_bulge', self._catalog.get_quantity_modifier('bulge_sersic_index'))
-
         self._make_column_map()
 
         if self.objectTypeId is None:
