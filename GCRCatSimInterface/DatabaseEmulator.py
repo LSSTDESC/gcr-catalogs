@@ -173,7 +173,7 @@ class DESCQAObject(object):
         self._catalog.add_quantity_modifier('majorAxis_disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
         self._catalog.add_quantity_modifier('minorAxis_disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
         self._catalog.add_quantity_modifier('majorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
-        self._catalog.add_quantity_modifier('majorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
+        self._catalog.add_quantity_modifier('minorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
 
         self._catalog.add_quantity_modifier('sindex_disk', self._catalog.get_quantity_modifier('disk_sersic_index'))
         self._catalog.add_quantity_modifier('sindex_bulge', self._catalog.get_quantity_modifier('bulge_sersic_index'))
