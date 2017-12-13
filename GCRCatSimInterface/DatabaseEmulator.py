@@ -90,8 +90,6 @@ class DESCQAChunkIterator(object):
     def __iter__(self):
         return self
 
-    next = __next__
-
     def __next__(self):
         if self._data_indices is None:
             self._init_data_indices()
@@ -108,6 +106,7 @@ class DESCQAChunkIterator(object):
 
         return dict_to_numpy_array(data)
 
+    next = __next__
 
     def _init_data_indices(self):
 
