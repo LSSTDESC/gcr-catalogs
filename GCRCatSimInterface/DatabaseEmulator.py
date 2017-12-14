@@ -103,7 +103,7 @@ class DESCQAChunkIterator(object):
             try:
                 radius_rad = max(self._obs_metadata._boundLength[0],
                                  self._obs_metadata._boundLength[1])
-            except TypeError:
+            except (TypeError, IndexError):
                 radius_rad = self._obs_metadata._boundLength
 
             ra = self._descqa_obj['raJ2000']
