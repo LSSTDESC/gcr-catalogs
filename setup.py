@@ -30,7 +30,7 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs', 'GCRCatSimInterface'],
-    install_requires=['future', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.1'],
+    install_requires=['future', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.2'],
     extras_require = {
         'protodc2': ['h5py'],
         'dc1':  ['sqlalchemy', 'pymssql'],

@@ -22,7 +22,11 @@ except ImportError:
     def _angularSeparation(ra1, dec1, ra2, dec2):
         return SkyCoord(ra1, dec1, unit="radian").separation(SkyCoord(ra2, dec2, unit="radian")).radian
 
-def arcsec_to_radians(x):
+
+def deg2rad_double(x):
+    return np.deg2rad(x).astype(np.float64)
+
+def arcsec2rad(x):
     return np.deg2rad(x/3600.0)
 
 
@@ -146,8 +150,8 @@ class DESCQAObject(object):
         if yaml_file_name not in _CATALOG_CACHE:
             gc = GCRCatalogs.load_catalog(yaml_file_name, config_overwrite)
 
-            gc.add_modifier_on_derived_quantities('raJ2000', np.deg2rad, 'ra_true')
-            gc.add_modifier_on_derived_quantities('decJ2000', np.deg2rad, 'dec_true')
+            gc.add_modifier_on_derived_quantities('raJ2000', deg2rad_double, 'ra_true')
+            gc.add_modifier_on_derived_quantities('decJ2000', deg2rad_double, 'dec_true')
 
             gc.add_quantity_modifier('redshift', gc.get_quantity_modifier('redshift_true'), overwrite=True)
             gc.add_quantity_modifier('true_redshift', gc.get_quantity_modifier('redshift_true'))
@@ -156,10 +160,10 @@ class DESCQAObject(object):
             gc.add_quantity_modifier('kappa', gc.get_quantity_modifier('convergence'))
             gc.add_quantity_modifier('positionAngle', gc.get_quantity_modifier('position_angle'))
 
-            gc.add_quantity_modifier('majorAxis::disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis::disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
-            gc.add_quantity_modifier('majorAxis::bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis::bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis::disk', (arcsec2rad, 'morphology/diskMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::disk', (arcsec2rad, 'morphology/diskMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis::bulge', (arcsec2rad, 'morphology/spheroidMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::bulge', (arcsec2rad, 'morphology/spheroidMinorAxisArcsec'))
 
             gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('disk_sersic_index'))
             gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('bulge_sersic_index'))
