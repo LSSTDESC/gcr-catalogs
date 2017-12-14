@@ -41,9 +41,8 @@ class DESCQAChunkIterator(object):
     and allows CatSim to iterate over it one chunk at a
     time.
     """
-
-    def __init__(self, descqa_obj, column_map=None, obs_metadata=None,
-                 colnames=None, default_values=None, chunk_size=None):
+    def __init__(self, descqa_obj, column_map, obs_metadata,
+                 colnames, default_values=None, chunk_size=None):
         """
         Parameters
         ----------
@@ -71,21 +70,11 @@ class DESCQAChunkIterator(object):
         of rows to be returned at a time.
         """
         self._descqa_obj = descqa_obj
+        self._column_map = column_map
         self._obs_metadata = obs_metadata
-        self._column_map = column_map or dict()
-
-        if colnames is None:
-            self._colnames = list(self._column_map)
-            self._colnames += list(self._descqa_obj.list_all_quantities(include_native=True))
-        else:
-            self._colnames = list(colnames)
-
+        self._colnames = colnames
         self._chunk_size = int(chunk_size) if chunk_size else None
-        self._chunk_slice = slice(None, self._chunk_size)
         self._data_indices = None
-
-        assert self._descqa_obj.has_quantities([self._column_map.get(name, name) for name in self._colnames]),\
-                "some quantities do not exist!!"
 
     def __iter__(self):
         return self
@@ -94,23 +83,23 @@ class DESCQAChunkIterator(object):
         if self._data_indices is None:
             self._init_data_indices()
 
-        if len(self._data_indices) == 0:
+        data_indices_this = self._data_indices[:self._chunk_size]
+
+        if not data_indices_this.size:
             raise StopIteration
 
-        data = {}
-        for name in self._colnames:
-            gcr_name = self._column_map.get(name, name)
-            data[name] = self._descqa_obj[gcr_name][self._data_indices[self._chunk_slice]]
+        self._data_indices = self._data_indices[self._chunk_size:]
 
-        self._data_indices = self._data_indices[self._chunk_size:] if self._chunk_size else []
-
-        return dict_to_numpy_array(data)
+        return dict_to_numpy_array({name: self._descqa_obj[self._column_map[name][0]][data_indices_this] for name in self._colnames})
 
     next = __next__
 
     def _init_data_indices(self):
 
-        if self._obs_metadata is not None and self._obs_metadata._boundLength is not None:
+        if self._obs_metadata is None or self._obs_metadata._boundLength is None:
+            self._data_indices = np.arange(self._descqa_obj['raJ2000'].size)
+
+        else:
             try:
                 radius_rad = max(self._obs_metadata._boundLength[0],
                                  self._obs_metadata._boundLength[1])
@@ -124,9 +113,8 @@ class DESCQAChunkIterator(object):
                     self._obs_metadata._pointingRA, \
                     self._obs_metadata._pointingDec) < radius_rad)[0]
 
-        else:
-            self._data_indices = np.arange(len(self._descqa_obj['raJ2000']))
-
+        if self._chunk_size is None:
+            self._chunk_size = self._data_indices.size
 
 
 class DESCQAObject(object):
@@ -140,8 +128,8 @@ class DESCQAObject(object):
 
     epoch = 2000.0
     idColKey = 'galaxy_id'
-    columns_need_postfix = ('majorAxis', 'minorAxis', 'sindex')
-    postfix = None
+    _columns_need_postfix = ('majorAxis', 'minorAxis', 'sindex')
+    _postfix = None
 
     def __init__(self, yaml_file_name, config_overwrite=None):
         """
@@ -152,7 +140,7 @@ class DESCQAObject(object):
         """
 
         if not _GCR_IS_AVAILABLE:
-            raise RuntimeError("You cannot use DESQAObject\n"
+            raise RuntimeError("You cannot use DESCQAObject\n"
                                "You do not have *GCR* installed and setup")
 
         if yaml_file_name not in _CATALOG_CACHE:
@@ -167,13 +155,13 @@ class DESCQAObject(object):
             gc.add_quantity_modifier('kappa', gc.get_quantity_modifier('convergence'))
             gc.add_quantity_modifier('positionAngle', gc.get_quantity_modifier('position_angle'))
 
-            gc.add_quantity_modifier('majorAxis_disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis_disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
-            gc.add_quantity_modifier('majorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis_bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis::disk', (arcsec_to_radians, 'morphology/diskMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::disk', (arcsec_to_radians, 'morphology/diskMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis::bulge', (arcsec_to_radians, 'morphology/spheroidMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::bulge', (arcsec_to_radians, 'morphology/spheroidMinorAxisArcsec'))
 
-            gc.add_quantity_modifier('sindex_disk', gc.get_quantity_modifier('disk_sersic_index'))
-            gc.add_quantity_modifier('sindex_bulge', gc.get_quantity_modifier('bulge_sersic_index'))
+            gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('disk_sersic_index'))
+            gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('bulge_sersic_index'))
 
             _CATALOG_CACHE[yaml_file_name] = gc
 
@@ -186,7 +174,6 @@ class DESCQAObject(object):
 
         if self.idColKey is None:
             raise RuntimeError("Need to define idColKey for your DESCQAObject")
-
 
     def getIdColKey(self):
         return self.idColKey
@@ -205,11 +192,14 @@ class DESCQAObject(object):
         """
         self.columnMap = dict()
 
-        if self.columns_need_postfix:
-            if not self.postfix:
-                raise ValueError('must specify `postfix` when `columns_need_postfix` is not empty')
-            for name in self.columns_need_postfix:
-                self.columnMap[name] = name + self.postfix
+        for name in self._catalog.list_all_quantities(include_native=True):
+            self.columnMap[name] = (name,)
+
+        if self._columns_need_postfix:
+            if not self._postfix:
+                raise ValueError('must specify `_postfix` when `_columns_need_postfix` is not empty')
+            for name in self._columns_need_postfix:
+                self.columnMap[name] = (name + self._postfix,)
 
 
     def query_columns(self, colnames=None, chunk_size=None,
@@ -230,7 +220,8 @@ class DESCQAObject(object):
         limit is ignored, but needs to be here to preserve the API
         """
         return DESCQAChunkIterator(self._catalog, self.columnMap, obs_metadata,
-                                   colnames, None, chunk_size)
+                                   colnames or list(self.columnMap), None,
+                                   chunk_size)
 
 
 class bulgeDESCQAObject(DESCQAObject):
@@ -243,9 +234,9 @@ class bulgeDESCQAObject(DESCQAObject):
     objectTypeId = 77
 
     # some column names require an additional postfix
-    postfix = '_bulge'
+    _postfix = '::bulge'
 
 
 class diskDESCQAObject(DESCQAObject):
     objectTypeId = 87
-    postfix = '_disk'
+    _postfix = '::disk'
