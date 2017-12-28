@@ -66,14 +66,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'halo_mass':          'hostHaloMass',
             'is_central':         (lambda x : x.astype(np.bool), 'isCentral'),
             'stellar_mass':       'totalMassStellar',
-            'size_disk_true':     'morphology/diskHalfLightRadius',
-            'size_bulge_true':    'morphology/spheroidHalfLightRadius',
-            'disk_sersic_index':  'morphology/diskSersicIndex',
-            'bulge_sersic_index': 'morphology/spheroidSersicIndex',
-            'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
-            'ellipticity_1':      (lambda ellip2, pos_angle: ellip2/np.tan(2*np.rad2deg(pos_angle)), 'morphology/totalEllipticity2', 'morphology/positionAngle'), # Two points: pos_angle needs to be converted to radians from the over converted value. ellip_1 should equal |ellip|*cos(2*pos_angle) but was assigned |ellip|*sin(2*pos_angle)
-            'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadius', 'morphology/spheroidHalfLightRadius', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
+            'size_disk_true':     'morphology/diskHalfLightRadiusArcsec',
+            'size_bulge_true':    'morphology/spheroidHalfLightRadiusArcsec',
+            'disk_Sersic_index':  'morphology/diskSersicIndex',
+            'bulge_Sersic_index': 'morphology/spheroidSersicIndex',
+            'position_angle':     'morphology/positionAngle',
+            'ellipticity_1':      'morphology/totalEllipticity1',
             'ellipticity_2':      'morphology/totalEllipticity2',
+            'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadiusArcsec', 'morphology/spheroidHalfLightRadiusArcsec', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
             'position_x':         'x',
             'position_y':         'y',
             'position_z':         'z',
@@ -81,7 +81,11 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y':         'vy',
             'velocity_z':         'vz',
         }
-
+        if catalog_version < StrictVersion('2.1.2'):
+            self._quantity_modifiers.update({
+                'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+            })
+            
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
