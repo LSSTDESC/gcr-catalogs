@@ -42,7 +42,7 @@ obs = obs_list[0]
 ############################################
 # establish connection to the DESCQA catalog
 
-cat_file = 'proto-dc2_v2.0'
+cat_file = 'proto-dc2_v2.1.1'
 db_bulge = bulgeDESCQAObject(cat_file)
 db_disk = diskDESCQAObject(cat_file)
 

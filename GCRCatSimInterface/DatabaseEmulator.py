@@ -1,24 +1,17 @@
 """
 This script will define classes that enable CatSim to interface with GCR
 """
-from future.builtins import next
-from future.builtins import object
-from collections import OrderedDict
 import numpy as np
-import gc
-import numbers
-from lsst.sims.utils import radiansFromArcsec
-
 
 __all__ = ["DESCQAObject", "bulgeDESCQAObject", "diskDESCQAObject"]
 
 
 _GCR_IS_AVAILABLE = True
 try:
-    from GCRCatalogs.register import load_catalog
+    from GCR import dict_to_numpy_array
+    import GCRCatalogs
 except ImportError:
     _GCR_IS_AVAILABLE = False
-
 
 _LSST_IS_AVAILABLE = True
 try:
@@ -27,13 +20,14 @@ except ImportError:
     _LSST_IS_AVAILABLE = False
     from astropy.coordinates import SkyCoord
     def _angularSeparation(ra1, dec1, ra2, dec2):
-        return SkyCoord(ra1, dec1, unit="deg").separation(SkyCoord(ra2, dec2, unit="deg")).radian
+        return SkyCoord(ra1, dec1, unit="radian").separation(SkyCoord(ra2, dec2, unit="radian")).radian
 
-def deg_to_radians(x):
-    return np.radians(x).astype(np.float)
 
-def arcsec_to_radians(x):
-    return radiansFromArcsec(x).astype(np.float)
+def deg2rad_double(x):
+    return np.deg2rad(x).astype(np.float64)
+
+def arcsec2rad(x):
+    return np.deg2rad(x/3600.0)
 
 
 # a cache to store loaded catalogs to prevent them
@@ -51,9 +45,8 @@ class DESCQAChunkIterator(object):
     and allows CatSim to iterate over it one chunk at a
     time.
     """
-
     def __init__(self, descqa_obj, column_map, obs_metadata,
-                 colnames, default_values, chunk_size):
+                 colnames, default_values=None, chunk_size=None):
         """
         Parameters
         ----------
@@ -75,112 +68,57 @@ class DESCQAChunkIterator(object):
         mapping and columns defined the
         DESCQAObject.dbDefaultValues
 
-        default_values is a dict (dbDefaultValues defined in the
-        DESCQAObject) defining default column values to be used
-        if the catalog does not contain required quantities
+        default_values is ignored.
 
         chunk_size is an integer (or None) defining the number
         of rows to be returned at a time.
         """
         self._descqa_obj = descqa_obj
-        self._catsim_colnames = colnames
-        self._chunk_size = chunk_size
-        self._data = None
-        self._continue = True
         self._column_map = column_map
         self._obs_metadata = obs_metadata
-        self._default_values = default_values
+        self._colnames = colnames
+        self._chunk_size = int(chunk_size) if chunk_size else None
+        self._data_indices = None
 
     def __iter__(self):
         return self
 
     def __next__(self):
-        if self._data is None and self._continue:
-            avail_qties = self._descqa_obj.list_all_quantities()
-            avail_native_qties = self._descqa_obj.list_all_native_quantities()
+        if self._data_indices is None:
+            self._init_data_indices()
 
-            # find the list of names that need to be passed to self._descqa_obj.get_quantities()
-            gcr_col_names = np.array([self._column_map[catsim_name][0] for catsim_name in self._catsim_colnames
-                                      if self._column_map[catsim_name][0] in avail_qties
-                                      or self._column_map[catsim_name][0] in avail_native_qties])
+        data_indices_this = self._data_indices[:self._chunk_size]
 
-            gcr_col_names = np.unique(gcr_col_names)
-            gcr_cat_data = self._descqa_obj.get_quantities(gcr_col_names)
+        if not data_indices_this.size:
+            raise StopIteration
 
-            n_rows = len(gcr_cat_data[gcr_col_names[0]])
+        self._data_indices = self._data_indices[self._chunk_size:]
 
-            # now build a dict keyed to the row names in self._catsim_colnames
-            # whose values are the numpy arrays of data corresponding to those
-            # column names
-            catsim_data = {}
-            dtype_list = []
-            for catsim_name in self._catsim_colnames:
-                gcr_name = self._column_map[catsim_name][0]
+        return dict_to_numpy_array({name: self._descqa_obj[self._column_map[name][0]][data_indices_this] for name in self._colnames})
 
-                if gcr_name in avail_qties or gcr_name in avail_native_qties:
-                    catsim_data[catsim_name] = gcr_cat_data[gcr_name]
-                else:
-                    catsim_data[catsim_name] = np.array([self._default_values[gcr_name]]*n_rows)
+    next = __next__
 
-                if len(self._column_map[catsim_name])>1:
-                    catsim_data[catsim_name] = self._column_map[catsim_name][1](catsim_data[catsim_name])
-                dtype_list.append((catsim_name, catsim_data[catsim_name].dtype))
+    def _init_data_indices(self):
 
-            dtype = np.dtype(dtype_list)
+        if self._obs_metadata is None or self._obs_metadata._boundLength is None:
+            self._data_indices = np.arange(self._descqa_obj['raJ2000'].size)
 
-            del gcr_cat_data
-            gc.collect()
+        else:
+            try:
+                radius_rad = max(self._obs_metadata._boundLength[0],
+                                 self._obs_metadata._boundLength[1])
+            except (TypeError, IndexError):
+                radius_rad = self._obs_metadata._boundLength
 
-            # if an ObservationMetaData has been specified, cull
-            # the data to be within the field of view
-            if self._obs_metadata is not None:
-                if self._obs_metadata._boundLength is not None:
-                    if not isinstance(self._obs_metadata._boundLength, numbers.Number):
-                        radius_rad = max(self._obs_metadata._boundLength[0],
-                                         self._obs_metadata._boundLength[1])
-                    else:
-                        radius_rad = self._obs_metadata._boundLength
+            ra = self._descqa_obj['raJ2000']
+            dec = self._descqa_obj['decJ2000']
 
-                    valid = np.where(_angularSeparation(catsim_data['raJ2000'],
-                                                        catsim_data['decJ2000'],
-                                                        self._obs_metadata._pointingRA,
-                                                        self._obs_metadata._pointingDec) < radius_rad)
+            self._data_indices = np.where(_angularSeparation(ra, dec, \
+                    self._obs_metadata._pointingRA, \
+                    self._obs_metadata._pointingDec) < radius_rad)[0]
 
-                    for name in catsim_data:
-                        catsim_data[name] = catsim_data[name][valid]
-
-            # convert catsim_data into a numpy recarray, which is what
-            # CatSim ultimately expects the ChunkIterator to deliver
-            records = []
-            for i_rec in range(len(catsim_data[self._catsim_colnames[0]])):
-                rec = (tuple([catsim_data[name][i_rec]
-                              for name in self._catsim_colnames]))
-                records.append(rec)
-
-            if len(records) == 0:
-                self._data = np.recarray(shape=(0,len(catsim_data)), dtype=dtype)
-            else:
-                self._data = np.rec.array(records, dtype=dtype)
-            self._start_row = 0
-
-        # iterate over the chunks of the recarray stored in self._data
-        if self._chunk_size is None and self._continue and len(self._data)>0:
-            output = self._data
-            self._data = None
-            self._continue = False
-            return output
-        elif self._continue:
-            if self._start_row<len(self._data):
-                old_start = self._start_row
-                self._start_row += self._chunk_size
-                return self._data[old_start:self._start_row]
-            else:
-                self._data = None
-                self._continue = False
-                raise StopIteration
-
-        raise StopIteration
-
+        if self._chunk_size is None:
+            self._chunk_size = self._data_indices.size
 
 
 class DESCQAObject(object):
@@ -189,11 +127,15 @@ class DESCQAObject(object):
     connect CatSim to a database.
     """
 
-    idColKey = None
     objectTypeId = None
     verbose = False
 
-    def __init__(self, yaml_file_name):
+    epoch = 2000.0
+    idColKey = 'galaxy_id'
+    _columns_need_postfix = ('majorAxis', 'minorAxis', 'sindex')
+    _postfix = None
+
+    def __init__(self, yaml_file_name, config_overwrite=None):
         """
         Parameters
         ----------
@@ -202,17 +144,41 @@ class DESCQAObject(object):
         """
 
         if not _GCR_IS_AVAILABLE:
-            raise RuntimeError("You cannot use DESQAObject\n"
+            raise RuntimeError("You cannot use DESCQAObject\n"
                                "You do not have *GCR* installed and setup")
 
-        if yaml_file_name in _CATALOG_CACHE:
-            self._catalog = _CATALOG_CACHE[yaml_file_name]
-        else:
-            self._catalog = load_catalog(yaml_file_name)
-            _CATALOG_CACHE[yaml_file_name] = self._catalog
+        if yaml_file_name not in _CATALOG_CACHE:
+            gc = GCRCatalogs.load_catalog(yaml_file_name, config_overwrite)
 
+            gc.add_modifier_on_derived_quantities('raJ2000', deg2rad_double, 'ra_true')
+            gc.add_modifier_on_derived_quantities('decJ2000', deg2rad_double, 'dec_true')
+
+            gc.add_quantity_modifier('redshift', gc.get_quantity_modifier('redshift_true'), overwrite=True)
+            gc.add_quantity_modifier('true_redshift', gc.get_quantity_modifier('redshift_true'))
+            gc.add_quantity_modifier('gamma1', gc.get_quantity_modifier('shear_1'))
+            gc.add_quantity_modifier('gamma2', gc.get_quantity_modifier('shear_2'))
+            gc.add_quantity_modifier('kappa', gc.get_quantity_modifier('convergence'))
+            gc.add_quantity_modifier('positionAngle', gc.get_quantity_modifier('position_angle'))
+
+            gc.add_quantity_modifier('majorAxis::disk', (arcsec2rad, 'morphology/diskMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::disk', (arcsec2rad, 'morphology/diskMinorAxisArcsec'))
+            gc.add_quantity_modifier('majorAxis::bulge', (arcsec2rad, 'morphology/spheroidMajorAxisArcsec'))
+            gc.add_quantity_modifier('minorAxis::bulge', (arcsec2rad, 'morphology/spheroidMinorAxisArcsec'))
+
+            gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('disk_sersic_index'))
+            gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('bulge_sersic_index'))
+
+            _CATALOG_CACHE[yaml_file_name] = gc
+
+        self._catalog = _CATALOG_CACHE[yaml_file_name]
         self.columnMap = None
         self._make_column_map()
+
+        if self.objectTypeId is None:
+            raise RuntimeError("Need to define objectTypeId for your DESCQAObject")
+
+        if self.idColKey is None:
+            raise RuntimeError("Need to define idColKey for your DESCQAObject")
 
     def getIdColKey(self):
         return self.idColKey
@@ -229,25 +195,16 @@ class DESCQAObject(object):
         element is an (optional) transformation applied to the GCR column
         used to get it into units expected by CatSim.
         """
-        self.columnMap = OrderedDict()
+        self.columnMap = dict()
 
-        if hasattr(self, 'columns'):
-            for column_tuple in self.columns:
-                if len(column_tuple)>1:
-                    self.columnMap[column_tuple[0]] = column_tuple[1:]
+        for name in self._catalog.list_all_quantities(include_native=True):
+            self.columnMap[name] = (name,)
 
-        for name in self._catalog.list_all_quantities():
-            if name not in self.columnMap:
-                self.columnMap[name] = (name,)
-
-        for name in self._catalog.list_all_native_quantities():
-            if name not in self.columnMap:
-                self.columnMap[name] = (name,)
-
-        if hasattr(self, 'dbDefaultValues'):
-            for name in self.dbDefaultValues:
-                if name not in self.columnMap:
-                    self.columnMap[name] = (name,)
+        if self._columns_need_postfix:
+            if not self._postfix:
+                raise ValueError('must specify `_postfix` when `_columns_need_postfix` is not empty')
+            for name in self._columns_need_postfix:
+                self.columnMap[name] = (name + self._postfix,)
 
 
     def query_columns(self, colnames=None, chunk_size=None,
@@ -267,28 +224,12 @@ class DESCQAObject(object):
 
         limit is ignored, but needs to be here to preserve the API
         """
-
-        if self.objectTypeId is None:
-            raise RuntimeError("Need to define objectTypeId for your DESCQAObject")
-
-        if self.idColKey is None:
-            raise RuntimeError("Need to define idColKey for your DESCQAObject")
-
-        if colnames is None:
-            colnames = [k for k in self.columnMap]
-
-        if hasattr(self, 'dbDefaultValues'):
-            default = self.dbDefaultValues
-        else:
-            default = None
-
         return DESCQAChunkIterator(self._catalog, self.columnMap, obs_metadata,
-                                   colnames, default, chunk_size)
+                                   colnames or list(self.columnMap), None,
+                                   chunk_size)
 
 
 class bulgeDESCQAObject(DESCQAObject):
-    epoch = 2000.0
-
     # PhoSim uniqueIds are generated by taking
     # source catalog uniqueIds, multiplying by
     # 1024, and adding objectTypeId.  This
@@ -297,43 +238,10 @@ class bulgeDESCQAObject(DESCQAObject):
     # share a uniqueId in the source catalog
     objectTypeId = 77
 
-    # this identifies the uniqueId column
-    # in the source catalog
-    idColKey = 'galaxy_id'
-
-    # map the source catalog columns to CatSim
-    # columns; each tuple is :
-    #
-    # (catsim_column_name,
-    #  source_column_name,
-    #  optional transformation to get from one to the other)
-    columns = [('raJ2000', 'ra_true', deg_to_radians),
-               ('decJ2000', 'dec_true', deg_to_radians),
-               ('gamma1', 'shear_1'),
-               ('gamma2', 'shear_2'),
-               ('kappa', 'convergence'),
-               ('redshift', 'redshift_true'),
-               ('positionAngle', 'morphology/positionAngle'),
-               ('majorAxis', 'morphology/spheroidMajorAxisArcsec', arcsec_to_radians),
-               ('minorAxis', 'morphology/spheroidMinorAxisArcsec', arcsec_to_radians)]
-
-    # default values that are applied if no other source
-    # for a column can be found
-    dbDefaultValues = {'sindex': 4.0}
+    # some column names require an additional postfix
+    _postfix = '::bulge'
 
 
 class diskDESCQAObject(DESCQAObject):
-    epoch = 2000.0
     objectTypeId = 87
-    idColKey = 'galaxy_id'
-    columns = [('raJ2000', 'ra_true', deg_to_radians),
-               ('decJ2000', 'dec_true', deg_to_radians),
-               ('gamma1', 'shear_1'),
-               ('gamma2', 'shear_2'),
-               ('kappa', 'convergence'),
-               ('redshift', 'redshift_true'),
-               ('positionAngle', 'morphology/positionAngle'),
-               ('majorAxis', 'morphology/diskMajorAxisArcsec', arcsec_to_radians),
-               ('minorAxis', 'morphology/diskMinorAxisArcsec', arcsec_to_radians)]
-
-    dbDefaultValues = {'sindex': 1.0}
+    _postfix = '::disk'
