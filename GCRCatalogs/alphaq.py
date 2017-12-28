@@ -10,7 +10,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '2.1.1.1' #version 1 for the 2.1.1 catalog reader
+__version__ = '2.1.2.0' #version 1 for the 2.1.1 catalog reader
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -68,8 +68,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'stellar_mass':       'totalMassStellar',
             'size_disk_true':     'morphology/diskHalfLightRadiusArcsec',
             'size_bulge_true':    'morphology/spheroidHalfLightRadiusArcsec',
-            'disk_Sersic_index':  'morphology/diskSersicIndex',
-            'bulge_Sersic_index': 'morphology/spheroidSersicIndex',
+            'disk_Sersic':  'morphology/diskSersicIndex',
+            'bulge_Sersic': 'morphology/spheroidSersicIndex',
             'position_angle':     'morphology/positionAngle',
             'ellipticity_1':      'morphology/totalEllipticity1',
             'ellipticity_2':      'morphology/totalEllipticity2',
