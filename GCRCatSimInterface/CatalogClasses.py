@@ -5,6 +5,7 @@ from lsst.utils import getPackageDir
 from lsst.sims.catUtils.exampleCatalogDefinitions import PhoSimCatalogSersic2D
 from lsst.sims.catalogs.decorators import cached, compound
 from lsst.sims.catUtils.mixins import EBVmixin
+from lsst.sims.utils import arcsecFromRadians
 
 __all__ = ["PhoSimDESCQA"]
 
@@ -144,3 +145,7 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         """
         return self.column_by_name('fittedMagNorm')
 
+    def column_by_name(self, colname):
+        if colname in ('majorAxis', 'minorAxis'):
+            return arcsecFromRadians(super(PhoSimDESCQA, self).column_by_name(colname))
+        return super(PhoSimDESCQA, self).column_by_name(colname)
