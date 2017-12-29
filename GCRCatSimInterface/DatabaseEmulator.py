@@ -158,15 +158,16 @@ class DESCQAObject(object):
             gc.add_quantity_modifier('gamma1', gc.get_quantity_modifier('shear_1'))
             gc.add_quantity_modifier('gamma2', gc.get_quantity_modifier('shear_2'))
             gc.add_quantity_modifier('kappa', gc.get_quantity_modifier('convergence'))
+
             gc.add_quantity_modifier('positionAngle', gc.get_quantity_modifier('position_angle'))
 
-            gc.add_quantity_modifier('majorAxis::disk', (arcsec2rad, 'morphology/diskMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis::disk', (arcsec2rad, 'morphology/diskMinorAxisArcsec'))
-            gc.add_quantity_modifier('majorAxis::bulge', (arcsec2rad, 'morphology/spheroidMajorAxisArcsec'))
-            gc.add_quantity_modifier('minorAxis::bulge', (arcsec2rad, 'morphology/spheroidMinorAxisArcsec'))
+            gc.add_modifier_on_derived_quantities('majorAxis::disk', arcsec2rad, 'size_disk_true')
+            gc.add_modifier_on_derived_quantities('minorAxis::disk', arcsec2rad, 'size_minor_disk_true')
+            gc.add_modifier_on_derived_quantities('majorAxis::bulge', arcsec2rad, 'size_bulge_true')
+            gc.add_modifier_on_derived_quantities('minorAxis::bulge', arcsec2rad, 'size_minor_bulge_true')
 
-            gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('disk_sersic_index'))
-            gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('bulge_sersic_index'))
+            gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('sersic_disk'))
+            gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('sersic_bulge'))
 
             _CATALOG_CACHE[yaml_file_name] = gc
 
