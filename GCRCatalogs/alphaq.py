@@ -72,7 +72,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':          'morphology/spheroidMinorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMajorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
-            'position_angle':           'morphology/positionAngle',
+            'position_angle_true':      'morphology/positionAngle',
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
