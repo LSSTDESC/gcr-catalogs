@@ -35,15 +35,25 @@ Quantity Label | Unit | Definition
 `A_v` | - | Extinction in V-band
 `R_v` | - | Ratio of total to selective extinction in B and V bands
 `size` | arcsec | Galaxy half-light radius (of major axis), lensed
+`size_minor` | arcsec | Galaxy half-light radius (of minor axis), lensed
 `size_true` | arcsec | Galaxy half-light radius (of major axis), not lensed
+`size_minor_true` | arcsec | Galaxy half-light radius (of minor axis), not lensed
 `size_disk_true` | arcsec | Disk half-light radius (of major axis), not lensed
+`size_minor_disk_true` | arcsec | Disk half-light radius (of minor axis), not lensed
 `size_bulge_true` | arcsec | Bulge half-light radius (of major axis), not lensed
-`ellipticity_1` | - | Ellipticity component 1, lensed
-`ellipticity_2` | - | Ellipticity component 2, lensed
+`size_minor_bulge_true` | arcsec | Bulge half-light radius (of minor axis), not lensed
+`position_angle` | deg | Position angle (arctan(E2/E1)), for galaxy, lensed
+`position_angle_true` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed
+`ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, lensed
+`ellipticity_1` | - | Ellipticity component 1, for galaxy, lensed
+`ellipticity_2` | - | Ellipticity component 2, for galaxy, lensed
+`ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, not lensed
 `ellipticity_1_true` | - | Ellipticity component 1, for galaxy, not lensed
 `ellipticity_2_true` | - | Ellipticity component 2, for galaxy, not lensed
+`ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for disk, not lensed
 `ellipticity_1_disk_true` | - | Ellipticity component 1, for disk, not lensed
 `ellipticity_2_disk_true` | - | Ellipticity component 2, for disk, not lensed
+`ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for bulge, not lensed
 `ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed
 `ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
 `shear_1` | - | Shear (gamma) component 1 *(sign convention to be supplied)*
