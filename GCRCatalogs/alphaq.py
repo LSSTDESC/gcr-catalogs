@@ -10,7 +10,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '2.1.2.0'
+__version__ = '2.1.2'
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -45,10 +45,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             else:
                 self.sky_area = 25.0 #If the sky area isn't specified use the default value of the sky area.
 
-        config_version = StrictVersion(kwargs.get('version', '0.0'))
+        self.version = kwargs.get('version', '0.0.0')
+        config_version = StrictVersion(self.version)
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
-
+        if StrictVersion(__version__) < config_version:
+            raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
 
         self._quantity_modifiers = {
             'galaxy_id' :    'galaxyID',
