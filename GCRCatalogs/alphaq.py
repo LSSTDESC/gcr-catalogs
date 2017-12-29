@@ -10,7 +10,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '2.1.2.0' 
+__version__ = '2.1.2.0'
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -24,7 +24,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
         self.lightcone = kwargs.get('lightcone')
-        
+
 
         with h5py.File(self._file, 'r') as fh:
             self.cosmology = FlatLambdaCDM(
@@ -44,53 +44,66 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 self.sky_area = float(fh['metaData/skyArea'].value)
             else:
                 self.sky_area = 25.0 #If the sky area isn't specified use the default value of the sky area.
-        
+
         config_version = StrictVersion(kwargs.get('version', '0.0'))
         if config_version != catalog_version:
             raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
 
 
         self._quantity_modifiers = {
-            'galaxy_id' :         'galaxyID',
-            'ra':                 'ra',
-            'dec':                'dec',
-            'ra_true':            'ra_true',
-            'dec_true':           'dec_true',
-            'redshift':           'redshift',
-            'redshift_true':      'redshiftHubble',
-            'shear_1':            'shear1',
-            'shear_2':            'shear2',
-            'convergence':        'convergence',
-            'magnification':      'magnification',
-            'halo_id':            'hostIndex',
-            'halo_mass':          'hostHaloMass',
-            'is_central':         (lambda x : x.astype(np.bool), 'isCentral'),
-            'stellar_mass':       'totalMassStellar',
-            'size_disk_true':     'morphology/diskHalfLightRadiusArcsec',
-            'size_bulge_true':    'morphology/spheroidHalfLightRadiusArcsec',
-            'sersic_disk':  'morphology/diskSersicIndex',
-            'sersic_bulge': 'morphology/spheroidSersicIndex',
-            'position_angle':     'morphology/positionAngle',
-            'ellipticity_1_true':      'morphology/totalEllipticity1',
-            'ellipticity_2_true':      'morphology/totalEllipticity2',
+            'galaxy_id' :    'galaxyID',
+            'ra':            'ra',
+            'dec':           'dec',
+            'ra_true':       'ra_true',
+            'dec_true':      'dec_true',
+            'redshift':      'redshift',
+            'redshift_true': 'redshiftHubble',
+            'shear_1':       'shear1',
+            'shear_2':       'shear2',
+            'convergence':   'convergence',
+            'magnification': 'magnification',
+            'halo_id':       'hostIndex',
+            'halo_mass':     'hostHaloMass',
+            'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
+            'stellar_mass':  'totalMassStellar',
+            'size_disk_true':           'morphology/diskMajorAxisArcsec',
+            'size_bulge_true':          'morphology/spheroidMinorAxisArcsec',
+            'size_minor_disk_true':     'morphology/diskMajorAxisArcsec',
+            'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
+            'position_angle':           'morphology/positionAngle',
+            'sersic_disk':              'morphology/diskSersicIndex',
+            'sersic_bulge':             'morphology/spheroidSersicIndex',
+            'ellipticity_true':         'morphology/totalEllipticity',
+            'ellipticity_true':         'morphology/totalEllipticity',
+            'ellipticity_disk_true':    'morphology/diskEllipticity',
+            'ellipticity_disk_true':    'morphology/diskEllipticity',
+            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
+            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
+            'ellipticity_1_true':       'morphology/totalEllipticity1',
+            'ellipticity_2_true':       'morphology/totalEllipticity2',
             'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
             'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
             'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
             'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
-            
-            'size_true':          (lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2), 'morphology/diskHalfLightRadiusArcsec', 'morphology/spheroidHalfLightRadiusArcsec', 'LSST_filters/diskLuminositiesStellar:LSST_r:rest', 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest'),
-            'position_x':         'x',
-            'position_y':         'y',
-            'position_z':         'z',
-            'velocity_x':         'vx',
-            'velocity_y':         'vy',
-            'velocity_z':         'vz',
+            'size_true': (
+                lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
+                'morphology/diskMajorAxisArcsec',
+                'morphology/spheroidMinorAxisArcsec',
+                'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+            ),
+            'position_x': 'x',
+            'position_y': 'y',
+            'position_z': 'z',
+            'velocity_x': 'vx',
+            'velocity_y': 'vy',
+            'velocity_z': 'vz',
         }
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
             })
-            
+
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
                 'disk_sersic_index':  'diskSersicIndex',
@@ -154,7 +167,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
-            
+
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
