@@ -32,7 +32,7 @@ _Note_: These instructions about Python environment may change in the future. If
 
 ### with Jypeter notebooks:
 
-First, [start a NERSC notebook server](https://jupyter.nersc.gov) and open a notebook with Python 2 kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
+First, [start a NERSC notebook server](https://jupyter-dev.nersc.gov) and open a notebook with Python 2 kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
 
 For Python 3:
 ```python
@@ -52,7 +52,7 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
 
 For Python 3:
 
-    source /global/common/cori/contrib/lsst/apps/anaconda/4.4.0-py3/bin/activate
+    source /global/common/software/lsst/cori-haswell-gcc/stack/setup_w_2017_46_py3_gcc6.sh
     source activate DESCQA
 
 For Python 2:
@@ -67,7 +67,7 @@ To be able to import `GCRCatalogs`, the first line of the script should be:
 
 For Python 3:
 
-    #!/global/common/cori/contrib/lsst/apps/anaconda/py3-envs/DESCQA/bin/python 
+    #!/global/common/software/lsst/common/miniconda/py3-4.2.12/bin/python
 
 For Python 2:
 
@@ -105,7 +105,7 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
        git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
 
 
-3. Sync with the upstream master branch
+3. Sync with the upstream master branch (**always do this!**)
 
        cd /your/own/directory/gcr-catalogs
        git checkout master
@@ -115,7 +115,7 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 
 4. Create a new branch for this edit:
 
-       git checkout -b newBranchName
+       git checkout -b newBranchName master
 
 
 5. Make changes
