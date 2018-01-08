@@ -32,15 +32,15 @@ _Note_: These instructions about Python environment may change in the future. If
 
 ### with Jypeter notebooks:
 
-First, [start a NERSC notebook server](https://jupyter-dev.nersc.gov) and open a notebook with Python 2 kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
+First, [start a NERSC notebook server](https://jupyter-dev.nersc.gov) and open a notebook with Python kernel. Make sure you add the DESCQA Python enviornment to `sys.path`:
 
-For Python 3:
+For Python 3 (recommended):
 ```python
 import sys
 sys.path.insert(0, '/global/common/software/lsst/common/miniconda/py3-4.2.12/lib/python3.6/site-packages')
 ```
 
-For Python 2
+For Python 2:
 ```python
 import sys
 sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESCQA/lib/python2.7/site-packages')
@@ -50,7 +50,7 @@ sys.path.insert(0, '/global/common/cori/contrib/lsst/apps/anaconda/py2-envs/DESC
 
 Activate DESCQA Python environment by running the following on NERSC (needs to be in `bash` or `zsh`):
 
-For Python 3:
+For Python 3 (recommended):
 
     source /global/common/software/lsst/cori-haswell-gcc/stack/setup_w_2017_46_py3_gcc6.sh
     source activate DESCQA
@@ -65,7 +65,7 @@ For Python 2:
 
 To be able to import `GCRCatalogs`, the first line of the script should be:
 
-For Python 3:
+For Python 3 (recommended):
 
     #!/global/common/software/lsst/common/miniconda/py3-4.2.12/bin/python
 
@@ -89,7 +89,7 @@ But note that the actual catalogs can only be accessed on a NERSC machine.
 
 - See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/CLF%20Test.ipynb) for an actual application (the Conditional  Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
 
-- See [GCR documentation](https://yymao.github.io/generic-catalog-reader/index.html) for the complete GCR API.
+- See [GCR documentation](https://yymao.github.io/generic-catalog-reader/) for the complete GCR API.
 
 - See [this script](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/phosim_descqa.py) for an example of interfacing PhoSim through CatSim using GCR Catalogs.
 
