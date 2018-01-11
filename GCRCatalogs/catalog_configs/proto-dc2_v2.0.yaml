@@ -1,12 +1,13 @@
-subclass_name: AlphaQGalaxyCatalog
+subclass_name: alphaq.AlphaQGalaxyCatalog
 
 filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2.hdf5
 
 lightcone: true
 
+version: "2.0"
+
 creators: ['Eve Kovacs', 'Danila Korytov', 'Katrin Heitmann', 'Andrew Benson']
 
 description: |
           ProtoDC2 is a down-scaled version of the catalog to be generated for LSST-DESC DC2.
-          For a description of the catalog and the methods, please see 
-          https://confluence.slac.stanford.edu/display/LSSTDESC/Extragalactic+Catalog+Development+for+DC2?preview=%2F227167079%2F228300698%2Fdc2-prototype-catalog_release_2.0.pdf
+          For a description of the catalog and the methods, please see https://goo.gl/fXDQwP

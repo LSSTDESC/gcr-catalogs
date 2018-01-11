@@ -5,11 +5,15 @@ Copyright (c) 2017 LSST DESC
 http://opensource.org/licenses/MIT
 """
 
+import os
 from setuptools import setup
+
+with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
+    exec(f.read())
 
 setup(
     name='GCRCatalogs',
-    version='0.2.0',
+    version=__version__,
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
@@ -25,7 +29,13 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='GCR',
-    packages=['GCRCatalogs'],
-    install_requires=['numpy', 'pyyaml', 'requests', 'h5py', 'astropy', 'GCR', 'sqlalchemy', 'pymssql'],
-    package_data = {'GCRCatalogs': ['catalog_configs/*.yaml']},
+    packages=['GCRCatalogs', 'GCRCatSimInterface'],
+    install_requires=['future', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.2'],
+    extras_require = {
+        'protodc2': ['h5py'],
+        'dc1':  ['sqlalchemy', 'pymssql'],
+        'full':  ['h5py', 'sqlalchemy', 'pymssql'],
+    },
+    package_data={'GCRCatalogs': ['catalog_configs/*.yaml'],
+                  'GCRCatSimInterface': ['data/*']},
 )

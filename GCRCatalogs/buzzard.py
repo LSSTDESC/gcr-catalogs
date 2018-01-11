@@ -4,11 +4,11 @@ Buzzard galaxy catalog class.
 from __future__ import division, print_function
 import os
 import re
+import functools
 import numpy as np
 from astropy.io import fits
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from .register import register_reader
 
 __all__ = ['BuzzardGalaxyCatalog']
 
@@ -38,8 +38,10 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        cosmology,
                        halo_mass_def='vir',
                        lightcone=True,
+                       sky_area=None,
                        healpix_pixels=None,
                        high_res=False,
+                       use_cache=True,
                        **kwargs):
 
         assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
@@ -51,11 +53,14 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.healpix_pixels = None
         self.reset_healpix_pixels()
         self.check_healpix_pixels()
-        self._pre_filter_quantities = {'healpix_pixel'}
+        self._native_filter_quantities = {'healpix_pixel'}
+
+        self.cache = dict() if use_cache else None
 
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
         self.lightcone = bool(lightcone)
+        self.sky_area  = float(sky_area or np.nan)
 
         _c = 299792.458
         _abs_mask_func = lambda x: np.where(x==99.0, np.nan, x + 5 * np.log10(self.cosmology.h))
@@ -67,7 +72,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'ra_true': 'truth/RA',
                 'dec_true': 'truth/DEC',
                 'redshift_true' : (lambda zt, x, y, z, vx, vy, vz: zt - (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
-                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                                   'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
                 'halo_id': 'truth/HALOID',
                 'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
                 'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
@@ -87,25 +92,22 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     self._quantity_modifiers['Mag_true_{}_sdss_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAG/{}'.format(i))
                     self._quantity_modifiers['magerr_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
-                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
 
                 if b!='u':
                     self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'desy5/AMAG/{}'.format(i-1))
                     self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'desy5/OMAG/{}'.format(i-1))
                     self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
-                    self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
 
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
-                self._quantity_modifiers['Mag_true_{}_any_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_lsst'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
-                self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
 
             for i, b in enumerate('ZYJHK'):
                 self._quantity_modifiers['Mag_true_{}_vista_z01'.format(b)] = (_abs_mask_func, 'vista/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_vista'.format(b)] = (_mask_func, 'vista/OMAG/{}'.format(i))
 
             for i, b in enumerate(['acsf435w', 'acsf606w', 'acsf775w', 'acsf814w', 'acsf850lp', 'wfc3f275w', 'wfc3f336w',
-                                    'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
+                                   'wfc3f336w', 'wfc3f125w', 'wfc3f160w']):
+
                 self._quantity_modifiers['Mag_true_{}_candels_z0'.format(b)] = (_abs_mask_func, 'candels/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_candels'.format(b)] = (_mask_func, 'candels/OMAG/{}'.format(i))
 
@@ -122,7 +124,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers = {
                 'galaxy_id': 'truth/ID',
                 'redshift': (lambda zt, x, y, z, vx, vy, vz: zt + (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
-                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
+                             'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
                 'redshift_true': 'truth/Z',
                 'ra': 'truth/RA',
                 'dec': 'truth/DEC',
@@ -151,12 +153,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
             for i, b in enumerate('grizY'):
                 self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
-                self._quantity_modifiers['Mag_true_{}_any'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
-                self._quantity_modifiers['mag_{}_any'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
                 self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
-                self._quantity_modifiers['magerr_{}_any'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
-
 
 
     def _get_healpix_pixels(self):
@@ -197,43 +195,39 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         return native_quantities
 
 
-    def _iter_native_dataset(self, pre_filters=None):
-        cache = dict()
-        for i in self.healpix_pixels:
-            args = dict(healpix_pixel=i)
-            if (not pre_filters) or all(f[0](*(args[k] for k in f[1:])) for f in pre_filters):
-                yield i, cache
-        for key in list(cache.keys()):
-            del cache[key]
+    def _iter_native_dataset(self, native_filters=None):
+        for healpix in self.healpix_pixels:
+
+            fargs = dict(healpix_pixel=healpix)
+            if native_filters and not all(f[0](*(fargs[k] for k in f[1:])) for f in native_filters):
+                continue
+
+            yield functools.partial(self._native_quantity_getter, healpix=healpix)
 
 
-    def _open_dataset(self, healpix, subset, use_cache=None):
+    def _open_dataset(self, healpix, subset):
         path = self._catalog_path_template[subset].format(healpix)
 
-        if use_cache is None:
+        if self.cache is None:
             return FitsFile(path)
 
         key = (healpix, subset)
-        if key not in use_cache:
-            use_cache[key] = FitsFile(path)
-        return use_cache[key]
+        if key not in self.cache:
+            self.cache[key] = FitsFile(path)
+        return self.cache[key]
 
 
-    def _fetch_native_quantity(self, dataset, native_quantity):
-        healpix, cache = dataset
+    def _native_quantity_getter(self, native_quantity, healpix):
         if native_quantity == 'healpix_pixel':
-            data = np.empty(self._open_dataset(healpix, self._default_subset, cache).data.shape, np.int)
+            data = np.empty(self._open_dataset(healpix, self._default_subset).data.shape, np.int)
             data.fill(healpix)
-        else:
-            native_quantity = native_quantity.split('/')
-            assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
-            subset = native_quantity.pop(0)
-            column = native_quantity.pop(0)
-            data = self._open_dataset(healpix, subset, cache).data[column]
-            if native_quantity:
-                data = data[:,int(native_quantity.pop(0))]
-        return data
+            return data
 
-
-# Registers the reader
-register_reader(BuzzardGalaxyCatalog)
+        native_quantity = native_quantity.split('/')
+        assert len(native_quantity) in {2,3}, 'something wrong with the native_quantity {}'.format(native_quantity)
+        subset = native_quantity.pop(0)
+        column = native_quantity.pop(0)
+        data = self._open_dataset(healpix, subset).data[column]
+        if native_quantity:
+            data = data[:,int(native_quantity.pop(0))]
+        return data.byteswap().newbyteorder()
