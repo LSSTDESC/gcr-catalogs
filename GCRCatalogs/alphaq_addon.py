@@ -83,7 +83,7 @@ class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
         self._sess = tf.Session()
 
         # Load the saved tensorflow model
-        model = tf.saved_model.loader.load(sess, tags=['serve'], export_dir=self._model_dir)
+        model = tf.saved_model.loader.load(self._sess, tags=['serve'], export_dir=self._model_dir)
 
         # Extracts the signature definition of the function to use
         definition = model.signature_def[self._function_name]
@@ -98,7 +98,7 @@ class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
                 inp = definition.inputs[n]
                 feed_dict[inp.name] = x[i]
 
-            return self._sess.run(definition.outputs[output_name], feed_dict=feed_dict)
+            return self._sess.run(definition.outputs[output_name].name, feed_dict=feed_dict)
 
         # Add the quantity modifier
         modifiers = {}
