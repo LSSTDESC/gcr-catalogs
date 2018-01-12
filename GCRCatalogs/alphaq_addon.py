@@ -8,8 +8,15 @@ import h5py
 from itertools import product
 from GCR import BaseGenericCatalog
 
-__all__ = ['AlphaQTidalCatalog']
+from .alphaq import AlphaQGalaxyCatalog
 
+try:
+  import tensorflow as tf
+  HAS_TENSORFLOW = True
+except ImportError:
+  HAS_TENSORFLOW = False
+
+__all__ = ['AlphaQTidalCatalog', 'AlphaQMorphoCatalog']
 
 class AlphaQTidalCatalog(BaseGenericCatalog):
     """
@@ -55,3 +62,47 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
                 cols = (slice(None),) + tuple((int(i) for i in items[1:]))
                 return data[name][cols]
             yield native_quantity_getter
+
+
+class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
+    """
+    Addon to the AlphaQ catalog that adds a RandomWalk component to the galaxy
+    """
+
+    def _subclass_init(self, **kwargs):
+        super(self.__class__, self)._subclass_init(**kwargs)
+
+        if not HAS_TENSORFLOW:
+            raise TypeError('The RandomWalk catalog requires tensorflow')
+
+        self._model_dir = kwargs['model_dir']
+        self._function_name = kwargs['function_name']
+        assert os.path.exists(self._model_dir), 'Model directory {} does not exist'.format(self._model_dir)
+
+        # Opens tf Session
+        self._sess = tf.Session()
+
+        # Load the saved tensorflow model
+        model = tf.saved_model.loader.load(sess, tags=['serve'], export_dir=self._model_dir)
+
+        # Extracts the signature definition of the function to use
+        definition = model.signature_def[self._function_name]
+
+        requested_quantities = tuple([n for n in definition.inputs])
+        generated_quantities = tuple([n for n in definition.outputs])
+
+        # Define the serving function
+        def function_mapper(output_name, *x):
+            feed_dict = {}
+            for i, n in enumerate(definition.inputs):
+                inp = definition.inputs[n]
+                feed_dict[inp.name] = x[i]
+
+            return self._sess.run(definition.outputs[output_name], feed_dict=feed_dict)
+
+        # Add the quantity modifier
+        modifiers = {}
+        for quantity in generated_quantities:
+            modifiers[quantity] =  (function_mapper , quantity )+requested_quantities
+
+        self._quantity_modifiers.update(modifiers)
