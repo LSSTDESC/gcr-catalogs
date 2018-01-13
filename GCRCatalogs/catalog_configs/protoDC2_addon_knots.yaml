@@ -1,4 +1,4 @@
-subclass_name: alphaq_addon.AlphaQMorphoCatalog
+subclass_name: alphaq_addon.AlphaQKnotsCatalog
 filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2.1.2.hdf5
 lightcone: true
 version: "2.1.2"
