@@ -169,21 +169,23 @@ class DESCQAObject(object):
             gc.add_quantity_modifier('sindex::disk', gc.get_quantity_modifier('sersic_disk'))
             gc.add_quantity_modifier('sindex::bulge', gc.get_quantity_modifier('sersic_bulge'))
 
-            # Very hacky solution, the number of knots replaces the sersic index, keeping the rest
-            # of the sersic
-            gc.add_quantity_modifier('sindex::knots', gc.get_quantity_modifier('n_knots'))
-            gc.add_modifier_on_derived_quantities('majorAxis::knots', arcsec2rad, 'size_disk_true')
-            gc.add_modifier_on_derived_quantities('minorAxis::knots', arcsec2rad, 'size_minor_disk_true')
+            # Test for random walk specific addon
+            if isinstance(gc, AlphaQMorphoCatalog):
+                # Very hacky solution, the number of knots replaces the sersic index, keeping the rest
+                # of the sersic
+                gc.add_quantity_modifier('sindex::knots', gc.get_quantity_modifier('n_knots'))
+                gc.add_modifier_on_derived_quantities('majorAxis::knots', arcsec2rad, 'size_disk_true')
+                gc.add_modifier_on_derived_quantities('minorAxis::knots', arcsec2rad, 'size_minor_disk_true')
 
-            # Apply flux correction for the random walk
-            add_postfix = []
-            for name in gc.list_all_native_quantities():
-                if 'SEDs/diskLuminositiesStellar:SED' in name:
-                    gc.add_quantity_modifier(name+'::disk', (lambda x,y: x*y, name, 'knots_flux_ratio'))
-                    gc.add_quantity_modifier(name+'::knots', (lambda x,y: x*(1-y), name, 'knots_flux_ratio'))
-                    add_postfix.append(name)
-            # Registering these columns for postfix filtering
-            self._columns_need_postfix += tuple(add_postfix)
+                # Apply flux correction for the random walk
+                add_postfix = []
+                for name in gc.list_all_native_quantities():
+                    if 'SEDs/diskLuminositiesStellar:SED' in name:
+                        gc.add_quantity_modifier(name+'::disk', (lambda x,y: x*y, name, 'knots_flux_ratio'))
+                        gc.add_quantity_modifier(name+'::knots', (lambda x,y: x*(1-y), name, 'knots_flux_ratio'))
+                        add_postfix.append(name)
+                # Registering these columns for postfix filtering
+                self._columns_need_postfix += tuple(add_postfix)
 
             _CATALOG_CACHE[yaml_file_name] = gc
 
