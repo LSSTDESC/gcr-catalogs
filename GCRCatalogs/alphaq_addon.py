@@ -71,12 +71,16 @@ class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
 
     def _subclass_init(self, **kwargs):
         super(self.__class__, self)._subclass_init(**kwargs)
+        
+        # Adds additional field required by the sampling code
+        self._quantity_modifiers['morphology/BTR'] = (lambda x,y : x/(x+y), 'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed', 'SDSS_filters/diskLuminositiesStellar:SDSS_i:observed')
 
         if not HAS_TENSORFLOW:
             raise TypeError('The RandomWalk catalog requires tensorflow')
 
         self._model_dir = kwargs['model_dir']
         self._function_name = kwargs['function_name']
+        self._batch_size = 10000
         assert os.path.exists(self._model_dir), 'Model directory {} does not exist'.format(self._model_dir)
 
         # Opens tf Session
@@ -90,19 +94,34 @@ class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
 
         requested_quantities = tuple([n for n in definition.inputs])
         generated_quantities = tuple([n for n in definition.outputs])
+        print(requested_quantities)
+        print(generated_quantities)
+        self._native_quantities = []
 
         # Define the serving function
-        def function_mapper(output_name, *x):
-            feed_dict = {}
-            for i, n in enumerate(definition.inputs):
-                inp = definition.inputs[n]
-                feed_dict[inp.name] = x[i]
-
-            return self._sess.run(definition.outputs[output_name].name, feed_dict=feed_dict)
+        def get_function_mapper(output_name):
+            
+            def func(*x):
+                
+                x_size = len(x[0])
+                n_batches = x_size // self._batch_size
+                n_batches += 0 if (x_size % self._batch_size) == 0 else 1
+                
+                # list storing the results
+                res = []
+                
+                # Create data dictionary
+                feed_dict = {}
+                for b in range(n_batches):
+                    print(b)
+                    for i, n in enumerate(definition.inputs):
+                        feed_dict[definition.inputs[n].name] = x[i][b*self._batch_size:min((b+1)*self._batch_size, x_size)].astype('float32')
+                    res.append(self._sess.run(definition.outputs[output_name].name, feed_dict=feed_dict))
+                
+                return np.concatenate(res)
+            return func
 
         # Add the quantity modifier
-        modifiers = {}
         for quantity in generated_quantities:
-            modifiers[quantity] =  (function_mapper , quantity )+requested_quantities
-
-        self._quantity_modifiers.update(modifiers)
+            self.add_modifier_on_derived_quantities(quantity, get_function_mapper( quantity), *requested_quantities )
+ 
