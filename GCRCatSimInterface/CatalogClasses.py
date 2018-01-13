@@ -11,7 +11,6 @@ __all__ = ["PhoSimDESCQA"]
 #########################################################################
 # define a class to write the PhoSim catalog; defining necessary defaults
 
-
 class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
 
     # default values used if the database does not provide information
@@ -21,6 +20,17 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
                        ('internalRv', 3.1, float),
                        ('galacticExtinctionModel', 'CCM', str, 3),
                        ('galacticRv', 3.1, float)]
+
+    def __init__(self, *args, **kwargs):
+        # Update the spatial model if knots are requested, for knots, the sersic
+        # parameter actually contains the number of knots
+        if 'hasKnots' in kwargs['cannot_be_null']:
+            self.catalog_type = 'phoSim_catalog_KNOTS'
+            self.spatialModel = 'knots'
+            if 'hasDisk' not in kwargs['cannot_be_null']:
+                kwargs['cannot_be_null'].append('hasDisk')
+
+        super(self.__class__, self).__init__(*args, **kwargs)
 
     # below are defined getter methods used to define CatSim value-added columns
     @cached
@@ -143,4 +153,3 @@ class PhoSimDESCQA(PhoSimCatalogSersic2D, EBVmixin):
         in the base PhoSim InstanceCatalog classes
         """
         return self.column_by_name('fittedMagNorm')
-
