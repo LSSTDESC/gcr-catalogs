@@ -16,7 +16,7 @@ try:
 except ImportError:
   HAS_TENSORFLOW = False
 
-__all__ = ['AlphaQTidalCatalog', 'AlphaQMorphoCatalog']
+__all__ = ['AlphaQTidalCatalog', 'AlphaQKnotsCatalog']
 
 class AlphaQTidalCatalog(BaseGenericCatalog):
     """
@@ -64,14 +64,14 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
             yield native_quantity_getter
 
 
-class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
+class AlphaQKnotsCatalog(AlphaQGalaxyCatalog):
     """
     Addon to the AlphaQ catalog that adds a RandomWalk component to the galaxy
     """
 
     def _subclass_init(self, **kwargs):
         super(self.__class__, self)._subclass_init(**kwargs)
-        
+
         # Adds additional field required by the sampling code
         self._quantity_modifiers['morphology/BTR'] = (lambda x,y : x/(x+y), 'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed', 'SDSS_filters/diskLuminositiesStellar:SDSS_i:observed')
 
@@ -94,34 +94,28 @@ class AlphaQMorphoCatalog(AlphaQGalaxyCatalog):
 
         requested_quantities = tuple([n for n in definition.inputs])
         generated_quantities = tuple([n for n in definition.outputs])
-        print(requested_quantities)
-        print(generated_quantities)
+
         self._native_quantities = []
 
         # Define the serving function
         def get_function_mapper(output_name):
-            
+
             def func(*x):
-                
                 x_size = len(x[0])
                 n_batches = x_size // self._batch_size
                 n_batches += 0 if (x_size % self._batch_size) == 0 else 1
-                
+
                 # list storing the results
                 res = []
-                
                 # Create data dictionary
                 feed_dict = {}
                 for b in range(n_batches):
-                    print(b)
                     for i, n in enumerate(definition.inputs):
                         feed_dict[definition.inputs[n].name] = x[i][b*self._batch_size:min((b+1)*self._batch_size, x_size)].astype('float32')
                     res.append(self._sess.run(definition.outputs[output_name].name, feed_dict=feed_dict))
-                
                 return np.concatenate(res)
             return func
 
         # Add the quantity modifier
         for quantity in generated_quantities:
             self.add_modifier_on_derived_quantities(quantity, get_function_mapper( quantity), *requested_quantities )
- 
