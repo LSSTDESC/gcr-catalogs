@@ -1,6 +1,4 @@
-subclass_name: alphaq_addon.AlphaQKnotsCatalog
-filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2.1.2.hdf5
-lightcone: true
-version: "2.1.2"
-model_dir: /global/homes/f/flanusse/randomwalk/model
-function_name: samples
+subclass_name: alphaq_addon.AlphaQAddonCatalog
+alias: proto-dc2_v2.1.2
+addon_filename: /global/homes/f/flanusse/randomwalk/protoDC2_knots_v2.1.2.hdf5
+addon_group: knots
