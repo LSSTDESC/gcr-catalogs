@@ -43,7 +43,7 @@ class AlphaQAddonCatalog(AlphaQGalaxyCatalog):
 
         self._addon_native_quantities = addon_native_quantities
 
-        return native_quantities + addon_native_quantities
+        return native_quantities.union(addon_native_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
         """
