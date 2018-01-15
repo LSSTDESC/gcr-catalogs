@@ -10,7 +10,7 @@ from GCR import BaseGenericCatalog
 
 from .alphaq import AlphaQGalaxyCatalog
 
-__all__ = ['AlphaQTidalCatalog', 'AlphaAddonCatalog']
+__all__ = ['AlphaQTidalCatalog', 'AlphaQAddonCatalog']
 
 
 class AlphaQAddonCatalog(AlphaQGalaxyCatalog):
