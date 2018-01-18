@@ -70,3 +70,6 @@ Quantity Label | Unit | Definition
 `velocity_x` | km/s | 3D velocity (x component)
 `velocity_y` | km/s | 3D velocity (y component)
 `velocity_z` | km/s | 3D velocity (z component)
+`sed_<start>_<width>` | 4.4659e13 W/Hz | intergrated AB luminosity of for a narrow tophat filter from `<start>` to `<start>` + `<width>` in Angstroms
+`sed_<start>_<width>_disk` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for disk
+`sed_<start>_<width>_bulge` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for bulge
