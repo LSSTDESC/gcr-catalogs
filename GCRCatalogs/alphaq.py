@@ -114,21 +114,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         # add magnitudes
         for band in 'ugrizY':
-            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
-            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
             if band != 'Y':
-                self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
-                self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+                self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
+                self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
+            self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+            self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
 
         # add SEDs
+        translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
         sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest$')
         for quantity in self._native_quantities:
             m = sed_re.match(quantity)
             if m is None:
                 continue
             component, start, width = m.groups()
-            component = '' if component == 'total' else ('_' + component)
-            self._quantity_modifiers['sed_{}_{}{}'.format(start, width, component)] = quantity
+            self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
 
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('2.1.2'):
