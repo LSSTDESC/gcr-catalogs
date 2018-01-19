@@ -26,7 +26,7 @@ Quantity Label | Unit | Definition
 `dec_true` | degree | Declination, not lensed
 `redshift_true` | - | Cosmological redshift
 `redshift` | - | Cosmological redshift with line-of-sight motion
-`Mag_true_<band>_<filter>_z<z>` | - | Absolute magnitude, not lensed, in `<band>` with  `<filter>` and k-corrected to `<z>`, e.g., `Mag_true_Y_lsst_z0`, `Mag_true_g_des_z01`
+`Mag_true_<band>_<filter>_z<z>` | - | Absolute magnitude, not lensed, in `<band>` with  `<filter>` and k-corrected to `<z>`, e.g., `Mag_true_Y_lsst_z0`, `Mag_true_g_des_z01`. In the case when postfix is `_z0`, it means rest-frame absolute magnitude.
 `mag_<band>_<filter>_lsst` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
 `magerr_<band>_<filter>_lsst` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
 `sersic` | - | Sersic index of galaxy light profile
@@ -70,6 +70,6 @@ Quantity Label | Unit | Definition
 `velocity_x` | km/s | 3D velocity (x component)
 `velocity_y` | km/s | 3D velocity (y component)
 `velocity_z` | km/s | 3D velocity (z component)
-`sed_<start>_<width>` | 4.4659e13 W/Hz | intergrated AB luminosity of for a narrow tophat filter from `<start>` to `<start>` + `<width>` in Angstroms
+`sed_<start>_<width>` | 4.4659e13 W/Hz | intergrated, rest-frame, AB luminosity of for a narrow tophat filter from `<start>` to `<start>` + `<width>` in Angstroms
 `sed_<start>_<width>_disk` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for disk
 `sed_<start>_<width>_bulge` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for bulge
