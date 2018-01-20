@@ -8,7 +8,56 @@ import h5py
 from itertools import product
 from GCR import BaseGenericCatalog
 
-__all__ = ['AlphaQTidalCatalog']
+from .alphaq import AlphaQGalaxyCatalog
+
+__all__ = ['AlphaQTidalCatalog', 'AlphaQAddonCatalog']
+
+
+class AlphaQAddonCatalog(AlphaQGalaxyCatalog):
+    """
+    Addon to the AlphaQ catalog that can add extra quanities to the baseline
+    catalog
+    """
+    def _subclass_init(self, **kwargs):
+        # Loads main catalog
+        super(self.__class__, self)._subclass_init(**kwargs)
+
+        # Sets the filename of the addon
+        self._addon_filename = kwargs['addon_filename']
+        assert os.path.isfile(self._addon_filename), 'Addon file {} does not exist'.format(self._addon_filename)
+        self._addon_group = kwargs['addon_group']
+
+    def _generate_native_quantity_list(self):
+        # Generates the native quantity list for the parent catalog
+        native_quantities = super(self.__class__, self)._generate_native_quantity_list()
+
+        # Loads the additional data provided by the addon file
+        with h5py.File(self._addon_filename, 'r') as fh:
+            hgroup = fh[self._addon_group]
+            hobjects = []
+            #get all the names of objects in this tree
+            hgroup.visit(hobjects.append)
+            #filter out the group objects and keep the dataste objects
+            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject]) == h5py.Dataset]
+            addon_native_quantities = set(hdatasets)
+
+        self._addon_native_quantities = addon_native_quantities
+
+        return native_quantities.union(addon_native_quantities)
+
+    def _iter_native_dataset(self, native_filters=None):
+        """
+        Caution, fully overiddes parent function
+        """
+        assert not native_filters, '*native_filters* is not supported'
+        with h5py.File(self._file, 'r') as fh:
+            with h5py.File(self._addon_filename, 'r') as fh_addon:
+                def native_quantity_getter(native_quantity):
+                    if native_quantity in self._addon_native_quantities:
+                        return fh_addon['{}/{}'.format(self._addon_group,native_quantity)].value
+                    else:
+                        return fh['galaxyProperties/{}'.format(native_quantity)].value
+                yield native_quantity_getter
 
 
 class AlphaQTidalCatalog(BaseGenericCatalog):
