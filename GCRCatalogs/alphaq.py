@@ -81,7 +81,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_true': (
                 lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
                 'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMinorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
