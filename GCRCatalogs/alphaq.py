@@ -4,14 +4,24 @@ Alpha Q galaxy catalog class.
 from __future__ import division
 import os
 import re
+import warnings
+import hashlib
 import numpy as np
 import h5py
-import warnings
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from distutils.version import StrictVersion
+
 __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '2.1.2'
+
+
+def md5(fname, chunk_size=65536):
+    hash_md5 = hashlib.md5()
+    with open(fname, 'rb') as f:
+        for chunk in iter(lambda: f.read(chunk_size), b''):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -24,6 +34,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
+
+        if kwargs.get('md5'):
+            assert md5(self._file) == kwargs['md5'], 'md5 sum does not match!'
+        else:
+            warnings.warn('No md5 sum specified in the config file')
+
         self.lightcone = kwargs.get('lightcone')
 
         with h5py.File(self._file, 'r') as fh:
