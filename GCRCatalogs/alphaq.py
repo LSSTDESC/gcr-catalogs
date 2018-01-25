@@ -85,6 +85,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
+            'Av' : (lambda lum_v, lum_v_dust: (-2.5*(np.log10(lum_v_dust/lum_v))),
+                    'otherLuminosities/totalLuminositiesStellar:V:rest',
+                    'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
+              
+            ),
+            'Rv' : (lambda lum_v, lum_v_dust, lum_b, lum_b_dust :
+                    np.choose(((lum_v_dust/lum_v==1.0) & (lum_b_dust/lum_b/lum_v_dust*lum_v==1.0)).astype(int),
+                              (((np.log10(lum_v_dust/lum_v)) /  (np.log10(lum_b_dust/lum_b/lum_v_dust*lum_v) ) ),
+                               (np.ones(lum_v.size)))),
+                    'otherLuminosities/totalLuminositiesStellar:V:rest',
+                    'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
+                    'otherLuminosities/totalLuminositiesStellar:B:rest',
+                    'otherLuminosities/totalLuminositiesStellar:B:rest:dustAtlas',
+
+            ),
             'position_x': 'x',
             'position_y': 'y',
             'position_z': 'z',
@@ -94,7 +109,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         }
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
-                'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+                'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
             })
 
         if catalog_version < StrictVersion('2.1.1'):
