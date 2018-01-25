@@ -3,10 +3,14 @@ python:
   - "2.7"
   - "3.6"
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y freetds-dev
+  
 install:
   - pip install .[full]
   - pip install pylint nose
 
 script:
-  - pylint --disable=C0103,C0301 --extension-pkg-whitelist=numpy `find . -name \*.py -not -path ./v1/\* -print` || true
-  - nosetests
+  - pylint --disable=C0103,C0301 --extension-pkg-whitelist=numpy `find . -name \*.py -print` || true
+  - nosetests tests/test_import.py
