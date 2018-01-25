@@ -3,14 +3,28 @@ Alpha Q galaxy catalog class.
 """
 from __future__ import division
 import os
+import re
+import warnings
+import hashlib
+from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
-import warnings
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from distutils.version import StrictVersion
+
 __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '2.1.2'
+
+
+def md5(fname, chunk_size=65536):
+    """
+    generate MD5 sum for *fname*
+    """
+    hash_md5 = hashlib.md5()
+    with open(fname, 'rb') as f:
+        for chunk in iter(lambda: f.read(chunk_size), b''):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
@@ -19,20 +33,20 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, **kwargs):
+    def _subclass_init(self, filename, **kwargs): # pylint: disable-msg=W0221
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
+
+        if kwargs.get('md5'):
+            assert md5(self._file) == kwargs['md5'], 'md5 sum does not match!'
+        else:
+            warnings.warn('No md5 sum specified in the config file')
+
         self.lightcone = kwargs.get('lightcone')
 
-
         with h5py.File(self._file, 'r') as fh:
-            self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value,
-            )
-
+            # get version
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
                 try:
@@ -40,11 +54,28 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 except KeyError:
                     break
             catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
+
+            # get cosmology
+            self.cosmology = FlatLambdaCDM(
+                H0=fh['metaData/simulationParameters/H_0'].value,
+                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
+                Ob0=fh['metaData/simulationParameters/Omega_b'].value,
+            )
+
+            # get sky area
             if catalog_version >= StrictVersion("2.1.1"):
                 self.sky_area = float(fh['metaData/skyArea'].value)
             else:
                 self.sky_area = 25.0 #If the sky area isn't specified use the default value of the sky area.
 
+            # get native quantities
+            self._native_quantities = set()
+            def _collect_native_quantities(name, obj):
+                if isinstance(obj, h5py.Dataset):
+                    self._native_quantities.add(name)
+            fh['galaxyProperties'].visititems(_collect_native_quantities)
+
+        # check versions
         self.version = kwargs.get('version', '0.0.0')
         config_version = StrictVersion(self.version)
         if config_version != catalog_version:
@@ -52,6 +83,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if StrictVersion(__version__) < config_version:
             raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
 
+        # specify quantity modifiers
         self._quantity_modifiers = {
             'galaxy_id' :    'galaxyID',
             'ra':            'ra',
@@ -68,6 +100,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
+            'stellar_mass_disk':        'diskMassStellar',
+            'stellar_mass_bulge':       'spheroidMassStellar',
             'size_disk_true':           'morphology/diskMajorAxisArcsec',
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
@@ -107,6 +141,26 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'velocity_y': 'vy',
             'velocity_z': 'vz',
         }
+
+        # add magnitudes
+        for band in 'ugrizY':
+            if band != 'Y':
+                self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+                self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
+            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
+
+        # add SEDs
+        translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
+        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest$')
+        for quantity in self._native_quantities:
+            m = sed_re.match(quantity)
+            if m is None:
+                continue
+            component, start, width = m.groups()
+            self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
+
+        # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
@@ -129,41 +183,16 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             })
 
 
-        for band in 'ugriz':
-            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band)
-            self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
-            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band)
-            self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
-
-        self._quantity_modifiers['mag_Y_lsst'] = 'LSST_filters/magnitude:LSST_y:observed'
-        self._quantity_modifiers['Mag_true_Y_lsst_z0'] = 'LSST_filters/magnitude:LSST_y:rest'
-
-        with h5py.File(self._file, 'r') as fh:
-            self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value
-            )
-
-
     def _generate_native_quantity_list(self):
-        with h5py.File(self._file, 'r') as fh:
-            hgroup = fh['galaxyProperties']
-            hobjects = []
-            #get all the names of objects in this tree
-            hgroup.visit(hobjects.append)
-            #filter out the group objects and keep the dataste objects
-            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject]) == h5py.Dataset]
-            native_quantities = set(hdatasets)
-        return native_quantities
+        return self._native_quantities
 
 
     def _iter_native_dataset(self, native_filters=None):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
-            def native_quantity_getter(native_quantity):
+            def _native_quantity_getter(native_quantity):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value
-            yield native_quantity_getter
+            yield _native_quantity_getter
 
 
 
@@ -172,7 +201,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             quantity_key = 'galaxyProperties/' + quantity
             if quantity_key not in fh:
                 return default
-            modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
+            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
 
