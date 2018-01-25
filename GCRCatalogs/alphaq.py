@@ -6,17 +6,20 @@ import os
 import re
 import warnings
 import hashlib
+from distutils.version import StrictVersion
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from distutils.version import StrictVersion
 
 __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '2.1.2'
 
 
 def md5(fname, chunk_size=65536):
+    """
+    generate MD5 sum for *fname*
+    """
     hash_md5 = hashlib.md5()
     with open(fname, 'rb') as f:
         for chunk in iter(lambda: f.read(chunk_size), b''):
@@ -30,7 +33,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, **kwargs):
+    def _subclass_init(self, filename, **kwargs): # pylint: disable-msg=W0221,R0912,R0914
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
@@ -97,6 +100,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
+            'stellar_mass_disk':        'diskMassStellar',
+            'stellar_mass_bulge':       'spheroidMassStellar',
             'size_disk_true':           'morphology/diskMajorAxisArcsec',
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
@@ -176,9 +181,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
-            def native_quantity_getter(native_quantity):
+            def _native_quantity_getter(native_quantity):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value
-            yield native_quantity_getter
+            yield _native_quantity_getter
 
 
 
@@ -187,7 +192,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             quantity_key = 'galaxyProperties/' + quantity
             if quantity_key not in fh:
                 return default
-            modifier = lambda k, v: None if k=='description' and v==b'None given' else v.decode()
+            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
 
