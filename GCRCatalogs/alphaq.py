@@ -33,7 +33,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, **kwargs): # pylint: disable-msg=W0221,R0912,R0914
+    def _subclass_init(self, filename, **kwargs): # pylint: disable-msg=W0221
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
