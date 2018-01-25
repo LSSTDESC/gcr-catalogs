@@ -63,8 +63,8 @@ Quantity Label | Unit | Definition
 `halo_id` | - | Unique ID of the main halo that contains the galaxy
 `halo_mass` | M<sub>sun</sub> | Halo mass of the main halo that contains the galaxy
 `stellar_mass` | M<sub>sun</sub> | Total stellar mass of the galaxy
-`stellar_mass_disk` | M<sub>sun</sub> | Total stellar mass of the disk component
-`stellar_mass_bulge` | M<sub>sun</sub> | Total stellar mass of the bulge component
+`stellar_mass_disk` | M<sub>sun</sub> | Stellar mass of the disk component
+`stellar_mass_bulge` | M<sub>sun</sub> | Stellar mass of the bulge component
 `is_central` | *(bool)* | If the galaxy is the central galaxy of the main halo
 `position_x` | Mpc | 3D position (x coordinate)
 `position_y` | Mpc | 3D position (y coordinate)
