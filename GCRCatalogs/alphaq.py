@@ -6,7 +6,7 @@ import os
 import re
 import warnings
 import hashlib
-from distutils.version import StrictVersion
+from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
