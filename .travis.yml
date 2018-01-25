@@ -1,0 +1,12 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+install:
+  - pip install .[full]
+  - pip install pylint nose
+
+script:
+  - pylint --disable=C0103,C0301 --extension-pkg-whitelist=numpy `find . -name \*.py -not -path ./v1/\* -print` || true
+  - nosetests
