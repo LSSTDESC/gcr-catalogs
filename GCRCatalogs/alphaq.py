@@ -98,7 +98,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                               'magnification',
                               'shear1',
                               'shear2'),
-            'convergence_old': 'convergence',
             'magnification': 'magnification',
             'halo_id':       'hostIndex',
             'halo_mass':     'hostHaloMass',
