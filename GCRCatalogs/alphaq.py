@@ -26,6 +26,19 @@ def md5(fname, chunk_size=65536):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
+    v = lum_v_dust/lum_v
+    b = lum_b_dust/lum_b
+    bv = b/v
+    Rv = np.log10(v) / np.log10(bv)
+    Rv[(v == 1) & (b == 1)] = 1.0
+    Rv[v == b] = np.nan
+    return Rv
+
+def _calc_Av(lum_v, lum_v_dust):
+    Av = -2.5*(np.log10(lum_v_dust/lum_v))
+    Av[lum_v_dust == 0] = np.nan
+    return Av
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -112,6 +125,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'ellipticity_true':         'morphology/totalEllipticity',
             'ellipticity_1_true':       'morphology/totalEllipticity1',
             'ellipticity_2_true':       'morphology/totalEllipticity2',
+            'ellipticity_disk_true':         'morphology/totalEllipticity',
+            'ellipticity_1_disk_true':       'morphology/totalEllipticity1',
+            'ellipticity_2_disk_true':       'morphology/totalEllipticity2',
+            'ellipticity_bulge_true':         'morphology/totalEllipticity',
+            'ellipticity_1_bulge_true':       'morphology/totalEllipticity1',
+            'ellipticity_2_bulge_true':       'morphology/totalEllipticity2',
             'size_true': (
                 lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
                 'morphology/diskMajorAxisArcsec',
@@ -119,15 +138,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
-            'Av' : (lambda lum_v, lum_v_dust: (-2.5*(np.log10(lum_v_dust/lum_v))),
+            'A_v' : (lambda lum_v, lum_v_dust: _calc_Av(lum_v,lum_v_dust),
                     'otherLuminosities/totalLuminositiesStellar:V:rest',
                     'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
               
             ),
-            'Rv' : (lambda lum_v, lum_v_dust, lum_b, lum_b_dust :
-                    np.choose(((lum_v_dust/lum_v==1.0) & (lum_b_dust/lum_b/lum_v_dust*lum_v==1.0)).astype(int),
-                              (((np.log10(lum_v_dust/lum_v)) /  (np.log10(lum_b_dust/lum_b/lum_v_dust*lum_v) ) ),
-                               (np.ones(lum_v.size)))),
+            'R_v' : (lambda lum_v, lum_v_dust, lum_b, lum_b_dust :
+                     _calc_Rv(lum_v,lum_v_dust, lum_b, lum_b_dust),
                     'otherLuminosities/totalLuminositiesStellar:V:rest',
                     'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
                     'otherLuminosities/totalLuminositiesStellar:B:rest',
@@ -212,3 +229,4 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+
