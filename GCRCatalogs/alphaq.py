@@ -105,7 +105,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                               'magnification',
                               'shear1',
                               'shear2'),
-            'magnification': (lambda mag: np.where(mag<0.1,np.ones_like(mag),mag),
+            'magnification': (lambda mag: np.where(mag<0.1, np.ones_like(mag), mag),
                               'magnification'),
             'halo_id':       'hostIndex',
             'halo_mass':     'hostHaloMass',
