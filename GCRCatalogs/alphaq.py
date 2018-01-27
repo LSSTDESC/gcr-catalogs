@@ -26,6 +26,11 @@ def md5(fname, chunk_size=65536):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+def _calc_conv(mag, shear1, shear2):
+    conv = 1.0 - np.sqrt(1.0/mag + shear1**2 + shear2**2)
+    slct = mag < 0.2
+    conv[slct] = 1.0 #manually changing the values for when magnification is near zero. 
+    return conv
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -94,7 +99,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
-            'convergence':   (lambda mag, shear1, shear2 : 1.0 - np.sqrt(1.0/mag + shear1**2 + shear2**2),
+            'convergence':   (lambda mag, shear1, shear2 : _calc_conv(mag, shear1, shear2),
                               'magnification',
                               'shear1',
                               'shear2'),
