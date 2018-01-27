@@ -138,13 +138,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
-            'A_v' : (lambda lum_v, lum_v_dust: _calc_Av(lum_v,lum_v_dust),
+            'A_v' : (_calc_Av,
                     'otherLuminosities/totalLuminositiesStellar:V:rest',
                     'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
               
             ),
-            'R_v' : (lambda lum_v, lum_v_dust, lum_b, lum_b_dust :
-                     _calc_Rv(lum_v,lum_v_dust, lum_b, lum_b_dust),
+            'R_v' : (_calc_Rv,
                     'otherLuminosities/totalLuminositiesStellar:V:rest',
                     'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
                     'otherLuminosities/totalLuminositiesStellar:B:rest',
