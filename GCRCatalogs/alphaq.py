@@ -101,7 +101,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
-            'convergence':   (lambda mag, shear1, shear2 : _calc_conv(mag, shear1, shear2),
+            'convergence':    (_calc_conv,
                               'magnification',
                               'shear1',
                               'shear2'),
