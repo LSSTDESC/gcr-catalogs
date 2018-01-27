@@ -27,9 +27,11 @@ def md5(fname, chunk_size=65536):
     return hash_md5.hexdigest()
 
 def _calc_conv(mag, shear1, shear2):
-    conv = 1.0 - np.sqrt(1.0/mag + shear1**2 + shear2**2)
     slct = mag < 0.2
-    conv[slct] = 1.0 #manually changing the values for when magnification is near zero. 
+    mag_corr = np.copy(mag)
+    mag_corr[slct] = 1.0
+    conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
+    #manually changing the values for when magnification is near zero. 
     return conv
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
