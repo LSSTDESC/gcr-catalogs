@@ -26,6 +26,15 @@ def md5(fname, chunk_size=65536):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+
+def _calc_conv(mag, shear1, shear2):
+    slct = mag < 0.2
+    mag_corr = np.copy(mag)
+    mag_corr[slct] = 1.0 # manually changing the values for when magnification is near zero. 
+    conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
+    return conv
+
+
 def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
     v = lum_v_dust/lum_v
     b = lum_b_dust/lum_b
@@ -35,10 +44,12 @@ def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
     Rv[v == b] = np.nan
     return Rv
 
+
 def _calc_Av(lum_v, lum_v_dust):
     Av = -2.5*(np.log10(lum_v_dust/lum_v))
     Av[lum_v_dust == 0] = np.nan
     return Av
+
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -107,8 +118,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
-            'convergence':   'convergence',
-            'magnification': 'magnification',
+            'convergence':    (
+                _calc_conv,
+                'magnification',
+                'shear1',
+                'shear2',
+            ),
+            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'hostIndex',
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
