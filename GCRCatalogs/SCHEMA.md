@@ -65,7 +65,7 @@ Quantity Label | Unit | Definition
 `stellar_mass` | M<sub>sun</sub> | Total stellar mass of the galaxy
 `stellar_mass_disk` | M<sub>sun</sub> | Stellar mass of the disk component
 `stellar_mass_bulge` | M<sub>sun</sub> | Stellar mass of the bulge component
-`bulge_to_total_ratio_i` | - | bulge-to-total luminosity ratio in *i* band
+`bulge_to_total_ratio_<band>` | - | bulge-to-total luminosity ratio in `<band>` (e.g., `bulge_to_total_ratio_i`)
 `is_central` | *(bool)* | If the galaxy is the central galaxy of the main halo
 `position_x` | Mpc | 3D position (x coordinate)
 `position_y` | Mpc | 3D position (y coordinate)
