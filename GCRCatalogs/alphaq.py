@@ -26,13 +26,30 @@ def md5(fname, chunk_size=65536):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+
 def _calc_conv(mag, shear1, shear2):
     slct = mag < 0.2
     mag_corr = np.copy(mag)
-    mag_corr[slct] = 1.0
+    mag_corr[slct] = 1.0 # manually changing the values for when magnification is near zero. 
     conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
-    #manually changing the values for when magnification is near zero. 
     return conv
+
+
+def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
+    v = lum_v_dust/lum_v
+    b = lum_b_dust/lum_b
+    bv = b/v
+    Rv = np.log10(v) / np.log10(bv)
+    Rv[(v == 1) & (b == 1)] = 1.0
+    Rv[v == b] = np.nan
+    return Rv
+
+
+def _calc_Av(lum_v, lum_v_dust):
+    Av = -2.5*(np.log10(lum_v_dust/lum_v))
+    Av[lum_v_dust == 0] = np.nan
+    return Av
+
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -122,20 +139,32 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
             'ellipticity_1_true':       'morphology/totalEllipticity1',
             'ellipticity_2_true':       'morphology/totalEllipticity2',
+            'ellipticity_disk_true':    'morphology/diskEllipticity',
             'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
             'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
+            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
             'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
             'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
             'size_true': (
                 lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
                 'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMinorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+            ),
+            'A_v' : (
+                _calc_Av,
+                'otherLuminosities/totalLuminositiesStellar:V:rest',
+                'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
+            ),
+            'R_v' : (
+                _calc_Rv,
+                'otherLuminosities/totalLuminositiesStellar:V:rest',
+                'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
+                'otherLuminosities/totalLuminositiesStellar:B:rest',
+                'otherLuminosities/totalLuminositiesStellar:B:rest:dustAtlas',
             ),
             'position_x': 'x',
             'position_y': 'y',
@@ -166,7 +195,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
-                'position_angle':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+                'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
             })
 
         if catalog_version < StrictVersion('2.1.1'):
@@ -215,3 +244,4 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+
