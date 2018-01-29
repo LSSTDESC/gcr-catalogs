@@ -130,14 +130,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMinorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
             'size_minor_true': (
                 _calc_weighted_size_minor,
                 'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMinorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
                 'morphology/totalEllipticity',
