@@ -16,15 +16,6 @@ __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '2.1.2'
 
 
-def _calc_weighted_size(size1, size2, lum1, lum2):
-    return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
-
-
-def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
-    size = _calc_weighted_size(size1, size2, lum1, lum2)
-    return size * (1.0 - ell) / (1.0 + ell)
-
-
 def md5(fname, chunk_size=65536):
     """
     generate MD5 sum for *fname*
@@ -34,6 +25,15 @@ def md5(fname, chunk_size=65536):
         for chunk in iter(lambda: f.read(chunk_size), b''):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+
+def _calc_weighted_size(size1, size2, lum1, lum2):
+    return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
+
+
+def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
+    size = _calc_weighted_size(size1, size2, lum1, lum2)
+    return size * (1.0 - ell) / (1.0 + ell)
 
 
 def _calc_conv(mag, shear1, shear2):
