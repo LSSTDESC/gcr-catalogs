@@ -27,6 +27,15 @@ def md5(fname, chunk_size=65536):
     return hash_md5.hexdigest()
 
 
+def _calc_weighted_size(size1, size2, lum1, lum2):
+    return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
+
+
+def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
+    size = _calc_weighted_size(size1, size2, lum1, lum2)
+    return size * (1.0 - ell) / (1.0 + ell)
+
+
 def _calc_conv(mag, shear1, shear2):
     slct = mag < 0.2
     mag_corr = np.copy(mag)
@@ -118,7 +127,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
-            'convergence':    (
+            'convergence': (
                 _calc_conv,
                 'magnification',
                 'shear1',
@@ -148,18 +157,31 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
             'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
             'size_true': (
-                lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
+                _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
                 'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
-            'A_v' : (
+            'size_minor_true': (
+                _calc_weighted_size_minor,
+                'morphology/diskMajorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
+                'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+                'morphology/totalEllipticity',
+            ),
+            'bulge_to_total_ratio_i': (
+                lambda x, y: x/(x+y),
+                'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed', 
+                'SDSS_filters/diskLuminositiesStellar:SDSS_i:observed',
+            ),
+            'A_v': (
                 _calc_Av,
                 'otherLuminosities/totalLuminositiesStellar:V:rest',
                 'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
             ),
-            'R_v' : (
+            'R_v': (
                 _calc_Rv,
                 'otherLuminosities/totalLuminositiesStellar:V:rest',
                 'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
