@@ -20,27 +20,27 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     DC1 galaxy catalog class.
     """
 
-    def _subclass_init(self, db_info_fname, **kwargs):
+    def _subclass_init(self, **kwargs):
 
-        db_url = engine.url.URL('mssql+pymssql', **self._read_database_info_from_file(db_info_fname))
+        db_url = engine.url.URL('mssql+pymssql', **self._read_database_info_from_file(kwargs['db_info_fname']))
         session_factory = sessionmaker(autoflush=True, bind=create_engine(db_url))
         self._Session = scoped_session(session_factory)
 
         self._quantity_modifiers = {
             'ra_true': 'ra',
-            'dec_true': 'dec' ,
+            'dec_true': 'dec',
             'redshift_true': 'redshift',
             'galaxy_id': 'galid',
             'galaxy_id_disk': 'sedid_disk',
             'galaxy_id_bulge': 'sedid_bulge',
-            'Mag_r_lsst_z0': 'absmag_r_total',
-            'disk_sersic_index': 'disk_n',
-            'bulge_sersic_index': 'bulge_n',
+            'Mag_true_r_lsst_z0': 'absmag_r_total',
+            'sersic_disk': 'disk_n',
+            'sersic_bulge': 'bulge_n',
             'stellar_mass': 'mass_stellar',
-            'disk_re_a_true': 'a_d',
-            'disk_re_b_true': 'b_d',
-            'bulge_re_a_true': 'a_b',
-            'bulge_re_b_true': 'b_b',
+            'size_disk_true': 'a_d',
+            'size_minor_disk_true': 'b_d',
+            'size_bulge_true': 'a_b',
+            'size_minor_bulge_true': 'b_b',
         }
 
         self.cosmology = FlatLambdaCDM(Om0=0.25, Ob0=0.045, H0=73.)
