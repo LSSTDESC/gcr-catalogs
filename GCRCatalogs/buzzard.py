@@ -28,11 +28,11 @@ class FitsFile(object):
     def __init__(self, path):
         self._path = path
         self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
-        self.data = self._file_handle[1].data
+        self.data = self._file_handle[1].data #pylint: disable=E1101
 
     def __del__(self):
         del self.data
-        del self._file_handle[1].data
+        del self._file_handle[1].data #pylint: disable=E1101
         self._file_handle.close()
         del self._file_handle
 
@@ -53,7 +53,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                        healpix_pixels=None,
                        high_res=False,
                        use_cache=True,
-                       **kwargs):
+                       **kwargs): #pylint: disable=W0221
 
         assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
 
@@ -105,11 +105,13 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
             for i, b in enumerate('ugrizY'):
                 if b!='Y':
                     self._quantity_modifiers['Mag_true_{}_sdss_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
+                    self._quantity_modifiers['mag_true_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/TMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAG/{}'.format(i))
                     self._quantity_modifiers['magerr_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/OMAGERR/{}'.format(i))
 
                 if b!='u':
                     self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'desy5/AMAG/{}'.format(i-1))
+                    self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'desy5/TMAG/{}'.format(i-1))
                     self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'desy5/OMAG/{}'.format(i-1))
                     self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'desy5/OMAGERR/{}'.format(i-1))
 
@@ -174,6 +176,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
             for i, b in enumerate('grizY'):
                 self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
+                self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
                 self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
 
@@ -199,7 +202,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         """
         Reset the list of healpixels used by the reader.
         """
-        self.healpix_pixels = list(self._default_healpix_pixels)
+        self.healpix_pixels = list(self._default_healpix_pixels) #pylint: disable=W0201
 
 
     def _generate_native_quantity_list(self):
@@ -207,7 +210,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         healpix = next(iter(self.healpix_pixels))
         for subset in self._catalog_path_template.keys():
             f = self._open_dataset(healpix, subset)
-            for name, (dt, size) in f.data.dtype.fields.items():
+            for name, (dt, _) in f.data.dtype.fields.items():
                 if dt.shape:
                     for i in range(dt.shape[0]):
                         native_quantities.add('/'.join((subset, name, str(i))))
