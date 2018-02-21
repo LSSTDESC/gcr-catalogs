@@ -33,8 +33,12 @@ Quantity Label | Unit | Definition
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
-`A_v` | - | Extinction in V-band
-`R_v` | - | Ratio of total to selective extinction in B and V bands
+`A_v` | - | Extinction in V-band, for galaxy light profile
+`A_v_disk` | - | Extinction in V-band, for disk light profile
+`A_v_bulge` | - | Extinction in V-band, for bulge light profile
+`R_v` | - | Ratio of total to selective extinction in B and V bands, for galaxy light profile
+`R_v_disk` | - | Ratio of total to selective extinction in B and V bands, for disk light profile
+`R_v_bulge` | - | Ratio of total to selective extinction in B and V bands, for bulge light profile
 `size` | arcsec | Galaxy half-light radius (of major axis), lensed
 `size_minor` | arcsec | Galaxy half-light radius (of minor axis), lensed
 `size_true` | arcsec | Galaxy half-light radius (of major axis), not lensed
