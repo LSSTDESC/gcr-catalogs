@@ -1,4 +1,0 @@
-# This file is needed in order to use this package in the context
-# of EUPS, the LSST package-management software
-
-envPrepend(PYTHONPATH, ${PRODUCT_DIR})
