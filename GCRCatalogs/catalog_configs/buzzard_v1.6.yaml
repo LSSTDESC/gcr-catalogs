@@ -8,6 +8,7 @@ catalog_path_template:
 cosmology:
     H0: 70.0
     Om0: 0.286
+    Ob0: 0.047
 
 halo_mass_def: vir
 lightcone: true
