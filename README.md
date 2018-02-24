@@ -22,7 +22,7 @@ Currently these sets of catalogs are available (**Note that these catalogs are n
 3. DC1 catalog: 
    - `dc1`
 
-Each of the catalogs is specified by a YAML config file, which can be found [here](https://github.com/LSSTDESC/gcr-catalogs/tree/master/GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [the schema](GCRCatalogs/SCHEMA.md).
+Each of the catalogs is specified by a YAML config file, which can be found [here](GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [the schema](GCRCatalogs/SCHEMA.md).
 
 
 ## Use GCRCatalogs on NERSC
@@ -86,9 +86,9 @@ sys.path.insert(0, '/path/to/gcr-catalogs')
 
 ## Usage and examples
 
-- See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/GCRCatalogs%20Demo.ipynb) for a detail tutorial on how to use GCR Catalogs.
+- See [this notebook](examples/GCRCatalogs%20Demo.ipynb) for a detail tutorial on how to use GCR Catalogs.
 
-- See [this notebook](https://github.com/LSSTDESC/gcr-catalogs/blob/master/examples/CLF%20Test.ipynb) for an actual application (the Conditional  Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
+- See [this notebook](examples/CLF%20Test.ipynb) for an actual application (the Conditional  Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
 
 - See [GCR documentation](https://yymao.github.io/generic-catalog-reader/) for the complete GCR API.
 
