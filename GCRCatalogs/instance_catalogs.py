@@ -38,7 +38,7 @@ class BaseInstanceCatalog(BaseGenericCatalog):
             'seed': 'seed',
             'seeing': 'seeing',
             'sun_alt': 'sunalt',
-            'visit_time': 'visitime',
+            'visit_time': 'vistime',
             'min_source': 'minsource',
             'includeobj': 'includeobj'
         } 
@@ -57,17 +57,17 @@ class BaseInstanceCatalog(BaseGenericCatalog):
             return fh[native_quantity].values
         yield native_quantity_getter
     def has_stellar_catalog(self):
-        return any('star' in x for x in self.get_quantities('includeobj').values()[0][0])
+        return any('star' in x for x in list(self.get_quantities('includeobj').values())[0][0])
     def get_stellar_catalog_name(self):
         assert(self.has_stellar_catalog()), 'Catalog {} does not contain stellar source catalog'
-        mask = ['star' in x for x in self.get_quantities('includeobj').values()[0][0]]
-        return self.get_quantities('includeobj').values()[0][0][mask][0] 
+        mask = ['star' in x for x in list(self.get_quantities('includeobj').values())[0][0]]
+        return list(self.get_quantities('includeobj').values())[0][0][mask][0] 
     def has_galaxy_catalog(self):
-        return any('gal' in x for x in self.get_quantities('includeobj').values()[0][0])
+        return any('gal' in x for x in list(self.get_quantities('includeobj').values())[0][0])
     def get_galaxy_catalog_name(self):
         assert(self.has_stellar_catalog()), 'Catalog {} does not contain galaxy source catalog'
-        mask = ['gal' in x for x in self.get_quantities('includeobj').values()[0][0]]
-        return self.get_quantities('includeobj').values()[0][0][mask][0] 
+        mask = ['gal' in x for x in list(self.get_quantities('includeobj').values())[0][0]]
+        return list(self.get_quantities('includeobj').values())[0][0][mask][0] 
     
     
 class InstanceCatalogStar(BaseInstanceCatalog):
