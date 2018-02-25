@@ -1,0 +1,5 @@
+subclass_name: instance_catalogs.InstanceCatalog
+filename: /global/cscratch1/sd/descpho/Pipeline-tasks/DC2-phoSim-3_WFD-r/000000/instCat/phosim_cat_162700.txt
+description: Instance Catalogs for DC2
+included_by_default: true
+
