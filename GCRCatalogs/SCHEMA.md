@@ -27,13 +27,18 @@ Quantity Label | Unit | Definition
 `redshift_true` | - | Cosmological redshift
 `redshift` | - | Cosmological redshift with line-of-sight motion
 `Mag_true_<band>_<filter>_z<z>` | - | Absolute magnitude, not lensed, in `<band>` with  `<filter>` and k-corrected to `<z>`, e.g., `Mag_true_Y_lsst_z0`, `Mag_true_g_des_z01`. In the case when postfix is `_z0`, it means rest-frame absolute magnitude.
-`mag_<band>_<filter>_lsst` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
-`magerr_<band>_<filter>_lsst` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
+`mag_true_<band>_<filter>` | - | Apparent magnitude, not lensed, in `<band>` with  `<filter>`, e.g., `mag_true_Y_lsst`, `mag_true_g_des`
+`mag_<band>_<filter>` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
+`magerr_<band>_<filter>` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
-`A_v` | - | Extinction in V-band
-`R_v` | - | Ratio of total to selective extinction in B and V bands
+`A_v` | - | Extinction in V-band, for galaxy light profile
+`A_v_disk` | - | Extinction in V-band, for disk light profile
+`A_v_bulge` | - | Extinction in V-band, for bulge light profile
+`R_v` | - | Ratio of total to selective extinction in B and V bands, for galaxy light profile
+`R_v_disk` | - | Ratio of total to selective extinction in B and V bands, for disk light profile
+`R_v_bulge` | - | Ratio of total to selective extinction in B and V bands, for bulge light profile
 `size` | arcsec | Galaxy half-light radius (of major axis), lensed
 `size_minor` | arcsec | Galaxy half-light radius (of minor axis), lensed
 `size_true` | arcsec | Galaxy half-light radius (of major axis), not lensed
@@ -44,16 +49,16 @@ Quantity Label | Unit | Definition
 `size_minor_bulge_true` | arcsec | Bulge half-light radius (of minor axis), not lensed
 `position_angle` | deg | Position angle (arctan(E2/E1)), for galaxy, lensed
 `position_angle_true` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed
-`ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, lensed
+`ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, lensed, where `q = size_minor/size`
 `ellipticity_1` | - | Ellipticity component 1, for galaxy, lensed
 `ellipticity_2` | - | Ellipticity component 2, for galaxy, lensed
-`ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, not lensed
+`ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, not lensed, where `q = size_minor_true/size_true`
 `ellipticity_1_true` | - | Ellipticity component 1, for galaxy, not lensed
 `ellipticity_2_true` | - | Ellipticity component 2, for galaxy, not lensed
-`ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for disk, not lensed
+`ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for disk, not lensed, where `q = size_minor_disk_true/size_disk_true`
 `ellipticity_1_disk_true` | - | Ellipticity component 1, for disk, not lensed
 `ellipticity_2_disk_true` | - | Ellipticity component 2, for disk, not lensed
-`ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for bulge, not lensed
+`ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for bulge, not lensed, where `q = size_minor_bulge_true/size_bulge_true`
 `ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed
 `ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
 `shear_1` | - | Shear (gamma) component 1 *(sign convention to be supplied)*
@@ -65,6 +70,7 @@ Quantity Label | Unit | Definition
 `stellar_mass` | M<sub>sun</sub> | Total stellar mass of the galaxy
 `stellar_mass_disk` | M<sub>sun</sub> | Stellar mass of the disk component
 `stellar_mass_bulge` | M<sub>sun</sub> | Stellar mass of the bulge component
+`bulge_to_total_ratio_<band>` | - | bulge-to-total luminosity ratio in `<band>` (e.g., `bulge_to_total_ratio_i`)
 `is_central` | *(bool)* | If the galaxy is the central galaxy of the main halo
 `position_x` | Mpc | 3D position (x coordinate)
 `position_y` | Mpc | 3D position (y coordinate)

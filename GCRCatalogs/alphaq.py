@@ -40,13 +40,46 @@ def _calc_Av(lum_v, lum_v_dust):
     Av[lum_v_dust == 0] = np.nan
     return Av
 
+def _calc_weighted_size(size1, size2, lum1, lum2):
+    return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
+
+
+def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
+    size = _calc_weighted_size(size1, size2, lum1, lum2)
+    return size * (1.0 - ell) / (1.0 + ell)
+
+
+def _calc_conv(mag, shear1, shear2):
+    slct = mag < 0.2
+    mag_corr = np.copy(mag)
+    mag_corr[slct] = 1.0 # manually changing the values for when magnification is near zero.
+    conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
+    return conv
+
+
+def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
+    v = lum_v_dust/lum_v
+    b = lum_b_dust/lum_b
+    bv = b/v
+    Rv = np.log10(v) / np.log10(bv)
+    Rv[(v == 1) & (b == 1)] = 1.0
+    Rv[v == b] = np.nan
+    return Rv
+
+
+def _calc_Av(lum_v, lum_v_dust):
+    Av = -2.5*(np.log10(lum_v_dust/lum_v))
+    Av[lum_v_dust == 0] = np.nan
+    return Av
+
+
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
     Alpha Q galaxy catalog class. Uses generic quantity and filter mechanisms
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, **kwargs): # pylint: disable-msg=W0221
+    def _subclass_init(self, filename, **kwargs): #pylint: disable=W0221
 
         assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
         self._file = filename
@@ -107,8 +140,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       'shear2',
-            'convergence':   'convergence',
-            'magnification': 'magnification',
+            'convergence': (
+                _calc_conv,
+                'magnification',
+                'shear1',
+                'shear2',
+            ),
+            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'hostIndex',
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
@@ -132,23 +170,61 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
             'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
             'size_true': (
-                lambda size1, size2, lum1, lum2: ((size1*lum1)+(size2*lum2))/(lum1+lum2),
+                _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
                 'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
-            'A_v' : (
+            'size_minor_true': (
+                _calc_weighted_size_minor,
+                'morphology/diskMajorAxisArcsec',
+                'morphology/spheroidMajorAxisArcsec',
+                'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+                'morphology/totalEllipticity',
+            ),
+            'bulge_to_total_ratio_i': (
+                lambda x, y: x/(x+y),
+                'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed',
+                'SDSS_filters/diskLuminositiesStellar:SDSS_i:observed',
+            ),
+            'A_v': (
                 _calc_Av,
                 'otherLuminosities/totalLuminositiesStellar:V:rest',
                 'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
             ),
-            'R_v' : (
+            'A_v_disk': (
+                _calc_Av,
+                'otherLuminosities/diskLuminositiesStellar:V:rest',
+                'otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas',
+            ),
+            'A_v_bulge': (
+                _calc_Av,
+                'otherLuminosities/spheroidLuminositiesStellar:V:rest',
+                'otherLuminosities/spheroidLuminositiesStellar:V:rest:dustAtlas',
+            ),
+            'R_v': (
+
                 _calc_Rv,
                 'otherLuminosities/totalLuminositiesStellar:V:rest',
                 'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
                 'otherLuminosities/totalLuminositiesStellar:B:rest',
                 'otherLuminosities/totalLuminositiesStellar:B:rest:dustAtlas',
+            ),
+            'R_v_disk': (
+                _calc_Rv,
+                'otherLuminosities/diskLuminositiesStellar:V:rest',
+                'otherLuminosities/diskLuminositiesStellar:V:rest:dustAtlas',
+                'otherLuminosities/diskLuminositiesStellar:B:rest',
+                'otherLuminosities/diskLuminositiesStellar:B:rest:dustAtlas',
+            ),
+            'R_v_bulge': (
+                _calc_Rv,
+                'otherLuminosities/spheroidLuminositiesStellar:V:rest',
+                'otherLuminosities/spheroidLuminositiesStellar:V:rest:dustAtlas',
+                'otherLuminosities/spheroidLuminositiesStellar:B:rest',
+                'otherLuminosities/spheroidLuminositiesStellar:B:rest:dustAtlas',
             ),
             'position_x': 'x',
             'position_y': 'y',
@@ -161,9 +237,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         # add magnitudes
         for band in 'ugrizY':
             if band != 'Y':
-                self._quantity_modifiers['mag_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+                self._quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
                 self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
-            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
+            self._quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
             self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
 
         # add SEDs
