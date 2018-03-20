@@ -240,6 +240,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             component, start, width = m.groups()
             self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
 
+        if catalog_version < StrictVersion('3.0'):
+            self._quantity_modifiers.update({
+                'host_id': 'hostIndex',
+            })
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
@@ -253,7 +257,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             })
             del self._quantity_modifiers['ellipticity_1']
             del self._quantity_modifiers['ellipticity_2']
-
+        
         if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
