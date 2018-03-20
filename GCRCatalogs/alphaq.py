@@ -27,7 +27,6 @@ def md5(fname, chunk_size=65536):
     return hash_md5.hexdigest()
 
 
-
 def _calc_weighted_size(size1, size2, lum1, lum2):
     return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
 
@@ -79,6 +78,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = kwargs.get('lightcone')
 
         with h5py.File(self._file, 'r') as fh:
+            # pylint: disable=no-member
             # get version
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
@@ -274,9 +274,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
             def _native_quantity_getter(native_quantity):
-                return fh['galaxyProperties/{}'.format(native_quantity)].value
+                return fh['galaxyProperties/{}'.format(native_quantity)].value # pylint: disable=no-member
             yield _native_quantity_getter
-
 
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
@@ -288,11 +287,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
 
-
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
         if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
-
