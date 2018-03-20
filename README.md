@@ -8,10 +8,10 @@ More information about GCR can be found [here](https://github.com/yymao/generic-
 Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
 
 1. protoDC2: 
-   by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
+   by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs et al.
    - `protoDC2` (full catalog)
    - `protoDC2_test` (same as `protoDC2` but this one skips time-consuming md5 check.)
-   
+
 2. Buzzard series: 
    by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
    - `buzzard` (full catalog, DES Y3 area)
