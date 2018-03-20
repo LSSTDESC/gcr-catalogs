@@ -13,7 +13,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '2.1.2'
+__version__ = '3.0.0'
 
 
 def md5(fname, chunk_size=65536):
@@ -79,6 +79,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = kwargs.get('lightcone')
 
         with h5py.File(self._file, 'r') as fh:
+            # pylint: disable=no-member
             # get version
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
@@ -134,7 +135,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'shear2',
             ),
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
-            'halo_id':       'hostIndex',
+            'halo_id':       'hostHaloTag',
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
@@ -239,6 +240,11 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
 
         # make quantity modifiers work in older versions
+        if catalog_version < StrictVersion('3.0'):
+            self._quantity_modifiers.update({
+                'host_id': 'hostIndex',
+            })
+
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
@@ -269,9 +275,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
             def _native_quantity_getter(native_quantity):
-                return fh['galaxyProperties/{}'.format(native_quantity)].value
+                return fh['galaxyProperties/{}'.format(native_quantity)].value # pylint: disable=no-member
             yield _native_quantity_getter
-
 
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
@@ -283,11 +288,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
 
-
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
         if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
-
