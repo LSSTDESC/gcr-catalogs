@@ -31,7 +31,6 @@ def md5(fname, chunk_size=65536):
 def _calc_weighted_size(size1, size2, lum1, lum2):
     return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
 
-
 def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
     size = _calc_weighted_size(size1, size2, lum1, lum2)
     return size * (1.0 - ell) / (1.0 + ell)
@@ -239,11 +238,12 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             component, start, width = m.groups()
             self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
 
+        # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
                 'host_id': 'hostIndex',
             })
-        # make quantity modifiers work in older versions
+
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
@@ -256,7 +256,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             })
             del self._quantity_modifiers['ellipticity_1']
             del self._quantity_modifiers['ellipticity_2']
-        
+
         if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
                 'ra':       (lambda x: x/3600, 'ra'),
