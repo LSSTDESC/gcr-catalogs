@@ -193,7 +193,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'otherLuminosities/spheroidLuminositiesStellar:V:rest:dustAtlas',
             ),
             'R_v': (
-
                 _calc_Rv,
                 'otherLuminosities/totalLuminositiesStellar:V:rest',
                 'otherLuminosities/totalLuminositiesStellar:V:rest:dustAtlas',
