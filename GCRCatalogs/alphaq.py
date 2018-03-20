@@ -26,19 +26,7 @@ def md5(fname, chunk_size=65536):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
-    v = lum_v_dust/lum_v
-    b = lum_b_dust/lum_b
-    bv = b/v
-    Rv = np.log10(v) / np.log10(bv)
-    Rv[(v == 1) & (b == 1)] = 1.0
-    Rv[v == b] = np.nan
-    return Rv
 
-def _calc_Av(lum_v, lum_v_dust):
-    Av = -2.5*(np.log10(lum_v_dust/lum_v))
-    Av[lum_v_dust == 0] = np.nan
-    return Av
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
     return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
