@@ -3,7 +3,6 @@ redMaPPer catalog class.
 """
 from __future__ import division, print_function
 import os
-import re
 import functools
 import numpy as np
 from astropy.io import fits
