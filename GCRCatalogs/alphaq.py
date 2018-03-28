@@ -85,6 +85,14 @@ def _calc_ellipticity_2(ellipticity):
     # and position angle
     return ellipticity*np.sin(2.0*pos_angle)
 
+
+def _gen_galaxy_id(size_reference):
+    # pylint: disable=protected-access
+    size = size_reference.size
+    if not hasattr(_gen_galaxy_id, "_galaxy_id") or _gen_galaxy_id._galaxy_id.size != size:
+        _gen_galaxy_id._galaxy_id = np.arange(size, dtype='i8')
+    return _gen_galaxy_id._galaxy_id
+
     
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -145,7 +153,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         # specify quantity modifiers
         self._quantity_modifiers = {
-            'galaxy_id' :    'galaxyID',
+            'galaxy_id' :    (_gen_galaxy_id, 'galaxyID'),
             'ra':            'ra',
             'dec':           'dec',
             'ra_true':       'ra_true',
@@ -268,6 +276,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
+                'galaxy_id' :    'galaxyID',
                 'host_id': 'hostIndex',
                 'position_angle_true':      'morphology/positionAngle',
                 'ellipticity_1_true':       'morphology/totalEllipticity1',
