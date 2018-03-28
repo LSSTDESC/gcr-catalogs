@@ -268,12 +268,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
                 'host_id': 'hostIndex',
-                'ellipticity_1_true':       'morphology/totalEllipticity1'),
-                'ellipticity_2_true':       'morphology/totalEllipticity2'),
-                'ellipticity_1_disk_true':  'morphology/diskEllipticity1'),
-                'ellipticity_2_disk_true':  'morphology/diskEllipticity2'),
-                'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1'),
-                'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2'),
+                'position_angle_true':      'morphology/positionAngle',
+                'ellipticity_1_true':       'morphology/totalEllipticity1',
+                'ellipticity_2_true':       'morphology/totalEllipticity2',
+                'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
+                'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
+                'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
+                'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
             })
 
         if catalog_version < StrictVersion('2.1.2'):
