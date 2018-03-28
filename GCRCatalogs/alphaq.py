@@ -68,18 +68,21 @@ def _gen_position_angle(size_reference):
     pos_angle = rand_state.uniform(0,180,size)
     return pos_angle
 
-def _calc_ellipticity_12(ellipticity, ellip12):
+def _calc_ellipticity_1(ellipticity):
     # position angle using ellipticity as reference for the size or the array
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
-    # use the correct conversion for ellipticity 1 or 2. Of course no
-    # other values are allowed.
-    if(ellip12 == 1):
-        return ellipticity*np.cos(2.0*pos_angle)
-    elif(ellip12 == 2):
-        return ellipticity*np.sin(2.0*pos_angle)
-    else: 
-        raise KeyError("Ellipticity {} isn't an allowed value. Only 1 or 2 is allowed.".format(ellip12))
+    # use the correct conversion for ellipticity 1 from ellipticity
+    # and position angle
+    return ellipticity*np.cos(2.0*pos_angle)
+    
 
+def _calc_ellipticity_2(ellipticity):
+    # position angle using ellipticity as reference for the size or the array
+    pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
+    # use the correct conversion for ellipticity 1 from ellipticity
+    # and position angle
+    return ellipticity*np.sin(2.0*pos_angle)
+    
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
     Alpha Q galaxy catalog class. Uses generic quantity and filter mechanisms
@@ -169,14 +172,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_1_true':       (_calc_ellipticity_12, 'morphology/totalEllipticity', 1),
-            'ellipticity_2_true':       (_calc_ellipticity_12, 'morphology/totalEllipticity', 2),
+            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity'),
+            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity'),
             'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_1_disk_true':  (_calc_ellipticity_12, 'morphology/diskEllipticity', 1),
-            'ellipticity_2_disk_true':  (_calc_ellipticity_12, 'morphology/diskEllipticity', 2),
+            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity'),
+            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity'),
             'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
-            'ellipticity_1_bulge_true': (_calc_ellipticity_12, 'morphology/spheroidEllipticity', 1),
-            'ellipticity_2_bulge_true': (_calc_ellipticity_12, 'morphology/spheroidEllipticity', 2),
+            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
+            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
@@ -305,7 +308,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if quantity_key not in fh:
                 return default
             modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
-            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
+            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()        }
 
 
     def _get_quantity_info_dict(self, quantity, default=None):
