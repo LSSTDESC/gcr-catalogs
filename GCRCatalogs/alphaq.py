@@ -69,7 +69,8 @@ def _gen_position_angle(size_reference):
     return pos_angle
 
 def _calc_ellipticity_1(ellipticity):
-    # position angle using ellipticity as reference for the size or the array
+    # position angle using ellipticity as reference for the size or
+    # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
     # use the correct conversion for ellipticity 1 from ellipticity
     # and position angle
@@ -77,9 +78,10 @@ def _calc_ellipticity_1(ellipticity):
     
 
 def _calc_ellipticity_2(ellipticity):
-    # position angle using ellipticity as reference for the size or the array
+    # position angle using ellipticity as reference for the size or
+    # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
-    # use the correct conversion for ellipticity 1 from ellipticity
+    # use the correct conversion for ellipticity 2 from ellipticity
     # and position angle
     return ellipticity*np.sin(2.0*pos_angle)
     
