@@ -279,7 +279,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'ellipticity_2_disk_true':  'morphology/diskEllipticity2'),
                 'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1'),
                 'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2'),
-
             })
 
         if catalog_version < StrictVersion('2.1.1'):
