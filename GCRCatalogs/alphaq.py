@@ -61,14 +61,10 @@ def _calc_Av(lum_v, lum_v_dust):
 
 
 def _gen_position_angle(size_reference):
-    # get the size of the data by passing any array of the right size
     size = size_reference.size
-    # Create a RNG with a fixed seed for reproducibility. This
-    # function will be called multiple times in one catalog read.
-    rand_state = np.random.RandomState(123497)
-    # Get the position angle in degrees
-    pos_angle = rand_state.uniform(0, 180, size)
-    return pos_angle
+    if not hasattr(_gen_position_angle, "_pos_angle") or _gen_position_angle._pos_angle.size != size:
+        _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
+    return _gen_position_angle._pos_angle
 
 
 def _calc_ellipticity_1(ellipticity):
@@ -277,6 +273,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
+                'ellipticity_1_true':       'morphology/totalEllipticity1'),
+                'ellipticity_2_true':       'morphology/totalEllipticity2'),
+                'ellipticity_1_disk_true':  'morphology/diskEllipticity1'),
+                'ellipticity_2_disk_true':  'morphology/diskEllipticity2'),
+                'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1'),
+                'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2'),
+
             })
 
         if catalog_version < StrictVersion('2.1.1'):
