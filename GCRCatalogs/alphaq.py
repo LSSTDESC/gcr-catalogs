@@ -58,6 +58,27 @@ def _calc_Av(lum_v, lum_v_dust):
     Av[lum_v_dust == 0] = np.nan
     return Av
 
+def _gen_position_angle(size_reference):
+    # get the size of the data by passing any array of the right size
+    size = size_reference.size
+    # Create a RNG with a fixed seed for reproducibility. This
+    # function will be called multiple times in one catalog read.
+    rand_state = np.random.RandomState(123497)
+    # Get the position angle in degrees
+    pos_angle = rand_state.uniform(0,180,size)
+    return pos_angle
+
+def _calc_ellipticity_12(ellipticity, ellip12):
+    # position angle using ellipticity as reference for the size or the array
+    pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
+    # use the correct conversion for ellipticity 1 or 2. Of course no
+    # other values are allowed.
+    if(ellip12 == 1):
+        return ellipticity*np.cos(2.0*pos_angle)
+    elif(ellip12 == 2):
+        return ellipticity*np.sin(2.0*pos_angle)
+    else: 
+        raise KeyError("Ellipticity {} isn't an allowed value. Only 1 or 2 is allowed.".format(ellip12))
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -144,18 +165,18 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
-            'position_angle_true':      'morphology/positionAngle',
+            'position_angle_true':      (_gen_position_angle, 'morphology/positionAngle'),
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_1_true':       'morphology/totalEllipticity1',
-            'ellipticity_2_true':       'morphology/totalEllipticity2',
+            'ellipticity_1_true':       (_calc_ellipticity_12, 'morphology/totalEllipticity', 1),
+            'ellipticity_2_true':       (_calc_ellipticity_12, 'morphology/totalEllipticity', 2),
             'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
-            'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
+            'ellipticity_1_disk_true':  (_calc_ellipticity_12, 'morphology/diskEllipticity', 1),
+            'ellipticity_2_disk_true':  (_calc_ellipticity_12, 'morphology/diskEllipticity', 2),
             'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
-            'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
-            'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
+            'ellipticity_1_bulge_true': (_calc_ellipticity_12, 'morphology/spheroidEllipticity', 1),
+            'ellipticity_2_bulge_true': (_calc_ellipticity_12, 'morphology/spheroidEllipticity', 2),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
