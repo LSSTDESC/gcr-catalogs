@@ -268,17 +268,17 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
                 'host_id': 'hostIndex',
-            })
-
-        if catalog_version < StrictVersion('2.1.2'):
-            self._quantity_modifiers.update({
-                'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
                 'ellipticity_1_true':       'morphology/totalEllipticity1'),
                 'ellipticity_2_true':       'morphology/totalEllipticity2'),
                 'ellipticity_1_disk_true':  'morphology/diskEllipticity1'),
                 'ellipticity_2_disk_true':  'morphology/diskEllipticity2'),
                 'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1'),
                 'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2'),
+            })
+
+        if catalog_version < StrictVersion('2.1.2'):
+            self._quantity_modifiers.update({
+                'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
             })
 
         if catalog_version < StrictVersion('2.1.1'):
