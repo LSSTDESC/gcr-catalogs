@@ -61,6 +61,7 @@ def _calc_Av(lum_v, lum_v_dust):
 
 
 def _gen_position_angle(size_reference):
+    # pylint: disable=protected-access
     size = size_reference.size
     if not hasattr(_gen_position_angle, "_pos_angle") or _gen_position_angle._pos_angle.size != size:
         _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
