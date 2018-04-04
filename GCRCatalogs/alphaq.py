@@ -13,7 +13,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '2.1.2'
+__version__ = '3.0.0'
 
 
 def md5(fname, chunk_size=65536):
@@ -60,6 +60,40 @@ def _calc_Av(lum_v, lum_v_dust):
     return Av
 
 
+def _gen_position_angle(size_reference):
+    # pylint: disable=protected-access
+    size = size_reference.size
+    if not hasattr(_gen_position_angle, "_pos_angle") or _gen_position_angle._pos_angle.size != size:
+        _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
+    return _gen_position_angle._pos_angle
+
+
+def _calc_ellipticity_1(ellipticity):
+    # position angle using ellipticity as reference for the size or
+    # the array. The angle is converted from degrees to radians
+    pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
+    # use the correct conversion for ellipticity 1 from ellipticity
+    # and position angle
+    return ellipticity*np.cos(2.0*pos_angle)
+    
+
+def _calc_ellipticity_2(ellipticity):
+    # position angle using ellipticity as reference for the size or
+    # the array. The angle is converted from degrees to radians
+    pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0 
+    # use the correct conversion for ellipticity 2 from ellipticity
+    # and position angle
+    return ellipticity*np.sin(2.0*pos_angle)
+
+
+def _gen_galaxy_id(size_reference):
+    # pylint: disable=protected-access
+    size = size_reference.size
+    if not hasattr(_gen_galaxy_id, "_galaxy_id") or _gen_galaxy_id._galaxy_id.size != size:
+        _gen_galaxy_id._galaxy_id = np.arange(size, dtype='i8')
+    return _gen_galaxy_id._galaxy_id
+
+    
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
     Alpha Q galaxy catalog class. Uses generic quantity and filter mechanisms
@@ -79,6 +113,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = kwargs.get('lightcone')
 
         with h5py.File(self._file, 'r') as fh:
+            # pylint: disable=no-member
             # get version
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
@@ -118,7 +153,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         # specify quantity modifiers
         self._quantity_modifiers = {
-            'galaxy_id' :    'galaxyID',
+            'galaxy_id' :    (_gen_galaxy_id, 'galaxyID'),
             'ra':            'ra',
             'dec':           'dec',
             'ra_true':       'ra_true',
@@ -134,7 +169,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'shear2',
             ),
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
-            'halo_id':       'hostIndex',
+            'halo_id':       'hostHaloTag',
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
@@ -144,18 +179,18 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
-            'position_angle_true':      'morphology/positionAngle',
+            'position_angle_true':      (_gen_position_angle, 'morphology/positionAngle'),
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_1_true':       'morphology/totalEllipticity1',
-            'ellipticity_2_true':       'morphology/totalEllipticity2',
+            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity'),
+            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity'),
             'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
-            'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
+            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity'),
+            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity'),
             'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
-            'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
-            'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
+            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
+            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
@@ -239,6 +274,19 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
 
         # make quantity modifiers work in older versions
+        if catalog_version < StrictVersion('3.0'):
+            self._quantity_modifiers.update({
+                'galaxy_id' :    'galaxyID',
+                'host_id': 'hostIndex',
+                'position_angle_true':      'morphology/positionAngle',
+                'ellipticity_1_true':       'morphology/totalEllipticity1',
+                'ellipticity_2_true':       'morphology/totalEllipticity2',
+                'ellipticity_1_disk_true':  'morphology/diskEllipticity1',
+                'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
+                'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
+                'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
+            })
+
         if catalog_version < StrictVersion('2.1.2'):
             self._quantity_modifiers.update({
                 'position_angle_true':     (lambda pos_angle: np.rad2deg(np.rad2deg(pos_angle)), 'morphology/positionAngle'), #I converted the units the wrong way, so a double conversion is required.
@@ -269,9 +317,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._file, 'r') as fh:
             def _native_quantity_getter(native_quantity):
-                return fh['galaxyProperties/{}'.format(native_quantity)].value
+                return fh['galaxyProperties/{}'.format(native_quantity)].value # pylint: disable=no-member
             yield _native_quantity_getter
-
 
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
@@ -283,11 +330,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
 
-
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
         if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
             warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
             return default
         return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
-

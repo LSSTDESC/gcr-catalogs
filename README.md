@@ -1,17 +1,20 @@
 # GCR Catalogs
 
-This repo hosts the mock galaxy catalogs availble to the LSST DESC. These catalogs are also used by [DESCQA](https://github.com/LSSTDESC/descqa).
+[![Paper DOI](https://img.shields.io/badge/Paper%20DOI-10.3847%2F1538--4365%2Faaa6c3-brightgreen.svg)](https://doi.org/10.3847/1538-4365/aaa6c3)
+[![arXiv:1709.09665](https://img.shields.io/badge/astro--ph.IM-arXiv%3A1709.09665-B31B1B.svg)](https://arxiv.org/abs/1709.09665)
 
-On a NERSC machine, all these catalogs can be directly accessed through the "Generic Catalog Reader" (GCR) inferface.
-More information about GCR can be found [here](https://github.com/yymao/generic-catalog-reader).
+This repo hosts the mock galaxy catalogs availble to the LSST DESC and are used by [DESCQA](https://github.com/LSSTDESC/descqa). 
+The GCRCatalogs module uses the "Generic Catalog Reader" (GCR) to provide a unified interface to access these catalogs. 
+More information about GCR can be found in the [GCR repo](https://github.com/yymao/generic-catalog-reader).
+Description of the concept of this reader interface can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3).
 
 Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
 
 1. protoDC2: 
-   by Eve Kovacs, Danila Korytov, Andrew Benson, Katrin Heitmann et al. 
+   by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs et al.
    - `protoDC2` (full catalog)
    - `protoDC2_test` (same as `protoDC2` but this one skips time-consuming md5 check.)
-   
+
 2. Buzzard series: 
    by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
    - `buzzard` (full catalog, DES Y3 area)
