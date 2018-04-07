@@ -11,7 +11,7 @@ before_install:
 install:
 - pip install .[full]
 - pip install pylint nose
-
+- pip install pandas
 before_script:
 - export CHANGED=$(git diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep '^\(GCRCatalogs\|tests\)/.\+\.py$')
 
