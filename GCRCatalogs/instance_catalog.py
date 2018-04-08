@@ -89,17 +89,18 @@ def _total_shape(a_bulge, b_bulge, theta_bulge, mag_bulge,
     f_bulge = _get_bulge_fraction(mag_bulge, mag_disk)
     Q_total = Q_bulge * f_bulge + Q_disk * (1.0 - f_bulge)
     a, b, beta, e1, e2 = np.array([moments_size_and_shape(Q_total[:,:,i]) for i in range(Q_total.shape[-1])]).T
+    beta = np.remainder(np.rad2deg(beta), 180.0)
     if result == 'a':
         return a
     if result == 'b':
         return b
     if result == 'beta':
-        return np.rad2deg(beta)
+        return beta
     if result == 'e1':
         return e1
     if result == 'e2':
         return e2
-    return a, b, np.rad2deg(beta), e1, e2
+    return a, b, beta, e1, e2
 
 _get_total_a = partial(_total_shape, result='a')
 _get_total_b = partial(_total_shape, result='b')
