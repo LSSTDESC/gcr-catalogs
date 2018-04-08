@@ -1,3 +1,6 @@
+"""
+instance catalog reader
+"""
 from __future__ import division, print_function
 import os
 import gzip
@@ -55,8 +58,6 @@ def sersic_second_moments(n, hlr, q, beta):
 def moments_size_and_shape(Q):
     trQ = np.trace(Q,axis1=-2,axis2=-1)
     detQ = np.linalg.det(Q)
-    sigma_m = np.power(detQ,0.25)
-    sigma_p = np.sqrt(0.5*trQ)
     asymQx = Q[...,0,0] - Q[...,1,1]
     asymQy = 2*Q[...,0,1]
     asymQ = np.sqrt(asymQx**2 + asymQy**2)
@@ -165,6 +166,9 @@ class InstanceCatalog(BaseGenericCatalog):
         self.header = self.parse_header(self.header_file)
         self.base_dir = os.path.dirname(self.header_file)
 
+        self.cosmology = FlatLambdaCDM(H0=71, Om0=0.265, Ob0=0.0448)
+        self.lightcone = True
+
         self._data = dict()
         self._object_files = dict()
         for filename in self.header['includeobj']:
@@ -217,7 +221,7 @@ class InstanceCatalog(BaseGenericCatalog):
                 else:
                     native_quantities.append('{}_{}'.format(obj_type, col))
             if obj_type == 'gal':
-                 native_quantities.append('gal_total_id')
+                native_quantities.append('gal_total_id')
         return native_quantities
 
     def _get_data(self, obj_type):
@@ -239,10 +243,10 @@ class InstanceCatalog(BaseGenericCatalog):
                 df['total_id'] = df['id'].values >> 10
                 df['sub_type'] = df['id'].values & (2**10-1)
                 df = pd.merge(df.query('sub_type == 97'),
-                                df.query('sub_type == 107'),
-                                how='outer',
-                                on='total_id',
-                                suffixes=('_disk', '_bulge'))
+                              df.query('sub_type == 107'),
+                              how='outer',
+                              on='total_id',
+                              suffixes=('_disk', '_bulge'))
             self._data[obj_type] = df
         return self._data[obj_type]
 
