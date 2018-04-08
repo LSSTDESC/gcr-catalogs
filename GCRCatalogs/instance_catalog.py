@@ -246,7 +246,7 @@ class InstanceCatalog(BaseGenericCatalog):
                               df.query('sub_type == 107'),
                               how='outer',
                               on='total_id',
-                              suffixes=('_disk', '_bulge'))
+                              suffixes=('_bulge', '_disk'))
             self._data[obj_type] = df
         return self._data[obj_type]
 
