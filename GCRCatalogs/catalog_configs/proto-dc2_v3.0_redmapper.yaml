@@ -1,0 +1,20 @@
+subclass_name: redmapper.RedMapperCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/
+catalog_path_template:
+    clusters : proto-dc2_v3.0_halos_lambda_chisq.fit
+    members  : proto-dc2_v3.0_halos_lambda_chisq_members_00.fit
+
+cosmology:
+    H0: 71.0
+    Om0: 0.265
+    Ob0: 0.0448
+
+lightcone: true
+sky_area : 25.0
+
+creators: [ 'Andrew Benson', 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Eli Rykoff']
+description: |
+    cluster catalog and member catalog from the redMaPPer cluster finder run on proto-dc2. Red 
+    sequence was fit in the standard way, but centers are on halo centers, i.e. a real halo finding
+    run was not done.
