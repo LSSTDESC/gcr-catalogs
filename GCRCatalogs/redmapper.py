@@ -67,6 +67,8 @@ class RedMapperCatalog(BaseGenericCatalog):
             'richness'          :   'clusters/LAMBDA_CHISQ',
             'halo_id'           :   'clusters/MEM_MATCH_ID',
             'halo_mass'         :   'clusters/M200',
+            'LIM_LIMMAG_DERED'  :   'clusters/LIM_LIMMAG_DERED',
+            'SCALEVAL'          :   'clusters/SCALEVAL',
         }
 
         # add magnitudes
