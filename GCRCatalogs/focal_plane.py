@@ -86,9 +86,9 @@ class FocalPlaneCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         native_quantity_list = {'visit'}
         self._load_focal_plane()
-        for raft_name, raft in self.focal_plane.rafts.iteritems():
+        for raft_name, raft in self.focal_plane.rafts.items():
             native_quantity_list.update({'%s' % raft_name})
-            for sensor_name in list(raft.sensors.iterkeys()):
+            for sensor_name in list(raft.sensors.keys()):
                 native_quantity_list.update({('%s-%s') % (raft_name,sensor_name)})
         return native_quantity_list 
 
