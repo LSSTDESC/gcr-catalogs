@@ -33,8 +33,9 @@ setup(
     install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.2'],
     extras_require = {
         'protodc2': ['h5py'],
+        'instance': ['pandas'],
         'dc1':  ['sqlalchemy', 'pymssql'],
-        'full':  ['h5py', 'sqlalchemy', 'pymssql'],
+        'full':  ['h5py', 'sqlalchemy', 'pymssql', 'pandas'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
