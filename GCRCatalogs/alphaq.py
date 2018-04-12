@@ -297,8 +297,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'disk_sersic_index':  'diskSersicIndex',
                 'bulge_sersic_index': 'spheroidSersicIndex',
             })
-            del self._quantity_modifiers['ellipticity_1']
-            del self._quantity_modifiers['ellipticity_2']
 
         if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
