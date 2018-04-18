@@ -282,7 +282,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             component, start, width = m.groups()
             self._quantity_modifiers['sed_{}_{}_no_host_extinction{}'.format(start, width, translate_component_name[component])] = quantity
 
-
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
