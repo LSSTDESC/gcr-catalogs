@@ -265,22 +265,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
-        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest:dustAtlas$')
+        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest((?::dustAtlas))$')
         for quantity in self._native_quantities:
             m = sed_re.match(quantity)
             if m is None:
                 continue
-            component, start, width = m.groups()
-            self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
-
-        # add SEDs without dust extinction
-        sed_nodust_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest$')
-        for quantity in self._native_quantities:
-            m = sed_nodust_re.match(quantity)
-            if m is None:
-                continue
-            component, start, width = m.groups()
-            self._quantity_modifiers['sed_{}_{}_no_host_extinction{}'.format(start, width, translate_component_name[component])] = quantity
+            component, start, width, dust = m.groups()
+            key = 'sed_{}_{}{}{}'.format(start, width, translate_component_name[component], '' if dust else '_no_host_extinction')
+            self._quantity_modifiers[key] = quantity
 
         # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('3.0'):
