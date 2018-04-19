@@ -265,7 +265,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
-        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest((?::dustAtlas))$')
+        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest((?::dustAtlas)?)$')
         for quantity in self._native_quantities:
             m = sed_re.match(quantity)
             if m is None:
