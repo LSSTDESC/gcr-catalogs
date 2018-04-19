@@ -82,5 +82,5 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>_disk` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for disk
 `sed_<start>_<width>_bulge` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for bulge
 `sed_<start>_<width>_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but without dust extiction in the host galaxy
-`sed_<start>_<width>_no_host_extinction_disk` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
-`sed_<start>_<width>_no_host_extinction_bulge` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
+`sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
+`sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
