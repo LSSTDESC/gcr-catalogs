@@ -41,7 +41,7 @@ First, [start a NERSC notebook server](https://jupyter-dev.nersc.gov) and open a
 For Python 3 (recommended):
 ```python
 import sys
-sys.path.insert(0, '/global/common/software/lsst/common/miniconda/py3-4.2.12/lib/python3.6/site-packages')
+sys.path.insert(0, '/global/common/software/lsst/common/miniconda/current/lib/python3.6/site-packages')
 ```
 
 For Python 2:
@@ -56,7 +56,7 @@ Activate DESCQA Python environment by running the following on NERSC (needs to b
 
 For Python 3 (recommended):
 ```bash
-source /global/common/software/lsst/cori-haswell-gcc/stack/setup_w_2017_46_py3_gcc6.sh
+source /global/common/software/lsst/common/miniconda/setup_current_python.sh
 ```
 
 For Python 2:
@@ -71,7 +71,7 @@ To be able to import `GCRCatalogs`, the first line of the script should be:
 
 For Python 3 (recommended):
 ```bash
-#!/global/common/software/lsst/common/miniconda/py3-4.2.12/bin/python
+#!/global/common/software/lsst/common/miniconda/current/bin/python
 ```
 
 For Python 2:
