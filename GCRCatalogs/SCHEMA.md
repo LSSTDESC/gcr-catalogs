@@ -33,8 +33,12 @@ Quantity Label | Unit | Definition
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
-`A_v` | - | Extinction in V-band
-`R_v` | - | Ratio of total to selective extinction in B and V bands
+`A_v` | - | Extinction in V-band, for galaxy light profile
+`A_v_disk` | - | Extinction in V-band, for disk light profile
+`A_v_bulge` | - | Extinction in V-band, for bulge light profile
+`R_v` | - | Ratio of total to selective extinction in B and V bands, for galaxy light profile
+`R_v_disk` | - | Ratio of total to selective extinction in B and V bands, for disk light profile
+`R_v_bulge` | - | Ratio of total to selective extinction in B and V bands, for bulge light profile
 `size` | arcsec | Galaxy half-light radius (of major axis), lensed
 `size_minor` | arcsec | Galaxy half-light radius (of minor axis), lensed
 `size_true` | arcsec | Galaxy half-light radius (of major axis), not lensed
@@ -45,16 +49,16 @@ Quantity Label | Unit | Definition
 `size_minor_bulge_true` | arcsec | Bulge half-light radius (of minor axis), not lensed
 `position_angle` | deg | Position angle (arctan(E2/E1)), for galaxy, lensed
 `position_angle_true` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed
-`ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, lensed
+`ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, lensed, where `q = size_minor/size`
 `ellipticity_1` | - | Ellipticity component 1, for galaxy, lensed
 `ellipticity_2` | - | Ellipticity component 2, for galaxy, lensed
-`ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for galaxy, not lensed
+`ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, not lensed, where `q = size_minor_true/size_true`
 `ellipticity_1_true` | - | Ellipticity component 1, for galaxy, not lensed
 `ellipticity_2_true` | - | Ellipticity component 2, for galaxy, not lensed
-`ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for disk, not lensed
+`ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for disk, not lensed, where `q = size_minor_disk_true/size_disk_true`
 `ellipticity_1_disk_true` | - | Ellipticity component 1, for disk, not lensed
 `ellipticity_2_disk_true` | - | Ellipticity component 2, for disk, not lensed
-`ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2)), for bulge, not lensed
+`ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for bulge, not lensed, where `q = size_minor_bulge_true/size_bulge_true`
 `ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed
 `ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
 `shear_1` | - | Shear (gamma) component 1 *(sign convention to be supplied)*
@@ -77,3 +81,6 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>` | 4.4659e13 W/Hz | intergrated, rest-frame, AB luminosity of for a narrow tophat filter from `<start>` to `<start>` + `<width>` in Angstroms
 `sed_<start>_<width>_disk` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for disk
 `sed_<start>_<width>_bulge` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but for bulge
+`sed_<start>_<width>_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but without dust extiction in the host galaxy
+`sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
+`sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
