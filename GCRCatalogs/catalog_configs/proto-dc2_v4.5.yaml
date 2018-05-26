@@ -6,6 +6,8 @@ lightcone: true
 
 version: "4.5.0"
 
+md5: 64458a94527b2f34453ed87edba5180f
+
 creators: [ 'Andrew Benson', 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs']
 
 description: |
