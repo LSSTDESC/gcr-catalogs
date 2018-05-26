@@ -260,31 +260,30 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if band != 'Y':
                 self._quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
                 self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
-            self._quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
-            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
-
-        # No host extinction 
-        for band in 'ugrizY':
-            if band != 'Y':
                 self._quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
                 self._quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+            self._quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
+            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
             self._quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
             self._quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
-        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest$')
+        sed_re = re.compile(r'^SEDs/([a-z]+)LuminositiesStellar:SED_(\d+)_(\d+):rest((?::dustAtlas)?)$')
         for quantity in self._native_quantities:
             m = sed_re.match(quantity)
             if m is None:
                 continue
-            component, start, width = m.groups()
-            self._quantity_modifiers['sed_{}_{}{}'.format(start, width, translate_component_name[component])] = quantity
+            component, start, width, dust = m.groups()
+            key = 'sed_{}_{}{}{}'.format(start, width, translate_component_name[component], '' if dust else '_no_host_extinction')
+            self._quantity_modifiers[key] = quantity
+
+        # make quantity modifiers work in older versions
         if catalog_version < StrictVersion('4.0'):
             self._quantity_modifiers.update({
                 'galaxy_id' :    (_gen_galaxy_id, 'galaxyID'),
             })
-        # make quantity modifiers work in older versions
+
         if catalog_version < StrictVersion('3.0'):
             self._quantity_modifiers.update({
                 'galaxy_id' :    'galaxyID',
