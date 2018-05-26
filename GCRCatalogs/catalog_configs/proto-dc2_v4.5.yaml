@@ -1,0 +1,15 @@
+subclass_name: alphaq.AlphaQGalaxyCatalog
+
+filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/v4.5.full.all.hdf5
+
+lightcone: true
+
+version: "4.5.0"
+
+md5: 64458a94527b2f34453ed87edba5180f
+
+creators: [ 'Andrew Benson', 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs']
+
+description: |
+    ProtoDC2 is a down-scaled version of the catalog to be generated for LSST-DESC DC2.
+    For a description of the catalog and the methods, please see https://goo.gl/fXDQwP
