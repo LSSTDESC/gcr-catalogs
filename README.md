@@ -87,6 +87,11 @@ and add the path to `sys.path`. You should add this line *right after* you inser
 sys.path.insert(0, '/path/to/gcr-catalogs')
 ```
 
+If you are running DESCQA and want to use your cloned GCRCatalogs, you can add the path to `-p` option:
+```bash
+./run_master.sh -t <tests> -c <catalogs> -p /path/to/gcr-catalogs
+```
+
 ## Usage and examples
 
 - See [this notebook](examples/GCRCatalogs%20Demo.ipynb) for a detail tutorial on how to use GCR Catalogs.
