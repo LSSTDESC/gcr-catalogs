@@ -158,6 +158,24 @@ class InstanceCatalog(BaseGenericCatalog):
                             ('A_v_lab', float),
                             ('R_v_lab', float),
                            ]),
+        'agn': OrderedDict([('object', str),
+                            ('id', int),
+                            ('ra', float),
+                            ('dec', float),
+                            ('mag_norm', float),
+                            ('sed_name', str),
+                            ('redshift', float),
+                            ('gamma_1', float),
+                            ('gamma_2', float),
+                            ('kappa', float),
+                            ('delta_ra', float),
+                            ('delta_dec', float),
+                            ('source_type', str),
+                            ('dust_name_ref', str),
+                            ('dust_name_lab', str),
+                            ('A_v_lab', float),
+                            ('R_v_lab', float),
+                           ]),
     }
 
     def _subclass_init(self, **kwargs):
@@ -178,6 +196,7 @@ class InstanceCatalog(BaseGenericCatalog):
                     full_path = os.path.join(self.base_dir, filename)
                     if os.path.isfile(full_path):
                         self._object_files[obj_type] = full_path
+        self._object_files['agn'] = self._object_files['gal'] #AGNs are in the galaxy file
 
         shape_quantities = ('gal_a_bulge',
                             'gal_b_bulge',
@@ -227,19 +246,25 @@ class InstanceCatalog(BaseGenericCatalog):
 
     def _get_data(self, obj_type):
         if obj_type not in self._data:
-            nrows = None
-            if obj_type == 'gal': # the galaxy catalog has agn in it...
+            additional_kwargs = dict()
+            if obj_type in ('gal', 'agn'): # Galaxies and AGNs are in the same file but have different columns
                 this_open = gzip.open if self._object_files[obj_type].endswith('.gz') else open
                 with this_open(self._object_files[obj_type], 'rb') as f:
                     for i, line in enumerate(f):
                         if b'agnSED/' in line:
-                            nrows = i
+                            agn_start_line_number = i
                             break
+                if obj_type == 'gal':
+                    additional_kwargs['nrows'] = agn_start_line_number
+                elif obj_type == 'agn':
+                    additional_kwargs['skiprows'] = agn_start_line_number - 1
+
             df = pd.read_table(self._object_files[obj_type],
                                delim_whitespace=True,
-                               nrows=nrows,
                                names=list(self._col_names[obj_type]),
-                               dtype=self._col_names[obj_type])
+                               dtype=self._col_names[obj_type],
+                               **additional_kwargs)
+
             if obj_type == 'gal':
                 df['total_id'] = df['id'].values >> 10
                 df['sub_type'] = df['id'].values & (2**10-1)
@@ -248,7 +273,9 @@ class InstanceCatalog(BaseGenericCatalog):
                               how='outer',
                               on='total_id',
                               suffixes=('_bulge', '_disk'))
+
             self._data[obj_type] = df
+
         return self._data[obj_type]
 
     def _native_quantity_getter(self, native_quantity):
