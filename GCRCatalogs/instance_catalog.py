@@ -252,12 +252,8 @@ class InstanceCatalog(BaseGenericCatalog):
                 with this_open(self._object_files[obj_type], 'rb') as f:
                     for i, line in enumerate(f):
                         if b'agnSED/' in line:
-                            agn_start_line_number = i
+                            additional_kwargs['nrows' if obj_type == 'gal' else 'skiprows'] = i
                             break
-                if obj_type == 'gal':
-                    additional_kwargs['nrows'] = agn_start_line_number
-                elif obj_type == 'agn':
-                    additional_kwargs['skiprows'] = agn_start_line_number - 1
 
             df = pd.read_table(self._object_files[obj_type],
                                delim_whitespace=True,
