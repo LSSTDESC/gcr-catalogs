@@ -141,7 +141,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'size': 'truth/SIZE',
                 'size_true': 'truth/TSIZE',
                 'shear_1': 'truth/GAMMA1',
-                'shear_2': 'truth/GAMMA2',
+                'shear_2': (np.negative, 'truth/GAMMA2'),
+                'shear_2_phosim': 'truth/GAMMA2',
                 'convergence': 'truth/KAPPA',
                 'magnification': 'truth/MU',
                 'position_x': (lambda x: x/self.cosmology.h, 'truth/PX'),
@@ -156,13 +157,13 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_true_{}_lsst'.format(b)] = (_mask_func, 'lsst/TMAG/{}'.format(i))
                 if b != 'u':
-                    i -= 1                
+                    i -= 1
                     self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
                     self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
 
-                
+
     def _get_healpix_pixels(self):
         path = self._catalog_path_template[self._default_subset]
         fname_pattern = re.escape(os.path.basename(path)).replace(r'\{', '{').replace(r'\}', '}').format(r'(\d+)')
