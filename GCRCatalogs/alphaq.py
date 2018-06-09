@@ -93,6 +93,8 @@ def _gen_galaxy_id(size_reference):
         _gen_galaxy_id._galaxy_id = np.arange(size, dtype='i8')
     return _gen_galaxy_id._galaxy_id
 
+def _calc_lensed_magnitudes(magnitude, magnification):
+    return magnitude -2.5*np.log10(magnification)
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -267,6 +269,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
             self._quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
             self._quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
+
+        # add magnitudes
+        for band in 'ugrizy':
+            if band != 'y':
+                self._quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification')
+                self._quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification')
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification')
+            self._quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification')
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
