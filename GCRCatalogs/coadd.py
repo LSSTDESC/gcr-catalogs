@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import tables
 
-BASE_DIR = '/global/projecta/projectdirs/lsst/global/in2p3/Run1.1-test2/summary'
+BASE_DIR = '/global/projecta/projectdirs/lsst/global/in2p3/Run1.1/summary'
 FILE_PATTERN = r'merged_tract_\d+\.hdf5'
 GROUP_PATTERN = r'coadd_\d+_\d\d$'
 
@@ -68,13 +68,15 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                             warnings.warn(warn_msg.format(fname))
                             break
 
-                        if 'axis0' not in fh.root[key]:
+                        group = getattr(fh.root, key)
+                        if 'axis0' not in group:
                             warn_msg = '{} does not have correct hdf5 format; skipped'
                             warnings.warn(warn_msg.format(fname))
                             break
 
                         datasets_this.append((fpath, key))
-                        columns_this.update((c.decode() for c in fh.root[key].axis0))
+                        columns_this.update((c.decode() for c in group.axis0))
+
                     else:
                         datasets.extend(datasets_this)
                         columns.update(columns_this)
