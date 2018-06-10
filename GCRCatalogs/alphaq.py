@@ -94,6 +94,7 @@ def _gen_galaxy_id(size_reference):
     return _gen_galaxy_id._galaxy_id
 
 def _calc_lensed_magnitude(magnitude, magnification):
+    magnification[magnification==0]=1.0
     return magnitude -2.5*np.log10(magnification)
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
