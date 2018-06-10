@@ -260,8 +260,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         }
 
         # add magnitudes
-        for band in 'ugrizY':
-            if band != 'Y':
+        for band in 'ugrizy':
+            if band != 'y':
                 self._quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
                 self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
                 self._quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
