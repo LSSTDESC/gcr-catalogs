@@ -42,6 +42,18 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         self._quantity_modifiers = {
             'ra': 'coord_ra',
             'dec': 'coord_dec',
+            'objectId': 'id',
+            'flags': 'flags',
+            'parentObjectId': 'parent',
+            'Ixx': 'base_SdssShape_xx',
+            'Ixy': 'base_SdssShape_xy',
+            'Iyy': 'base_SdssShape_yy',
+            'IxxCov': 'base_SdssShape_flux_xx_Cov',
+            'IxyCov': 'base_SdssShape_flux_xy_Cov',
+            'IyyCov': 'base_SdssShape_flux_yy_Cov',
+            'IxxPSF': 'base_SdssShape_psf_xx',
+            'IxyPSF': 'base_SdssShape_psf_xy',
+            'IyyPSF': 'base_SdssShape_psf_yy',
         }
 
         for band in 'ugrizy':
