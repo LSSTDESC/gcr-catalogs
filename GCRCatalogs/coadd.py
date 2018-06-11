@@ -29,46 +29,19 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         self._groupname_re = re.compile(groupname_pattern)
         self.use_cache = bool(use_cache)
 
-        if not os.path.isdir(self._base_dir):
-            err_msg = '`base_dir` {} is not a valid directory'
-            raise ValueError(err_msg.format(self._base_dir))
-
         self._datasets, self._columns = self._generate_native_datasets_and_columns()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
 
         self._dataset_cache = dict()
-        self._quantity_modifiers = {
-            'ra': 'coord_ra',
-            'dec': 'coord_dec',
-            'objectId': 'id',
-            'flags': 'flags',
-            'parentObjectId': 'parent',
-            'Ixx': 'base_SdssShape_xx',
-            'Ixy': 'base_SdssShape_xy',
-            'Iyy': 'base_SdssShape_yy',
-            'IxxCov': 'base_SdssShape_flux_xx_Cov',
-            'IxyCov': 'base_SdssShape_flux_xy_Cov',
-            'IyyCov': 'base_SdssShape_flux_yy_Cov',
-            'IxxPSF': 'base_SdssShape_psf_xx',
-            'IxyPSF': 'base_SdssShape_psf_xy',
-            'IyyPSF': 'base_SdssShape_psf_yy',
-        }
-
-        for band in 'ugrizy':
-            self._quantity_modifiers[
-                'mag_{}_lsst'.format(band)] = '{}_mag'.format(band.lower())
-
-            self._quantity_modifiers[
-                'magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(
-                band.lower())
+        self._quantity_modifiers = self._generate_modifiers()
 
     def _generate_native_datasets_and_columns(self):
         datasets = list()
         columns = set()
-        for fname in sorted((f for f in os.listdir(self._base_dir) if
-                             self._filename_re.match(f))):
+        file_list = (f for f in os.listdir(self._base_dir) if self._filename_re.match(f))
+        for fname in sorted(file_list):
             fpath = os.path.join(self._base_dir, fname)
             datasets_this = list()
             columns_this = set()
@@ -97,6 +70,29 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                 warnings.warn('Cannot access {}; skipped'.format(fpath))
 
         return datasets, columns
+
+    @staticmethod
+    def _generate_modifiers():
+        # Creates a dictionary relating native and homogenized column names
+
+        modifiers = {
+            'ra': 'coord_ra',
+            'dec': 'coord_dec',
+            'objectId': 'id',
+            'flags': 'flags',
+            'parentObjectId': 'parent',
+        }
+
+        for band in 'ugrizy':
+            modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
+            modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
+
+        for ax in ['xx', 'xy', 'yy']:
+            modifiers['I{}'.format(ax)] = 'base_SdssShape_{}'.format(ax)
+            modifiers['I{}Cov'.format(ax)] = 'base_SdssShape_flux_{}_Cov'.format(ax)
+            modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
+
+        return modifiers
 
     @staticmethod
     def get_dataset_info(dataset):
