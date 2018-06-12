@@ -1,0 +1,2 @@
+subclass_name: dc2_static_coadd.DC2StaticCoaddCatalog
+included_by_default: true
