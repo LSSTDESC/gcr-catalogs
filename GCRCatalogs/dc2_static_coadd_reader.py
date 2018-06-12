@@ -145,7 +145,15 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                             for native_filter in native_filters):
                 continue
 
-            d = self.load_dataset(dataset)
+            try:
+                d = self.load_dataset(dataset)
+
+            except tables.NoSuchNodeError:
+                war_msg = 'Missing node for tract {}, patch {} in {} '
+                warnings.warn(war_msg.format(dataset_info['tract'],
+                                             dataset_info['patch'],
+                                             dataset[0]))
+                continue
 
             def native_quantity_getter(native_quantity):
                 if native_quantity in self._native_filter_quantities:
