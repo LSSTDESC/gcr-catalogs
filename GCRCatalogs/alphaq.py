@@ -165,7 +165,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       (np.negative, 'shear2'),
-            'shear_2_phosim':'shear2',
+            'shear_2_treecorr': (np.negative, 'shear2'),
+            'shear_2_phosim':   'shear2',
             'convergence': (
                 _calc_conv,
                 'magnification',
