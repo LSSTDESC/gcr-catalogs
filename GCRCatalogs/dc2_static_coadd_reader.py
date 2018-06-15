@@ -76,21 +76,31 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         # Creates a dictionary relating native and homogenized column names
 
         modifiers = {
+            'objectId': 'id',
+            'parentObjectId': 'parent',
             'ra': 'coord_ra',
             'dec': 'coord_dec',
-            'objectId': 'id',
-            'flags': 'flags',
-            'parentObjectId': 'parent',
+            'centroidX': 'slot_Centroid_x',
+            'centroidY': 'slot_Centroid_y',
+            'centroidX_err':'slot_Centroid_xSigma',
+            'centroidY_err':'slot_Centroid_ySigma',
+            'centroid_flag': 'slot_Centroid_flag',
+            'psNdata': 'base_PsfFlux_area',
+            'extendedness': 'base_ClassificationExtendedness_value'
         }
 
         for band in 'ugrizy':
-            modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
-            modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['{}_magLSST'.format(band)] = '{}_mag'.format(band)
+            modifiers['{}_magLSST_err'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['{}_psFlux'.format(band)] = '{}_slot_ModelFlux_flux'.format(band)
+            modifiers['{}_psFlux_flag'.format(band)] = '{}_slot_ModelFlux_flag'.format(band)
+            modifiers['{}_psFlux_err'.format(band)] = '{}_slot_ModelFlux_fluxSigma'.format(band)
 
-        for ax in ['xx', 'xy', 'yy']:
-            modifiers['I{}'.format(ax)] = 'base_SdssShape_{}'.format(ax)
-            modifiers['I{}Cov'.format(ax)] = 'base_SdssShape_flux_{}_Cov'.format(ax)
-            modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
+            modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
+            for ax in ['xx', 'xy', 'yy']:
+                modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
+                #modifiers['I{}Cov_{}'.format(ax, band)] = 'base_SdssShape_flux_{}_Cov'.format(ax)
+                modifiers['{}_I{}PSF'.format(band, ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
 
         return modifiers
 
