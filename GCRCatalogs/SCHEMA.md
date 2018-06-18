@@ -61,8 +61,10 @@ Quantity Label | Unit | Definition
 `ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for bulge, not lensed, where `q = size_minor_bulge_true/size_bulge_true`
 `ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed
 `ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
-`shear_1` | - | Shear (gamma) component 1 *(sign convention to be supplied)*
-`shear_2` | - | Shear (gamma) component 2 *(sign convention to be supplied)*
+`shear_1` | - | Shear (gamma) component 1 in treecorr/GalSim convention
+`shear_2` | - | Shear (gamma) component 2 in treecorr/GalSim convention
+`shear_2_treecorr` | - | Shear (gamma) component 2 in treecorr/GalSim convention (`= shear_2`)
+`shear_2_phosim` | - | Shear (gamma) component 2 in PhoSim convention (`= -shear_2`)
 `convergence` | - | Convergence (kappa)
 `magnification` | - | Magnification
 `halo_id` | - | Unique ID of the main halo that contains the galaxy
