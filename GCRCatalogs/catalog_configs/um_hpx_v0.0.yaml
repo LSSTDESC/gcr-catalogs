@@ -1,6 +1,6 @@
 subclass_name: um_hpx.UMGalaxyCatalog
 
-filename: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/um_healpix_mocks/umachine_color_mock_cutout_0.hdf5
+filename: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/um_healpix_mocks/umachine_color_mock_z_0_1_cutout_368.hdf5
 
 lightcone: true
 
