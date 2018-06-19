@@ -63,6 +63,7 @@ Quantity Label | Unit | Definition
 `ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
 `shear_1` | - | Shear (gamma) component 1 in treecorr/GalSim convention
 `shear_2` | - | Shear (gamma) component 2 in treecorr/GalSim convention
+`shear_2_treecorr` | - | Shear (gamma) component 2 in treecorr/GalSim convention (`= shear_2`)
 `shear_2_phosim` | - | Shear (gamma) component 2 in PhoSim convention (`= -shear_2`)
 `convergence` | - | Convergence (kappa)
 `magnification` | - | Magnification
