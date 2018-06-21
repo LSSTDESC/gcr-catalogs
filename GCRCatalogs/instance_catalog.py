@@ -3,6 +3,7 @@ instance catalog reader
 """
 from __future__ import division, print_function
 import os
+import gc
 import warnings
 from functools import partial
 import numpy as np
@@ -115,53 +116,53 @@ class InstanceCatalog(BaseGenericCatalog):
     """
 
     _base_col_names = [
-        ('object', '<U8'),
+        ('object', str),
         ('id', np.int64),
         ('ra', np.float64),
         ('dec', np.float64),
         ('mag_norm', np.float64),
-        ('sed_name', '<U64'),
+        ('sed_name', str),
         ('redshift', np.float64),
         ('gamma_1', np.float64),
         ('gamma_2', np.float64),
         ('kappa', np.float64),
         ('delta_ra', np.float64),
         ('delta_dec', np.float64),
-        ('source_type', '<U8'),
+        ('source_type', str),
     ]
 
     _point_col_names = _base_col_names + [
-        ('dust_rest_name', '<U8'),
-        ('dust_lab_name', '<U8'),
+        ('dust_rest_name', str),
+        ('dust_lab_name', str),
         ('A_v_lab', np.float64),
         ('R_v_lab', np.float64),
-    ],
+    ]
 
     _sersic2d_col_names = _base_col_names + [
         ('a', np.float64),
         ('b', np.float64),
         ('theta', np.float64),
         ('sersic_n', np.float64),
-        ('dust_rest_name', '<U8'),
+        ('dust_rest_name', str),
         ('A_v_rest', np.float64),
         ('R_v_rest', np.float64),
-        ('dust_lab_name', '<U8'),
+        ('dust_lab_name', str),
         ('A_v_lab', np.float64),
         ('R_v_lab', np.float64),
-    ],
+    ]
 
     _knots_col_names = _base_col_names + [
         ('a', np.float64),
         ('b', np.float64),
         ('theta', np.float64),
         ('nknots', np.int64),
-        ('dust_rest_name', '<U8'),
+        ('dust_rest_name', str),
         ('A_v_rest', np.float64),
         ('R_v_rest', np.float64),
-        ('dust_lab_name', '<U8'),
+        ('dust_lab_name', str),
         ('A_v_lab', np.float64),
         ('R_v_lab', np.float64),
-    ],
+    ]
 
     _col_names = {
         'star': _point_col_names,
@@ -179,7 +180,8 @@ class InstanceCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
         self.header_file = kwargs['header_file']
-        assert(os.path.isfile(self.header_file)), 'Header file {} does not exist'.format(self.header_file)
+        if not os.path.isfile(self.header_file):
+            raise ValueError('Header file {} does not exist'.format(self.header_file))
 
         self.header = self.parse_header(self.header_file)
         self.base_dir = os.path.dirname(self.header_file)
@@ -203,63 +205,73 @@ class InstanceCatalog(BaseGenericCatalog):
             self._object_files[obj_type] = full_path
 
 
-        shape_quantities = ('gal_a_bulge',
-                            'gal_b_bulge',
-                            'gal_theta_bulge',
-                            'gal_mag_norm_bulge',
-                            'gal_a_disk',
-                            'gal_b_disk',
-                            'gal_theta_disk',
-                            'gal_mag_norm_disk')
+        shape_quantities = ('gal/a_bulge',
+                            'gal/b_bulge',
+                            'gal/theta_bulge',
+                            'gal/mag_norm_bulge',
+                            'gal/a_disk',
+                            'gal/b_disk',
+                            'gal/theta_disk',
+                            'gal/mag_norm_disk')
 
         self._quantity_modifiers = {
-            'galaxy_id': 'gal_total_id',
-            'ra_true': (_get_one, 'gal_ra_bulge', 'gal_ra_disk'),
-            'dec_true': (_get_one, 'gal_dec_bulge', 'gal_dec_disk'),
-            'mag_true_i_lsst': (_get_total_mag, 'gal_mag_norm_bulge', 'gal_mag_norm_disk'),
-            'redshift_true': (_get_one, 'gal_redshift_bulge', 'gal_redshift_disk'),
-            'bulge_to_total_ratio_i': (_get_bulge_fraction, 'gal_mag_norm_bulge', 'gal_mag_norm_disk'),
-            'sersic_disk': 'gal_sersic_n_disk',
-            'sersic_bulge': 'gal_sersic_n_bulge',
-            'convergence': (_get_one, 'gal_kappa_bulge', 'gal_kappa_disk'),
-            'shear_1': (_get_one, 'gal_gamma_1_bulge', 'gal_gamma_1_disk'),
-            'shear_2': (_get_one, 'gal_gamma_2_bulge', 'gal_gamma_2_disk'),
+            'galaxy_id': 'gal/total_id',
+            'ra_true': (_get_one, 'gal/ra_bulge', 'gal/ra_disk'),
+            'dec_true': (_get_one, 'gal/dec_bulge', 'gal/dec_disk'),
+            'mag_true_i_lsst': (_get_total_mag, 'gal/mag_norm_bulge', 'gal/mag_norm_disk'),
+            'redshift_true': (_get_one, 'gal/redshift_bulge', 'gal/redshift_disk'),
+            'bulge_to_total_ratio_i': (_get_bulge_fraction, 'gal/mag_norm_bulge', 'gal/mag_norm_disk'),
+            'sersic_disk': 'gal/sersic_n_disk',
+            'sersic_bulge': 'gal/sersic_n_bulge',
+            'convergence': (_get_one, 'gal/kappa_bulge', 'gal/kappa_disk'),
+            'shear_1': (_get_one, 'gal/gamma_1_bulge', 'gal/gamma_1_disk'),
+            'shear_2': (_get_one, 'gal/gamma_2_bulge', 'gal/gamma_2_disk'),
             'size_true': (_get_total_a,) + shape_quantities,
             'size_minor_true': (_get_total_b,) + shape_quantities,
             'position_angle_true': (_get_total_beta,) + shape_quantities,
             'ellipticity_1_true': (_get_total_e1,) + shape_quantities,
             'ellipticity_2_true': (_get_total_e2,) + shape_quantities,
-            'size_disk_true': 'gal_a_disk',
-            'size_disk_minor_true': 'gal_b_disk',
-            'size_bulge_true': 'gal_a_bulge',
-            'size_bulge_minor_true': 'gal_b_bulge',
+            'size_disk_true': 'gal/a_disk',
+            'size_disk_minor_true': 'gal/b_disk',
+            'size_bulge_true': 'gal/a_bulge',
+            'size_bulge_minor_true': 'gal/b_bulge',
         }
 
 
     def _generate_native_quantity_list(self):
-        native_quantities = ['{}/{}'.format(obj_type, col) for obj_type in self._object_files for col in self._col_names[obj_type]]
-        native_quantities.extend(('{}/{}'.format('gal', col) for col in self._col_names['bulge_gal']))
+        native_quantities = ['{}/{}'.format(obj_type, col) for obj_type in self._object_files for col, _ in self._col_names[obj_type]]
+        for col, _ in self._col_names['bulge_gal']:
+            native_quantities.append('gal/{}_bulge'.format(col))
+            native_quantities.append('gal/{}_disk'.format(col))
         native_quantities.append('gal/total_id')
         return native_quantities
 
 
     def _get_data(self, obj_type):
         if obj_type not in self._data:
-            if obj_type == 'gal':
-                df1 = self._data['bulge_gal']
-                df2 = self._data['disk_gal']
-                df1['total_id'] = df1['id'].values >> 10
-                df2['total_id'] = df2['id'].values >> 10
-                self._data[obj_type] = pd.merge(df1, df2, how='outer',
-                                                on='total_id',
-                                                suffixes=('_bulge', '_disk'))
-            else:
-                self._data[obj_type] = pd.read_table(
-                    self._object_files[obj_type],
-                    delim_whitespace=True,
-                    names=[c[0] for c in self._col_names[obj_type]],
-                    dtype=dict(self._col_names[obj_type]),
-                )
+            try:
+                if obj_type == 'gal':
+                    df1 = self._get_data('bulge_gal')
+                    df2 = self._get_data('disk_gal')
+                    df1['total_id'] = df1['id'].values >> 10
+                    df2['total_id'] = df2['id'].values >> 10
+                    self._data[obj_type] = pd.merge(df1, df2, how='outer',
+                                                    on='total_id',
+                                                    suffixes=('_bulge', '_disk'))
+                else:
+                    self._data[obj_type] = pd.read_table(
+                        self._object_files[obj_type],
+                        delim_whitespace=True,
+                        names=[c[0] for c in self._col_names[obj_type]],
+                        dtype=dict(self._col_names[obj_type]),
+                        na_filter=False,
+                    )
+            except MemoryError:
+                if not self._data:
+                    raise
+                self._data = dict()
+                gc.collect()
+                return self._get_data(obj_type)
 
         return self._data[obj_type]
 
@@ -270,7 +282,8 @@ class InstanceCatalog(BaseGenericCatalog):
 
 
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '`native_filters` is not supported'
+        if native_filters is not None:
+            raise ValueError('`native_filters` is not supported')
         yield self._native_quantity_getter
 
 
