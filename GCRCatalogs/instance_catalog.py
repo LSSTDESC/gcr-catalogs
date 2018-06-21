@@ -269,7 +269,7 @@ class InstanceCatalog(BaseGenericCatalog):
             except MemoryError:
                 if not self._data:
                     raise
-                self._data = dict()
+                self._data.clear()
                 gc.collect()
                 return self._get_data(obj_type)
 
