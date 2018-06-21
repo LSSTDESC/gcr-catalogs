@@ -9,22 +9,12 @@ import hashlib
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
+import functools
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['UMGalaxyCatalog']
 __version__ = '0.0.0'
-
-
-def md5(fname, chunk_size=65536):
-    """
-    generate MD5 sum for *fname*
-    """
-    hash_md5 = hashlib.md5()
-    with open(fname, 'rb') as f:
-        for chunk in iter(lambda: f.read(chunk_size), b''):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
 
 class UMGalaxyCatalog(BaseGenericCatalog):
@@ -33,62 +23,20 @@ class UMGalaxyCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
-    def _subclass_init(self, filename, **kwargs): #pylint: disable=W0221
+    def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, **kwargs): 
 
-        assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
-        self._file = filename
+        assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
 
-        if kwargs.get('md5'):
-            assert md5(self._file) == kwargs['md5'], 'md5 sum does not match!'
-        else:
-            warnings.warn('No md5 sum specified in the config file')
+        self._catalog_path_template = os.path.join(catalog_root_dir, catalog_path_template)
+        
+        self._default_zrange_lo, self._default_zrange_hi, self._default_healpix_pixels = self._get_healpix_info()
+        self.zrange_lo = self._default_zrange_lo if zlo is None else zlo
+        self.zrange_hi = self._default_zrange_hi if zhi is None else zhi
+        self.healpix_pixels = self._default_healpix_pixels if healpix_pixels is None else healpix_pixels
 
-        self.lightcone = kwargs.get('lightcone')
-
-        with h5py.File(self._file, 'r') as fh:
-            # pylint: disable=no-member
-            # get version
-            catalog_version = list()
-            for version_label in ('Major', 'Minor', 'MinorMinor'):
-                try:
-                    catalog_version.append(fh['/metaData/version' + version_label].value)
-                except KeyError:
-                    break
-            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (0, 0))))
-
-            # get cosmology
-            metakeys = fh['metaData'].keys()
-            if 'H_0' in metakeys and 'Omega_matter' in metakeys and 'Omega_b' in metakeys:
-                self.cosmology = FlatLambdaCDM(
-                    H0=fh['metaData/H_0'].value,
-                    Om0=fh['metaData/Omega_matter'].value,
-                    Ob0=fh['metaData/Omega_b'].value,
-                )
-            else:
-                print('Cosmological parameters not found, assigning defaults')
-                self.cosmology = FlatLambdaCDM(H0=.71, Om0=0.2648 ,Ob0=0.0448)
-  
-            # get sky area
-            if catalog_version >= StrictVersion("2.0.0"):
-                self.sky_area = float(fh['metaData/skyArea'].value)
-            else:
-                self.sky_area = 50.0 #If the sky area isn't specified use the default value of the sky area.
-
-            # get native quantities
-            self._native_quantities = set()
-            def _collect_native_quantities(name, obj):
-                if isinstance(obj, h5py.Dataset):
-                    self._native_quantities.add(name)
-            for k in [k for k in fh.keys() if k.isdigit()]:
-                fh[k].visititems(_collect_native_quantities)
-
-        # check versions
+        self.check_healpix_file_list()                                                       
+        self.cosmology = FlatLambdaCDM(**cosmology)
         self.version = kwargs.get('version', '0.0.0')
-        config_version = StrictVersion(self.version)
-        if config_version != catalog_version:
-            raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
-        if StrictVersion(__version__) < config_version:
-            raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
 
         # specify quantity modifiers
         self._quantity_modifiers = {
@@ -112,25 +60,96 @@ class UMGalaxyCatalog(BaseGenericCatalog):
         for band in 'gri':
             self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
 
+    def _get_healpix_info(self):
+        path = self._catalog_path_template
+        fname_pattern = os.path.basename(path).format('\d', '\d', '\d+') #include z and healpix #s in pattern
+        pattern = re.compile('\d+')
+        path = os.path.dirname(path)
+     
+        healpix_pixels = set()
+        zvalues = set()
+        for f in sorted(os.listdir(path)):                                                                                
+            m = re.match(fname_pattern, f)                                                                        
+            if m is not None:
+                healpix_name = os.path.splitext(m.group())[0]
+                zlo, zhi, hpx = pattern.findall(healpix_name)
+                healpix_pixels.add(int(hpx))
+                zvalues.add(int(zlo))
+                zvalues.add(int(zhi))
+
+        return min(zvalues), max(zvalues), list(healpix_pixels)
+
+
+    def check_healpix_file_list(self):
+        self.healpix_pixel_files = [self._catalog_path_template.format(z,z+1,h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
+        assert all(os.path.isfile(f) for f in self.healpix_pixel_files), 'Problem with some catalog files'
+
+
+    def _open_dataset(self, zlo, healpix, check_file=False):
+        healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
+        fh = h5py.File(healpix_file, 'r')
+
+        if check_file:
+            catalog_version = list()
+            for version_label in ('Major', 'Minor', 'MinorMinor'):
+                try:
+                    catalog_version.append(fh['/metaData/version' + version_label].value)
+                except KeyError:
+                    break
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (0, 0))))
+
+            #check cosmology
+            metakeys = fh['metaData'].keys()
+            if 'H_0' in metakeys and 'Omega_matter' in metakeys and 'Omega_b' in metakeys:
+                H0=fh['metaData/H_0'].value,
+                Om0=fh['metaData/Omega_matter'].value,
+                Ob0=fh['metaData/Omega_b'].value,
+                if H0 != self.cosmology.H0.value or Om0 != self.cosmology.Om0.value or Ob0 != self.cosmology.Ob0.value:
+                    raise ValueError('Mismatch in cosmological parameters for healpix file {}'.format(healpix_file))
+
+            # check versions
+            config_version = StrictVersion(self.version)
+            if config_version != catalog_version:
+                raise ValueError('Catalog file for file {} version {} does not match config version {}'.format(healpix_file, catalog_version, config_version))
+            if StrictVersion(__version__) < config_version:
+                raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
+
+        return fh
+
 
     def _generate_native_quantity_list(self):
+        #use first file in list to get information
+        filename = self._catalog_path_template.format(self.zrange_lo, self.zrange_lo+1, self.healpix_pixels[0])
+        with h5py.File(filename, 'r') as fh:
+            self._native_quantities = set()
+            def _collect_native_quantities(name, obj):
+                if isinstance(obj, h5py.Dataset):
+                    self._native_quantities.add(name)
+            for k in [k for k in fh.keys() if k.isdigit()]:
+                fh[k].visititems(_collect_native_quantities)
         return self._native_quantities
+
+    def _native_quantity_getter(self, native_quantity, zlo, healpix):
+        fh = self._open_dataset(zlo, healpix)
+        np_array = np.asarray([])
+        for k in [k for k in fh.keys() if k.isdigit()]:
+            np_array = np.concatenate((np_array, fh['{}/{}'.format(k, native_quantity)].value))
+
+        return np_array
 
 
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '*native_filters* is not supported'
-        with h5py.File(self._file, 'r') as fh:
-            def _native_quantity_getter(native_quantity):
-                np_array = np.asarray([])
-                for k in [k for k in fh.keys() if k.isdigit()]:
-                    np_array = np.concatenate((np_array, fh['{}/{}'.format(k, native_quantity)].value))
+        for healpix in self.healpix_pixels:
+            for zlo in range(self.zrange_lo, self.zrange_hi):
+                if native_filters:
+                    print("Not implemented yet")
 
-                return np_array
-            yield _native_quantity_getter
-
+                yield functools.partial(self._native_quantity_getter, healpix=healpix, zlo=zlo)
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
-        with h5py.File(self._file, 'r') as fh:
+        #use first file in list to get information
+        filename = self._catalog_path_template.format(self.zrange_lo, self.zrange_lo+1, self.healpix_pixels[0])
+        with h5py.File(filename, 'r') as fh:
             quantity_key = '{}/{}'.format(fh.keys()[0], quantity) #use first lc shell
             if quantity_key not in fh:
                 return default
