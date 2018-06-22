@@ -35,7 +35,8 @@ setup(
         'protodc2': ['h5py'],
         'instance': ['pandas'],
         'dc1':  ['sqlalchemy', 'pymssql'],
-        'full':  ['h5py', 'sqlalchemy', 'pymssql', 'pandas'],
+        'focal_plane': ['scikit-image', 'pandas'],
+        'full':  ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'scikit-image'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
