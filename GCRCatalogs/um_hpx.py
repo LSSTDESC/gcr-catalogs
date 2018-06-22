@@ -67,7 +67,7 @@ class UMGalaxyCatalog(BaseGenericCatalog):
             'velocity_x': 'vx',
             'velocity_y': 'vy',
             'velocity_z': 'vz',
-            
+            'is_central': (lambda x: x == -1, 'upid'),
         }
 
         # add magnitudes
