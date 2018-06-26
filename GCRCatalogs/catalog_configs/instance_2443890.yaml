@@ -1,0 +1,3 @@
+subclass_name: instance_catalog.InstanceCatalog
+header_file: /global/projecta/projectdirs/lsst/groups/SSim/DC2/example_instance_catalogs/phosim_cat_2443890.txt
+description: Instance Catalogs for DC2
