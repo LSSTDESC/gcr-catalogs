@@ -168,6 +168,26 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         tract_gen = (self.get_dataset_info(dataset)['tract'] for dataset in self._datasets)
         return sorted(set(tract_gen))
 
+    def get_patches_in_tract(self, tract):
+        """Return the patches available for a given tract
+
+        Patches are represented as strings (eg. '4,1')
+
+        Args:
+            tract (int): The desired tract id
+
+        Returns:
+            A list of available patches
+        """
+
+        patches = []
+        for dataset in self._datasets:
+            dataset_info = self.get_dataset_info(dataset)
+            if dataset_info['tract'] == int(tract):
+                patches.append(dataset_info['patch'])
+
+        return patches
+
     @property
     def base_dir(self):
         """The directory where data files are stored"""
@@ -213,6 +233,30 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                 self._dataset_cache[dataset] = self._load_dataset(dataset)
 
         return self._dataset_cache[dataset]
+
+    def read_tract_patch(self, tract, patch):
+        """Return data for a given tract and patch
+
+        Args:
+            tract (int): The desired tract id
+            patch (str): The desired patch (eg. '4,1')
+
+        Returns:
+            A pandas data frame
+        """
+
+        if not int(tract) in self.available_tracts:
+            raise ValueError('Invalid tract value: {}'.format(tract))
+
+        if not patch in self.get_patches_in_tract(tract):
+            err_msg = 'Invalid patch {} for tract {}'
+            raise ValueError(err_msg.format(patch, tract))
+
+        file_name = FILE_PATTERN.replace('\d+\\', str(tract))
+        file_path = os.path.join(self.base_dir, file_name)
+        group_id = 'coadd_4850_{}'.format(patch.replace(',', ''))
+
+        return self.load_dataset((file_path, group_id))
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
