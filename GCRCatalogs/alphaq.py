@@ -317,11 +317,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
-                'disk_sersic_index':  'diskSersicIndex',
-                'bulge_sersic_index': 'spheroidSersicIndex',
+                'sersic_disk':  'diskSersicIndex',
+                'sersic_bulge': 'spheroidSersicIndex',
             })
-            del self._quantity_modifiers['ellipticity_1']
-            del self._quantity_modifiers['ellipticity_2']
+            for key in (
+                'size_minor_true',
+                'ellipticity_true',
+                'ellipticity_1_true', 
+                'ellipticity_2_true', 
+                'ellipticity_1_disk_true', 
+                'ellipticity_2_disk_true', 
+                'ellipticity_1_bulge_true', 
+                'ellipticity_2_bulge_true',
+            ):
+                if key in self._quantity_modifiers:
+                    del self._quantity_modifiers[key]
 
         if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({

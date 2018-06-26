@@ -3,9 +3,9 @@ instance catalog reader
 """
 from __future__ import division, print_function
 import os
-import gzip
+import gc
+import warnings
 from functools import partial
-from collections import OrderedDict
 import numpy as np
 import pandas as pd
 from astropy.cosmology import FlatLambdaCDM
@@ -115,54 +115,73 @@ class InstanceCatalog(BaseGenericCatalog):
     defined by BaseGenericCatalog class.
     """
 
+    _base_col_names = [
+        ('object', str),
+        ('id', np.int64),
+        ('ra', np.float64),
+        ('dec', np.float64),
+        ('mag_norm', np.float64),
+        ('sed_name', str),
+        ('redshift', np.float64),
+        ('gamma_1', np.float64),
+        ('gamma_2', np.float64),
+        ('kappa', np.float64),
+        ('delta_ra', np.float64),
+        ('delta_dec', np.float64),
+        ('source_type', str),
+    ]
+
+    _point_col_names = _base_col_names + [
+        ('dust_rest_name', str),
+        ('dust_lab_name', str),
+        ('A_v_lab', np.float64),
+        ('R_v_lab', np.float64),
+    ]
+
+    _sersic2d_col_names = _base_col_names + [
+        ('a', np.float64),
+        ('b', np.float64),
+        ('theta', np.float64),
+        ('sersic_n', np.float64),
+        ('dust_rest_name', str),
+        ('A_v_rest', np.float64),
+        ('R_v_rest', np.float64),
+        ('dust_lab_name', str),
+        ('A_v_lab', np.float64),
+        ('R_v_lab', np.float64),
+    ]
+
+    _knots_col_names = _base_col_names + [
+        ('a', np.float64),
+        ('b', np.float64),
+        ('theta', np.float64),
+        ('nknots', np.int64),
+        ('dust_rest_name', str),
+        ('A_v_rest', np.float64),
+        ('R_v_rest', np.float64),
+        ('dust_lab_name', str),
+        ('A_v_lab', np.float64),
+        ('R_v_lab', np.float64),
+    ]
+
     _col_names = {
-        'star': OrderedDict([('object', str),
-                             ('id', int),
-                             ('ra', float),
-                             ('dec', float),
-                             ('mag_norm', float),
-                             ('sed_name', str),
-                             ('redshift', float),
-                             ('gamma_1', float),
-                             ('gamma_2', float),
-                             ('kappa', float),
-                             ('delta_ra', float),
-                             ('delta_dec', float),
-                             ('source_type', str),
-                             ('params', str),
-                             ('dust_name', str),
-                             ('A_v', float),
-                             ('R_v', float),
-                            ]),
-        'gal': OrderedDict([('object', str),
-                            ('id', int),
-                            ('ra', float),
-                            ('dec', float),
-                            ('mag_norm', float),
-                            ('sed_name', str),
-                            ('redshift', float),
-                            ('gamma_1', float),
-                            ('gamma_2', float),
-                            ('kappa', float),
-                            ('delta_ra', float),
-                            ('delta_dec', float),
-                            ('source_type', str),
-                            ('a', float),
-                            ('b', float),
-                            ('theta', float),
-                            ('sersic_n', float),
-                            ('dust_name_ref', str),
-                            ('A_v_ref', float),
-                            ('R_v_ref', float),
-                            ('dust_name_lab', str),
-                            ('A_v_lab', float),
-                            ('R_v_lab', float),
-                           ]),
+        'star': _point_col_names,
+        'bright_stars': _point_col_names,
+        'bulge_gal': _sersic2d_col_names,
+        'disk_gal': _sersic2d_col_names,
+        'agn_gal': _point_col_names,
+        'knots': _knots_col_names,
+        'MainSurveyHostedSNPositions': _point_col_names,
+        'MainSurvey_hostlessSN': _point_col_names,
+        'MainSurvey_hostlessSN_highz': _point_col_names,
+        'uDDFHostedSNPositions': _point_col_names,
+        'uDDF_hostlessSN': _point_col_names,
     }
 
     def _subclass_init(self, **kwargs):
         self.header_file = kwargs['header_file']
-        assert(os.path.isfile(self.header_file)), 'Header file {} does not exist'.format(self.header_file)
+        if not os.path.isfile(self.header_file):
+            raise ValueError('Header file {} does not exist'.format(self.header_file))
 
         self.header = self.parse_header(self.header_file)
         self.base_dir = os.path.dirname(self.header_file)
@@ -173,91 +192,100 @@ class InstanceCatalog(BaseGenericCatalog):
         self._data = dict()
         self._object_files = dict()
         for filename in self.header['includeobj']:
-            for obj_type in self._col_names:
-                if filename.startswith(obj_type + '_'):
-                    full_path = os.path.join(self.base_dir, filename)
-                    if os.path.isfile(full_path):
-                        self._object_files[obj_type] = full_path
+            obj_type = filename.partition('_cat_')[0]
+            if obj_type not in self._col_names:
+                warnings.warn('Unknown object type {}! Skipped!'.format(obj_type))
+                continue
 
-        shape_quantities = ('gal_a_bulge',
-                            'gal_b_bulge',
-                            'gal_theta_bulge',
-                            'gal_mag_norm_bulge',
-                            'gal_a_disk',
-                            'gal_b_disk',
-                            'gal_theta_disk',
-                            'gal_mag_norm_disk')
+            full_path = os.path.join(self.base_dir, filename)
+            if not os.path.isfile(full_path):
+                warnings.warn('Cannot find file {}! Skipped!'.format(full_path))
+                continue
+
+            self._object_files[obj_type] = full_path
+
+
+        shape_quantities = ('gal/a_bulge',
+                            'gal/b_bulge',
+                            'gal/theta_bulge',
+                            'gal/mag_norm_bulge',
+                            'gal/a_disk',
+                            'gal/b_disk',
+                            'gal/theta_disk',
+                            'gal/mag_norm_disk')
 
         self._quantity_modifiers = {
-            'galaxy_id': 'gal_total_id',
-            'ra_true': (_get_one, 'gal_ra_bulge', 'gal_ra_disk'),
-            'dec_true': (_get_one, 'gal_dec_bulge', 'gal_dec_disk'),
-            'mag_true_i_lsst': (_get_total_mag, 'gal_mag_norm_bulge', 'gal_mag_norm_disk'),
-            'redshift_true': (_get_one, 'gal_redshift_bulge', 'gal_redshift_disk'),
-            'bulge_to_total_ratio_i': (_get_bulge_fraction, 'gal_mag_norm_bulge', 'gal_mag_norm_disk'),
-            'sersic_disk': 'gal_sersic_n_disk',
-            'sersic_bulge': 'gal_sersic_n_bulge',
-            'convergence': (_get_one, 'gal_kappa_bulge', 'gal_kappa_disk'),
-            'shear_1': (_get_one, 'gal_gamma_1_bulge', 'gal_gamma_1_disk'),
-            'shear_2': (_get_one, 'gal_gamma_2_bulge', 'gal_gamma_2_disk'),
+            'galaxy_id': 'gal/total_id',
+            'ra_true': (_get_one, 'gal/ra_bulge', 'gal/ra_disk'),
+            'dec_true': (_get_one, 'gal/dec_bulge', 'gal/dec_disk'),
+            'mag_true_i_lsst': (_get_total_mag, 'gal/mag_norm_bulge', 'gal/mag_norm_disk'),
+            'redshift_true': (_get_one, 'gal/redshift_bulge', 'gal/redshift_disk'),
+            'bulge_to_total_ratio_i': (_get_bulge_fraction, 'gal/mag_norm_bulge', 'gal/mag_norm_disk'),
+            'sersic_disk': 'gal/sersic_n_disk',
+            'sersic_bulge': 'gal/sersic_n_bulge',
+            'convergence': (_get_one, 'gal/kappa_bulge', 'gal/kappa_disk'),
+            'shear_1': (_get_one, 'gal/gamma_1_bulge', 'gal/gamma_1_disk'),
+            'shear_2': (_get_one, 'gal/gamma_2_bulge', 'gal/gamma_2_disk'),
             'size_true': (_get_total_a,) + shape_quantities,
             'size_minor_true': (_get_total_b,) + shape_quantities,
             'position_angle_true': (_get_total_beta,) + shape_quantities,
             'ellipticity_1_true': (_get_total_e1,) + shape_quantities,
             'ellipticity_2_true': (_get_total_e2,) + shape_quantities,
-            'size_disk_true': 'gal_a_disk',
-            'size_disk_minor_true': 'gal_b_disk',
-            'size_bulge_true': 'gal_a_bulge',
-            'size_bulge_minor_true': 'gal_b_bulge',
+            'size_disk_true': 'gal/a_disk',
+            'size_disk_minor_true': 'gal/b_disk',
+            'size_bulge_true': 'gal/a_bulge',
+            'size_bulge_minor_true': 'gal/b_bulge',
         }
 
 
     def _generate_native_quantity_list(self):
-        native_quantities = []
-        for obj_type in self._object_files:
-            for col in self._col_names[obj_type]:
-                if obj_type == 'gal':
-                    native_quantities.append('{}_{}_bulge'.format(obj_type, col))
-                    native_quantities.append('{}_{}_disk'.format(obj_type, col))
-                else:
-                    native_quantities.append('{}_{}'.format(obj_type, col))
-            if obj_type == 'gal':
-                native_quantities.append('gal_total_id')
+        native_quantities = ['{}/{}'.format(obj_type, col) for obj_type in self._object_files for col, _ in self._col_names[obj_type]]
+        for col, _ in self._col_names['bulge_gal']:
+            native_quantities.append('gal/{}_bulge'.format(col))
+            native_quantities.append('gal/{}_disk'.format(col))
+        native_quantities.append('gal/total_id')
         return native_quantities
+
 
     def _get_data(self, obj_type):
         if obj_type not in self._data:
-            nrows = None
-            if obj_type == 'gal': # the galaxy catalog has agn in it...
-                this_open = gzip.open if self._object_files[obj_type].endswith('.gz') else open
-                with this_open(self._object_files[obj_type], 'rb') as f:
-                    for i, line in enumerate(f):
-                        if b'agnSED/' in line:
-                            nrows = i
-                            break
-            df = pd.read_table(self._object_files[obj_type],
-                               delim_whitespace=True,
-                               nrows=nrows,
-                               names=list(self._col_names[obj_type]),
-                               dtype=self._col_names[obj_type])
-            if obj_type == 'gal':
-                df['total_id'] = df['id'].values >> 10
-                df['sub_type'] = df['id'].values & (2**10-1)
-                df = pd.merge(df.query('sub_type == 97'),
-                              df.query('sub_type == 107'),
-                              how='outer',
-                              on='total_id',
-                              suffixes=('_bulge', '_disk'))
-            self._data[obj_type] = df
+            try:
+                if obj_type == 'gal':
+                    df1 = self._get_data('bulge_gal')
+                    df2 = self._get_data('disk_gal')
+                    df1['total_id'] = df1['id'].values >> 10
+                    df2['total_id'] = df2['id'].values >> 10
+                    self._data[obj_type] = pd.merge(df1, df2, how='outer',
+                                                    on='total_id',
+                                                    suffixes=('_bulge', '_disk'))
+                else:
+                    self._data[obj_type] = pd.read_table(
+                        self._object_files[obj_type],
+                        delim_whitespace=True,
+                        names=[c[0] for c in self._col_names[obj_type]],
+                        dtype=dict(self._col_names[obj_type]),
+                        na_filter=False,
+                    )
+            except MemoryError:
+                if not self._data:
+                    raise
+                self._data.clear()
+                gc.collect()
+                return self._get_data(obj_type)
+
         return self._data[obj_type]
 
+
     def _native_quantity_getter(self, native_quantity):
-        obj_type, _, col_name = native_quantity.partition('_')
+        obj_type, _, col_name = native_quantity.partition('/')
         return self._get_data(obj_type)[col_name].values
 
+
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '`native_filters` is not supported'
+        if native_filters is not None:
+            raise ValueError('`native_filters` is not supported')
         yield self._native_quantity_getter
+
 
     @staticmethod
     def parse_header(header_file):
