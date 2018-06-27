@@ -14,6 +14,11 @@ GROUP_PATTERN = r'coadd_\d+_\d\d$'
 __all__ = ['DC2StaticCoaddCatalog']
 
 
+def calc_cov(*args):
+    arg_array = np.array([a[~np.isnan(a)] for a in args])
+    return np.cov(arg_array)
+
+
 class DC2StaticCoaddCatalog(BaseGenericCatalog):
     _native_filter_quantities = {'tract', 'patch'}
 
@@ -67,12 +72,21 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             modifiers['{}_psFlux_err'.format(band)] = '{}_slot_ModelFlux_fluxSigma'.format(band)
 
             modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
-            for ax in ['xx', 'xy', 'yy']:
+            cov_args = []
+            for ax in ['xx', 'yy', 'xy']:
+                cov_args.append('{}_slot_Shape_{}'.format(band, ax))
                 modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['{}_I{}PSF'.format(band, ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
-                # modifiers['I{}Cov_{}'.format(ax, band)] = 'base_SdssShape_flux_{}_Cov'.format(ax)
+                modifiers['{}_I{}PSF'.format(band,ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
+
+            modifiers['{}_ICov'.format(band)] = (calc_cov, *cov_args)
 
         return modifiers
+
+    @property
+    def quantity_modifiers(self):
+        """Return the mapping from native to homogonized value names as a dict"""
+
+        return self._quantity_modifiers
 
     def _read_hdf5_meta(self, fpath):
         """Read an HDF5 file and returns the file's keys and columns
@@ -118,7 +132,8 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
 
         datasets = list()
         columns = set()
-        file_names = (f for f in os.listdir(self._base_dir) if self._filename_re.match(f))
+        file_names = (f for f in os.listdir(self._base_dir) if
+                      self._filename_re.match(f))
         for fname in sorted(file_names):
             fpath = os.path.join(self._base_dir, fname)
 
@@ -165,7 +180,8 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             A sorted list of available tracts as integers
         """
 
-        tract_gen = (self.get_dataset_info(dataset)['tract'] for dataset in self._datasets)
+        tract_gen = (self.get_dataset_info(dataset)['tract'] for dataset in
+                     self._datasets)
         return sorted(set(tract_gen))
 
     def get_patches_in_tract(self, tract):
