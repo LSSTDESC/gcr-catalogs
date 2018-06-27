@@ -1,0 +1,3 @@
+subclass_name: input_catalog.InputCatalogReader
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/dc2_reference_catalog_dc2v3_fov4.txt
+included_by_default: true
