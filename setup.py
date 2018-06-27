@@ -35,8 +35,8 @@ setup(
         'protodc2': ['h5py'],
         'instance': ['pandas'],
         'dc1': ['sqlalchemy', 'pymssql'],
-        'dc2_merged': ['pytables', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'pytables'],
+        'dc2_merged': ['tables', 'pandas'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
