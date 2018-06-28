@@ -23,11 +23,7 @@ class ReferenceCatalogReader(BaseGenericCatalog):
     """
 
     def _subclass_init(self, **kwargs):
-        self._filename = kwargs.get(
-            'filename',
-            '/global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/dc2_reference_catalog_dc2v3_fov4.txt'
-        )
-
+        self._filename = kwargs['filename']
         if not os.path.isfile(self._filename):
             raise ValueError('File {} not found'.format(self._filename))
 
