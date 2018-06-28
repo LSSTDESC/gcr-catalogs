@@ -27,7 +27,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     _native_filter_quantities = {'tract', 'patch'}
 
     def _subclass_init(self, **kwargs):
-        self._base_dir = kwargs.get('base_dir', '/global/projecta/projectdirs/lsst/global/in2p3/Run1.1/summary')
+        self._base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', r'merged_tract_\d+\.hdf5'))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', r'coadd_\d+_\d\d$'))
         self.use_cache = bool(kwargs.get('use_cache', True))
