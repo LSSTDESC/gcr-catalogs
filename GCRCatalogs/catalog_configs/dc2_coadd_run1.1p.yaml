@@ -1,5 +1,5 @@
 subclass_name: dc2_coadd.DC2CoaddCatalog
 base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.1/coadd_catalog
-description: DC2 Run 1.1 Coadd Catalog
+description: DC2 Run 1.1p Coadd Catalog
 creators: ['Michael Wood-Vasey']
 included_by_default: true
