@@ -67,7 +67,7 @@ class ReferenceCatalogReader(BaseGenericCatalog):
         line = None
         with open(self._filename, 'r') as f:
             for i, line in enumerate(f):
-                if len(line) > 2 and line[0] == '#'  and line[1] not in (' ', '\n'):
+                if line.startswith('#') and 'uniqueId' in line:
                     self._header_line_number = i + 1
                     break #found the header line!
 
