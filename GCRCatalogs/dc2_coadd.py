@@ -1,5 +1,5 @@
 """
-DC2 Static Merged Coadd Catalog reader
+DC2 Coadd Catalog Reader
 """
 
 import os
@@ -10,11 +10,11 @@ import tables
 import pandas as pd
 from GCR import BaseGenericCatalog
 
-__all__ = ['DC2StaticMergedCoaddCatalog']
+__all__ = ['DC2CoaddCatalog']
 
-class DC2StaticMergedCoaddCatalog(BaseGenericCatalog):
+class DC2CoaddCatalog(BaseGenericCatalog):
     r"""
-    DC2 Static Merged Coadd Catalog reader
+    DC2 Coadd Catalog reader
 
     Parameters
     ----------

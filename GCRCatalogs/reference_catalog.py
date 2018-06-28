@@ -1,15 +1,15 @@
 """
-input_catalog_reader
+Reference Catalog Reader
 """
 import os
 import numpy as np
 from GCR import BaseGenericCatalog
 
-__all__ = ['InputCatalogReader']
+__all__ = ['ReferenceCatalogReader']
 
-class InputCatalogReader(BaseGenericCatalog):
+class ReferenceCatalogReader(BaseGenericCatalog):
     """
-    Input catalog reader
+    Reference Catalog Reader
 
     Parameters
     ----------
