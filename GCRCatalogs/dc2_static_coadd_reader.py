@@ -129,7 +129,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
 
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['{}_I{}PSF'.format(band,ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
+                modifiers['{}_I{}PSF'.format(band, ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
 
         return modifiers
 
@@ -156,7 +156,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         columns = set()
         data_sets = list()
         with tables.open_file(fpath, 'r') as ofile:
-            for key in ofile.root._v_children:
+            for key in ofile.root._v_children:  # pylint: disable=W0212
                 if not self._groupname_re.match(key):
                     warn_msg = '{} has incorrect group names; skipped'
                     warnings.warn(warn_msg.format(os.path.basename(fpath)))
@@ -315,7 +315,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         if not int(tract) in self.available_tracts:
             raise ValueError('Invalid tract value: {}'.format(tract))
 
-        if not patch in self.get_patches_in_tract(tract):
+        if not patch in self.available_patches_in_tract(tract):
             err_msg = 'Invalid patch {} for tract {}'
             raise ValueError(err_msg.format(patch, tract))
 
@@ -350,6 +350,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                                              dataset[0]))
                 continue
 
+            # pylint: disable=W0640
             def native_quantity_getter(native_quantity):
                 if native_quantity in self._native_filter_quantities:
                     return np.repeat(dataset_info[native_quantity], len(d))
