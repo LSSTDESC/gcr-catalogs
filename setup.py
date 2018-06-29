@@ -9,11 +9,11 @@ import os
 from setuptools import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
-    exec(f.read())
+    exec(f.read()) # pylint: disable=W0122
 
 setup(
     name='GCRCatalogs',
-    version=__version__,
+    version=__version__, # pylint: disable=E0602
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
@@ -34,8 +34,9 @@ setup(
     extras_require = {
         'protodc2': ['h5py'],
         'instance': ['pandas'],
-        'dc1':  ['sqlalchemy', 'pymssql'],
-        'full':  ['h5py', 'sqlalchemy', 'pymssql', 'pandas'],
+        'dc1': ['sqlalchemy', 'pymssql'],
+        'dc2_merged': ['tables', 'pandas'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
