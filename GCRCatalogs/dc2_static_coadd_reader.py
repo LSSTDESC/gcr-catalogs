@@ -1,3 +1,6 @@
+"""A cataloge reader for the DC2 static coadd data.
+"""
+
 import os
 import re
 import warnings
@@ -31,6 +34,32 @@ def calc_cov(*args):
 
 
 class DC2StaticCoaddCatalog(BaseGenericCatalog):
+    """DC2 Static Coadd Catalog reader
+
+    Parameters
+    ----------
+    base_dir          (str): The optional directory of data files being served
+    filename_pattern  (str): The optional regex pattern of served data files
+    groupname_pattern (str): The optional regex pattern of groups in data files
+    use_cache         (str): Whether to cache returned data (default: True)
+
+    Attributes
+    ----------
+    base_dir                      (str): The directory of data files being served
+    use_cache                    (bool): Whether to cache returned data
+    quantity_modifiers           (dict): The mapping from native to homogonized value names
+    available_tracts             (list): Sorted list of available tracts
+    available_tracts_and_patches (list): Available tracts and patches as dict objects
+
+    Methods
+    -------
+    get_dataset_info           : Return the tract and patch information for a dataset
+    available_patches_in_tract : Return the patches available for a given tract
+    clear_cache                : Empty the catalog reader cache and frees up memory allocation
+    load_dataset               : Return the data table corresponding to a dataset
+    read_tract_patch           : Return data for a given tract and patch
+    """
+
     _native_filter_quantities = {'tract', 'patch'}
 
     def _subclass_init(self,
@@ -47,14 +76,14 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         self.use_cache = bool(use_cache)
         self._dataset_cache = dict()
 
-        self._quantity_modifiers = self.generate_modifiers()
+        self._quantity_modifiers = self._generate_modifiers()
         self._datasets, self._columns = self._generate_datasets_and_columns()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
 
     @staticmethod
-    def generate_modifiers():
+    def _generate_modifiers():
         """Creates a dictionary relating native and homogenized column names
 
         Returns:
@@ -206,7 +235,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                      self._datasets)
         return sorted(set(tract_gen))
 
-    def get_patches_in_tract(self, tract):
+    def available_patches_in_tract(self, tract):
         """Return the patches available for a given tract
 
         Patches are represented as strings (eg. '4,1')
@@ -233,7 +262,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         return self._base_dir
 
     def clear_cache(self):
-        """Empties the catalog reader cache and frees up memory allocation"""
+        """Empty the catalog reader cache and frees up memory allocation"""
 
         self._dataset_cache = dict()
 
