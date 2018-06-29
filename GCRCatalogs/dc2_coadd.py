@@ -41,8 +41,8 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._dataset_cache = dict()
 
         self._quantity_modifiers = {
-            'ra': 'coord_ra',
-            'dec': 'coord_dec',
+            'ra': (np.rad2deg, 'coord_ra'),
+            'dec': (np.rad2deg, 'coord_dec'),
         }
 
         for band in 'ugrizy':
