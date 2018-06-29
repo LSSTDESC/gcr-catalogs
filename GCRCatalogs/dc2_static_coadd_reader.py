@@ -53,8 +53,8 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
         modifiers = {
             'objectId': 'id',
             'parentObjectId': 'parent',
-            'ra': 'coord_ra',
-            'dec': 'coord_dec',
+            'ra': (np.rad2deg, 'coord_ra'),
+            'dec': (np.rad2deg, 'coord_dec'),
             'centroidX': 'slot_Centroid_x',
             'centroidY': 'slot_Centroid_y',
             'centroidX_err': 'slot_Centroid_xSigma',
