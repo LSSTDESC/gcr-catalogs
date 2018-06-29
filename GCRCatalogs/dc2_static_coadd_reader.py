@@ -15,6 +15,17 @@ __all__ = ['DC2StaticCoaddCatalog']
 
 
 def calc_cov(*args):
+    """Calculate the covariance between arrays
+
+    Ignore entries that are nans
+
+    Args:
+        All arguments should be 1D arrays of the same length
+
+    Returns:
+        The covariance between the given arrays
+    """
+
     arg_array = np.array([a[~np.isnan(a)] for a in args])
     return np.cov(arg_array)
 
@@ -61,8 +72,15 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             'centroidY_err': 'slot_Centroid_ySigma',
             'centroid_flag': 'slot_Centroid_flag',
             'psNdata': 'base_PsfFlux_area',
-            'extendedness': 'base_ClassificationExtendedness_value'
+            'extendedness': 'base_ClassificationExtendedness_value',
         }
+
+        # cross-band average, second moment values
+        modifiers['I_flag'] = 'slot_Shape_flag'
+        modifiers['ICov'] = (calc_cov, 'slot_Shape_xx', 'slot_Shape_yy', 'slot_Shape_xy')
+        for ax in ['xx', 'yy', 'xy']:
+            modifiers['I{}'.format(ax)] = 'slot_Shape_{}'.format(ax)
+            modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
 
         for band in 'ugrizy':
             modifiers['{}_magLSST'.format(band)] = '{}_mag'.format(band)
@@ -71,14 +89,18 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             modifiers['{}_psFlux_flag'.format(band)] = '{}_slot_ModelFlux_flag'.format(band)
             modifiers['{}_psFlux_err'.format(band)] = '{}_slot_ModelFlux_fluxSigma'.format(band)
 
+            # Band specific second moment values
             modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
-            cov_args = []
+            modifiers['{}_ICov'.format(band)] = (
+                calc_cov,
+                '{}_slot_Shape_xx'.format(band),
+                '{}_slot_Shape_yy'.format(band),
+                '{}_slot_Shape_xy'.format(band)
+            )
+
             for ax in ['xx', 'yy', 'xy']:
-                cov_args.append('{}_slot_Shape_{}'.format(band, ax))
                 modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
                 modifiers['{}_I{}PSF'.format(band,ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
-
-            modifiers['{}_ICov'.format(band)] = (calc_cov, *cov_args)
 
         return modifiers
 
