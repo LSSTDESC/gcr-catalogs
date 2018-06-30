@@ -13,7 +13,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '4.5.0'
+__version__ = '4.7.0'
 
 
 def md5(fname, chunk_size=65536):
@@ -93,6 +93,9 @@ def _gen_galaxy_id(size_reference):
         _gen_galaxy_id._galaxy_id = np.arange(size, dtype='i8')
     return _gen_galaxy_id._galaxy_id
 
+def _calc_lensed_magnitude(magnitude, magnification):
+    magnification[magnification==0]=1.0
+    return magnitude -2.5*np.log10(magnification)
 
 class AlphaQGalaxyCatalog(BaseGenericCatalog):
     """
@@ -162,7 +165,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'redshift_true': 'redshiftHubble',
             'shear_1':       'shear1',
             'shear_2':       (np.negative, 'shear2'),
-            'shear_2_phosim':'shear2',
+            'shear_2_treecorr': (np.negative, 'shear2'),
+            'shear_2_phosim':   'shear2',
             'convergence': (
                 _calc_conv,
                 'magnification',
@@ -257,8 +261,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         }
 
         # add magnitudes
-        for band in 'ugrizy':
-            if band != 'y':
+        for band in 'ugrizyY':
+            if band != 'y' and band != 'Y':
                 self._quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
                 self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
                 self._quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
@@ -267,6 +271,14 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
             self._quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
             self._quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
+
+        # add lensed magnitudes
+        for band in 'ugrizyY':
+            if band != 'y' and band != 'Y':
+                self._quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
+                self._quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
+            self._quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
@@ -305,11 +317,21 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         if catalog_version < StrictVersion('2.1.1'):
             self._quantity_modifiers.update({
-                'disk_sersic_index':  'diskSersicIndex',
-                'bulge_sersic_index': 'spheroidSersicIndex',
+                'sersic_disk':  'diskSersicIndex',
+                'sersic_bulge': 'spheroidSersicIndex',
             })
-            del self._quantity_modifiers['ellipticity_1']
-            del self._quantity_modifiers['ellipticity_2']
+            for key in (
+                'size_minor_true',
+                'ellipticity_true',
+                'ellipticity_1_true', 
+                'ellipticity_2_true', 
+                'ellipticity_1_disk_true', 
+                'ellipticity_2_disk_true', 
+                'ellipticity_1_bulge_true', 
+                'ellipticity_2_bulge_true',
+            ):
+                if key in self._quantity_modifiers:
+                    del self._quantity_modifiers[key]
 
         if catalog_version == StrictVersion('2.0'): # to be backward compatible
             self._quantity_modifiers.update({
