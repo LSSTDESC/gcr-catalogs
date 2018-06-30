@@ -17,20 +17,28 @@ GROUP_PATTERN = r'coadd_\d+_\d\d$'
 __all__ = ['DC2StaticCoaddCatalog']
 
 
-def calc_cov(*args):
-    """Calculate the covariance between arrays
-
-    Ignore entries that are nans
+def calc_cov(ixx_err, iyy_err, ixy_err):
+    """Calculate the covariance between three arrays of second moments
 
     Args:
-        All arguments should be 1D arrays of the same length
+        ixx_err (float): The error in the second moment Ixx
+        iyy_err (float): The error in the second moment Iyy
+        ixy_err (float): The error in the second moment Ixy
 
     Returns:
         The covariance between the given arrays
     """
 
-    arg_array = np.array([a[~np.isnan(a)] for a in args])
-    return np.cov(arg_array)
+    # If need be, this can be generalized using a mesh grid
+    out_data = np.array([
+        ixx_err * ixx_err,
+        ixx_err * iyy_err,
+        ixx_err * ixy_err,
+        iyy_err * iyy_err,
+        iyy_err * ixy_err,
+        ixy_err * ixy_err])
+
+    return out_data.transpose()
 
 
 class DC2StaticCoaddCatalog(BaseGenericCatalog):
@@ -82,8 +90,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
 
-    @staticmethod
-    def _generate_modifiers():
+    def _generate_modifiers(self):
         """Creates a dictionary relating native and homogenized column names
 
         Returns:
@@ -106,7 +113,7 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'slot_Shape_flag'
-        modifiers['ICov'] = (calc_cov, 'slot_Shape_xx', 'slot_Shape_yy', 'slot_Shape_xy')
+        modifiers['ICov'] = (calc_cov, 'base_SdssShape_xxSigma', 'base_SdssShape_yySigma', 'base_SdssShape_xySigma')
         for ax in ['xx', 'yy', 'xy']:
             modifiers['I{}'.format(ax)] = 'slot_Shape_{}'.format(ax)
             modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
@@ -122,9 +129,9 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
             modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
             modifiers['{}_ICov'.format(band)] = (
                 calc_cov,
-                '{}_slot_Shape_xx'.format(band),
-                '{}_slot_Shape_yy'.format(band),
-                '{}_slot_Shape_xy'.format(band)
+                '{}_base_SdssShape_xxSigma'.format(band),
+                '{}_base_SdssShape_yySigma'.format(band),
+                '{}_base_SdssShape_xySigma'.format(band)
             )
 
             for ax in ['xx', 'yy', 'xy']:
@@ -362,3 +369,4 @@ class DC2StaticCoaddCatalog(BaseGenericCatalog):
                     return d[native_quantity].values
 
             yield native_quantity_getter
+
