@@ -1,4 +1,4 @@
-"""A cataloge reader for the DC2 static coadd data.
+"""A catalog reader for the DC2 static coadd data.
 """
 
 import os
@@ -42,7 +42,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
 
 
 class DC2StaticCoaddCatalog(BaseGenericCatalog):
-    """DC2 Static Coadd Catalog reader
+    """DC2 Static Coadd Catalog Reader
 
     Parameters
     ----------
