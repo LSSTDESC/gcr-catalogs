@@ -39,6 +39,17 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     return out_data.transpose()
 
 
+def create_basic_flag_mash(*flags):
+    """
+    generate a mask for a set of flags
+    for each item, mask will be true if and only if all flags are false
+    """
+    out = np.ones(len(flags[0]), np.bool)
+    for flag in flags:
+        out &= (~flag)
+    return out
+
+
 class DC2CoaddCatalog(BaseGenericCatalog):
     r"""DC2 Coadd Catalog reader
 
@@ -103,7 +114,22 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'centroid_flag': 'slot_Centroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
+            'HSM_res': 'ext_shapeHSM_HsmShapeRegauss_resolution',
+            'HSM_ell': (np.hypot, 'ext_shapeHSM_HsmShapeRegauss_e1', 'ext_shapeHSM_HsmShapeRegauss_e2'),
         }
+
+        modifiers['pass_basic_flag_cut'] = (
+            create_basic_flag_mash,
+            'deblend_skipped',
+            'base_PixelFlags_flag_edge',
+            'base_PixelFlags_flag_interpolatedCenter',
+            'base_PixelFlags_flag_saturatedCenter',
+            'base_PixelFlags_flag_crCenter',
+            'base_PixelFlags_flag_bad',
+            'base_PixelFlags_flag_suspectCenter',
+            'base_PixelFlags_flag_clipped',
+            'ext_shapeHSM_HsmShapeRegauss_flag',
+        )
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'slot_Shape_flag'
@@ -115,6 +141,8 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         for band in 'ugrizy':
             modifiers['{}_magLSST'.format(band)] = '{}_mag'.format(band)
             modifiers['{}_magLSST_err'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
+            modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
             modifiers['{}_psFlux'.format(band)] = '{}_slot_ModelFlux_flux'.format(band)
             modifiers['{}_psFlux_flag'.format(band)] = '{}_slot_ModelFlux_flag'.format(band)
             modifiers['{}_psFlux_err'.format(band)] = '{}_slot_ModelFlux_fluxSigma'.format(band)
@@ -131,6 +159,24 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
                 modifiers['{}_I{}PSF'.format(band, ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
+
+            modifiers['{}_mag_CModel'.format(band)] = (
+                lambda x: -2.5 * np.log10(x) + 27.0,
+                '{}_modelfit_CModel_flux'.format(band),
+            )
+
+            modifiers['{}_SN_CModel'.format(band)] = (
+                np.divide,
+                '{}_modelfit_CModel_flux'.format(band),
+                '{}_modelfit_CModel_fluxSigma'.format(band),
+            )
+
+            modifiers['{}_psf_size'.format(band)] = (
+                lambda xx, yy, xy: 0.168*2.355*(xx*yy - xy*xy)**0.25,
+                '{}_base_SdssShape_psf_xx'.format(band),
+                '{}_base_SdssShape_psf_yy'.format(band),
+                '{}_base_SdssShape_psf_xy'.format(band),
+            )
 
         return modifiers
 
