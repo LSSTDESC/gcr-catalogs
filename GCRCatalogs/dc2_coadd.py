@@ -60,10 +60,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     Methods
     -------
     get_dataset_info               : Return the tract and patch information for a dataset
-    get_available_patches_in_tract : Return the patches available for a given tract
     clear_cache                    : Empty the catalog reader cache and frees up memory allocation
-    load_dataset                   : Return the data table corresponding to a dataset
-    read_tract_patch               : Return data for a given tract and patch
     """
 
     _native_filter_quantities = {'tract', 'patch'}
@@ -240,7 +237,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         return sorted(set(tract_gen))
 
 
-    def get_available_patches_in_tract(self, tract):
+    def _get_available_patches_in_tract(self, tract):
         """Return the patches available for a given tract
 
         Patches are represented as strings (eg. '4,1')
@@ -321,7 +318,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if not int(tract) in self.available_tracts:
             raise ValueError('Invalid tract value: {}'.format(tract))
 
-        if not patch in self.get_available_patches_in_tract(tract):
+        if not patch in self._get_available_patches_in_tract(tract):
             err_msg = 'Invalid patch {} for tract {}'
             raise ValueError(err_msg.format(patch, tract))
 
