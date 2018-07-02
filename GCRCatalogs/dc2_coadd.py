@@ -76,7 +76,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
     _native_filter_quantities = {'tract', 'patch'}
 
-
     def _subclass_init(self, **kwargs):
         self._base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', r'merged_tract_\d+\.hdf5'))
@@ -93,7 +92,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
-
 
     @staticmethod
     def _generate_modifiers():
@@ -180,12 +178,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return modifiers
 
-
     @property
     def quantity_modifiers(self):
         """Return the mapping from native to homogonized value names as a dict"""
         return self._quantity_modifiers
-
 
     def _read_hdf5_meta(self, fpath):
         """Read an HDF5 file and returns the file's keys and columns
@@ -220,7 +216,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return data_sets, columns
 
-
     def _generate_datasets_and_columns(self):
         """Return viable data sets and columns from all files in self._base_dir
 
@@ -245,7 +240,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return datasets, columns
 
-
     @staticmethod
     def get_dataset_info(dataset):
         """Return the tract and patch information for a dataset
@@ -259,7 +253,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         items = dataset[1].split('_')
         return dict(tract=int(items[1]), patch=','.join(items[2]))
 
-
     @property
     def available_tracts_and_patches(self):
         """Return a list of available tracts and patches as dict objects
@@ -269,7 +262,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                [{"tract": <tract (int)>, "patch": <patch (int)>}, ...]
         """
         return [self.get_dataset_info(dataset) for dataset in self._datasets]
-
 
     @property
     def available_tracts(self):
@@ -281,7 +273,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         tract_gen = (self.get_dataset_info(dataset)['tract'] for dataset in
                      self._datasets)
         return sorted(set(tract_gen))
-
 
     def _get_available_patches_in_tract(self, tract):
         """Return the patches available for a given tract
@@ -302,17 +293,14 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return patches
 
-
     @property
     def base_dir(self):
         """The directory where data files are stored"""
         return self._base_dir
 
-
     def clear_cache(self):
         """Empty the catalog reader cache and frees up memory allocation"""
         self._dataset_cache.clear()
-
 
     def _load_dataset(self, dataset):
         """Return the contents of an HDF5 file
@@ -324,7 +312,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             The contents of the specified file's group
         """
         return pd.read_hdf(*dataset, mode='r')
-
 
     def load_dataset(self, dataset):
         """Return the data table corresponding to a dataset
@@ -347,7 +334,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 self._dataset_cache[dataset] = self._load_dataset(dataset)
 
         return self._dataset_cache[dataset]
-
 
     def read_tract_patch(self, tract, patch):
         """Return data for a given tract and patch
@@ -374,14 +360,11 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return self.load_dataset((file_path, group_id))
 
-
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
         return self._columns.union(self._native_filter_quantities)
 
-
     def _iter_native_dataset(self, native_filters=None):
-
         for dataset in self._datasets:
             dataset_info = self.get_dataset_info(dataset)
             if native_filters and \
@@ -404,10 +387,8 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 # pylint: disable=W0640
                 if native_quantity in self._native_filter_quantities:
                     return np.repeat(dataset_info[native_quantity], len(d))
-
                 elif native_quantity not in d:
                     return np.repeat(np.nan, len(d))
-
                 else:
                     return d[native_quantity].values
 
