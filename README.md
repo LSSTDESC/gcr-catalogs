@@ -8,21 +8,40 @@ The GCRCatalogs module uses the "Generic Catalog Reader" (GCR) to provide a unif
 More information about GCR can be found in the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 Description of the concept of this reader interface can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3).
 
-Currently these sets of catalogs are available (**Note that these catalogs are not perfect and will continue to be updated**):
+Currently these sets of catalogs are available:
+
+*Note 1*: hese catalogs are not perfect and will continue to be updated.
+
+*Note 2*: you can run the following code to see all available catalogs
+```python
+sorted(GCRCatalogs.get_available_catalogs(False))
+```
 
 1. protoDC2: 
    by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs et al.
    - `protoDC2` (full catalog)
    - `protoDC2_test` (same as `protoDC2` but this one skips time-consuming md5 check.)
+   - `proto-dc2_vX.X_test.yaml` (some other versions of the protoDC2 catalog. You can run 
+     ```python
+     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto')))
+     ```
+     to see all available versions. 
 
 2. Buzzard series: 
    by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
    - `buzzard` (full catalog, DES Y3 area)
-   - `buzzard_test` (same as `buzzard` but a small subset for testing purpose)
+   - `buzzard_test` (same as `buzzard` but a small subset for testing purpose / faster access)
    - `buzzard_high-res` (higher resolution, smaller sky area)
    - `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21` (different realizations of `buzzard`)
-      
-3. DC1 catalog: 
+
+3. DC2 catalogs:
+   - `dc2_coadd_run1.1p`: "coadd catalog" for Run 1.1p
+   - `dc2_coadd_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
+   - `dc2_reference_run1.1p`: "reference catalog" for Run 1.1p
+   - `dc2_reference_run1.2p`: "reference catalog" for Run 1.2p
+   - `dc2_instance_example1`: an example instance catalog
+
+4. DC1 catalog: 
    - `dc1`
 
 Each of the catalogs is specified by a YAML config file, which can be found [here](GCRCatalogs/catalog_configs). The galaxy quantities in these catalogs conform to [the schema](GCRCatalogs/SCHEMA.md).
