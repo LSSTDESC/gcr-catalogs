@@ -328,7 +328,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if dataset not in self._dataset_cache:
             try:
                 self._dataset_cache[dataset] = self._load_dataset(dataset)
-
             except MemoryError:
                 self.clear_cache()
                 self._dataset_cache[dataset] = self._load_dataset(dataset)
@@ -375,7 +374,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
             try:
                 d = self.load_dataset(dataset)
-
             except tables.NoSuchNodeError:
                 war_msg = 'Missing node for tract {}, patch {} in {} '
                 warnings.warn(war_msg.format(dataset_info['tract'],
