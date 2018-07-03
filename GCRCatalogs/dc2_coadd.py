@@ -5,9 +5,10 @@ DC2 Coadd Catalog Reader
 import os
 import re
 import warnings
+
 import numpy as np
-import tables
 import pandas as pd
+import tables
 from GCR import BaseGenericCatalog
 
 __all__ = ['DC2CoaddCatalog']
@@ -30,11 +31,12 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     # If need be, this can be generalized using a mesh grid
     out_data = np.array([
         ixx_err * ixx_err,
-        ixx_err * iyy_err,
         ixx_err * ixy_err,
-        iyy_err * iyy_err,
-        iyy_err * ixy_err,
-        ixy_err * ixy_err])
+        ixx_err * iyy_err,
+        ixy_err * ixy_err,
+        ixy_err * iyy_err,
+        iyy_err * iyy_err
+    ])
 
     return out_data.transpose()
 
@@ -170,7 +172,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             )
 
             modifiers['{}_psf_size'.format(band)] = (
-                lambda xx, yy, xy: 0.168*2.355*(xx*yy - xy*xy)**0.25,
+                lambda xx, yy, xy: 0.168 * 2.355 * (xx * yy - xy * xy) ** 0.25,
                 '{}_base_SdssShape_psf_xx'.format(band),
                 '{}_base_SdssShape_psf_yy'.format(band),
                 '{}_base_SdssShape_psf_xy'.format(band),
@@ -344,12 +346,13 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         Returns:
             A pandas data frame
         """
-        warnings.warn('This function is not a not GCR API, but only for convenience. Only use this function for testing.')
+        warnings.warn('This function is not a not GCR API, but only for convenience. '
+                      'Only use this function for testing.')
 
         if not int(tract) in self.available_tracts:
             raise ValueError('Invalid tract value: {}'.format(tract))
 
-        if not patch in self._get_available_patches_in_tract(tract):
+        if patch not in self._get_available_patches_in_tract(tract):
             err_msg = 'Invalid patch {} for tract {}'
             raise ValueError(err_msg.format(patch, tract))
 
