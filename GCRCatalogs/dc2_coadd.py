@@ -43,7 +43,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     return out_data.transpose()
 
 
-def create_basic_flag_mash(*flags):
+def create_basic_flag_mask(*flags):
     """
     generate a mask for a set of flags
     for each item, mask will be true if and only if all flags are false
@@ -116,12 +116,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'centroid_flag': 'slot_Centroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'HSM_res': 'ext_shapeHSM_HsmShapeRegauss_resolution',
-            'HSM_ell': (np.hypot, 'ext_shapeHSM_HsmShapeRegauss_e1', 'ext_shapeHSM_HsmShapeRegauss_e2'),
         }
 
-        modifiers['pass_basic_flag_cut'] = (
-            create_basic_flag_mash,
+        modifiers['good'] = (
+            create_basic_flag_mask,
             'deblend_skipped',
             'base_PixelFlags_flag_edge',
             'base_PixelFlags_flag_interpolatedCenter',
@@ -130,7 +128,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_bad',
             'base_PixelFlags_flag_suspectCenter',
             'base_PixelFlags_flag_clipped',
-            'ext_shapeHSM_HsmShapeRegauss_flag',
         )
 
         # cross-band average, second moment values
@@ -238,7 +235,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 datasets_this, columns_this = self._read_hdf5_meta(fpath)
                 datasets.extend(datasets_this)
                 columns.update(columns_this)
-
             except (IOError, OSError):
                 warnings.warn('Cannot access {}; skipped'.format(fpath))
 
