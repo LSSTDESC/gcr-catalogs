@@ -26,8 +26,10 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
         ixy_err (float): The error in the second moment Ixy
 
     Returns:
-        The covariance between the given arrays
+        Elements of the covariance matrix ordered as
+        [ixx * ixx, ixx * ixy, ixx * iyy, ixy * ixy, ixy * iyy, iyy * iyy]
     """
+
     # If need be, this can be generalized using a mesh grid
     out_data = np.array([
         ixx_err * ixx_err,
