@@ -100,5 +100,5 @@ The schema for DC2 Coadd Catalogs follow the following rules:
 - For qunatities that are defined in neither, we define them below:
 
 Quantity Label | Unit | Definition
---- | --- | --- | ---
+--- | --- | ---
 `mag_<band>_cmodel` | - | Apparent magnitude in `<band>`, fitted by CModel.
