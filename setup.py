@@ -34,9 +34,11 @@ setup(
     extras_require = {
         'protodc2': ['h5py'],
         'instance': ['pandas'],
+        'reference': ['pandas'],
         'dc1': ['sqlalchemy', 'pymssql'],
-        'dc2_merged': ['tables', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables'],
+        'dc2_coadd': ['tables', 'pandas'],
+        'focal_plane': ['scikit-image', 'pandas'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
