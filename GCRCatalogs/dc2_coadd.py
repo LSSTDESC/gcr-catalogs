@@ -99,8 +99,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
 
-    @staticmethod
-    def _generate_modifiers():
+    def _generate_modifiers(self):
         """Creates a dictionary relating native and homogenized column names
 
         Returns:
