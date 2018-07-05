@@ -118,6 +118,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'centroid_flag': 'slot_Centroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
+            'blendedness': 'base_Blendedness_abs_flux'
         }
 
         modifiers['good'] = (

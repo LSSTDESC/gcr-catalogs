@@ -122,3 +122,4 @@ Quantity Label | Unit | Definition
 ` psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
 `good` | - | Whether the source contains any corrupted pixels. 
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. 
+`blendedness` | - |
