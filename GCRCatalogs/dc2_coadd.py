@@ -93,13 +93,14 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         self._dataset_cache = dict()
 
-        self._quantity_modifiers = self._generate_modifiers()
+        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale)
         self._datasets, self._columns = self._generate_datasets_and_columns()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
 
-    def _generate_modifiers(self):
+    @staticmethod
+    def _generate_modifiers(pixel_scale=0.2):
         """Creates a dictionary relating native and homogenized column names
 
         Returns:
@@ -169,7 +170,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             )
 
             modifiers['psf_fwhm_{}'.format(band)] = (
-                lambda xx, yy, xy: self.pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
+                lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
                 '{}_base_SdssShape_psf_xx'.format(band),
                 '{}_base_SdssShape_psf_yy'.format(band),
                 '{}_base_SdssShape_psf_xy'.format(band),
