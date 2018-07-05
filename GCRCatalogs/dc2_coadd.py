@@ -63,6 +63,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
     use_cache         (str): Whether to cache returned data (default: True)
+    pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
 
     Attributes
     ----------
@@ -85,6 +86,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._filename_re = re.compile(kwargs.get('filename_pattern', r'merged_tract_\d+\.hdf5'))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', r'coadd_\d+_\d\d$'))
         self.use_cache = bool(kwargs.get('use_cache', True))
+        self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
 
         if not os.path.isdir(self._base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self._base_dir))
@@ -167,8 +169,8 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 '{}_modelfit_CModel_fluxSigma'.format(band),
             )
 
-            modifiers['psf_size_{}'.format(band)] = (
-                lambda xx, yy, xy: 0.168 * 2.355 * (xx * yy - xy * xy) ** 0.25,
+            modifiers['psf_fwhm_{}'.format(band)] = (
+                lambda xx, yy, xy: self.pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
                 '{}_base_SdssShape_psf_xx'.format(band),
                 '{}_base_SdssShape_psf_yy'.format(band),
                 '{}_base_SdssShape_psf_xy'.format(band),
