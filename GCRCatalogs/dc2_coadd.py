@@ -30,7 +30,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
         [ixx * ixx, ixx * ixy, ixx * iyy, ixy * ixy, ixy * iyy, iyy * iyy]
     """
 
-    # If need be, this can be generalized using a mesh grid
+    # This array is missing the off-diagonal correlation coefficients
     out_data = np.array([
         ixx_err * ixx_err,
         ixx_err * ixy_err,
@@ -132,14 +132,11 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'slot_Shape_flag'
-        modifiers['ICov'] = (calc_cov, 'base_SdssShape_xxSigma', 'base_SdssShape_yySigma', 'base_SdssShape_xySigma')
         for ax in ['xx', 'yy', 'xy']:
             modifiers['I{}'.format(ax)] = 'slot_Shape_{}'.format(ax)
             modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
 
         for band in 'ugrizy':
-            modifiers['{}_magLSST'.format(band)] = '{}_mag'.format(band)
-            modifiers['{}_magLSST_err'.format(band)] = '{}_mag_err'.format(band)
             modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
             modifiers['{}_psFlux'.format(band)] = '{}_slot_ModelFlux_flux'.format(band)
@@ -148,12 +145,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
             # Band specific second moment values
             modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
-            modifiers['{}_ICov'.format(band)] = (
-                calc_cov,
-                '{}_base_SdssShape_xxSigma'.format(band),
-                '{}_base_SdssShape_yySigma'.format(band),
-                '{}_base_SdssShape_xySigma'.format(band)
-            )
 
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
