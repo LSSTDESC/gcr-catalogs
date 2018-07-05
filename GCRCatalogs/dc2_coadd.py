@@ -118,7 +118,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'centroid_flag': 'slot_Centroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_flux'
+            'blendedness': 'base_Blendedness_abs_flux',
         }
 
         modifiers['good'] = (
@@ -161,7 +161,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             modifiers['magerr_{}_CModel'.format(band)] = (
                 lambda flux, err: (2.5 * err) / (flux * np.log(10)),
                 '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band)
+                '{}_modelfit_CModel_fluxSigma'.format(band),
             )
 
             modifiers['SNR_{}_CModel'.format(band)] = (
