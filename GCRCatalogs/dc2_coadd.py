@@ -139,29 +139,29 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         for band in 'ugrizy':
             modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['{}_psFlux'.format(band)] = '{}_slot_PsfFlux_flux'.format(band)
-            modifiers['{}_psFlux_flag'.format(band)] = '{}_slot_PsfFlux_flag'.format(band)
-            modifiers['{}_psFlux_err'.format(band)] = '{}_slot_PsfFlux_fluxSigma'.format(band)
+            modifiers['psFlux_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flux'.format(band)
+            modifiers['psFlux_flag_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flag'.format(band)
+            modifiers['psFlux_err_{}_lsst'.format(band)] = '{}_slot_PsfFlux_fluxSigma'.format(band)
 
             # Band specific second moment values
-            modifiers['{}_I_flag'.format(band)] = '{}_slot_Shape_flag'.format(band)
+            modifiers['I_flag_{}_lsst'.format(band)] = '{}_slot_Shape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers['{}_I{}'.format(band, ax)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['{}_I{}PSF'.format(band, ax)] = '{}_slot_PsfShape_{}'.format(band, ax)
+                modifiers['I{}_{}_lsst'.format(ax, band)] = '{}_slot_Shape_{}'.format(band, ax)
+                modifiers['I{}PSF_{}_lsst'.format(ax, band)] = '{}_slot_PsfShape_{}'.format(band, ax)
 
-            modifiers['{}_mag_CModel'.format(band)] = (
+            modifiers['mag_{}_CModel'.format(band)] = (
                 lambda x: -2.5 * np.log10(x) + 27.0,
                 '{}_modelfit_CModel_flux'.format(band),
             )
 
-            modifiers['{}_SN_CModel'.format(band)] = (
+            modifiers['SN_{}_CModel'.format(band)] = (
                 np.divide,
                 '{}_modelfit_CModel_flux'.format(band),
                 '{}_modelfit_CModel_fluxSigma'.format(band),
             )
 
-            modifiers['{}_psf_size'.format(band)] = (
+            modifiers['psf_size_{}'.format(band)] = (
                 lambda xx, yy, xy: 0.168 * 2.355 * (xx * yy - xy * xy) ** 0.25,
                 '{}_base_SdssShape_psf_xx'.format(band),
                 '{}_base_SdssShape_psf_yy'.format(band),
