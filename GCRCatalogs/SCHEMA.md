@@ -9,13 +9,15 @@ Attribute name | Type | Definition
 `halo_mass_def` | `str` | halo mass definition, e.g., `vir`, `200m`, `200c`
 `lightcone` | `bool` | whether or not the catalog is a light cone catalog
 
-## Galaxy properties
+## Schema
 
 - Label names are generally in `lowercase_separated_by_underscores` format, except in a few cases an upper case letter is needed (e.g., `Mag_true_Y_lsst_z0`).
 - Label names generally start with the name of the physical quantity, and are followed by specifications (i.e., use `size_disk_true` not `true_disk_size`). Some exceptions are `galaxy_id`, `halo_id`, `halo_mass`.
 - A quantity with `_true` usually means before the lensing effect is taken into account.
 - Not all quantities listed below are available in all catalogs. Use `list_all_quantities()` to find available quantities.
 - In addition to the quantities listed below, there are also *native quantities*, which are quantities whose label names and/or units have not been homogenized and may change in the future. Nevertheless, one can still access native quantities via GCRCatalogs. Use `list_all_native_quantities()` to find available native quantities.
+
+### Schema for Extragalatic Catalogs
 
 Quantity Label | Unit | Definition
 --- | --- | ---
@@ -86,3 +88,17 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but without dust extiction in the host galaxy
 `sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
 `sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
+
+
+## schema for DC2 Coadd Catalogs
+
+The schema for DC2 Coadd Catalogs follow the following rules:
+
+- For qunatities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
+- For qunatities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme.
+- For qunatities that are defined in both, we provide aliases so both naming schemes would work.
+- For qunatities that are defined in neither, we define them below:
+
+Quantity Label | Unit | Definition
+--- | --- | --- | ---
+`mag_<band>_cmodel` | - | Apparent magnitude in `<band>`, fitted by CModel.
