@@ -16,13 +16,6 @@ __all__ = ['BuzzardGalaxyCatalog']
 def _ellip2pa(e1, e2):
     return np.remainder(np.rad2deg(np.arctan2(e2, e1)/2.0), 180.0)
 
-def _ellip2e(e1, e2):
-    return np.sqrt(e1*e1 + e2*e2)
-
-def _major2minor(s, e1, e2):
-    e = _ellip2e(e1, e2)
-    return s * (1.0 - e) / (1.0 + e)
-
 
 class FitsFile(object):
     def __init__(self, path):
@@ -90,10 +83,9 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
                 'ellipticity_1_true': 'truth/TE/0',
                 'ellipticity_2_true': 'truth/TE/1',
-                'ellipticity_true': (_ellip2e, 'truth/TE/0', 'truth/TE/1'),
+                'ellipticity_true': (np.hypot, 'truth/TE/0', 'truth/TE/1'),
                 'position_angle_true': (_ellip2pa, 'truth/TE/0', 'truth/TE/1'),
                 'size_true': 'truth/TSIZE',
-                'size_minor_true': (_major2minor, 'truth/TSIZE', 'truth/TE/0', 'truth/TE/1'),
                 'position_x': (lambda x: x/self.cosmology.h, 'truth/PX'),
                 'position_y': (lambda x: x/self.cosmology.h, 'truth/PY'),
                 'position_z': (lambda x: x/self.cosmology.h, 'truth/PZ'),
@@ -151,16 +143,14 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
                 'ellipticity_1': 'truth/EPSILON/0',
                 'ellipticity_2': 'truth/EPSILON/1',
-                'ellipticity': (_ellip2e, 'truth/EPSILON/0', 'truth/EPSILON/1'),
+                'ellipticity': (np.hypot, 'truth/EPSILON/0', 'truth/EPSILON/1'),
                 'position_angle': (_ellip2pa, 'truth/EPSILON/0', 'truth/EPSILON/1'),
                 'ellipticity_1_true': 'truth/TE/0',
                 'ellipticity_2_true': 'truth/TE/1',
-                'ellipticity_true': (_ellip2e, 'truth/TE/0', 'truth/TE/1'),
+                'ellipticity_true': (np.hypot, 'truth/TE/0', 'truth/TE/1'),
                 'position_angle_true': (_ellip2pa, 'truth/TE/0', 'truth/TE/1'),
                 'size': 'truth/SIZE',
-                'size_minor': (_major2minor, 'truth/SIZE', 'truth/EPSILON/0', 'truth/EPSILON/1'),
                 'size_true': 'truth/TSIZE',
-                'size_minor_true': (_major2minor, 'truth/TSIZE', 'truth/TE/0', 'truth/TE/1'),
                 'shear_1': 'truth/GAMMA1',
                 'shear_2': 'truth/GAMMA2',
                 'convergence': 'truth/KAPPA',
