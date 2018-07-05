@@ -155,6 +155,12 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 '{}_modelfit_CModel_flux'.format(band),
             )
 
+            modifiers['magerr_{}_CModel'.format(band)] = (
+                lambda flux, err: (2.5 * err) / (flux * np.log(10)),
+                '{}_modelfit_CModel_flux'.format(band),
+                '{}_modelfit_CModel_fluxSigma'.format(band)
+            )
+
             modifiers['SNR_{}_CModel'.format(band)] = (
                 np.divide,
                 '{}_modelfit_CModel_flux'.format(band),
