@@ -97,7 +97,9 @@ The schema for DC2 Coadd Catalogs follow the following rules:
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
 - For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme.
 - For quantities that are defined in both, we provide aliases so both naming schemes would work.
-- For quantities that are defined in neither, we define them below. :
+- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
+
+For quantities that are not yet documented in the table above, we document them below:
 
 Quantity Label | Unit | Definition
 --- | --- | ---
