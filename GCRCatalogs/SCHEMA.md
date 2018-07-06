@@ -101,22 +101,22 @@ The schema for DC2 Coadd Catalogs follow the following rules:
 
 For quantities that are not yet documented in the table above, we document them below:
 - In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
-- Items marked with '*' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
+- Items marked with 'xx' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
    * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
    * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
    * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
-`ra` | degree | Right Ascension | x | x |
-`ra_err` | degree | Right Ascension | x | x |
-`dec` | degree | Declination | x | x |
-`dec_err` | degree | Declination | x | x |
-`x` | pixels | 2D centroid location (x coordinate). |   | x |
-`y` | pixels | 2D centroid location (y coordinate). |   | x |
-`xErr` | pixels | Error value for `centroidX`. |   | x |
-`yErr` | pixels | Error value for `centroidY`. |   | x |
-`xy_flag` | - | Flag for issues with `x` and `y`. |   | x |
+`ra` | degree | Right Ascension | x | xx |
+`ra_err` | degree | Right Ascension | x | xx |
+`dec` | degree | Declination | x | xx |
+`dec_err` | degree | Declination | x | xx |
+`x` | pixels | 2D centroid location (x coordinate). |   | xx |
+`y` | pixels | 2D centroid location (y coordinate). |   | xx |
+`xErr` | pixels | Error value for `centroidX`. |   | xx |
+`yErr` | pixels | Error value for `centroidY`. |   | xx |
+`xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
 `psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
 `psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
@@ -132,6 +132,6 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel. |   |   |
 `psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
 `good` | - | Whether the source contains any corrupted pixels. |   |   |
-`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | x |
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
