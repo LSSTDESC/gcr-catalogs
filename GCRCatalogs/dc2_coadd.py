@@ -111,11 +111,11 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'parentObjectId': 'parent',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
-            'centroidX': 'slot_Centroid_x',
-            'centroidY': 'slot_Centroid_y',
-            'centroidX_err': 'slot_Centroid_xSigma',
-            'centroidY_err': 'slot_Centroid_ySigma',
-            'centroid_flag': 'slot_Centroid_flag',
+            'centroidX': 'base_SdssCentroid_x',
+            'centroidY': 'base_SdssCentroid_y',
+            'centroidX_err': 'base_SdssCentroid_xSigma',
+            'centroidY_err': 'base_SdssCentroid_ySigma',
+            'centroid_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
             'blendedness': 'base_Blendedness_abs_flux',
@@ -134,10 +134,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         )
 
         # cross-band average, second moment values
-        modifiers['I_flag'] = 'slot_Shape_flag'
+        modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments'
         for ax in ['xx', 'yy', 'xy']:
-            modifiers['I{}'.format(ax)] = 'slot_Shape_{}'.format(ax)
-            modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
+            modifiers['I{}'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
+            modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
 
         for band in 'ugrizy':
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
@@ -147,11 +147,11 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
 
             # Band specific second moment values
-            modifiers['I_flag_{}'.format(band)] = '{}_slot_Shape_flag'.format(band)
+            modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers['I{}_{}'.format(ax, band)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['I{}PSF_{}'.format(ax, band)] = '{}_slot_PsfShape_{}'.format(band, ax)
+                modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
+                modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
             modifiers['mag_{}_CModel'.format(band)] = (
                 lambda x: -2.5 * np.log10(x) + 27.0,
