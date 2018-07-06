@@ -4,3 +4,5 @@ filename_pattern: merged_tract_4850.hdf5
 description: DC2 Run 1.1p Coadd Catalog
 creators: ['Michael Wood-Vasey']
 included_by_default: true
+pixel_scale: 0.185
+
