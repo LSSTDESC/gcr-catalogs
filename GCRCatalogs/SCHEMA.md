@@ -9,13 +9,15 @@ Attribute name | Type | Definition
 `halo_mass_def` | `str` | halo mass definition, e.g., `vir`, `200m`, `200c`
 `lightcone` | `bool` | whether or not the catalog is a light cone catalog
 
-## Galaxy properties
+## Schema
 
 - Label names are generally in `lowercase_separated_by_underscores` format, except in a few cases an upper case letter is needed (e.g., `Mag_true_Y_lsst_z0`).
 - Label names generally start with the name of the physical quantity, and are followed by specifications (i.e., use `size_disk_true` not `true_disk_size`). Some exceptions are `galaxy_id`, `halo_id`, `halo_mass`.
 - A quantity with `_true` usually means before the lensing effect is taken into account.
 - Not all quantities listed below are available in all catalogs. Use `list_all_quantities()` to find available quantities.
 - In addition to the quantities listed below, there are also *native quantities*, which are quantities whose label names and/or units have not been homogenized and may change in the future. Nevertheless, one can still access native quantities via GCRCatalogs. Use `list_all_native_quantities()` to find available native quantities.
+
+### Schema for Extragalatic Catalogs
 
 Quantity Label | Unit | Definition
 --- | --- | ---
@@ -86,3 +88,38 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but without dust extiction in the host galaxy
 `sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
 `sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
+
+
+## Schema for DC2 Coadd Catalogs
+
+The schema for DC2 Coadd Catalogs follow the following rules:
+
+- For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
+- For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme.
+- For quantities that are defined in both, we provide aliases so both naming schemes would work.
+- For quantities that are defined in neither, we define them below:
+
+Quantity Label | Unit | Definition
+--- | --- | ---
+`centroidX` | pixels | 2D centroid location (x coordinate). 
+`centroidY` | pixels | 2D centroid location (y coordinate). 
+`centroidX_err` | pixels | Error value for `centroidX`. 
+`centroidY_err` | pixels | Error value for `centroidY`. 
+`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. 
+`psFlux_<band>_lsst` | nmgy | Point source model flux in `<band>.` 
+`psFlux_err_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`. 
+`psFlux_flag_<band>_lsst` | - | Flag for issues with `psFlux_<band>_lsst`. 
+`Ixx_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
+`Iyy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
+`Ixy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
+`IxxPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`IyyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`IxyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`I_flag_<band>_lsst` | - | Flag for issues with `Ixx_<band>_lsst`, `Ixx_<band>_lsst`, and `Ixx_<band>_lsst.` 
+`mag_<band>_CModel` | mag | Apparent magnitude in `<band>`, fitted by CModel.
+`magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.` 
+`SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel.
+` psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
+`good` | - | Whether the source contains any corrupted pixels. 
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. 
+`blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766))
