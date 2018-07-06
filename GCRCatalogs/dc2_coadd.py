@@ -140,18 +140,18 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
 
         for band in 'ugrizy':
-            modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
-            modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}_lsst'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
-            modifiers['psFlux_flag_{}_lsst'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}_lsst'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
+            modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
+            modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+            modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
+            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
 
             # Band specific second moment values
-            modifiers['I_flag_{}_lsst'.format(band)] = '{}_slot_Shape_flag'.format(band)
+            modifiers['I_flag_{}'.format(band)] = '{}_slot_Shape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers['I{}_{}_lsst'.format(ax, band)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['I{}PSF_{}_lsst'.format(ax, band)] = '{}_slot_PsfShape_{}'.format(band, ax)
+                modifiers['I{}_{}'.format(ax, band)] = '{}_slot_Shape_{}'.format(band, ax)
+                modifiers['I{}PSF_{}'.format(ax, band)] = '{}_slot_PsfShape_{}'.format(band, ax)
 
             modifiers['mag_{}_CModel'.format(band)] = (
                 lambda x: -2.5 * np.log10(x) + 27.0,
