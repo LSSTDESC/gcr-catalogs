@@ -106,16 +106,16 @@ Quantity Label | Unit | Definition
 `centroidX_err` | pixels | Error value for `centroidX`. 
 `centroidY_err` | pixels | Error value for `centroidY`. 
 `centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. 
-`psFlux_<band>_lsst` | nmgy | Point source model flux in `<band>.` 
-`psFluxErr_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`. 
-`psFlux_flag_<band>_lsst` | - | Flag for issues with `psFlux_<band>_lsst`. 
-`Ixx_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
-`Iyy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`Ixy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`IxxPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IyyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IxyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`I_flag_<band>_lsst` | - | Flag for issues with `Ixx_<band>_lsst`, `Ixx_<band>_lsst`, and `Ixx_<band>_lsst.` 
+`psFlux_<band>` | nmgy | Point source model flux in `<band>.` 
+`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. 
+`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. 
+`Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`.
+`Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
+`Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
+`IxxPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`IyyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`IxyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
+`I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` 
 `mag_<band>_CModel` | mag | Apparent magnitude in `<band>`, fitted by CModel.
 `magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.` 
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel.
