@@ -142,9 +142,9 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         for band in 'ugrizy':
             modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flux'.format(band)
-            modifiers['psFlux_flag_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flag'.format(band)
-            modifiers['psFlux_err_{}_lsst'.format(band)] = '{}_slot_PsfFlux_fluxSigma'.format(band)
+            modifiers['psFlux_{}_lsst'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+            modifiers['psFlux_flag_{}_lsst'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
+            modifiers['psFluxErr_{}_lsst'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
 
             # Band specific second moment values
             modifiers['I_flag_{}_lsst'.format(band)] = '{}_slot_Shape_flag'.format(band)
