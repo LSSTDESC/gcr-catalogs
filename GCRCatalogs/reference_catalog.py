@@ -41,6 +41,8 @@ class ReferenceCatalogReader(BaseGenericCatalog):
             'sigma_dec' : 'sigma_decJ2000',
             'ra_smeared' : 'raJ2000_smeared',
             'dec_smeared' : 'decJ2000_smeared',
+            'is_agn': (lambda x: x.astype(np.bool), 'isagn'),
+            'is_resolved': (lambda x: x.astype(np.bool), 'isresolved'),
         }
 
         for band in 'ugrizy':
