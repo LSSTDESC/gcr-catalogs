@@ -97,7 +97,7 @@ The schema for DC2 Coadd Catalogs follow the following rules:
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
 - For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme.
 - For quantities that are defined in both, we provide aliases so both naming schemes would work.
-- For quantities that are defined in neither, we define them below:
+- For quantities that are defined in neither, we define them below. :
 
 Quantity Label | Unit | Definition
 --- | --- | ---
@@ -107,7 +107,7 @@ Quantity Label | Unit | Definition
 `centroidY_err` | pixels | Error value for `centroidY`. 
 `centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. 
 `psFlux_<band>_lsst` | nmgy | Point source model flux in `<band>.` 
-`psFlux_err_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`. 
+`psFluxErr_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`. 
 `psFlux_flag_<band>_lsst` | - | Flag for issues with `psFlux_<band>_lsst`. 
 `Ixx_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
 `Iyy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
@@ -119,7 +119,7 @@ Quantity Label | Unit | Definition
 `mag_<band>_CModel` | mag | Apparent magnitude in `<band>`, fitted by CModel.
 `magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.` 
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel.
-` psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
+`psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
 `good` | - | Whether the source contains any corrupted pixels. 
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. 
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766))
