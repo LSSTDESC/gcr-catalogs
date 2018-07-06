@@ -123,9 +123,9 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
 `Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
 `Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
-`IxxPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
-`IyyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
-`IxyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
+`IxxPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`IyyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`IxyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
 `I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
 `mag_<band>_CModel` | mag | composite model (CModel) magnitude in `<band>`, fitted by CModel. | x |   |
 `magerr_<band>_CModel` | mag | Error value for `mag_<band>_CModel.` | x |   |
