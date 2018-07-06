@@ -95,33 +95,38 @@ Quantity Label | Unit | Definition
 The schema for DC2 Coadd Catalogs follow the following rules:
 
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
-- For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme.
+- For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
 - For quantities that are defined in both, we provide aliases so both naming schemes would work.
 - For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
 
 For quantities that are not yet documented in the table above, we document them below:
+- In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
+- Items marked with '*' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
+   * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
+   * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
 
-Quantity Label | Unit | Definition
---- | --- | ---
-`centroidX` | pixels | 2D centroid location (x coordinate). 
-`centroidY` | pixels | 2D centroid location (y coordinate). 
-`centroidX_err` | pixels | Error value for `centroidX`. 
-`centroidY_err` | pixels | Error value for `centroidY`. 
-`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. 
-`psFlux_<band>` | nmgy | Point source model flux in `<band>.` 
-`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. 
-`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. 
-`Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`.
-`Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`IxxPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IyyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IxyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` 
-`mag_<band>_CModel` | mag | Apparent magnitude in `<band>`, fitted by CModel.
-`magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.` 
-`SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel.
-`psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
-`good` | - | Whether the source contains any corrupted pixels. 
-`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. 
-`blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766))
+Quantity Label | Unit | Definition | GCRbase | DPDD
+--- | --- | --- | --- | ---
+`centroidX` | pixels | 2D centroid location (x coordinate). |   | * |
+`centroidY` | pixels | 2D centroid location (y coordinate). |   | * |
+`centroidX_err` | pixels | Error value for `centroidX`. |   | * |
+`centroidY_err` | pixels | Error value for `centroidY`. |   | * |
+`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. |   | * |
+`psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
+`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
+`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
+`Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`IxxPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
+`IyyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
+`IxyPSF_<band>` | asec2 | Adaptive second moment for the PSF  in `<band>`. |   | x |
+`I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
+`mag_<band>_CModel` | mag | composite model (CModel) magnitude in `<band>`, fitted by CModel. | x |   |
+`magerr_<band>_CModel` | mag | Error value for `mag_<band>_CModel.` | x |   |
+`SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel. |   |   |
+`psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF |   |   |
+`good` | - | Whether the source contains any corrupted pixels. |   |   |
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | * |
+`blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
+`extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
