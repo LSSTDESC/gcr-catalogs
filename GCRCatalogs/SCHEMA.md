@@ -103,10 +103,15 @@ For quantities that are not yet documented in the table above, we document them 
 - In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
 - Items marked with '*' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
    * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
+   * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
    * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
+`ra` | degree | Right Ascension | x | * |
+`ra_err` | degree | Right Ascension | x | * |
+`dec` | degree | Declination | x | * |
+`dec_err` | degree | Declination | x | * |
 `centroidX` | pixels | 2D centroid location (x coordinate). |   | * |
 `centroidY` | pixels | 2D centroid location (y coordinate). |   | * |
 `centroidX_err` | pixels | Error value for `centroidX`. |   | * |
