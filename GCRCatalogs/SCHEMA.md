@@ -108,15 +108,15 @@ For quantities that are not yet documented in the table above, we document them 
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
-`ra` | degree | Right Ascension | x | * |
-`ra_err` | degree | Right Ascension | x | * |
-`dec` | degree | Declination | x | * |
-`dec_err` | degree | Declination | x | * |
-`x` | pixels | 2D centroid location (x coordinate). |   | * |
-`y` | pixels | 2D centroid location (y coordinate). |   | * |
-`xErr` | pixels | Error value for `centroidX`. |   | * |
-`yErr` | pixels | Error value for `centroidY`. |   | * |
-`xy_flag` | - | Flag for issues with `x` and `y`. |   | * |
+`ra` | degree | Right Ascension | x | x |
+`ra_err` | degree | Right Ascension | x | x |
+`dec` | degree | Declination | x | x |
+`dec_err` | degree | Declination | x | x |
+`x` | pixels | 2D centroid location (x coordinate). |   | x |
+`y` | pixels | 2D centroid location (y coordinate). |   | x |
+`xErr` | pixels | Error value for `centroidX`. |   | x |
+`yErr` | pixels | Error value for `centroidY`. |   | x |
+`xy_flag` | - | Flag for issues with `x` and `y`. |   | x |
 `psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
 `psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
@@ -132,6 +132,6 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel. |   |   |
 `psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
 `good` | - | Whether the source contains any corrupted pixels. |   |   |
-`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | * |
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | x |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
