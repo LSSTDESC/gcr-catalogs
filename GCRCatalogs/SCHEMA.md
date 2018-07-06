@@ -112,11 +112,11 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `ra_err` | degree | Right Ascension | x | * |
 `dec` | degree | Declination | x | * |
 `dec_err` | degree | Declination | x | * |
-`centroidX` | pixels | 2D centroid location (x coordinate). |   | * |
-`centroidY` | pixels | 2D centroid location (y coordinate). |   | * |
-`centroidX_err` | pixels | Error value for `centroidX`. |   | * |
-`centroidY_err` | pixels | Error value for `centroidY`. |   | * |
-`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. |   | * |
+`x` | pixels | 2D centroid location (x coordinate). |   | * |
+`y` | pixels | 2D centroid location (y coordinate). |   | * |
+`xErr` | pixels | Error value for `centroidX`. |   | * |
+`yErr` | pixels | Error value for `centroidY`. |   | * |
+`xy_flag` | - | Flag for issues with `x` and `y`. |   | * |
 `psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
 `psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
@@ -130,7 +130,7 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `mag_<band>_CModel` | mag | composite model (CModel) magnitude in `<band>`, fitted by CModel. | x |   |
 `magerr_<band>_CModel` | mag | Error value for `mag_<band>_CModel.` | x |   |
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel. |   |   |
-`psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF |   |   |
+`psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
 `good` | - | Whether the source contains any corrupted pixels. |   |   |
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | * |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
