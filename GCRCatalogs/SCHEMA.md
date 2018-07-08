@@ -127,9 +127,9 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `IyyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
 `IxyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
 `I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
-`mag_<band>_CModel` | mag | composite model (CModel) magnitude in `<band>`, fitted by CModel. | x |   |
-`magerr_<band>_CModel` | mag | Error value for `mag_<band>_CModel.` | x |   |
-`SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel. |   |   |
+`mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
+`magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
+`snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
 `psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
 `good` | - | Whether the source contains any corrupted pixels. |   |   |
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
