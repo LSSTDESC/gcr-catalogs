@@ -121,9 +121,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'blendedness': 'base_Blendedness_abs_flux',
         }
 
-        modifiers['good'] = (
-            create_basic_flag_mask,
-            'deblend_skipped',
+        not_good_flags = (
             'base_PixelFlags_flag_edge',
             'base_PixelFlags_flag_interpolatedCenter',
             'base_PixelFlags_flag_saturatedCenter',
@@ -132,6 +130,13 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_suspectCenter',
             'base_PixelFlags_flag_clipped',
         )
+
+        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+
+        modifiers['clean'] = (
+            create_basic_flag_mask,
+            'deblend_skipped',
+        ) + not_good_flags
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments'
