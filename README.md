@@ -126,16 +126,15 @@ If you need to use a newer version of `GCRCatalogs` then the one installed in th
 here's what you need to do:
 
 1. Clone this repo (on a NERSC machine):
-
-```bash
-git clone git@github.com:LSSTDESC/gcr-catalogs.git
-```
-and add the path to `sys.path` in your notebook.
-```python
-import sys
-sys.path.insert(0, '/path/to/cloned/gcr-catalogs')
-```
-(Note that if you use `sys.path` for the DESC Python environment, you should add the line above *right after* you insert the DESC Python environment.)
+   ```bash
+   git clone git@github.com:LSSTDESC/gcr-catalogs.git
+   ```
+2. Add the path to `sys.path` in your notebook.
+   ```python
+   import sys
+   sys.path.insert(0, '/path/to/cloned/gcr-catalogs')
+   ```
+   (Note that if you use `sys.path` for the DESC Python environment, you should add the line above *right after* you insert the DESC Python environment.)
 
 If you are running DESCQA and want to use your cloned `GCRCatalogs`, you can add the path to `-p` option:
 ```bash
@@ -143,7 +142,7 @@ If you are running DESCQA and want to use your cloned `GCRCatalogs`, you can add
 ```
 See [more instrcutions for DESCQA here](https://github.com/LSSTDESC/descqa/blob/master/CONTRIBUTING.md#master-script-options).
 
-`GCRCatalogs` is pip-installable, in case you need to install,
+`GCRCatalogs` is also pip-installable, in case you need to install,
 say the master branch of `GCRCatalogs` in your own Python environment
 (*no, in most cases you don't need this*):
 ```bash
