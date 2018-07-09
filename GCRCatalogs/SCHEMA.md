@@ -32,6 +32,9 @@ Quantity Label | Unit | Definition
 `mag_true_<band>_<filter>` | - | Apparent magnitude, not lensed, in `<band>` with  `<filter>`, e.g., `mag_true_Y_lsst`, `mag_true_g_des`
 `mag_<band>_<filter>` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
 `magerr_<band>_<filter>` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
+`mag_<band>` | - | alias for `mag_<band>_lsst`
+`mag_true_<band>` | - | alias for `mag_true_<band>_lsst`
+`magerr_<band>` | - | alias for `magerr_<band>_lsst`
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
@@ -101,25 +104,25 @@ The schema for DC2 Coadd Catalogs follow the following rules:
 
 Quantity Label | Unit | Definition
 --- | --- | ---
-`centroidX` | pixels | 2D centroid location (x coordinate). 
-`centroidY` | pixels | 2D centroid location (y coordinate). 
-`centroidX_err` | pixels | Error value for `centroidX`. 
-`centroidY_err` | pixels | Error value for `centroidY`. 
-`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`. 
-`psFlux_<band>_lsst` | nmgy | Point source model flux in `<band>.` 
-`psFlux_err_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`. 
-`psFlux_flag_<band>_lsst` | - | Flag for issues with `psFlux_<band>_lsst`. 
+`centroidX` | pixels | 2D centroid location (x coordinate).
+`centroidY` | pixels | 2D centroid location (y coordinate).
+`centroidX_err` | pixels | Error value for `centroidX`.
+`centroidY_err` | pixels | Error value for `centroidY`.
+`centroid_flag` | - | Flag for issues with `centroidX` and `centroidY`.
+`psFlux_<band>_lsst` | nmgy | Point source model flux in `<band>.`
+`psFlux_err_<band>_lsst` | nmgy | Error value for `psFlux_<band>_lsst`.
+`psFlux_flag_<band>_lsst` | - | Flag for issues with `psFlux_<band>_lsst`.
 `Ixx_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
-`Iyy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`Ixy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`. 
-`IxxPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IyyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`IxyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`. 
-`I_flag_<band>_lsst` | - | Flag for issues with `Ixx_<band>_lsst`, `Ixx_<band>_lsst`, and `Ixx_<band>_lsst.` 
+`Iyy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
+`Ixy_<band>_lsst` | asec2 | Adaptive second moment of the source intensity in `<band>`.
+`IxxPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`.
+`IyyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`.
+`IxyPSF_<band>_lsst` | asec2 | Adaptive second moment for the PSF  in `<band>`.
+`I_flag_<band>_lsst` | - | Flag for issues with `Ixx_<band>_lsst`, `Ixx_<band>_lsst`, and `Ixx_<band>_lsst.`
 `mag_<band>_CModel` | mag | Apparent magnitude in `<band>`, fitted by CModel.
-`magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.` 
+`magerr_<band>_CModel` | mag | Error value for `mag_<band>_cmodel.`
 `SNR_<band>_CModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by CModel.
-` psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF 
-`good` | - | Whether the source contains any corrupted pixels. 
-`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. 
+` psf_fwhm_<band>` | pixels | The full width at half maximum of the PSF
+`good` | - | Whether the source contains any corrupted pixels.
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`.
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766))
