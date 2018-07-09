@@ -139,7 +139,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         ) + not_good_flags
 
         # cross-band average, second moment values
-        modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments'
+        modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
         for ax in ['xx', 'yy', 'xy']:
             modifiers['I{}'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
             modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
