@@ -69,7 +69,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     ----------
     base_dir                      (str): The directory of data files being served
     use_cache                    (bool): Whether to cache returned data
-    quantity_modifiers           (dict): The mapping from native to homogonized value names
+    quantity_modifiers           (dict): The mapping from native to homogenized value names
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
 
@@ -111,19 +111,17 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'parentObjectId': 'parent',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
-            'centroidX': 'slot_Centroid_x',
-            'centroidY': 'slot_Centroid_y',
-            'centroidX_err': 'slot_Centroid_xSigma',
-            'centroidY_err': 'slot_Centroid_ySigma',
-            'centroid_flag': 'slot_Centroid_flag',
+            'x': 'base_SdssCentroid_x',
+            'y': 'base_SdssCentroid_y',
+            'xErr': 'base_SdssCentroid_xSigma',
+            'yErr': 'base_SdssCentroid_ySigma',
+            'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
             'blendedness': 'base_Blendedness_abs_flux',
         }
 
-        modifiers['good'] = (
-            create_basic_flag_mask,
-            'deblend_skipped',
+        not_good_flags = (
             'base_PixelFlags_flag_edge',
             'base_PixelFlags_flag_interpolatedCenter',
             'base_PixelFlags_flag_saturatedCenter',
@@ -133,38 +131,45 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_clipped',
         )
 
+        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+
+        modifiers['clean'] = (
+            create_basic_flag_mask,
+            'deblend_skipped',
+        ) + not_good_flags
+
         # cross-band average, second moment values
-        modifiers['I_flag'] = 'slot_Shape_flag'
+        modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
         for ax in ['xx', 'yy', 'xy']:
-            modifiers['I{}'.format(ax)] = 'slot_Shape_{}'.format(ax)
-            modifiers['I{}PSF'.format(ax)] = 'slot_PsfShape_{}'.format(ax)
+            modifiers['I{}'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
+            modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
 
         for band in 'ugrizy':
-            modifiers['mag_{}_lsst'.format(band)] = '{}_mag'.format(band)
-            modifiers['magerr_{}_lsst'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flux'.format(band)
-            modifiers['psFlux_flag_{}_lsst'.format(band)] = '{}_slot_PsfFlux_flag'.format(band)
-            modifiers['psFlux_err_{}_lsst'.format(band)] = '{}_slot_PsfFlux_fluxSigma'.format(band)
+            modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
+            modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+            modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
+            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
 
             # Band specific second moment values
-            modifiers['I_flag_{}_lsst'.format(band)] = '{}_slot_Shape_flag'.format(band)
+            modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers['I{}_{}_lsst'.format(ax, band)] = '{}_slot_Shape_{}'.format(band, ax)
-                modifiers['I{}PSF_{}_lsst'.format(ax, band)] = '{}_slot_PsfShape_{}'.format(band, ax)
+                modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
+                modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
-            modifiers['mag_{}_CModel'.format(band)] = (
+            modifiers['mag_{}_cModel'.format(band)] = (
                 lambda x: -2.5 * np.log10(x) + 27.0,
                 '{}_modelfit_CModel_flux'.format(band),
             )
 
-            modifiers['magerr_{}_CModel'.format(band)] = (
+            modifiers['magerr_{}_cModel'.format(band)] = (
                 lambda flux, err: (2.5 * err) / (flux * np.log(10)),
                 '{}_modelfit_CModel_flux'.format(band),
                 '{}_modelfit_CModel_fluxSigma'.format(band),
             )
 
-            modifiers['SNR_{}_CModel'.format(band)] = (
+            modifiers['snr_{}_cModel'.format(band)] = (
                 np.divide,
                 '{}_modelfit_CModel_flux'.format(band),
                 '{}_modelfit_CModel_fluxSigma'.format(band),
@@ -181,7 +186,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
     @property
     def quantity_modifiers(self):
-        """Return the mapping from native to homogonized value names as a dict"""
+        """Return the mapping from native to homogenized value names as a dict"""
         return self._quantity_modifiers
 
     def _read_hdf5_meta(self, fpath):

@@ -34,13 +34,21 @@ class ReferenceCatalogReader(BaseGenericCatalog):
         self._max_chunks = None if self._max_chunks is None else int(self._max_chunks)
 
         self._quantity_modifiers = {
-            'ra' : 'raJ2000',
-            'dec' : 'decJ2000',
+            'object_id': 'uniqueId',
+            'ra' : 'raJ2000_smeared',
+            'dec' : 'decJ2000_smeared',
+            'ra_unsearmed' : 'raJ2000',
+            'dec_unsearmed' : 'decJ2000',
             'sigma_ra' : 'sigma_raJ2000',
             'sigma_dec' : 'sigma_decJ2000',
-            'ra_smeared' : 'raJ2000_smeared',
-            'dec_smeared' : 'decJ2000_smeared',
+            'is_agn': (lambda x: x.astype(np.bool), 'isagn'),
+            'is_resolved': (lambda x: x.astype(np.bool), 'isresolved'),
         }
+
+        for band in 'ugrizy':
+            self._quantity_modifiers['mag_{}_unsearmed'.format(band)] = 'lsst_{}'.format(band)
+            self._quantity_modifiers['mag_{}'.format(band)] = 'lsst_{}_smeared'.format(band)
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'lsst_{}_smeared'.format(band)
 
         self._header_line_number = 0
         self._data_dtype = None
