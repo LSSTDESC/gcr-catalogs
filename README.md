@@ -30,8 +30,8 @@ You can also find an overview of the data products of DESC Data Challenge 2
 at [this Confluence page](https://confluence.slac.stanford.edu/x/oJgHDg)
 (*DESC member only*).
 
-1. "protoDC2" Extragalactic Catalogs:
-   by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs et al.
+1. "protoDC2" Extragalactic Catalogs: \
+   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs et al.*
    - `protoDC2` (full catalog)
    - `protoDC2_test` (same as `protoDC2` but this one skips time-consuming md5 check.)
    - `proto-dc2_vX.X_test.yaml` (some other versions of the protoDC2 catalog. You can run
@@ -40,30 +40,34 @@ at [this Confluence page](https://confluence.slac.stanford.edu/x/oJgHDg)
      ```
      to see all available versions.
 
-2. "Buzzard" Extragalactic Catalogs:
-   by Joe DeRose, Risa Wechsler, Eli Rykoff et al.
+2. "Buzzard" Extragalactic Catalogs: \
+   *by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
    - `buzzard` (full catalog, DES Y3 area)
    - `buzzard_test` (same as `buzzard` but a small subset for testing purpose / faster access)
    - `buzzard_high-res` (higher resolution, smaller sky area)
    - `buzzard_v1.6_1`, `buzzard_v1.6_2`, `buzzard_v1.6_3`, `buzzard_v1.6_5`, `buzzard_v1.6_21` (different realizations of `buzzard`)
 
-3. DC2 "Coadd Catalogs":
-   by LSST DESC, compiled by Michael Wood-Vasey
+3. DC2 "Coadd Catalogs": \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
    - `dc2_coadd_run1.1p`: coadd catalog for Run 1.1p
    - `dc2_coadd_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
-4. DC2 "Reference Catalogs":
-   by LSST DESC, compiled by Scott Daniel
+4. DC2 "Reference Catalogs": \
+   *by LSST DESC, compiled by Scott Daniel*
    - `dc2_reference_run1.1p`: reference catalog for Run 1.1p
    - `dc2_reference_run1.2p`: reference catalog for Run 1.2p
 
-5. DC2 "Instance Catalogs":
-   by LSST DESC, compiled by Scott Daniel
+5. DC2 "Instance Catalogs": \
+   *by LSST DESC, compiled by Scott Daniel*
    - `dc2_instance_example1`: an example instance catalog
    - `dc2_instance_example2`: another example instance catalog
 
 6. DC1 Galaxy Catalog:
    - `dc1`: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")
+
+7. HSC Coadd Catalog for PDR1 XMM field: \
+   *by the Hyper Suprime-Cam (HSC) Collaboration*
+   - `hsc-pdr1-xmm`
 
 
 ## Use GCRCatalogs at NERSC
