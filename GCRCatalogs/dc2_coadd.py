@@ -93,14 +93,16 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         self._dataset_cache = dict()
 
-        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale)
         self._datasets, self._columns = self._generate_datasets_and_columns()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
+        
+        bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
+        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
         """Creates a dictionary relating native and homogenized column names
 
         Returns:
@@ -144,7 +146,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             modifiers['I{}'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
             modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
 
-        for band in 'ugrizy':
+        for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
             modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
