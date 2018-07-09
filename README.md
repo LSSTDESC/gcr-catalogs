@@ -170,6 +170,8 @@ print(sorted(catalog.list_all_quantities()))
 data = catalog.get_quantities(['ra', 'dec'])
 ```
 
+- You can find quantity definitions in [`GCRCatalogs/SCHEMA.md`](https://github.com/LSSTDESC/gcr-catalogs/blob/master/GCRCatalogs/SCHEMA.md).
+
 - See [this notebook](examples/GCRCatalogs%20Demo.ipynb) for a detailed tutorial on how to use `GCRCatalogs`.
 
 - See [this notebook](examples/CLF%20Test.ipynb) for an actual application (the Conditional Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
