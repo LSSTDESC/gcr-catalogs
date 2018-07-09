@@ -32,6 +32,9 @@ Quantity Label | Unit | Definition
 `mag_true_<band>_<filter>` | - | Apparent magnitude, not lensed, in `<band>` with  `<filter>`, e.g., `mag_true_Y_lsst`, `mag_true_g_des`
 `mag_<band>_<filter>` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
 `magerr_<band>_<filter>` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
+`mag_<band>` | - | alias for `mag_<band>_lsst`
+`mag_true_<band>` | - | alias for `mag_true_<band>_lsst`
+`magerr_<band>` | - | alias for `magerr_<band>_lsst`
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
