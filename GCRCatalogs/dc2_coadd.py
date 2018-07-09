@@ -69,7 +69,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     ----------
     base_dir                      (str): The directory of data files being served
     use_cache                    (bool): Whether to cache returned data
-    quantity_modifiers           (dict): The mapping from native to homogonized value names
+    quantity_modifiers           (dict): The mapping from native to homogenized value names
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
 
@@ -186,7 +186,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
     @property
     def quantity_modifiers(self):
-        """Return the mapping from native to homogonized value names as a dict"""
+        """Return the mapping from native to homogenized value names as a dict"""
         return self._quantity_modifiers
 
     def _read_hdf5_meta(self, fpath):
