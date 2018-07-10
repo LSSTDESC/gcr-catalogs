@@ -79,7 +79,7 @@ You can find instructions about getting NERSC account and joining `lsst` group
 at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 (*DESC members only*).
 
-### With Jypeter notebooks:
+### With Jupyter notebooks:
 
 It is recommended that you first install DESC-specific kernels for your
 NERSC jupyter-dev environment (*you only need to do this once*).
