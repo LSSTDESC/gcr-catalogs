@@ -118,7 +118,7 @@ source /global/common/software/lsst/common/miniconda/setup_current_python.sh
 ```
 
 If you want to use `GCRCatalogs` in a Python script, you can either activate DESC
-Python environment before you run the script, or make the first line of the script to be:
+Python environment before you run the script, or edit the hashbang line of the script to be:
 
 ```bash
 #!/global/common/software/lsst/common/miniconda/current/bin/python
@@ -126,7 +126,7 @@ Python environment before you run the script, or make the first line of the scri
 
 ### Use the latest version of GCRCatalogs
 
-If you need to use a newer version of `GCRCatalogs` then the one installed in the DESC Python environment,
+If you need to use a newer version of `GCRCatalogs` than the one installed in the DESC Python environment,
 here's what you need to do:
 
 1. Clone this repo (on a NERSC machine):
