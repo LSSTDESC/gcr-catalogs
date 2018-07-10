@@ -37,8 +37,8 @@ class ReferenceCatalogReader(BaseGenericCatalog):
             'object_id': 'uniqueId',
             'ra' : 'raJ2000_smeared',
             'dec' : 'decJ2000_smeared',
-            'ra_unsearmed' : 'raJ2000',
-            'dec_unsearmed' : 'decJ2000',
+            'ra_unsmeared' : 'raJ2000',
+            'dec_unsmeared' : 'decJ2000',
             'sigma_ra' : 'sigma_raJ2000',
             'sigma_dec' : 'sigma_decJ2000',
             'is_agn': (lambda x: x.astype(np.bool), 'isagn'),
@@ -46,7 +46,7 @@ class ReferenceCatalogReader(BaseGenericCatalog):
         }
 
         for band in 'ugrizy':
-            self._quantity_modifiers['mag_{}_unsearmed'.format(band)] = 'lsst_{}'.format(band)
+            self._quantity_modifiers['mag_{}_unsmeared'.format(band)] = 'lsst_{}'.format(band)
             self._quantity_modifiers['mag_{}'.format(band)] = 'lsst_{}_smeared'.format(band)
             self._quantity_modifiers['mag_{}_lsst'.format(band)] = 'lsst_{}_smeared'.format(band)
 
