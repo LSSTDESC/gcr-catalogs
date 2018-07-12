@@ -29,6 +29,15 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         results = cursor.execute("PRAGMA table_info('truth')").fetchall()
         return [r[1] for r in results]
 
+    def _load_quantities(self, quantities, native_quantity_getter):
+        """
+        Overloading this so that we can query the database backend
+        for multiple columns at once
+        """
+        native_quantities = tuple(self._translate_quantities(quantities))
+        native_data = dict(zip(native_quantities, native_quantity_getter(native_quantities)))
+        return {q: self._assemble_quantity(q, native_data) for q in quantities}
+
     def _iter_native_dataset(self, native_filters=None):
         cursor = self._conn.cursor()
 
@@ -47,15 +56,20 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
 
         # define a method to return a native_quantity_getter
         # with the API expected by the GCR
-        def dc2_truth_native_quantity_getter(quantity):
-            query = 'SELECT %s' % quantity
+        def dc2_truth_native_quantity_getter(quantities):
+            query = 'SELECT'
+            for i_qty, qty in enumerate(quantities):
+                if i_qty > 0:
+                    query += ','
+                query += ' %s' % qty
+
             query += query_where_clause
             query_cursor = cursor.execute(query)
 
             # when we transition to CosmoDC2, this would be a place
             # to use fetchmany(chunk_size) to iterate over manageable
             # chunks of the catalog, if necessary
-            return np.array(query_cursor.fetchall()).flatten()
+            return np.array(query_cursor.fetchall()).transpose()
 
         yield dc2_truth_native_quantity_getter
 
