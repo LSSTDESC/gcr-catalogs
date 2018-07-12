@@ -1,0 +1,5 @@
+subclass_name: dc2_truth.DC2TruthCatalogReader
+
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/proto_dc2_truth_star_gal.db
+
+md5: 21d85326f392c7924e493f314dfd47fc
