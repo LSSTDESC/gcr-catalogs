@@ -50,4 +50,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         for i_col, column_name in enumerate(column_list):
             out_dict[column_name] = query_result[i_col]
 
-        yield out_dict
+        def dc2_truth_native_quantity_getter(quantity):
+            return out_dict[quantity]
+
+        yield dc2_truth_native_quantity_getter
