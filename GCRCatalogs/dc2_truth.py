@@ -15,6 +15,12 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
 
         self._conn = sqlite3.connect(kwargs['filename'])
 
+        cursor = self._conn.cursor()
+        metadata = cursor.execute('SELECT name, description FROM column_descriptions').fetchall()
+        self._column_descriptions = {}
+        for mm in metadata:
+            self._column_descriptions[mm[0]] = mm[1]
+
     def _generate_native_quantity_list(self):
         cursor = self._conn.cursor()
         results = cursor.execute("PRAGMA table_info('truth')").fetchall()
@@ -54,3 +60,8 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             return out_dict[quantity]
 
         yield dc2_truth_native_quantity_getter
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        if quantity in self._column_descriptions:
+            return {'description:' self._column_descriptions[quantity]}
+        return default
