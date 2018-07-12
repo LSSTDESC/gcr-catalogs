@@ -9,12 +9,15 @@ __all__ = ["DC2TruthCatalogReader"]
 class DC2TruthCatalogReader(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
+
         self._allow_string_native_filter = True
+
         if not os.path.isfile(kwargs['filename']):
             raise ValueError("%s is not a valid filename" % kwargs['filename'])
 
         self._conn = sqlite3.connect(kwargs['filename'])
 
+        # get the descriptions of the columns as provided in the sqlite database
         cursor = self._conn.cursor()
         metadata = cursor.execute('SELECT name, description FROM column_descriptions').fetchall()
         self._column_descriptions = {}
@@ -50,12 +53,18 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
                 query += ' {}'.format(filt)
 
         query_cursor = cursor.execute(query)
+
+        # when we transition to CosmoDC2, this would be a place
+        # to use fetchmany(chunk_size) to iterate over manageable
+        # chunks of the catalog, if necessary
         query_result = np.array(query_cursor.fetchall()).transpose()
 
         out_dict = {}
         for i_col, column_name in enumerate(column_list):
             out_dict[column_name] = query_result[i_col]
 
+        # define a method to return a native_quantity_getter
+        # with the API expected by the GCR
         def dc2_truth_native_quantity_getter(quantity):
             return out_dict[quantity]
 
