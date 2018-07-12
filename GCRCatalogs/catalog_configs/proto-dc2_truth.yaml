@@ -5,6 +5,7 @@ filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/p
 md5: 21d85326f392c7924e493f314dfd47fc
 
 description: |
+    Truth catalog for proto-dc2 run 1.1p (corresponding to proto-dc2_v2.1.2).
     This is a truth catalog for static sources only.  There are no supernovae.
     Reported AGN magnitudes are the baseline magnitudes on top of which the
     variability model is layered.
