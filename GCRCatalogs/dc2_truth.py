@@ -9,6 +9,7 @@ __all__ = ["DC2TruthCatalogReader"]
 class DC2TruthCatalogReader(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
+        self._allow_string_native_filter = True
         if not os.path.isfile(kwargs['filename']):
             raise ValueError("%s is not a valid filename" % kwargs['filename'])
 
@@ -34,7 +35,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         if native_filters is not None:
             query += ' WHERE'
 
-            if not isintance(native_filters, list) and not isinstance(native_filters, tuple):
+            if not isinstance(native_filters, list) and not isinstance(native_filters, tuple):
                 native_filters = [native_filters]
 
             for i_filt, filt in enumerate(native_filters):
