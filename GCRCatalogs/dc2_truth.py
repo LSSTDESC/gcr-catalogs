@@ -72,5 +72,5 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
 
     def _get_quantity_info_dict(self, quantity, default=None):
         if quantity in self._column_descriptions:
-            return {'description:' self._column_descriptions[quantity]}
+            return {'description': self._column_descriptions[quantity]}
         return default
