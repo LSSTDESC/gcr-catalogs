@@ -43,7 +43,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     return out_data.transpose()
 
 
-def create_basic_flag_mask(*flags):
+def create_good_flag_mask(*flags):
     """
     generate a mask for a set of flags
     for each item, mask will be true if and only if all flags are false
@@ -123,7 +123,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'blendedness': 'base_Blendedness_abs_flux',
         }
 
-        not_clean_flags = (
+        not_good_flags = (
             'base_PixelFlags_flag_edge',
             'base_PixelFlags_flag_interpolatedCenter',
             'base_PixelFlags_flag_saturatedCenter',
@@ -133,12 +133,12 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_clipped',
         )
 
-        modifiers['clean'] = (create_basic_flag_mask,) + not_clean_flags
+        modifiers['good'] = (create_good_flag_mask,) + not_good_flags
 
-        modifiers['good'] = (
-            create_basic_flag_mask,
+        modifiers[''] = (
+            lambda x, *args: x.astype(np.bool) & create_good_flag_mask(args),
             'deblend_skipped',
-        ) + not_clean_flags
+        ) + not_good_flags
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
