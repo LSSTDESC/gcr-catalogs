@@ -97,7 +97,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
-        
+
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
 
@@ -209,18 +209,26 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         with tables.open_file(fpath, 'r') as ofile:
             for key in ofile.root._v_children:  # pylint: disable=W0212
                 if not self._groupname_re.match(key):
-                    warn_msg = '{} has incorrect group names; skipped'
-                    warnings.warn(warn_msg.format(os.path.basename(fpath)))
-                    return list(), set()
+                    warn_msg = 'incorrect group name "{}" in {}; skipped'
+                    warnings.warn(warn_msg.format(os.path.basename(fpath), key))
+                    continue
 
                 group = getattr(ofile.root, key)
-                if 'axis0' not in group:
-                    warn_msg = '{} has incorrect hdf5 format; skipped'
-                    warnings.warn(warn_msg.format(os.path.basename(fpath)))
-                    return list(), set()
+                if 'axis0' in group:
+                    columns_this = [c.decode() for c in group.axis0]
+                elif 'table' in group:
+                    columns_this = []
+                    for block in group.table.colnames:
+                        if block == 'index':
+                            continue
+                        columns_this.extend(group.table.attrs[block + '_kind'])
+                else:
+                    warn_msg = 'Group "{}" in {} has incorrect format; skipped'
+                    warnings.warn(warn_msg.format(os.path.basename(fpath), key))
+                    continue
 
+                columns.update(columns_this)
                 data_sets.append((fpath, key))
-                columns.update((c.decode() for c in group.axis0))
 
         return data_sets, columns
 
