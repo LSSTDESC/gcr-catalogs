@@ -22,6 +22,13 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         metadata = cursor.execute('SELECT name, description FROM column_descriptions').fetchall()
         self._column_descriptions = dict(metadata)
 
+        self._quantity_modifiers = {'mag_true_u': 'u',
+                                    'mag_true_g': 'g',
+                                    'mag_true_r': 'r',
+                                    'mag_true_i': 'i',
+                                    'mag_true_z': 'z',
+                                    'mag_true_y': 'y'}
+
     def _generate_native_quantity_list(self):
         cursor = self._conn.cursor()
         results = cursor.execute("PRAGMA table_info('truth')").fetchall()
