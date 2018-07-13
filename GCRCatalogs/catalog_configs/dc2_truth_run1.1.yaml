@@ -8,4 +8,5 @@ description: |
     Truth catalog for proto-dc2 run 1.1p (corresponding to proto-dc2_v2.1.2).
     This is a truth catalog for static sources only.  There are no supernovae.
     Reported AGN magnitudes are the baseline magnitudes on top of which the
-    variability model is layered.
+    variability model is layered.  This truth information was generated with
+    version 2.1.2 of the proto-DC2 extragalactic catalog.
