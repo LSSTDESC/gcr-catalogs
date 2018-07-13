@@ -20,9 +20,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         # get the descriptions of the columns as provided in the sqlite database
         cursor = self._conn.cursor()
         metadata = cursor.execute('SELECT name, description FROM column_descriptions').fetchall()
-        self._column_descriptions = {}
-        for mm in metadata:
-            self._column_descriptions[mm[0]] = mm[1]
+        self._column_descriptions = dict(metadata)
 
     def _generate_native_quantity_list(self):
         cursor = self._conn.cursor()
