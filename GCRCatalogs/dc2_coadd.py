@@ -97,7 +97,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
-        
+
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
 
@@ -123,7 +123,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'blendedness': 'base_Blendedness_abs_flux',
         }
 
-        not_good_flags = (
+        not_clean_flags = (
             'base_PixelFlags_flag_edge',
             'base_PixelFlags_flag_interpolatedCenter',
             'base_PixelFlags_flag_saturatedCenter',
@@ -133,12 +133,12 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_clipped',
         )
 
-        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+        modifiers['clean'] = (create_basic_flag_mask,) + not_clean_flags
 
-        modifiers['clean'] = (
+        modifiers['good'] = (
             create_basic_flag_mask,
             'deblend_skipped',
-        ) + not_good_flags
+        ) + not_clean_flags
 
         # cross-band average, second moment values
         modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'

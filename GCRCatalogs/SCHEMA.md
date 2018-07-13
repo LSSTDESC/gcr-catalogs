@@ -134,8 +134,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
 `snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
 `psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
-`good` | - | True if the source has no flagged pixels. |   |   |
-`clean` | - |  True if the source has no flagged pixels and is not deblended (`good && deblend_skipped`). |   |   |
+`clean` | - | True if the source has no flagged pixels. |   |   |
+`good` | - |  True if the source has no flagged pixels and is not deblended (`clean && deblend_skipped`). |   |   |
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
