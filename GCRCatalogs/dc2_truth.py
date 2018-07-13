@@ -42,15 +42,12 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         query_where_clause = ' FROM truth'
 
         if native_filters is not None:
-            query_where_clause += ' WHERE'
+            query_where_clause += ' WHERE '
 
             if not isinstance(native_filters, list) and not isinstance(native_filters, tuple):
                 native_filters = [native_filters]
 
-            for i_filt, filt in enumerate(native_filters):
-                if i_filt > 0:
-                    query_where_clause += ' AND'
-                query_where_clause += ' {}'.format(filt)
+            query_where_clause += ' AND '.join(native_filters)
 
         # define a method to return a native_quantity_getter
         # with the API expected by the GCR
