@@ -8,9 +8,9 @@ __all__ = ["DC2TruthCatalogReader"]
 
 class DC2TruthCatalogReader(BaseGenericCatalog):
 
-    def _subclass_init(self, **kwargs):
+    _allow_string_native_filter = True
 
-        self._allow_string_native_filter = True
+    def _subclass_init(self, **kwargs):
 
         if not os.path.isfile(kwargs['filename']):
             raise ValueError("%s is not a valid filename" % kwargs['filename'])
