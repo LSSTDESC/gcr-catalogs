@@ -45,7 +45,8 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             query_where_clause += ' WHERE '
 
             if not isinstance(native_filters, list) and not isinstance(native_filters, tuple):
-                native_filters = [native_filters]
+                raise ValueError("native_filters should be a list or tuple "
+                                 "of strings")
 
             query_where_clause += ' AND '.join(native_filters)
 
