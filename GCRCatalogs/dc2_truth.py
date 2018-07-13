@@ -52,13 +52,8 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         # define a method to return a native_quantity_getter
         # with the API expected by the GCR
         def dc2_truth_native_quantity_getter(quantities):
-            query = 'SELECT'
-            for i_qty, qty in enumerate(quantities):
-                if i_qty > 0:
-                    query += ','
-                query += ' %s' % qty
-
-            query += query_where_clause
+            query = 'SELECT {} {}'.format(', '.join(quantities),
+                                          query_where_clause)
             query_cursor = cursor.execute(query)
 
             # when we transition to CosmoDC2, this would be a place
