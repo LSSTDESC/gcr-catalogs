@@ -43,7 +43,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     return out_data.transpose()
 
 
-def create_basic_flag_mask(*flags):
+def create_good_flag_mask(*flags):
     """
     generate a mask for a set of flags
     for each item, mask will be true if and only if all flags are false
@@ -97,7 +97,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self._base_dir))
-        
+
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
 
@@ -133,10 +133,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_clipped',
         )
 
-        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+        modifiers['good'] = (create_good_flag_mask,) + not_good_flags
 
-        modifiers['clean'] = (
-            create_basic_flag_mask,
+        modifiers[''] = (
+            lambda x, *args: x.astype(np.bool) & create_good_flag_mask(args),
             'deblend_skipped',
         ) + not_good_flags
 
