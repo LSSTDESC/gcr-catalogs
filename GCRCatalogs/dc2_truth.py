@@ -8,7 +8,7 @@ __all__ = ["DC2TruthCatalogReader"]
 
 class DC2TruthCatalogReader(BaseGenericCatalog):
 
-    _allow_string_native_filter = True
+    native_filter_string_only = True
 
     def _subclass_init(self, **kwargs):
 
@@ -27,34 +27,29 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         results = cursor.execute("PRAGMA table_info('truth')").fetchall()
         return [r[1] for r in results]
 
-    def _load_quantities(self, quantities, native_quantity_getter):
+    @staticmethod
+    def _obtain_native_data_dict(native_quantities_needed, native_quantity_getter):
         """
         Overloading this so that we can query the database backend
         for multiple columns at once
         """
-        native_quantities = tuple(self._translate_quantities(quantities))
-        native_data = dict(zip(native_quantities, native_quantity_getter(native_quantities)))
-        return {q: self._assemble_quantity(q, native_data) for q in quantities}
+        return dict(zip(native_quantities_needed, native_quantity_getter(native_quantities_needed)))
 
     def _iter_native_dataset(self, native_filters=None):
         cursor = self._conn.cursor()
 
-        query_where_clause = ' FROM truth'
-
-        if native_filters is not None:
-            query_where_clause += ' WHERE '
-
-            if not isinstance(native_filters, list) and not isinstance(native_filters, tuple):
-                raise ValueError("native_filters should be a list or tuple "
-                                 "of strings")
-
-            query_where_clause += ' AND '.join(native_filters)
-
+        if native_filters is None:
+            query_where_clause = ''
+        else:
+            query_where_clause = 'WHERE {}'.format(' AND '.join(native_filters))
+        
         # define a method to return a native_quantity_getter
         # with the API expected by the GCR
         def dc2_truth_native_quantity_getter(quantities):
-            query = 'SELECT {} {}'.format(', '.join(quantities),
-                                          query_where_clause)
+            query = 'SELECT {} FROM truth {}'.format(
+                ', '.join(quantities),
+                query_where_clause
+            )
             query_cursor = cursor.execute(query)
 
             # when we transition to CosmoDC2, this would be a place
