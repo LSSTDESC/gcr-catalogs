@@ -224,7 +224,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         for healpix in self.healpix_pixels:
-            if native_filters.check_scalar({'healpix_pixel': healpix}):
+            if native_filters is None or native_filters.check_scalar({'healpix_pixel': healpix}):
                 yield functools.partial(self._native_quantity_getter, healpix=healpix)
 
 
