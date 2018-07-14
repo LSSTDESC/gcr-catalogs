@@ -374,7 +374,8 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             dataset_info = self.get_dataset_info(dataset)
-            if not native_filters.check_scalar(dataset_info):
+            if native_filters is not None and \
+                    not native_filters.check_scalar(dataset_info):
                 continue
 
             try:
