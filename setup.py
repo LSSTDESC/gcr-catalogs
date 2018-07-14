@@ -30,7 +30,7 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.4'],
+    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.7.1'],
     extras_require = {
         'protodc2': ['h5py'],
         'instance': ['pandas'],
