@@ -145,6 +145,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
+        self.use_cache = bool(kwargs.get('use_cache', True))
 
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
@@ -304,6 +305,11 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         """
         return sorted(set(dataset.tract for dataset in self._datasets))
 
+    def clear_cache(self):
+        """Empty the catalog reader cache and frees up memory allocation"""
+        for dataset in self._datasets:
+            dataset.clear_cache()
+
     def _open_hdf5(self, file_path):
         """Open an HDF5 file at *file_path* and return the file handle as an
         pd.HDFStore object (and cache the handle).
@@ -338,4 +344,5 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 return d[native_quantity]
 
             yield _native_quantity_getter
-            dataset.clear_cache()
+            if not self.use_cache:
+                dataset.clear_cache()
