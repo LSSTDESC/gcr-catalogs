@@ -8,7 +8,6 @@ import warnings
 
 import numpy as np
 import pandas as pd
-import tables
 from GCR import BaseGenericCatalog
 
 __all__ = ['DC2CoaddCatalog']
@@ -54,6 +53,67 @@ def create_basic_flag_mask(*flags):
     return out
 
 
+class TableWrapper(object):
+    """This class is a wrapper for a pandas HDF5 storer so that we have a
+    unified API to access both fixed and table formats.
+    """
+    def __init__(self, file_handle, key):
+        if not file_handle.is_open:
+            raise ValueError('file handle has been closed!')
+
+        self.storer = file_handle.get_storer(key)
+        self.is_table = self.storer.is_table
+
+        if not self.is_table and not self.storer.format_type == 'fixed':
+            raise ValueError('storer format type not supported!')
+
+        self._columns = None
+        self._len = None
+
+    @property
+    def columns(self):
+        if self._columns is None:
+            if self.is_table:
+                self._columns = tuple(self.storer.non_index_axes[0][1])
+            else:
+                self._columns = tuple(c.decode() for c in self.storer.group.axis0)
+        return self._columns
+
+    def __len__(self):
+        if self._len is None:
+            if self.is_table:
+                self._len = self.storer.nrows
+            else:
+                self._len = self.storer.group.axis1.nrows
+        return self._len
+
+    def __contains__(self, item):
+        return item in self.columns
+
+    def __getitem__(self, key):
+        if key not in self:
+            raise KeyError('{} does not exist'.format(key))
+
+        if self.is_table:
+            return self.storer.read(columns=[key])[key].values
+
+        return self.storer.read()[key].values
+
+
+class CoaddTableWrapper(TableWrapper):
+    """Same as TableWrapper but add tract and patch info
+    """
+    def __init__(self, file_handle, key):
+        key_items = key.split('_')
+        self.tract = int(key_items[1])
+        self.patch = ','.join(key_items[2])
+        super(CoaddTableWrapper, self).__init__(file_handle, key)
+
+    @property
+    def tract_and_patch(self):
+        return {'tract': self.tract, 'patch': self.patch}
+
+
 class DC2CoaddCatalog(BaseGenericCatalog):
     r"""DC2 Coadd Catalog reader
 
@@ -62,44 +122,39 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
-    use_cache         (str): Whether to cache returned data (default: True)
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
 
     Attributes
     ----------
-    base_dir                      (str): The directory of data files being served
-    use_cache                    (bool): Whether to cache returned data
-    quantity_modifiers           (dict): The mapping from native to homogenized value names
+    base_dir                     (str): The directory of data files being served
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
-
-    Methods
-    -------
-    get_dataset_info               : Return the tract and patch information for a dataset
-    clear_cache                    : Empty the catalog reader cache and frees up memory allocation
     """
 
     _native_filter_quantities = {'tract', 'patch'}
 
     def _subclass_init(self, **kwargs):
-        self._base_dir = kwargs['base_dir']
-        self._filename_re = re.compile(kwargs.get('filename_pattern', r'merged_tract_\d+\.hdf5'))
-        self._groupname_re = re.compile(kwargs.get('groupname_pattern', r'coadd_\d+_\d\d$'))
-        self.use_cache = bool(kwargs.get('use_cache', True))
+        self.base_dir = kwargs['base_dir']
+        self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
+        self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
 
-        if not os.path.isdir(self._base_dir):
-            raise ValueError('`base_dir` {} is not a valid directory'.format(self._base_dir))
+        if not os.path.isdir(self.base_dir):
+            raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
-        self._dataset_cache = dict()
+        self._file_handles = dict()
+        self._datasets = self._generate_datasets()
 
-        self._datasets, self._columns = self._generate_datasets_and_columns()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
-            raise RuntimeError(err_msg.format(self._base_dir))
+            raise RuntimeError(err_msg.format(self.base_dir))
 
+        self._columns = self._generate_columns(self._datasets)
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
+
+    def __del__(self):
+        self.close_all_file_handles()
 
     @staticmethod
     def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
@@ -186,87 +241,42 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         return modifiers
 
-    @property
-    def quantity_modifiers(self):
-        """Return the mapping from native to homogenized value names as a dict"""
-        return self._quantity_modifiers
-
-    def _read_hdf5_meta(self, fpath):
-        """Read an HDF5 file and returns the file's keys and columns
-
-        If any formatting issues are detected, a warning is raised and the
-        returned containers will be empty.
-
-        Args:
-            fpath (str): The path of the file to read
-
-        Returns:
-            A list of tuples (fpath, <key>) for all keys in the file
-            A set of column names from the file
-        """
-        columns = set()
-        data_sets = list()
-        with tables.open_file(fpath, 'r') as ofile:
-            for key in ofile.root._v_children:  # pylint: disable=W0212
-                if not self._groupname_re.match(key):
-                    warn_msg = 'incorrect group name "{}" in {}; skipped'
-                    warnings.warn(warn_msg.format(os.path.basename(fpath), key))
-                    continue
-
-                group = getattr(ofile.root, key)
-                if 'axis0' in group:
-                    columns_this = [c.decode() for c in group.axis0]
-                elif 'table' in group:
-                    columns_this = []
-                    for block in group.table.colnames:
-                        if block == 'index':
-                            continue
-                        columns_this.extend(group.table.attrs[block + '_kind'])
-                else:
-                    warn_msg = 'Group "{}" in {} has incorrect format; skipped'
-                    warnings.warn(warn_msg.format(os.path.basename(fpath), key))
-                    continue
-
-                columns.update(columns_this)
-                data_sets.append((fpath, key))
-
-        return data_sets, columns
-
-    def _generate_datasets_and_columns(self):
-        """Return viable data sets and columns from all files in self._base_dir
+    def _generate_datasets(self):
+        """Return viable data sets and columns from all files in self.base_dir
 
         Returns:
             A list of tuples (<file path>, <key>) for all files and keys
             A set of column names from all files
         """
         datasets = list()
-        columns = set()
-        file_names = (f for f in os.listdir(self._base_dir) if
-                      self._filename_re.match(f))
-        for fname in sorted(file_names):
-            fpath = os.path.join(self._base_dir, fname)
+
+        for fname in sorted(os.listdir(self.base_dir)):
+            if not self._filename_re.match(fname):
+                continue
+            file_path = os.path.join(self.base_dir, fname)
 
             try:
-                datasets_this, columns_this = self._read_hdf5_meta(fpath)
-                datasets.extend(datasets_this)
-                columns.update(columns_this)
+                fh = self._open_hdf5(file_path)
             except (IOError, OSError):
-                warnings.warn('Cannot access {}; skipped'.format(fpath))
+                warnings.warn('Cannot access {}; skipped'.format(file_path))
+                continue
 
-        return datasets, columns
+            for key in fh:
+                if self._groupname_re.match(key.lstrip('/')):
+                    datasets.append(CoaddTableWrapper(fh, key))
+                    continue
+
+                warn_msg = 'incorrect group name "{}" in {}; skipped this group'
+                warnings.warn(warn_msg.format(os.path.basename(file_path), key))
+
+        return datasets
 
     @staticmethod
-    def get_dataset_info(dataset):
-        """Return the tract and patch information for a dataset
-
-        Args:
-            dataset (tuple): Of the form (<file path (str)>, <group id (str)>)
-
-        Returns:
-            A dictionary {"tract": <tract (int)>, "patch": <patch (int)>}
-        """
-        items = dataset[1].split('_')
-        return dict(tract=int(items[1]), patch=','.join(items[2]))
+    def _generate_columns(datasets):
+        columns = set()
+        for dataset in datasets:
+            columns.update(dataset.columns)
+        return columns
 
     @property
     def available_tracts_and_patches(self):
@@ -274,9 +284,9 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         Returns:
             A list of dictionaries of the form:
-               [{"tract": <tract (int)>, "patch": <patch (int)>}, ...]
+               [{"tract": <tract (int)>, "patch": <patch (str)>}, ...]
         """
-        return [self.get_dataset_info(dataset) for dataset in self._datasets]
+        return [dataset.tract_and_patch for dataset in self._datasets]
 
     @property
     def available_tracts(self):
@@ -285,95 +295,23 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         Args:
             A sorted list of available tracts as integers
         """
-        tract_gen = (self.get_dataset_info(dataset)['tract'] for dataset in
-                     self._datasets)
-        return sorted(set(tract_gen))
+        return sorted(set(dataset.tract for dataset in self._datasets))
 
-    def _get_available_patches_in_tract(self, tract):
-        """Return the patches available for a given tract
-
-        Patches are represented as strings (eg. '4,1')
-
-        Args:
-            tract (int): The desired tract id
-
-        Returns:
-            A list of available patches
+    def _open_hdf5(self, file_path):
+        """Open an HDF5 file at *file_path* and return the file handle as an
+        pd.HDFStore object (and cache the handle).
         """
-        patches = []
-        for dataset in self._datasets:
-            dataset_info = self.get_dataset_info(dataset)
-            if dataset_info['tract'] == int(tract):
-                patches.append(dataset_info['patch'])
+        if (file_path not in self._file_handles or
+                not self._file_handles[file_path].is_open):
+            self._file_handles[file_path] = pd.HDFStore(file_path, 'r')
+        return self._file_handles[file_path]
 
-        return patches
-
-    @property
-    def base_dir(self):
-        """The directory where data files are stored"""
-        return self._base_dir
-
-    def clear_cache(self):
-        """Empty the catalog reader cache and frees up memory allocation"""
-        self._dataset_cache.clear()
-
-    def _load_dataset(self, dataset):
-        """Return the contents of an HDF5 file
-
-        Args:
-            dataset (tuple): Of the form (<file path (str)>, <group id (str)>)
-
-        Returns:
-            The contents of the specified file's group
+    def close_all_file_handles(self):
+        """Clear all cached file handles
         """
-        return pd.read_hdf(*dataset, mode='r')
-
-    def load_dataset(self, dataset):
-        """Return the data table corresponding to a dataset
-
-        Args:
-            dataset (tuple): Of the form (<file path (str)>, <group id (str)>)
-
-        Returns:
-            A pandas data frame
-        """
-        if not self.use_cache:
-            return self._load_dataset(dataset)
-
-        if dataset not in self._dataset_cache:
-            try:
-                self._dataset_cache[dataset] = self._load_dataset(dataset)
-            except MemoryError:
-                self.clear_cache()
-                self._dataset_cache[dataset] = self._load_dataset(dataset)
-
-        return self._dataset_cache[dataset]
-
-    def read_tract_patch(self, tract, patch):
-        """Return data for a given tract and patch
-
-        Args:
-            tract (int): The desired tract id
-            patch (str): The desired patch (eg. '4,1')
-
-        Returns:
-            A pandas data frame
-        """
-        warnings.warn('This function is not a not GCR API, but only for convenience. '
-                      'Only use this function for testing.')
-
-        if not int(tract) in self.available_tracts:
-            raise ValueError('Invalid tract value: {}'.format(tract))
-
-        if patch not in self._get_available_patches_in_tract(tract):
-            err_msg = 'Invalid patch {} for tract {}'
-            raise ValueError(err_msg.format(patch, tract))
-
-        file_name = FILE_PATTERN.replace(r'\d+', str(tract)).replace(r'\.', '.')
-        file_path = os.path.join(self.base_dir, file_name)
-        group_id = GROUP_PATTERN.replace(r'\d+', str(tract)).replace(r'\d\d', patch.replace(',', ''))
-
-        return self.load_dataset((file_path, group_id))
+        for fh in self._file_handles.values():
+            fh.close()
+        self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
@@ -381,27 +319,15 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
-            dataset_info = self.get_dataset_info(dataset)
             if native_filters is not None and \
-                    not native_filters.check_scalar(dataset_info):
+                    not native_filters.check_scalar(dataset.tract_and_patch):
                 continue
 
-            try:
-                d = self.load_dataset(dataset)
-            except tables.NoSuchNodeError:
-                war_msg = 'Missing node for tract {}, patch {} in {} '
-                warnings.warn(war_msg.format(dataset_info['tract'],
-                                             dataset_info['patch'],
-                                             dataset[0]))
-                continue
-
-            def _native_quantity_getter(native_quantity):
-                # pylint: disable=W0640
+            def _native_quantity_getter(native_quantity, d=dataset):
                 if native_quantity in self._native_filter_quantities:
-                    return np.repeat(dataset_info[native_quantity], len(d))
-                elif native_quantity not in d:
+                    return np.repeat(getattr(d, native_quantity), len(d))
+                if native_quantity not in d:
                     return np.repeat(np.nan, len(d))
-                else:
-                    return d[native_quantity].values
+                return d[native_quantity]
 
             yield _native_quantity_getter
