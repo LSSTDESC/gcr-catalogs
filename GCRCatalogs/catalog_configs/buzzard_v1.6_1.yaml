@@ -8,6 +8,8 @@ cosmology:
     H0: 70.0
     Om0: 0.286
     Ob0: 0.047
+    sigma8: 0.82
+    n_s: 0.96
 
 halo_mass_def: vir
 lightcone: true

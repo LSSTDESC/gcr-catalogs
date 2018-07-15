@@ -9,12 +9,14 @@ cosmology:
     H0: 71.0
     Om0: 0.265
     Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
 
 lightcone: true
 sky_area : 25.0
 
 creators: [ 'Andrew Benson', 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Eli Rykoff']
 description: |
-    cluster catalog and member catalog from the redMaPPer cluster finder run on proto-dc2. Red 
+    cluster catalog and member catalog from the redMaPPer cluster finder run on proto-dc2. Red
     sequence was fit in the standard way, but centers are on halo centers, i.e. a real halo finding
     run was not done.
