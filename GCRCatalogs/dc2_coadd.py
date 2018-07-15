@@ -69,6 +69,7 @@ class TableWrapper(object):
 
         self._columns = None
         self._len = None
+        self._fixed_data = None
 
     @property
     def columns(self):
@@ -97,7 +98,13 @@ class TableWrapper(object):
         if self.is_table:
             return self.storer.read(columns=[key])[key].values
 
-        return self.storer.read()[key].values
+        if self._fixed_data is None:
+            self._fixed_data = self.storer.read()
+
+        return self._fixed_data[key].values
+
+    def clear_cache(self):
+        self._fixed_data = None
 
 
 class CoaddTableWrapper(TableWrapper):
@@ -331,3 +338,4 @@ class DC2CoaddCatalog(BaseGenericCatalog):
                 return d[native_quantity]
 
             yield _native_quantity_getter
+            dataset.clear_cache()
