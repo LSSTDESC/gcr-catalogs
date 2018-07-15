@@ -132,6 +132,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 Om0=fh['metaData/simulationParameters/Omega_matter'].value,
                 Ob0=fh['metaData/simulationParameters/Omega_b'].value,
             )
+            self.cosmology.sigma8 = fh['metaData/simulationParameters/sigma_8'].value
+            self.cosmology.n_s = fh['metaData/simulationParameters/N_s'].value
+            self.halo_mass_def = fh['metaData/simulationParameters/haloMassDefinition'].value
 
             # get sky area
             if catalog_version >= StrictVersion("2.1.1"):
