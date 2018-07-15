@@ -349,7 +349,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
 
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '*native_filters* is not supported'
+        if native_filters is not None:
+            raise ValueError('*native_filters* is not supported')
         with h5py.File(self._file, 'r') as fh:
             def _native_quantity_getter(native_quantity):
                 return fh['galaxyProperties/{}'.format(native_quantity)].value # pylint: disable=no-member

@@ -20,7 +20,7 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     DC1 galaxy catalog class.
     """
     
-    _allow_string_native_filter = True
+    native_filter_string_only = True
 
     def _subclass_init(self, **kwargs):
 
