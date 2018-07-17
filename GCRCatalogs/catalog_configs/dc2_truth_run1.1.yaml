@@ -1,0 +1,12 @@
+subclass_name: dc2_truth.DC2TruthCatalogReader
+
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/proto_dc2_truth_star_gal.db
+
+md5: f3f9c47d9a375849c37ae1b541fdbd66
+
+description: |
+    Truth catalog for proto-dc2 run 1.1p (corresponding to proto-dc2_v2.1.2).
+    This is a truth catalog for static sources only.  There are no supernovae.
+    Reported AGN magnitudes are the baseline magnitudes on top of which the
+    variability model is layered.  This truth information was generated with
+    version 2.1.2 of the proto-DC2 extragalactic catalog.

@@ -8,10 +8,13 @@ cosmology:
     H0: 70.0
     Om0: 0.286
     Ob0: 0.047
+    sigma8: 0.82
+    n_s: 0.96
 
 halo_mass_def: vir
 lightcone: true
 sky_area : 10313.24
+version: '1.6_1'
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
 description: |
