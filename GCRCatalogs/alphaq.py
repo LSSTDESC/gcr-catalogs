@@ -5,26 +5,15 @@ from __future__ import division
 import os
 import re
 import warnings
-import hashlib
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .utils import md5
 
 __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '5.0'
-
-
-def md5(fname, chunk_size=65536):
-    """
-    generate MD5 sum for *fname*
-    """
-    hash_md5 = hashlib.md5()
-    with open(fname, 'rb') as f:
-        for chunk in iter(lambda: f.read(chunk_size), b''):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
@@ -105,11 +94,13 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, filename, **kwargs): #pylint: disable=W0221
 
-        assert os.path.isfile(filename), 'Catalog file {} does not exist'.format(filename)
+        if not os.path.isfile(filename):
+            raise ValueError('Catalog file {} does not exist'.format(filename))
         self._file = filename
 
         if kwargs.get('md5'):
-            assert md5(self._file) == kwargs['md5'], 'md5 sum does not match!'
+            if md5(self._file) != kwargs['md5']:
+                raise ValueError('md5 sum does not match!')
         else:
             warnings.warn('No md5 sum specified in the config file')
 
