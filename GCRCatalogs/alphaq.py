@@ -13,7 +13,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '4.7.0'
+__version__ = '5.0'
 
 
 def md5(fname, chunk_size=65536):
