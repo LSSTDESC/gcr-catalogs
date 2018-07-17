@@ -1,7 +1,8 @@
 import os
-import numpy as np
 import sqlite3
+import numpy as np
 from GCR import BaseGenericCatalog
+from .utils import md5
 
 __all__ = ["DC2TruthCatalogReader"]
 
@@ -11,28 +12,38 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
     native_filter_string_only = True
 
     def _subclass_init(self, **kwargs):
+        self._filename = kwargs['filename']
 
-        if not os.path.isfile(kwargs['filename']):
-            raise ValueError("%s is not a valid filename" % kwargs['filename'])
+        if not os.path.isfile(self._filename):
+            raise ValueError('{} is not a valid file'.format(self._filename))
 
-        self._conn = sqlite3.connect(kwargs['filename'])
+        if kwargs.get('md5') and md5(self._filename) != kwargs['md5']:
+            raise ValueError('md5 sum does not match!')
+
+        self._conn = sqlite3.connect(self._filename)
 
         # get the descriptions of the columns as provided in the sqlite database
         cursor = self._conn.cursor()
-        metadata = cursor.execute('SELECT name, description FROM column_descriptions').fetchall()
-        self._column_descriptions = dict(metadata)
+        results = cursor.execute('SELECT name, description FROM column_descriptions')
+        self._column_descriptions = dict(results.fetchall())
 
-        self._quantity_modifiers = {'mag_true_u': 'u',
-                                    'mag_true_g': 'g',
-                                    'mag_true_r': 'r',
-                                    'mag_true_i': 'i',
-                                    'mag_true_z': 'z',
-                                    'mag_true_y': 'y'}
+        results = cursor.execute("PRAGMA table_info('truth')")
+        self._native_quantity_dtypes = {t[1]: t[2] for t in results.fetchall()}
+
+        self._quantity_modifiers = {
+            'mag_true_u': 'u',
+            'mag_true_g': 'g',
+            'mag_true_r': 'r',
+            'mag_true_i': 'i',
+            'mag_true_z': 'z',
+            'mag_true_y': 'y',
+            'agn': (lambda x: x.astype(np.bool)),
+            'star': (lambda x: x.astype(np.bool)),
+            'sprinkled': (lambda x: x.astype(np.bool)),
+        }
 
     def _generate_native_quantity_list(self):
-        cursor = self._conn.cursor()
-        results = cursor.execute("PRAGMA table_info('truth')").fetchall()
-        return [r[1] for r in results]
+        return list(self._native_quantity_dtypes)
 
     @staticmethod
     def _obtain_native_data_dict(native_quantities_needed, native_quantity_getter):
@@ -40,7 +51,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         Overloading this so that we can query the database backend
         for multiple columns at once
         """
-        return dict(zip(native_quantities_needed, native_quantity_getter(native_quantities_needed)))
+        return native_quantity_getter(native_quantities_needed)
 
     def _iter_native_dataset(self, native_filters=None):
         cursor = self._conn.cursor()
@@ -49,20 +60,17 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             query_where_clause = ''
         else:
             query_where_clause = 'WHERE {}'.format(' AND '.join(native_filters))
-        
-        # define a method to return a native_quantity_getter
-        # with the API expected by the GCR
+
         def dc2_truth_native_quantity_getter(quantities):
+            # note the API of this getter is not normal, and hence
+            # we have overwritten _obtain_native_data_dict
+            dtype = np.dtype([(q, self._native_quantity_dtypes[q]) for q in quantities])
             query = 'SELECT {} FROM truth {}'.format(
                 ', '.join(quantities),
                 query_where_clause
             )
-            query_cursor = cursor.execute(query)
-
-            # when we transition to CosmoDC2, this would be a place
-            # to use fetchmany(chunk_size) to iterate over manageable
-            # chunks of the catalog, if necessary
-            return np.array(query_cursor.fetchall()).transpose()
+            # may need to switch to fetchmany for larger dataset
+            return np.array(cursor.execute(query).fetchall(), dtype)
 
         yield dc2_truth_native_quantity_getter
 
