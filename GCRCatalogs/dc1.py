@@ -19,6 +19,8 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
     """
     DC1 galaxy catalog class.
     """
+    
+    native_filter_string_only = True
 
     def _subclass_init(self, **kwargs):
 
@@ -79,7 +81,11 @@ class DC1GalaxyCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         session = self._Session()
+        if native_filters:
+            condition = 'WHERE ' + ' AND '.join(native_filters)
+        else:
+            condition = ''
         def native_quantity_getter(native_quantity):
-            query = 'SELECT {} from galaxy'.format(native_quantity)
+            query = 'SELECT {} from galaxy {}'.format(native_quantity, condition)
             return np.array([r[0] for r in session.execute(query)])
         yield native_quantity_getter
