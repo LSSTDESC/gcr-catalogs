@@ -13,7 +13,7 @@ from GCR import BaseGenericCatalog
 from .utils import md5
 
 __all__ = ['AlphaQGalaxyCatalog']
-__version__ = '4.7.0'
+__version__ = '5.0.0'
 
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
