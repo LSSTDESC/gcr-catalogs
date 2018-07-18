@@ -52,12 +52,16 @@ at [this Confluence page](https://confluence.slac.stanford.edu/x/oJgHDg)
    - `dc2_coadd_run1.1p`: coadd catalog for Run 1.1p
    - `dc2_coadd_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
-4. DC2 "Reference Catalogs": \
+4. DC2 "Truth Catalogs": \
    *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_reference_run1.1p`: reference catalog for Run 1.1p
-   - `dc2_reference_run1.2p`: reference catalog for Run 1.2p
+   - `dc2_truth_run1.1`: truth catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
 
-5. DC2 "Instance Catalogs": \
+5. DC2 "Reference Catalogs": \
+   *by LSST DESC, compiled by Scott Daniel*
+   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
+   - `dc2_reference_run1.2`: reference catalog for Run 1.2 (corresponds to `proto-dc2_v3.0`)
+
+6. DC2 "Instance Catalogs": \
    *by LSST DESC, compiled by Scott Daniel*
    - `dc2_instance_example1`: an example instance catalog
    - `dc2_instance_example2`: another example instance catalog
