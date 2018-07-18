@@ -1,0 +1,21 @@
+subclass_name: cosmodc2.CosmoDC2GalaxyCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/all_v0.1
+catalog_path_template: z_{}_{}.step_all.healpix_{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+
+lightcone: true
+
+version: "0.1"
+
+check_file_metadata: true
+
+creators: [ 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs']
+
+description: |
+    This is the baseline catalog characterizing the galaxy-halo connection for LSST-DESC cosmoDC2.
+
