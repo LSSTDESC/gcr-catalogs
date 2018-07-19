@@ -125,6 +125,9 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
         self._native_quantities = set()
         with h5py.File(filename, 'r') as fh:
             def _collect_native_quantities(name, obj):
+                #TODO: remove the following two lines in the future when emissionLines are ready
+                if name.startswith('emissionLines/'):
+                    return
                 if isinstance(obj, h5py.Dataset):
                     self._native_quantities.add(name)
             fh['galaxyProperties'].visititems(_collect_native_quantities)
