@@ -13,7 +13,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['CosmoDC2GalaxyCatalog']
-__version__ = '0.1'
+__version__ = '0.1.0'
 
 
 def md5(fname, chunk_size=65536):
@@ -368,14 +368,14 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
 
             if native_filters is not None:
                 fargs = dict(healpix_pixel=healpix)
-                if not all(f[0](*(fargs[k] for k in f[1:])) for f in native_filters if set(f[1:]) == set(fargs)):
+                if not native_filters.check_scalar(fargs):
                     continue
 
             for zlo in range(self.zrange_lo, self.zrange_hi):
 
                 if native_filters is not None:
                     fargs = dict(healpix_pixel=healpix, redshift_block_lower=zlo)
-                    if not all(f[0](*(fargs[k] for k in f[1:])) for f in native_filters):
+                    if not native_filters.check_scalar(fargs):
                         continue
 
                 healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
