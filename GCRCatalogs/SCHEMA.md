@@ -9,13 +9,15 @@ Attribute name | Type | Definition
 `halo_mass_def` | `str` | halo mass definition, e.g., `vir`, `200m`, `200c`
 `lightcone` | `bool` | whether or not the catalog is a light cone catalog
 
-## Galaxy properties
+## Schema
 
 - Label names are generally in `lowercase_separated_by_underscores` format, except in a few cases an upper case letter is needed (e.g., `Mag_true_Y_lsst_z0`).
 - Label names generally start with the name of the physical quantity, and are followed by specifications (i.e., use `size_disk_true` not `true_disk_size`). Some exceptions are `galaxy_id`, `halo_id`, `halo_mass`.
 - A quantity with `_true` usually means before the lensing effect is taken into account.
 - Not all quantities listed below are available in all catalogs. Use `list_all_quantities()` to find available quantities.
 - In addition to the quantities listed below, there are also *native quantities*, which are quantities whose label names and/or units have not been homogenized and may change in the future. Nevertheless, one can still access native quantities via GCRCatalogs. Use `list_all_native_quantities()` to find available native quantities.
+
+### Schema for Extragalatic Catalogs
 
 Quantity Label | Unit | Definition
 --- | --- | ---
@@ -30,6 +32,9 @@ Quantity Label | Unit | Definition
 `mag_true_<band>_<filter>` | - | Apparent magnitude, not lensed, in `<band>` with  `<filter>`, e.g., `mag_true_Y_lsst`, `mag_true_g_des`
 `mag_<band>_<filter>` | - | Apparent magnitude, lensed, in `<band>` with  `<filter>`, e.g., `mag_Y_lsst`, `mag_g_des`
 `magerr_<band>_<filter>` | - | Error in apparent magnitude in `<band>` with  `<filter>`, e.g., `magerr_Y_lsst`, `magerr_g_des`
+`mag_<band>` | - | alias for `mag_<band>_lsst`
+`mag_true_<band>` | - | alias for `mag_true_<band>_lsst`
+`magerr_<band>` | - | alias for `magerr_<band>_lsst`
 `sersic` | - | Sersic index of galaxy light profile
 `sersic_disk` | - | Sersic index of disk light profile
 `sersic_bulge` | - | Sersic index of bulge light profile
@@ -86,3 +91,51 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>` but without dust extiction in the host galaxy
 `sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
 `sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
+
+
+## Schema for DC2 Coadd Catalogs
+
+The schema for DC2 Coadd Catalogs follow the following rules:
+
+- For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
+- For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
+- For quantities that are defined in both, we provide aliases so both naming schemes would work.
+- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
+
+For quantities that are not yet documented in the table above, we document them below:
+- In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
+- Items marked with 'xx' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
+   * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
+   * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
+   * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
+
+Quantity Label | Unit | Definition | GCRbase | DPDD
+--- | --- | --- | --- | ---
+`ra` | degree | Right Ascension | x | xx |
+`ra_err` | degree | Right Ascension | x | xx |
+`dec` | degree | Declination | x | xx |
+`dec_err` | degree | Declination | x | xx |
+`x` | pixels | 2D centroid location (x coordinate). |   | xx |
+`y` | pixels | 2D centroid location (y coordinate). |   | xx |
+`xErr` | pixels | Error value for `centroidX`. |   | xx |
+`yErr` | pixels | Error value for `centroidY`. |   | xx |
+`xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
+`psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
+`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
+`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
+`Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
+`IxxPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`IyyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`IxyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
+`mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
+`magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
+`snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
+`psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
+`good` | - | True if the source has no flagged pixels. |   |   |
+`clean` | - |  True if the source has no flagged pixels and is not skipped by the deblender (`good && ~deblend_skipped`). |   |   |
+`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
+`blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
+`extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |

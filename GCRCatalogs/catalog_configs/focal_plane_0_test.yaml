@@ -1,0 +1,5 @@
+subclass_name: focal_plane.FocalPlaneCatalog
+catalog_root_dir: /global/cscratch1/sd/descpho/Pipeline-tasks/DC2-R1-2p-WFD-r/000000/work
+rebinning: 0
+description: PhoSim e-images rebinned
+included_by_default: true

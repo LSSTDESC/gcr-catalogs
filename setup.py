@@ -9,11 +9,11 @@ import os
 from setuptools import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
-    exec(f.read())
+    exec(f.read()) # pylint: disable=W0122
 
 setup(
     name='GCRCatalogs',
-    version=__version__,
+    version=__version__, # pylint: disable=E0602
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
@@ -30,12 +30,15 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.6.2'],
+    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.7.2'],
     extras_require = {
         'protodc2': ['h5py'],
         'instance': ['pandas'],
-        'dc1':  ['sqlalchemy', 'pymssql'],
-        'full':  ['h5py', 'sqlalchemy', 'pymssql', 'pandas'],
+        'reference': ['pandas'],
+        'dc1': ['sqlalchemy', 'pymssql'],
+        'dc2_coadd': ['tables', 'pandas'],
+        'focal_plane': ['scikit-image', 'pandas'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
