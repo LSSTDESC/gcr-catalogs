@@ -160,6 +160,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._columns = self._generate_columns(self._datasets)
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
+        self._quantity_info_dict = kwargs.get('_quantity_info_dict')
 
     def __del__(self):
         self.close_all_file_handles()
