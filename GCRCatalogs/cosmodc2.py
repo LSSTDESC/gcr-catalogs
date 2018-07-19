@@ -104,7 +104,6 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
         self.healpix_pixels = self._default_healpix_pixels if healpix_pixels is None else healpix_pixels
         self.healpix_pixel_files = self._get_healpix_file_list(assert_files_complete=kwargs.get('assert_files_complete', True))
 
-        cosmology = kwargs.get('cosmology', {})
         cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
         cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
         self.cosmology = FlatLambdaCDM(**cosmo_astropy)
