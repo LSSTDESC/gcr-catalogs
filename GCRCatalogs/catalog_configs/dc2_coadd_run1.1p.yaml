@@ -4,35 +4,3 @@ description: DC2 Run 1.1p Coadd Catalog
 creators: ['Michael Wood-Vasey']
 included_by_default: true
 pixel_scale: 0.185
-
-
-_quantity_info_dict:
-    ra: ['Right Ascension', 'degree', true, true]
-    dec: ['Declination', 'degree', true, true]
-    ra_err: ['Error value for Right Ascension', 'degree', true, true]
-    dec_err: ['Error value for Declination', 'degree', true, true]
-    x: ['2D centroid location (x coordinate)', 'pixels', false, true]
-    y: ['2D centroid location (y coordinate)', 'pixels', false, true]
-    xErr: ['Error value for x', 'pixels', false, true]
-    yErr: ['Error value for y', 'pixels', false, true]
-    xy_flag: ['Flag for issues with `x` and `y`.', 'none', false , true]
-    psFlux_<band>: ['Point source model flux in `<band>.`', 'nmgy', false, true]
-    psFluxErr_<band>: ['Error value for `psFlux_<band>`.', 'nmgy', false, true]
-    psFlux_flag_<band>: ['Flag for issues with `psFlux_<band>`.', 'none', false, true]
-    Ixx_<band>: ['Adaptive second moment of the source intensity in `<band>`.', 'asec2', false, true]
-    Iyy_<band>: ['Adaptive second moment of the source intensity in `<band>`.', 'asec2', false, true]
-    Ixy_<band>: ['Adaptive second moment of the source intensity in `<band>`.', 'asec2', false, true]
-    IxxPSF_<band>: ['Adaptive second moment of the PSF  in `<band>`.', 'asec2', false, true]
-    IyyPSF_<band>: ['Adaptive second moment of the PSF  in `<band>`.', 'asec2', false, true]
-    IxyPSF_<band>: ['Adaptive second moment of the PSF  in `<band>`.', 'asec2', false, true]
-    I_flag_<band>: ['Flag for issues with `Ixx_<band>` `Ixx_<band>` and `Ixx_<band>.`', 'asec2', false, true]
-    mag_<band>_cModel: ['Composite model (cModel) magnitude in `<band>` fitted by cModel.', 'mag', true, false]
-    magerr_<band>_cModel: ['Error value for `mag_<band>_cModel.`', 'mag', true, false]
-    snr_<band>_cModel: ['Signal to noise ratio for magnitude in `<band>` fitted by cModel.', 'none', false, false]
-    psf_fwhm_<band>: ['PSF FWHM calculated from `base_SdssShape`', 'pixels', false, false]
-    good: ['True if the source has no flagged pixels.', 'none', false, false]
-    clean: ['True if the source has no flagged pixels and is not deblended (`good && deblend_skipped`).', 'none', false, false]
-    I_flag: ['Flag for issues with `Ixx`, `Iyy`, and `Ixy`.', 'none', false, true]
-    blendedness: ['measure of how flux is affected by neighbors (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766))', 'none', false, false]
-    extendedness: ['0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value`', 'none', false, false]
-

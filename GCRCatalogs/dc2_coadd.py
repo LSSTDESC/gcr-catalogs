@@ -8,12 +8,15 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import yaml
 from GCR import BaseGenericCatalog
 
 __all__ = ['DC2CoaddCatalog']
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'merged_tract_\d+\.hdf5'
 GROUP_PATTERN = r'coadd_\d+_\d\d$'
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_coadd_meta.yaml')
 
 
 def calc_cov(ixx_err, iyy_err, ixy_err):
@@ -170,7 +173,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._columns = self._generate_columns(self._datasets)
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
-        self._quantity_info_dict = self._generate_info_dict(kwargs.get('_quantity_info_dict'), bands)
+        self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
 
     def __del__(self):
         self.close_all_file_handles()
@@ -181,7 +184,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         Args:
             pixel_scale (float): Scale of pixels in coadd images
-            bands         (str): Photometric bands (default is 'ugriz')
+            bands        (list): List of photometric bands as strings
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
@@ -263,21 +266,24 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         return modifiers
     
     @staticmethod
-    def _generate_info_dict(base_dict, bands='ugriz'):
+    def _generate_info_dict(meta_path, bands='ugrizy'):
         """Creates a 2d dictionary with information for each homonogized quantity
 
-        Separate entries for each band are created for any key in the provided
-        base dictionary containing the substring '<band>'.
+        Separate entries for each band are created for any key in the yaml
+        dictionary at meta_path containing the substring '<band>'.
 
         Args:
-            base_dict (dict): A dictionary of quantity information with unformatted keys
-            bands      (str): Photometric bands (default is 'ugriz')
+            meta_path (path): Path of yaml config file with coadd meta data
+            bands     (list): List of photometric bands as strings
 
         Returns:
             Dictionary of the form
                 {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
         """
         
+        with open(meta_path, 'r') as ofile:
+            base_dict = yaml.load(ofile)
+
         info_dict = dict()
         for quantity, info_list in base_dict.items():
             quantity_info = dict(
