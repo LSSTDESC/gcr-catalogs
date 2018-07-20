@@ -8,12 +8,15 @@ import warnings
 
 import numpy as np
 import pandas as pd
+import yaml
 from GCR import BaseGenericCatalog
 
 __all__ = ['DC2CoaddCatalog']
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'merged_tract_\d+\.hdf5'
 GROUP_PATTERN = r'coadd_\d+_\d\d$'
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_coadd_meta.yaml')
 
 
 def calc_cov(ixx_err, iyy_err, ixy_err):
@@ -26,7 +29,7 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
 
     Returns:
         Elements of the covariance matrix ordered as
-        [ixx * ixx, ixx * ixy, ixx * iyy, ixy * ixy, ixy * iyy, iyy * iyy]
+            [ixx * ixx, ixx * ixy, ixx * iyy, ixy * ixy, ixy * iyy, iyy * iyy]
     """
 
     # This array is missing the off-diagonal correlation coefficients
@@ -43,20 +46,30 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
 
 
 def create_basic_flag_mask(*flags):
+    """Generate a mask for a set of flags
+
+    For each item the mask will be true if and only if all flags are false
+
+    Args:
+        *flags (ndarray): Variable number of arrays with booleans or equivalent
+
+    Returns:
+        The combined mask array
     """
-    generate a mask for a set of flags
-    for each item, mask will be true if and only if all flags are false
-    """
+
     out = np.ones(len(flags[0]), np.bool)
     for flag in flags:
         out &= (~flag)
+
     return out
 
 
 class TableWrapper(object):
-    """This class is a wrapper for a pandas HDF5 storer so that we have a
-    unified API to access both fixed and table formats.
+    """Wrapper class for pandas HDF5 storer
+
+    Provides a unified API to access both fixed and table formats.
     """
+
     def __init__(self, file_handle, key):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
@@ -108,8 +121,8 @@ class TableWrapper(object):
 
 
 class CoaddTableWrapper(TableWrapper):
-    """Same as TableWrapper but add tract and patch info
-    """
+    """Same as TableWrapper but add tract and patch info"""
+
     def __init__(self, file_handle, key):
         key_items = key.split('_')
         self.tract = int(key_items[1])
@@ -130,6 +143,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
+    use_cache        (bool): Whether or not to cache read data in memory
 
     Attributes
     ----------
@@ -152,7 +166,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
         self._file_handles = dict()
         self._datasets = self._generate_datasets()
-
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
@@ -160,6 +173,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._columns = self._generate_columns(self._datasets)
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
+        self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
 
     def __del__(self):
         self.close_all_file_handles()
@@ -168,9 +182,14 @@ class DC2CoaddCatalog(BaseGenericCatalog):
     def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
         """Creates a dictionary relating native and homogenized column names
 
+        Args:
+            pixel_scale (float): Scale of pixels in coadd images
+            bands        (list): List of photometric bands as strings
+
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
+
         modifiers = {
             'objectId': 'id',
             'parentObjectId': 'parent',
@@ -197,7 +216,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         )
 
         modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
-
         modifiers['clean'] = (
             create_basic_flag_mask,
             'deblend_skipped',
@@ -215,8 +233,6 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
             modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
-
-            # Band specific second moment values
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
@@ -248,23 +264,76 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             )
 
         return modifiers
+    
+    @staticmethod
+    def _generate_info_dict(meta_path, bands='ugrizy'):
+        """Creates a 2d dictionary with information for each homonogized quantity
+
+        Separate entries for each band are created for any key in the yaml
+        dictionary at meta_path containing the substring '<band>'.
+
+        Args:
+            meta_path (path): Path of yaml config file with coadd meta data
+            bands     (list): List of photometric bands as strings
+
+        Returns:
+            Dictionary of the form
+                {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
+        """
+        
+        with open(meta_path, 'r') as ofile:
+            base_dict = yaml.load(ofile)
+
+        info_dict = dict()
+        for quantity, info_list in base_dict.items():
+            quantity_info = dict(
+                description=info_list[0], 
+                unit=info_list[1], 
+                in_GCRbase=info_list[2], 
+                in_DPDD=info_list[3]
+            )
+            
+            if '<band>' in quantity:
+                for band in bands:
+                    info_dict[quantity.replace('<band>', band)] = quantity_info      
+                    
+            else:
+                info_dict[quantity] = quantity_info
+       
+        return info_dict
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        """Return a dictionary with descriptive information for a quantity
+        
+        Returned information includes a quantity description, quantity units, whether 
+        the quantity is defined in the DPDD, and if the quantity is available in GCRbase.
+        
+        Args:
+            quantity   (str): The quantity to return information for
+            default (object): Value to return if no information is available (default None)
+        
+        Returns:
+            A dictionary with information about the provided quantity
+        """
+        
+        return self._quantity_info_dict.get(quantity, default)
 
     def _generate_datasets(self):
-        """Return viable data sets and columns from all files in self.base_dir
+        """Return viable data sets from all files in self.base_dir
 
         Returns:
             A list of tuples (<file path>, <key>) for all files and keys
-            A set of column names from all files
         """
-        datasets = list()
 
+        datasets = list()
         for fname in sorted(os.listdir(self.base_dir)):
             if not self._filename_re.match(fname):
                 continue
-            file_path = os.path.join(self.base_dir, fname)
 
+            file_path = os.path.join(self.base_dir, fname)
             try:
                 fh = self._open_hdf5(file_path)
+
             except (IOError, OSError):
                 warnings.warn('Cannot access {}; skipped'.format(file_path))
                 continue
@@ -281,9 +350,19 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _generate_columns(datasets):
+        """Return unique column names for given datasets
+
+        Args:
+            datasets (list): A list of tuples (<file path>, <key>)
+
+        Returns:
+            A set of unique column names found in all data sets
+        """
+
         columns = set()
         for dataset in datasets:
             columns.update(dataset.columns)
+
         return columns
 
     @property
@@ -294,40 +373,54 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             A list of dictionaries of the form:
                [{"tract": <tract (int)>, "patch": <patch (str)>}, ...]
         """
+
         return [dataset.tract_and_patch for dataset in self._datasets]
 
     @property
     def available_tracts(self):
         """Returns a sorted list of available tracts
 
-        Args:
+        Returns:
             A sorted list of available tracts as integers
         """
+
         return sorted(set(dataset.tract for dataset in self._datasets))
 
     def clear_cache(self):
         """Empty the catalog reader cache and frees up memory allocation"""
+
         for dataset in self._datasets:
             dataset.clear_cache()
 
     def _open_hdf5(self, file_path):
-        """Open an HDF5 file at *file_path* and return the file handle as an
-        pd.HDFStore object (and cache the handle).
+        """Return the file handle of an HDF5 file as an pd.HDFStore object
+
+        Cache and return the file handle for the HDF5 file at <file_path>
+
+        Args:
+            file_path (str): The path of the desired file
+
+        Return:
+            The cached file handle
         """
+
         if (file_path not in self._file_handles or
                 not self._file_handles[file_path].is_open):
             self._file_handles[file_path] = pd.HDFStore(file_path, 'r')
+
         return self._file_handles[file_path]
 
     def close_all_file_handles(self):
-        """Clear all cached file handles
-        """
+        """Clear all cached file handles"""
+
         for fh in self._file_handles.values():
             fh.close()
+
         self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
+
         return self._columns.union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
@@ -339,8 +432,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             def _native_quantity_getter(native_quantity, d=dataset):
                 if native_quantity in self._native_filter_quantities:
                     return np.repeat(getattr(d, native_quantity), len(d))
+
                 if native_quantity not in d:
                     return np.repeat(np.nan, len(d))
+
                 return d[native_quantity]
 
             yield _native_quantity_getter
