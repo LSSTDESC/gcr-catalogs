@@ -160,7 +160,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         self._columns = self._generate_columns(self._datasets)
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
-        self._quantity_info_dict = kwargs.get('_quantity_info_dict')
+        self._quantity_info_dict = self._generate_info_dict(kwargs.get('_quantity_info_dict'), bands)
 
     def __del__(self):
         self.close_all_file_handles()
@@ -249,6 +249,45 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             )
 
         return modifiers
+    
+    @staticmethod
+    def _generate_info_dict(base_dict, bands):
+        """Creates a 2d dictionary with information for each homonogized quantity"""
+        
+        info_dict = dict()
+        for quantity, info_list in base_dict.items():
+            quantity_info = dict(
+                description=info_list[0], 
+                unit=info_list[1], 
+                in_GCRbase=info_list[2], 
+                in_DPDD=info_list[3]
+            )
+            
+            if '<band>' in quantity:
+                for band in bands:
+                    info_dict[quantity.replace('<band>', band)] = quantity_info      
+                    
+            else:
+                info_dict[quantity] = quantity_info
+       
+        return info_dict
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        """
+        Return a dictionary with descriptive information for a quantity
+        
+        Returned information includes a quantity description, quantity units, whether 
+        the quantity is defined in the DPDD, and if the quantity is available in GCRbase.
+        
+        Args:
+            quantity   (str): The quantity to return information for
+            default (object): Value to return if no information is available (default None)
+        
+        Returns:
+            A dictionary with information about the provided quantity
+        """
+        
+        return self._quantity_info_dict.get(quantity, default)
 
     def _generate_datasets(self):
         """Return viable data sets and columns from all files in self.base_dir
