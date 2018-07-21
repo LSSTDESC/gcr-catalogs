@@ -61,7 +61,13 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
         self.cache = dict() if use_cache else None
 
-        self.cosmology = FlatLambdaCDM(**cosmology)
+        cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
+        cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
+        self.cosmology = FlatLambdaCDM(**cosmo_astropy)
+        for k, v in cosmology.items():
+            if k not in cosmo_astropy_allowed:
+                setattr(self.cosmology, k, v)
+
         self.halo_mass_def = halo_mass_def
         self.lightcone = bool(lightcone)
         self.sky_area  = float(sky_area or np.nan)
@@ -99,6 +105,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     i -= 1
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_lsst'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
+                if b != 'Y':
+                    self._quantity_modifiers['mag_{}'.format(b)] = self._quantity_modifiers['mag_{}_lsst'.format(b)]
                 if b != 'y' and b != 'Y':
                     self._quantity_modifiers['Mag_true_{}_sdss_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/TMAG/{}'.format(i))
@@ -172,6 +180,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     i -= 1
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_true_{}_lsst'.format(b)] = (_mask_func, 'lsst/TMAG/{}'.format(i))
+                if b != 'Y':
+                    self._quantity_modifiers['mag_true_{}'.format(b)] = self._quantity_modifiers['mag_true_{}_lsst'.format(b)]
                 if b != 'u':
                     i -= 1
                     self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
@@ -220,12 +230,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         for healpix in self.healpix_pixels:
-
-            fargs = dict(healpix_pixel=healpix)
-            if native_filters and not all(f[0](*(fargs[k] for k in f[1:])) for f in native_filters):
-                continue
-
-            yield functools.partial(self._native_quantity_getter, healpix=healpix)
+            if native_filters is None or native_filters.check_scalar({'healpix_pixel': healpix}):
+                yield functools.partial(self._native_quantity_getter, healpix=healpix)
 
 
     def _open_dataset(self, healpix, subset):

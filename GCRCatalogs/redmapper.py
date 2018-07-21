@@ -39,7 +39,15 @@ class RedMapperCatalog(BaseGenericCatalog):
         assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
 
         self._catalog_path_template = {k: os.path.join(catalog_root_dir, v) for k, v in catalog_path_template.items()}
-        self.cosmology = FlatLambdaCDM(**kwargs.get('cosmology'))
+
+        cosmology = kwargs.get('cosmology', {})
+        cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
+        cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
+        self.cosmology = FlatLambdaCDM(**cosmo_astropy)
+        for k, v in cosmology.items():
+            if k not in cosmo_astropy_allowed:
+                setattr(self.cosmology, k, v)
+
         self.lightcone = kwargs.get('lightcone')
         self.sky_area = kwargs.get('sky_area')
 
