@@ -460,3 +460,8 @@ class UMShearCatalog(UMGalaxyCatalog):
     @staticmethod
     def _generate_quantity_modifiers():
         return {}
+
+    def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs):
+        super(UMShearCatalog, self)._subclass_init(catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs)
+        self.composite_compatible = kwargs.get('composite_compatible', [])
+        self.composite_matched_format = kwargs.get('composite_matched_format', [])
