@@ -208,9 +208,9 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             zlo, zhi, hpx = pattern.findall(healpix_name)
             if hpx not in skyarea:
                 skyarea[hpx] = {}
-            if 'skyArea' in fh['metaData'].keys():
+            try:
                 skyarea[hpx][zlo+'_'+zhi] = float(fh['metaData/skyArea'].value)
-            else:
+            except KeyError:
                 skyarea[hpx][zlo+'_'+zhi] = np.rad2deg(np.rad2deg(4.0*np.pi/768.))
             fh.close()
 
@@ -428,9 +428,7 @@ class UMGalaxyCatalog(BaseCosmoDC2Catalog):
     def _generate_group_names(self):
         filename = self.healpix_pixel_files[0]
         with h5py.File(filename, 'r') as fh:
-            for k in fh:
-                if k.isdigit():
-                    return list(fh[k].keys())
+            return [k for k in fh if k.isdigit()]
 
     @staticmethod
     def _generate_quantity_modifiers():
