@@ -1,11 +1,7 @@
 subclass_name: cosmodc2.UMGalaxyCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/um_healpix_mocks
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/um_healpix_mocks_mh_14.5_min_9.8_sats
 catalog_path_template: umachine_color_mock_z_{}_{}_cutout_{}.hdf5
-
-healpix_pixels: [368]
-zlo: 1
-zhi: 2
 
 cosmology:
     H0: 71.0
@@ -15,6 +11,8 @@ cosmology:
 lightcone: true
 
 version: "0.0.0"
+
+check_file_metadata: true
 
 creators: [ 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs']
 

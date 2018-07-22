@@ -21,7 +21,7 @@ check_file_metadata: false
 creators: [ 'Patricia Larsen']
 
 description: |
-    This is shear addon catalog associated with um_hpx_test_564_z0
+    This is shear addon catalog associated with um_v0.1_test
 
-composite_compatible: ['um_hpx_test_564_z0']
-composite_matched_format: ['um_hpx_test_564_z0']
+composite_compatible: ['um_v0.1_test']
+composite_matched_format: ['um_v0.1_test']
