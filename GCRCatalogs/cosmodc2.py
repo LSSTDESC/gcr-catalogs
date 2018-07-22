@@ -11,7 +11,7 @@ import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
-__all__ = ['CosmoDC2GalaxyCatalog']
+__all__ = ['CosmoDC2GalaxyCatalog', 'UMGalaxyCatalog']
 __version__ = '0.1.0'
 
 
@@ -76,30 +76,23 @@ def _calc_ellipticity_2(ellipticity):
     return ellipticity*np.sin(2.0*pos_angle)
 
 
-def _gen_galaxy_id(size_reference):
-    # pylint: disable=protected-access
-    size = size_reference.size
-    if not hasattr(_gen_galaxy_id, "_galaxy_id") or _gen_galaxy_id._galaxy_id.size != size:
-        _gen_galaxy_id._galaxy_id = np.arange(size, dtype='i8')
-    return _gen_galaxy_id._galaxy_id
-
 def _calc_lensed_magnitude(magnitude, magnification):
     magnification[magnification == 0] = 1.0
     return magnitude -2.5*np.log10(magnification)
 
-class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
+
+class BaseCosmoDC2Catalog(BaseGenericCatalog):
     """
-    CosmoDC2 galaxy catalog class. Uses generic quantity and filter mechanisms
-    defined by BaseGenericCatalog class.
+    BaseCosmoDC2Catalog class for catalogs that have cosmoDC-like structures.
     """
 
     def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs):
         # pylint: disable=W0221
-        assert(os.path.isdir(catalog_root_dir)), 'Catalog directory {} does not exist'.format(catalog_root_dir)
+        if not os.path.isdir(catalog_root_dir):
+            raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
+
         self._catalog_path_template = os.path.join(catalog_root_dir, catalog_path_template)
-
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
-
         self._default_zrange_lo, self._default_zrange_hi, self._default_healpix_pixels = self._get_healpix_info()
         self.zrange_lo = self._default_zrange_lo if zlo is None else zlo
         self.zrange_hi = self._default_zrange_hi if zhi is None else zhi
@@ -122,22 +115,167 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
             for healpix_file in self.healpix_pixel_files:
                 self._check_file_metadata(healpix_file)
 
-        #use first file in list to get information for native quantities
-        filename = self.healpix_pixel_files[0]
         self._native_quantities = set()
+        self._native_quantities = set(self._generate_native_quantity_list())
+        self._quantity_modifiers = self._generate_quantity_modifiers()
+
+    def _get_group_names(self, fh): # pylint: disable=W0613
+        return ['galaxyProperties']
+
+    def _generate_native_quantity_list(self):
+        if not self._native_quantities:
+            filename = self.healpix_pixel_files[0]
+            with h5py.File(filename, 'r') as fh:
+                def _collect_native_quantities(name, obj):
+                    if isinstance(obj, h5py.Dataset):
+                        self._native_quantities.add(name)
+                fh[self._get_group_names(fh)[0]].visititems(_collect_native_quantities)
+
+        return self._native_quantities
+
+    @staticmethod
+    def _generate_quantity_modifiers():
+        return {}
+
+    def _get_healpix_info(self):
+        path = self._catalog_path_template
+        fname_pattern = os.path.basename(path).format(r'\d', r'\d', r'\d+')
+        path = os.path.dirname(path)
+        pattern = re.compile(r'\d+')
+        if not os.listdir(path):
+            raise ValueError('Problem with yaml file: no files with format {} found in {}'.format(fname_pattern, path))
+
+        healpix_pixels = set()
+        zvalues = set()
+        for f in sorted(os.listdir(path)):
+            m = re.match(fname_pattern, f)
+            if m is not None:
+                healpix_name = os.path.splitext(m.group())[0]
+                zlo, zhi, hpx = pattern.findall(healpix_name)
+                healpix_pixels.add(int(hpx))
+                zvalues.add(int(zlo))
+                zvalues.add(int(zhi))
+
+        return min(zvalues), max(zvalues), list(healpix_pixels)
+
+
+    def _get_healpix_file_list(self, assert_files_complete=True):
+        possible_healpix_pixel_files = [self._catalog_path_template.format(z, z+1, h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
+        healpix_pixel_files = [f for f in possible_healpix_pixel_files if os.path.isfile(f)]
+        if assert_files_complete and len(healpix_pixel_files) != len(possible_healpix_pixel_files):
+            raise ValueError('Missing some catalog files')
+        return healpix_pixel_files
+
+
+    def _check_file_metadata(self, healpix_file, tol=1e-4):
+        fh = h5py.File(healpix_file, 'r')
+        try:
+            # pylint: disable=E1101
+            catalog_version = list()
+            for version_label in ('Major', 'Minor', 'MinorMinor'):
+                try:
+                    catalog_version.append(fh['/metaData/version' + version_label].value)
+                except KeyError:
+                    break
+            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (0, 0))))
+
+            #check cosmology
+            metakeys = fh['metaData'].keys()
+            if 'H_0' in metakeys and 'Omega_matter' in metakeys and 'Omega_b' in metakeys:
+                H0 = fh['metaData/H_0'].value
+                Om0 = fh['metaData/Omega_matter'].value
+                Ob0 = fh['metaData/Omega_b'].value
+                if  abs(H0 - self.cosmology.H0.value) > tol or abs(Om0 - self.cosmology.Om0) > tol or abs(Ob0 - self.cosmology.Ob0) > tol:
+                    raise ValueError('Mismatch in cosmological parameters (H0:{}, Om0:{}, Ob0:{}) for healpix file {}'.format(H0, Om0, Ob0, healpix_file))
+
+            # check versions
+            config_version = StrictVersion(self.version)
+            if config_version != catalog_version:
+                raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
+            if StrictVersion(__version__) < config_version:
+                raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
+        finally:
+            fh.close()
+
+
+    def _get_skyarea_info(self):
+        skyarea = {}
+        pattern = re.compile(r'\d+')
+        for healpix_file in self.healpix_pixel_files:
+            # pylint: disable=E1101
+            fh = h5py.File(healpix_file, 'r')
+            healpix_name = os.path.splitext(os.path.basename(healpix_file))[0]
+            zlo, zhi, hpx = pattern.findall(healpix_name)
+            if hpx not in skyarea:
+                skyarea[hpx] = {}
+            try:
+                skyarea[hpx][zlo+'_'+zhi] = float(fh['metaData/skyArea'].value)
+            except KeyError:
+                skyarea[hpx][zlo+'_'+zhi] = np.rad2deg(np.rad2deg(4.0*np.pi/768.))
+            fh.close()
+
+        sky_area = 0.0
+        for hpx in skyarea:
+            sky_area = sky_area + max([skyarea[hpx][z] for z in skyarea[hpx]])
+
+        return sky_area
+
+
+    def _iter_native_dataset(self, native_filters=None):
+        for healpix in self.healpix_pixels:
+
+            if native_filters is not None and not native_filters.check_scalar({
+                    'healpix_pixel': healpix,
+            }):
+                continue
+
+            for zlo in range(self.zrange_lo, self.zrange_hi):
+
+                if native_filters is not None and not native_filters.check_scalar({
+                        'healpix_pixel': healpix,
+                        'redshift_block_lower': zlo,
+                }):
+                    continue
+
+                healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
+                try:
+                    with h5py.File(healpix_file, 'r') as fh:
+                        for group in self._get_group_names(fh):
+                            # pylint: disable=E1101,W0640
+                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+
+                except (IOError, OSError):
+                    print('Cannot open file {}'.format(healpix_file))
+
+
+    def _get_native_quantity_info_dict(self, quantity, default=None):
+        #use first file in list to get information
+        filename = self._catalog_path_template.format(self.zrange_lo, self.zrange_lo+1, self.healpix_pixels[0])
         with h5py.File(filename, 'r') as fh:
-            def _collect_native_quantities(name, obj):
-                if isinstance(obj, h5py.Dataset):
-                    self._native_quantities.add(name)
-            fh['galaxyProperties'].visititems(_collect_native_quantities)
+            quantity_key = '{}/{}'.format(self._get_group_names(fh)[0], quantity) #use first lc shell
+            if quantity_key not in fh:
+                return default
+            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
+            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
 
-        #FIXME: remove this section when these native quantity really exist.
-        self._native_quantities.difference_update(set(q for q in self._native_quantities if (
-            q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
-        )))
 
-        # specify quantity modifiers
-        self._quantity_modifiers = {
+    def _get_quantity_info_dict(self, quantity, default=None):
+        q_mod = self.get_quantity_modifier(quantity)
+        if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
+            warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
+            return default
+        return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+
+
+
+class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
+    """
+    CosmoDC2 galaxy catalog class. Uses generic quantity and filter mechanisms
+    defined by BaseGenericCatalog class.
+    """
+
+    def _generate_quantity_modifiers(self):
+        quantity_modifiers = {
             'galaxy_id' :    'galaxyID',
             'ra':            'ra',
             'dec':           'dec',
@@ -245,22 +383,22 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
         # add magnitudes
         for band in 'ugrizyY':
             if band != 'y' and band != 'Y':
-                self._quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
-                self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
-                self._quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
-                self._quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
-            self._quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
-            self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
-            self._quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
-            self._quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
+                quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
+                quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
+                quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+                quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+            quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
+            quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
 
         # add lensed magnitudes
         for band in 'ugrizyY':
             if band != 'y' and band != 'Y':
-                self._quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
-                self._quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
-            self._quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
-            self._quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
+                quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
+            quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
+            quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}
@@ -271,137 +409,65 @@ class CosmoDC2GalaxyCatalog(BaseGenericCatalog):
                 continue
             component, start, width, dust = m.groups()
             key = 'sed_{}_{}{}{}'.format(start, width, translate_component_name[component], '' if dust else '_no_host_extinction')
-            self._quantity_modifiers[key] = quantity
+            quantity_modifiers[key] = quantity
+
+        #FIXME: remove this section when these native quantity really exist.
+        self._native_quantities.difference_update(set(q for q in self._native_quantities if (
+            q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
+        )))
+
+        return quantity_modifiers
 
 
-    def _get_healpix_info(self):
-        path = self._catalog_path_template
-        fname_pattern = os.path.basename(path).format(r'\d', r'\d', r'\d+')
-        path = os.path.dirname(path)
-        pattern = re.compile(r'\d+')
 
-        healpix_pixels = set()
-        zvalues = set()
-        if not os.listdir(path):
-            raise ValueError('Problem with yaml file: no files with format {} found in {}'.format(fname_pattern, path))
-        for f in sorted(os.listdir(path)):
-            m = re.match(fname_pattern, f)
-            if m is not None:
-                healpix_name = os.path.splitext(m.group())[0]
-                zlo, zhi, hpx = pattern.findall(healpix_name)
-                healpix_pixels.add(int(hpx))
-                zvalues.add(int(zlo))
-                zvalues.add(int(zhi))
+class UMGalaxyCatalog(BaseCosmoDC2Catalog):
+    """
+    UM galaxy catalog class. Uses generic quantity and filter mechanisms
+    defined by BaseGenericCatalog class.
+    """
+    def _get_group_names(self, fh):
+        return [k for k in fh if k.isdigit()]
 
-        return min(zvalues), max(zvalues), list(healpix_pixels)
+    @staticmethod
+    def _generate_quantity_modifiers():
+        quantity_modifiers = {
+            'galaxy_id' :    'galaxy_id',
+            'ra_true':       'ra',
+            'dec_true':      'dec',
+            'redshift_true': 'redshift',
+            'halo_id':       'target_halo_id',
+            'halo_mass':     'target_halo_mass',
+            'stellar_mass':  'obs_sm',
+            'position_x': 'x',
+            'position_y': 'y',
+            'position_z': 'z',
+            'velocity_x': 'vx',
+            'velocity_y': 'vy',
+            'velocity_z': 'vz',
+            'is_central': (lambda x: x == -1, 'upid'),
+        }
 
+        # add magnitudes
+        for band in 'gri':
+            quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
 
-    def _get_healpix_file_list(self, assert_files_complete=True):
-        possible_healpix_pixel_files = [self._catalog_path_template.format(z, z+1, h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
-        healpix_pixel_files = [f for f in possible_healpix_pixel_files if os.path.exists(f)]
-        if assert_files_complete:
-            assert all(f in healpix_pixel_files for f in possible_healpix_pixel_files), 'Missing some catalog files'
-        assert all(os.path.isfile(f) for f in healpix_pixel_files), 'Problem with some catalog files'
-        return healpix_pixel_files
-
-
-    def _check_file_metadata(self, healpix_file, tol=1e-4):
-        fh = h5py.File(healpix_file, 'r')
-        try:
-            # pylint: disable=E1101
-            catalog_version = list()
-            for version_label in ('Major', 'Minor', 'MinorMinor'):
-                try:
-                    catalog_version.append(fh['/metaData/version' + version_label].value)
-                except KeyError:
-                    break
-            catalog_version = StrictVersion('.'.join(map(str, catalog_version or (0, 0))))
-
-            #check cosmology
-            metakeys = fh['metaData'].keys()
-            if 'H_0' in metakeys and 'Omega_matter' in metakeys and 'Omega_b' in metakeys:
-                H0 = fh['metaData/H_0'].value
-                Om0 = fh['metaData/Omega_matter'].value
-                Ob0 = fh['metaData/Omega_b'].value
-                if  abs(H0 - self.cosmology.H0.value) > tol or abs(Om0 - self.cosmology.Om0) > tol or abs(Ob0 - self.cosmology.Ob0) > tol:
-                    raise ValueError('Mismatch in cosmological parameters (H0:{}, Om0:{}, Ob0:{}) for healpix file {}'.format(H0, Om0, Ob0, healpix_file))
-
-            # check versions
-            config_version = StrictVersion(self.version)
-            if config_version != catalog_version:
-                raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
-            if StrictVersion(__version__) < config_version:
-                raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
-        finally:
-            fh.close()
+        return quantity_modifiers
 
 
-    def _get_skyarea_info(self):
-        skyarea = {}
-        pattern = re.compile(r'\d+')
-        for healpix_file in self.healpix_pixel_files:
-            # pylint: disable=E1101
-            fh = h5py.File(healpix_file, 'r')
-            healpix_name = os.path.splitext(os.path.basename(healpix_file))[0]
-            zlo, zhi, hpx = pattern.findall(healpix_name)
-            if hpx not in skyarea:
-                skyarea[hpx] = {}
-            if 'skyArea' in fh['metaData'].keys():
-                skyarea[hpx][zlo+'_'+zhi] = float(fh['metaData/skyArea'].value)
-            else:
-                skyarea[hpx][zlo+'_'+zhi] = np.rad2deg(np.rad2deg(4.0*np.pi/768.))
-            fh.close()
+class UMShearCatalog(UMGalaxyCatalog):
+    """
+    UM shear catalog class.
+    """
+    @staticmethod
+    def _generate_quantity_modifiers():
+        quantity_modifiers = {
+            'shear_2_treecorr': 'shear_2',
+            'shear_2_phosim':   (np.negative, 'shear_2'),
+        }
+        return quantity_modifiers
 
-        sky_area = 0.0
-        for hpx in skyarea:
-            sky_area = sky_area + max([skyarea[hpx][z] for z in skyarea[hpx]])
-
-        return sky_area
-
-
-    def _generate_native_quantity_list(self):
-        return self._native_quantities
-
-    def _iter_native_dataset(self, native_filters=None):
-        for healpix in self.healpix_pixels:
-
-            if native_filters is not None and not native_filters.check_scalar({
-                    'healpix_pixel': healpix,
-            }):
-                continue
-
-            for zlo in range(self.zrange_lo, self.zrange_hi):
-
-                if native_filters is not None and not native_filters.check_scalar({
-                        'healpix_pixel': healpix,
-                        'redshift_block_lower': zlo,
-                }):
-                    continue
-
-                healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
-                try:
-                    with h5py.File(healpix_file, 'r') as fh:
-                        # pylint: disable=E1101,W0640
-                        yield lambda native_quantity: fh['galaxyProperties/{}'.format(native_quantity)].value
-
-                except (IOError, OSError):
-                    print('Cannot open file {}'.format(healpix_file))
-
-
-    def _get_native_quantity_info_dict(self, quantity, default=None):
-        #use first file in list to get information
-        filename = self._catalog_path_template.format(self.zrange_lo, self.zrange_lo+1, self.healpix_pixels[0])
-        with h5py.File(filename, 'r') as fh:
-            quantity_key = 'galaxyProperties/{}'.format(quantity) #use first lc shell
-            if quantity_key not in fh:
-                return default
-            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
-            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
-
-
-    def _get_quantity_info_dict(self, quantity, default=None):
-        q_mod = self.get_quantity_modifier(quantity)
-        if callable(q_mod) or (isinstance(q_mod, (tuple, list)) and len(q_mod) > 1 and callable(q_mod[0])):
-            warnings.warn('This value is composed of a function on native quantities. So we have no idea what the units are')
-            return default
-        return self._get_native_quantity_info_dict(q_mod or quantity, default=default)
+    def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs):
+        super(UMShearCatalog, self)._subclass_init(catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs)
+        self.composite_compatible = kwargs.get('composite_compatible', [])
+        self.composite_matched_format = kwargs.get('composite_matched_format', [])
