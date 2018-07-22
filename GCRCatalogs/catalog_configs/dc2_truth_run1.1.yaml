@@ -1,8 +1,8 @@
 subclass_name: dc2_truth.DC2TruthCatalogReader
 
-filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/proto_dc2_truth_star_gal.db
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/proto_dc2_truth_star_gal_180720.db
 
-md5: d035527eae197117cd1f7f3ddafd6df0
+md5: a8f0e1d656d44eb3c718be1a98e2a0ae
 
 description: |
     Truth catalog for proto-dc2 run 1.1 (corresponding to proto-dc2_v2.1.2).
