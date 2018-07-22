@@ -113,6 +113,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             for healpix_file in self.healpix_pixel_files:
                 self._check_file_metadata(healpix_file)
 
+        self._native_quantities = None
         self._native_quantities = set(self._generate_native_quantity_list())
         self._quantity_modifiers = self._generate_quantity_modifiers()
 
@@ -121,7 +122,6 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
 
     def _generate_native_quantity_list(self):
         if not self._native_quantities:
-            self._native_quantities = set()
             filename = self.healpix_pixel_files[0]
             with h5py.File(filename, 'r') as fh:
                 def _collect_native_quantities(name, obj):
