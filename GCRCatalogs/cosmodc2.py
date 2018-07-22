@@ -113,12 +113,10 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             for healpix_file in self.healpix_pixel_files:
                 self._check_file_metadata(healpix_file)
 
-        self._group_names = self._generate_group_names()
-        assert self._group_names, 'no groups found!'
         self._native_quantities = set(self._generate_native_quantity_list())
         self._quantity_modifiers = self._generate_quantity_modifiers()
 
-    def _generate_group_names(self):
+    def _get_group_names(self, fh): # pylint: disable=W0613
         return ['galaxyProperties']
 
     def _generate_native_quantity_list(self):
@@ -129,7 +127,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
                 def _collect_native_quantities(name, obj):
                     if isinstance(obj, h5py.Dataset):
                         self._native_quantities.add(name)
-                fh[self._group_names[0]].visititems(_collect_native_quantities)
+                fh[self._get_group_names(fh)[0]].visititems(_collect_native_quantities)
 
         return self._native_quantities
 
@@ -240,7 +238,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
                 healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
                 try:
                     with h5py.File(healpix_file, 'r') as fh:
-                        for group in self._group_names:
+                        for group in self._get_group_names(fh):
                             # pylint: disable=E1101,W0640
                             yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
 
@@ -252,7 +250,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         #use first file in list to get information
         filename = self._catalog_path_template.format(self.zrange_lo, self.zrange_lo+1, self.healpix_pixels[0])
         with h5py.File(filename, 'r') as fh:
-            quantity_key = '{}/{}'.format(self._group_names[0], quantity) #use first lc shell
+            quantity_key = '{}/{}'.format(self._get_group_names(fh)[0], quantity) #use first lc shell
             if quantity_key not in fh:
                 return default
             modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
@@ -425,10 +423,8 @@ class UMGalaxyCatalog(BaseCosmoDC2Catalog):
     UM galaxy catalog class. Uses generic quantity and filter mechanisms
     defined by BaseGenericCatalog class.
     """
-    def _generate_group_names(self):
-        filename = self.healpix_pixel_files[0]
-        with h5py.File(filename, 'r') as fh:
-            return [k for k in fh if k.isdigit()]
+    def _get_group_names(self, fh):
+        return [k for k in fh if k.isdigit()]
 
     @staticmethod
     def _generate_quantity_modifiers():
