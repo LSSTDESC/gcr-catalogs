@@ -15,6 +15,9 @@ from GCR import BaseGenericCatalog
 __all__ = ['UMGalaxyCatalog']
 __version__ = '0.0.0'
 
+def _calc_g_magnitude(gr, Magr):
+    return gr + Magr
+
 
 class UMGalaxyCatalog(BaseGenericCatalog):
     """
@@ -33,24 +36,19 @@ class UMGalaxyCatalog(BaseGenericCatalog):
         self.zrange_lo = self._default_zrange_lo if zlo is None else zlo
         self.zrange_hi = self._default_zrange_hi if zhi is None else zhi
         self.healpix_pixels = self._default_healpix_pixels if healpix_pixels is None else healpix_pixels
-        self.check_healpix_file_list()                                                       
+        self.check_healpix_file_list(assert_files_complete=kwargs.get('assert_files_complete', True))
         self.cosmology = FlatLambdaCDM(**cosmology)
         self.version = kwargs.get('version', '0.0.0')
+        self.lightcone = kwargs.get('lightcone')
         self.check_file_metadata = check_file_metadata
 
-        #get sky area and check files if requested
-        sky_area = 0.
-        for healpix in self.healpix_pixels:
-            for zlo in range(self.zrange_lo, self.zrange_hi):
-                healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
+        #get sky area and check meta data if requested
+        self.sky_area = self._get_skyarea_info()
+        if check_file_metadata:
+            for healpix_file in self.healpix_pixel_files:
                 fh = h5py.File(healpix_file, 'r')
-                if check_file_metadata:
-                    self._check_file_metadata(fh)
-                if 'skyArea' in fh['metaData'].keys():
-                    sky_area = sky_area + float(fh['metaData/skyArea'].value)
+                self._check_file_metadata(fh)
                 fh.close()
-
-        self.sky_area = sky_area if sky_area > 0 else np.nan
 
         # specify quantity modifiers
         self._quantity_modifiers = {
@@ -68,10 +66,21 @@ class UMGalaxyCatalog(BaseGenericCatalog):
             'velocity_y': 'vy',
             'velocity_z': 'vz',
             'is_central': (lambda x: x == -1, 'upid'),
+        #    'Mag_true_g_sdss_z0': (
+        #        _calc_g_magnitude,
+        #        'restframe_extincted_sdss_gr',
+        #        'restframe_extincted_sdss_abs_magr',
+        #    ),
+        #    'Mag_true_g_lsst_z0': (
+        #        _calc_g_magnitude,
+        #        'restframe_extincted_sdss_gr',
+        #        'restframe_extincted_sdss_abs_magr',
+        #    ),
         }
 
         # add magnitudes
         for band in 'gri':
+        #for band in 'ri':
             self._quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
             self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
 
@@ -80,6 +89,8 @@ class UMGalaxyCatalog(BaseGenericCatalog):
         fname_pattern = os.path.basename(path).format('\d', '\d', '\d+') #include z and healpix #s in pattern
         pattern = re.compile('\d+')
         path = os.path.dirname(path)
+        if len(os.listdir(path)) == 0:
+            raise ValueError('Problem with yaml file: no files with format {} found in {}'.format(fname_pattern, path))
      
         healpix_pixels = set()
         zvalues = set()
@@ -95,8 +106,11 @@ class UMGalaxyCatalog(BaseGenericCatalog):
         return min(zvalues), max(zvalues), list(healpix_pixels)
 
 
-    def check_healpix_file_list(self):
-        self.healpix_pixel_files = [self._catalog_path_template.format(z,z+1,h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
+    def check_healpix_file_list(self, assert_files_complete=True):
+        possible_healpix_pixel_files = [self._catalog_path_template.format(z,z+1,h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
+        self.healpix_pixel_files = [f for f in possible_healpix_pixel_files if os.path.exists(f)]
+        if assert_files_complete:
+            assert all(f in self.healpix_pixel_files for f in possible_healpix_pixel_files), 'Missing some catalog files'
         assert all(os.path.isfile(f) for f in self.healpix_pixel_files), 'Problem with some catalog files'
 
 
@@ -122,9 +136,31 @@ class UMGalaxyCatalog(BaseGenericCatalog):
         # check versions
         config_version = StrictVersion(self.version)
         if config_version != catalog_version:
-            raise ValueError('Catalog file for file {} version {} does not match config version {}'.format(healpix_file, catalog_version, config_version))
+            raise ValueError('Catalog file version {} does not match config version {}'.format(catalog_version, config_version))
         if StrictVersion(__version__) < config_version:
             raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
+
+
+    def _get_skyarea_info(self):
+        self._skyarea = {}
+        pattern = re.compile('\d+')
+        for healpix_file in self.healpix_pixel_files:
+            fh = h5py.File(healpix_file, 'r')
+            healpix_name = os.path.splitext(os.path.basename(healpix_file))[0]
+            zlo, zhi, hpx = pattern.findall(healpix_name)
+            if hpx not in self._skyarea:
+                self._skyarea[hpx] = {}
+            if 'skyArea' in fh['metaData'].keys():
+                self._skyarea[hpx][zlo+'_'+zhi] = float(fh['metaData/skyArea'].value)
+            else:
+                self._skyarea[hpx][zlo+'_'+zhi] = np.rad2deg(np.rad2deg(4.0*np.pi/768.))
+            fh.close()
+    
+        sky_area = 0.0
+        for hpx in self._skyarea:
+            sky_area = sky_area + max([self._skyarea[hpx][z] for z in self._skyarea[hpx]]) 
+
+        return sky_area
 
 
     def _generate_native_quantity_list(self):
@@ -152,11 +188,15 @@ class UMGalaxyCatalog(BaseGenericCatalog):
                         continue
 
                 healpix_file = self._catalog_path_template.format(zlo, zlo+1, healpix)
-                with h5py.File(healpix_file, 'r') as fh:
-                    for k in fh:
-                        if k.isdigit():
-                            yield lambda native_quantity: fh[k][native_quantity].value
+                
+                try:
+                    with h5py.File(healpix_file, 'r') as fh:
+                        for k in fh:
+                            if k.isdigit():
+                                yield lambda native_quantity: fh[k][native_quantity].value
 
+                except (IOError, OSError):
+                    print('Cannot open file {}'.format(healpix_file))
 
     def _get_native_quantity_info_dict(self, quantity, default=None):
         #use first file in list to get information
