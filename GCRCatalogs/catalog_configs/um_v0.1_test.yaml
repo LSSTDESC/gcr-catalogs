@@ -14,7 +14,7 @@ cosmology:
 
 lightcone: true
 
-version: "0.0.0"
+version: "0.1.0"
 
 creators: [ 'Andrew Hearin',  'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs']
 
