@@ -113,7 +113,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             for healpix_file in self.healpix_pixel_files:
                 self._check_file_metadata(healpix_file)
 
-        self._native_quantities = None
+        self._native_quantities = set()
         self._native_quantities = set(self._generate_native_quantity_list())
         self._quantity_modifiers = self._generate_quantity_modifiers()
 
