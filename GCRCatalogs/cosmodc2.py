@@ -461,7 +461,11 @@ class UMShearCatalog(UMGalaxyCatalog):
     """
     @staticmethod
     def _generate_quantity_modifiers():
-        return {}
+        quantity_modifiers = {
+            'shear_2_treecorr': 'shear_2',
+            'shear_2_phosim':   (np.negative, 'shear_2'),
+        }
+        return quantity_modifiers
 
     def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs):
         super(UMShearCatalog, self)._subclass_init(catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs)
