@@ -121,7 +121,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
 
     def _generate_native_quantity_list(self):
         if not self._native_quantities:
-            #use first file in list to get information for native quantities
+            self._native_quantities = set()
             filename = self.healpix_pixel_files[0]
             with h5py.File(filename, 'r') as fh:
                 def _collect_native_quantities(name, obj):
