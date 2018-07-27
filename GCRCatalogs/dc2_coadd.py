@@ -295,7 +295,10 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             
             if '<band>' in quantity:
                 for band in bands:
-                    info_dict[quantity.replace('<band>', band)] = quantity_info      
+                    band_quantity = quantity.replace('<band>', band)
+                    band_quantity_info = quantity_info.copy()
+                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`','{} band'.format(band))
+                    info_dict[band_quantity] = band_quantity_info
                     
             else:
                 info_dict[quantity] = quantity_info
