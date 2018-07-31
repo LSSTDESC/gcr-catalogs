@@ -1,5 +1,5 @@
 """
-DC2 Coadd Catalog Reader
+DC2 Object Catalog Reader
 """
 
 import os
@@ -11,12 +11,12 @@ import pandas as pd
 import yaml
 from GCR import BaseGenericCatalog
 
-__all__ = ['DC2CoaddCatalog']
+__all__ = ['DC2ObjectCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATTERN = r'merged_tract_\d+\.hdf5'
-GROUP_PATTERN = r'coadd_\d+_\d\d$'
-META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_coadd_meta.yaml')
+FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
+GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
 def calc_cov(ixx_err, iyy_err, ixy_err):
@@ -120,22 +120,22 @@ class TableWrapper(object):
         self._fixed_data = None
 
 
-class CoaddTableWrapper(TableWrapper):
+class ObjectTableWrapper(TableWrapper):
     """Same as TableWrapper but add tract and patch info"""
 
     def __init__(self, file_handle, key):
         key_items = key.split('_')
         self.tract = int(key_items[1])
         self.patch = ','.join(key_items[2])
-        super(CoaddTableWrapper, self).__init__(file_handle, key)
+        super(ObjectTableWrapper, self).__init__(file_handle, key)
 
     @property
     def tract_and_patch(self):
         return {'tract': self.tract, 'patch': self.patch}
 
 
-class DC2CoaddCatalog(BaseGenericCatalog):
-    r"""DC2 Coadd Catalog reader
+class DC2ObjectCatalog(BaseGenericCatalog):
+    r"""DC2 Object Catalog reader
 
     Parameters
     ----------
@@ -264,7 +264,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
             )
 
         return modifiers
-    
+
     @staticmethod
     def _generate_info_dict(meta_path, bands='ugrizy'):
         """Creates a 2d dictionary with information for each homonogized quantity
@@ -273,52 +273,52 @@ class DC2CoaddCatalog(BaseGenericCatalog):
         dictionary at meta_path containing the substring '<band>'.
 
         Args:
-            meta_path (path): Path of yaml config file with coadd meta data
+            meta_path (path): Path of yaml config file with object meta data
             bands     (list): List of photometric bands as strings
 
         Returns:
             Dictionary of the form
                 {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
         """
-        
+
         with open(meta_path, 'r') as ofile:
             base_dict = yaml.load(ofile)
 
         info_dict = dict()
         for quantity, info_list in base_dict.items():
             quantity_info = dict(
-                description=info_list[0], 
-                unit=info_list[1], 
-                in_GCRbase=info_list[2], 
+                description=info_list[0],
+                unit=info_list[1],
+                in_GCRbase=info_list[2],
                 in_DPDD=info_list[3]
             )
-            
+
             if '<band>' in quantity:
                 for band in bands:
                     band_quantity = quantity.replace('<band>', band)
                     band_quantity_info = quantity_info.copy()
                     band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`','{} band'.format(band))
                     info_dict[band_quantity] = band_quantity_info
-                    
+
             else:
                 info_dict[quantity] = quantity_info
-       
+
         return info_dict
 
     def _get_quantity_info_dict(self, quantity, default=None):
         """Return a dictionary with descriptive information for a quantity
-        
-        Returned information includes a quantity description, quantity units, whether 
+
+        Returned information includes a quantity description, quantity units, whether
         the quantity is defined in the DPDD, and if the quantity is available in GCRbase.
-        
+
         Args:
             quantity   (str): The quantity to return information for
             default (object): Value to return if no information is available (default None)
-        
+
         Returns:
             A dictionary with information about the provided quantity
         """
-        
+
         return self._quantity_info_dict.get(quantity, default)
 
     def _generate_datasets(self):
@@ -343,7 +343,7 @@ class DC2CoaddCatalog(BaseGenericCatalog):
 
             for key in fh:
                 if self._groupname_re.match(key.lstrip('/')):
-                    datasets.append(CoaddTableWrapper(fh, key))
+                    datasets.append(ObjectTableWrapper(fh, key))
                     continue
 
                 warn_msg = 'incorrect group name "{}" in {}; skipped this group'
