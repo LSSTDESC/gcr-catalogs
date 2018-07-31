@@ -22,6 +22,3 @@ creators: [ 'Patricia Larsen']
 
 description: |
     This is shear addon catalog associated with um_v0.1_test
-
-composite_compatible: ['um_v0.1_test']
-composite_matched_format: ['um_v0.1_test']
