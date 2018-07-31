@@ -1,0 +1,6 @@
+subclass_name: dc2_object.DC2ObjectCatalog
+base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.1/object_catalog
+description: DC2 Run 1.1p Object Catalog
+creators: ['Michael Wood-Vasey']
+included_by_default: true
+pixel_scale: 0.185
