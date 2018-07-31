@@ -1,0 +1,6 @@
+subclass_name: composite.CompositeReader
+
+catalogs:
+  - name: um_v0.1_test
+  - name: um_v0.1_shear_test
+    method: MATCHING_FORMAT
