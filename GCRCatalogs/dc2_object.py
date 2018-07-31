@@ -14,8 +14,8 @@ from GCR import BaseGenericCatalog
 __all__ = ['DC2ObjectCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATTERN = r'merged_tract_\d+\.hdf5'
-GROUP_PATTERN = r'coadd_\d+_\d\d$'
+FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
+GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
