@@ -83,6 +83,7 @@ class TableWrapper(object):
         self._columns = None
         self._len = None
         self._cache = None
+        self._constant_arrays = dict()
 
     @property
     def columns(self):
@@ -107,10 +108,24 @@ class TableWrapper(object):
     def __getitem__(self, key):
         if self._cache is None:
             self._cache = self.storer.read()
-        return self._cache[key].values
+        try:
+            return self._cache[key].values
+        except KeyError:
+            return self._get_constant_array(key)
+
+    get = __getitem__
+
+    def _get_constant_array(self, key):
+        return self._generate_constant_array('NaN', np.nan)
+
+    def _generate_constant_array(self, key, value):
+        if key not in self._constant_arrays:
+            self._constant_arrays[key] = np.repeat(value, len(self))
+        return self._constant_arrays[key]
 
     def clear_cache(self):
-        self._cache = None
+        self._columns = self._len = self._cache = None
+        self._constant_arrays.clear()
 
 
 class ObjectTableWrapper(TableWrapper):
@@ -125,6 +140,12 @@ class ObjectTableWrapper(TableWrapper):
     @property
     def tract_and_patch(self):
         return {'tract': self.tract, 'patch': self.patch}
+
+    def _get_constant_array(self, key):
+        if key != 'tract' and key != 'patch':
+            key = '_NaN_'
+        value = getattr(self, key, np.nan)
+        return self._generate_constant_array(key, value)
 
 
 class DC2ObjectCatalog(BaseGenericCatalog):
@@ -421,18 +442,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
-            if native_filters is not None and \
-                    not native_filters.check_scalar(dataset.tract_and_patch):
-                continue
-
-            def _native_quantity_getter(native_quantity, d=dataset):
-                try:
-                    return d[native_quantity]
-                except KeyError:
-                    if native_quantity in self._native_filter_quantities:
-                        return np.repeat(getattr(d, native_quantity), len(d))
-                    return np.repeat(np.nan, len(d))
-
-            yield _native_quantity_getter
-            if not self.use_cache:
-                dataset.clear_cache()
+            if (native_filters is None or
+                native_filters.check_scalar(dataset.tract_and_patch)):
+                yield dataset.get
+                if not self.use_cache:
+                    dataset.clear_cache()
