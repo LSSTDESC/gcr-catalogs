@@ -1,7 +1,9 @@
-subclass_name: alphaq_addon.AlphaQAddonCatalog
-filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v3.0.hdf5
-lightcone: true
-version: "3.0.0"
-md5: 1efca46756b59b75d23e5382ee97cd10
-addon_filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/protoDC2_knots_v3.0.hdf5
-addon_group: knots
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: proto-dc2_v3.0
+  - catalog_name: knots
+    matching_method: MATCHING_FORMAT
+    subclass_name: alphaq_addon.AlphaQAddonCatalog
+    filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v3.0.hdf5
+    addon_filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/protoDC2_knots_v3.0.hdf5
+    addon_group: knots

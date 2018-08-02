@@ -1,36 +1,25 @@
 """
 Add-on catalogs for alpha q.
 """
-from __future__ import division
 import os
-import numpy as np
-import h5py
 from itertools import product
+import h5py
 from GCR import BaseGenericCatalog
-
-from .alphaq import AlphaQGalaxyCatalog
 
 __all__ = ['AlphaQTidalCatalog', 'AlphaQAddonCatalog']
 
-
-class AlphaQAddonCatalog(AlphaQGalaxyCatalog):
+class AlphaQAddonCatalog(BaseGenericCatalog):
     """
     Addon to the AlphaQ catalog that can add extra quanities to the baseline
     catalog
     """
     def _subclass_init(self, **kwargs):
-        # Loads main catalog
-        super(self.__class__, self)._subclass_init(**kwargs)
-
         # Sets the filename of the addon
         self._addon_filename = kwargs['addon_filename']
         assert os.path.isfile(self._addon_filename), 'Addon file {} does not exist'.format(self._addon_filename)
         self._addon_group = kwargs['addon_group']
 
     def _generate_native_quantity_list(self):
-        # Generates the native quantity list for the parent catalog
-        native_quantities = super(self.__class__, self)._generate_native_quantity_list()
-
         # Loads the additional data provided by the addon file
         with h5py.File(self._addon_filename, 'r') as fh:
             hgroup = fh[self._addon_group]
@@ -40,24 +29,17 @@ class AlphaQAddonCatalog(AlphaQGalaxyCatalog):
             #filter out the group objects and keep the dataste objects
             hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject]) == h5py.Dataset]
             addon_native_quantities = set(hdatasets)
-
-        self._addon_native_quantities = addon_native_quantities
-
-        return native_quantities.union(addon_native_quantities)
+        return addon_native_quantities
 
     def _iter_native_dataset(self, native_filters=None):
         """
         Caution, fully overiddes parent function
         """
         assert not native_filters, '*native_filters* is not supported'
-        with h5py.File(self._file, 'r') as fh:
-            with h5py.File(self._addon_filename, 'r') as fh_addon:
-                def native_quantity_getter(native_quantity):
-                    if native_quantity in self._addon_native_quantities:
-                        return fh_addon['{}/{}'.format(self._addon_group,native_quantity)].value
-                    else:
-                        return fh['galaxyProperties/{}'.format(native_quantity)].value
-                yield native_quantity_getter
+        with h5py.File(self._addon_filename, 'r') as fh_addon:
+            def native_quantity_getter(native_quantity):
+                return fh_addon['{}/{}'.format(self._addon_group,native_quantity)].value # pylint: disable=E1101
+            yield native_quantity_getter
 
 
 class AlphaQTidalCatalog(BaseGenericCatalog):
@@ -65,10 +47,7 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
     Alpha Q tidal catalog class. Uses generic quantity and filter mechanisms
     defined by BaseGenericCatalog class.
     """
-    is_addon = True
-
     def _subclass_init(self, **kwargs):
-
         self._filename = kwargs['filename']
         assert os.path.isfile(self._filename), 'Catalog file {} does not exist'.format(self._filename)
 
@@ -80,11 +59,10 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
         for i, j in product(range(3), repeat=2):
             self._quantity_modifiers['tidal_eigvects[{}][{}]'.format(i, j)] = 'eigvects/{}/{}'.format(i, j)
 
-
     def _generate_native_quantity_list(self):
         native_quantities = set()
         with h5py.File(self._filename, 'r') as fh:
-            data = fh['tidal'].value
+            data = fh['tidal'].value # pylint: disable=E1101
             for name, (dt, _) in data.dtype.fields.items():
                 native_quantities.add(name)
                 if dt.shape:
@@ -92,10 +70,9 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
                         native_quantities.add((name + '/' + '/'.join(map(str, indices))).strip('/'))
         return native_quantities
 
-
     def _iter_native_dataset(self, native_filters=None):
         with h5py.File(self._filename, 'r') as fh:
-            data = fh['tidal'].value
+            data = fh['tidal'].value # pylint: disable=E1101
             def native_quantity_getter(native_quantity):
                 if '/' not in native_quantity:
                     return data[native_quantity]

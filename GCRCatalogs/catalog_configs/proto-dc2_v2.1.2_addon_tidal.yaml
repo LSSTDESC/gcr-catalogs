@@ -1,0 +1,8 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: proto-dc2_v2.1.2
+    matching_method: galaxy_id
+  - catalog_name: tidal
+    matching_method: galaxy_id
+    subclass_name: alphaq_addon.AlphaQTidalCatalog
+    filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/tidal_247_protoDC2_v2.1.hdf5
