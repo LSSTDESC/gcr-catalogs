@@ -82,15 +82,15 @@ class TableWrapper(object):
 
         self._columns = None
         self._len = None
-        self._fixed_data = None
+        self._cache = None
 
     @property
     def columns(self):
         if self._columns is None:
             if self.is_table:
-                self._columns = tuple(self.storer.non_index_axes[0][1])
+                self._columns = set(self.storer.non_index_axes[0][1])
             else:
-                self._columns = tuple(c.decode() for c in self.storer.group.axis0)
+                self._columns = set(c.decode() for c in self.storer.group.axis0)
         return self._columns
 
     def __len__(self):
@@ -105,19 +105,12 @@ class TableWrapper(object):
         return item in self.columns
 
     def __getitem__(self, key):
-        if key not in self:
-            raise KeyError('{} does not exist'.format(key))
-
-        if self.is_table:
-            return self.storer.read(columns=[key])[key].values
-
-        if self._fixed_data is None:
-            self._fixed_data = self.storer.read()
-
-        return self._fixed_data[key].values
+        if self._cache is None:
+            self._cache = self.storer.read()
+        return self._cache[key].values
 
     def clear_cache(self):
-        self._fixed_data = None
+        self._cache = None
 
 
 class ObjectTableWrapper(TableWrapper):
@@ -433,13 +426,12 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 continue
 
             def _native_quantity_getter(native_quantity, d=dataset):
-                if native_quantity in self._native_filter_quantities:
-                    return np.repeat(getattr(d, native_quantity), len(d))
-
-                if native_quantity not in d:
+                try:
+                    return d[native_quantity]
+                except KeyError:
+                    if native_quantity in self._native_filter_quantities:
+                        return np.repeat(getattr(d, native_quantity), len(d))
                     return np.repeat(np.nan, len(d))
-
-                return d[native_quantity]
 
             yield _native_quantity_getter
             if not self.use_cache:
