@@ -115,7 +115,7 @@ class TableWrapper(object):
 
     get = __getitem__
 
-    def _get_constant_array(self, key):
+    def _get_constant_array(self, key): # pylint: disable=W0613
         return self._generate_constant_array('NaN', np.nan)
 
     def _generate_constant_array(self, key, value):
