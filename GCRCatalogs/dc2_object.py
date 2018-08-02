@@ -121,6 +121,7 @@ class TableWrapper(object):
     def _generate_constant_array(self, key, value):
         if key not in self._constant_arrays:
             self._constant_arrays[key] = np.repeat(value, len(self))
+            self._constant_arrays[key].setflags(write=False)
         return self._constant_arrays[key]
 
     def clear_cache(self):
