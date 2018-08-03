@@ -350,7 +350,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         """Return viable data sets from all files in self.base_dir
 
         Returns:
-            A list of tuples (<file path>, <key>) for all files and keys
+            A list of ObjectTableWrapper(<file path>, <key>) objects
+            for all files and keys
         """
 
         datasets = list()
