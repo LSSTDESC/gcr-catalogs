@@ -401,7 +401,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             warnings.warn(warn_msg.format(schema_path))
             return set()
 
-        columns = set(schema.keys())
+        columns = set(schema)
         return columns
 
     @staticmethod
