@@ -1,6 +1,6 @@
 subclass_name: composite.CompositeReader
 catalogs:
-  - catalog_name: proto-dc2_v2.1.2
+  - catalog_name: proto-dc2_v2.1.2_test
     matching_method: galaxy_id
   - catalog_name: tidal
     matching_method: galaxy_id
