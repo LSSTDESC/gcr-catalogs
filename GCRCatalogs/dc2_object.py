@@ -188,7 +188,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        if not os.path.exists(self._schema_path):
+        if self._schema_path is None or not os.path.exists(self._schema_path):
             warn_msg = 'No schema file found: "{}".\nFalling back to reading all datafiles for column names'
             warnings.warn(warn_msg.format(self._schema_path))
             self._columns = self._generate_columns(self._datasets)
