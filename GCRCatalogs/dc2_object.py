@@ -16,6 +16,7 @@ __all__ = ['DC2ObjectCatalog']
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
 GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
+SCHEMA_PATH = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
@@ -83,6 +84,7 @@ class TableWrapper(object):
         self._columns = None
         self._len = None
         self._cache = None
+        self._constant_arrays = dict()
 
     @property
     def columns(self):
@@ -107,10 +109,25 @@ class TableWrapper(object):
     def __getitem__(self, key):
         if self._cache is None:
             self._cache = self.storer.read()
-        return self._cache[key].values
+        try:
+            return self._cache[key].values
+        except KeyError:
+            return self._get_constant_array(key)
+
+    get = __getitem__
+
+    def _get_constant_array(self, key): # pylint: disable=W0613
+        return self._generate_constant_array('NaN', np.nan)
+
+    def _generate_constant_array(self, key, value):
+        if key not in self._constant_arrays:
+            self._constant_arrays[key] = np.repeat(value, len(self))
+            self._constant_arrays[key].setflags(write=False)
+        return self._constant_arrays[key]
 
     def clear_cache(self):
-        self._cache = None
+        self._columns = self._len = self._cache = None
+        self._constant_arrays.clear()
 
 
 class ObjectTableWrapper(TableWrapper):
@@ -126,6 +143,12 @@ class ObjectTableWrapper(TableWrapper):
     def tract_and_patch(self):
         return {'tract': self.tract, 'patch': self.patch}
 
+    def _get_constant_array(self, key):
+        if key != 'tract' and key != 'patch':
+            key = '_NaN_'
+        value = getattr(self, key, np.nan)
+        return self._generate_constant_array(key, value)
+
 
 class DC2ObjectCatalog(BaseGenericCatalog):
     r"""DC2 Object Catalog reader
@@ -135,6 +158,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
+    schema_path       (str): The optional location of the schema file
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
     use_cache        (bool): Whether or not to cache read data in memory
 
@@ -151,6 +175,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
+        self._schema_path = kwargs.get('schema_path', os.path.join(self.base_dir, SCHEMA_PATH))
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
         self.use_cache = bool(kwargs.get('use_cache', True))
 
@@ -163,10 +188,19 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        self._columns = self._generate_columns(self._datasets)
+        self._columns = None
+        if self._schema_path and os.path.exists(self._schema_path):
+            self._columns = self._generate_columns_from_yaml(self._schema_path)
+
+        if not self._columns:
+            warn_msg = 'No columns found in schema file "{}".\nFalling back to reading all datafiles for column names'
+            warnings.warn(warn_msg.format(self._schema_path))
+            self._columns = self._generate_columns(self._datasets)
+
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
+
 
     def __del__(self):
         self.close_all_file_handles()
@@ -318,7 +352,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         """Return viable data sets from all files in self.base_dir
 
         Returns:
-            A list of tuples (<file path>, <key>) for all files and keys
+            A list of ObjectTableWrapper(<file path>, <key>) objects
+            for all files and keys
         """
 
         datasets = list()
@@ -343,6 +378,31 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 warnings.warn(warn_msg.format(os.path.basename(file_path), key))
 
         return datasets
+
+    @staticmethod
+    def _generate_columns_from_yaml(schema_path):
+        """Return column names based on schema in YAML file
+
+        Args:
+            schema_path (string): <file path> to schema file.
+
+        Returns:
+            The column names defined in the schema.
+
+        Warns:
+            If one or more column names are repeated.
+        """
+
+        with open(schema_path, 'r') as schema_stream:
+            schema = yaml.load(schema_stream)
+
+        if schema is None:
+            warn_msg = 'Schema file "{}" empty.'
+            warnings.warn(warn_msg.format(schema_path))
+            return set()
+
+        columns = set(schema)
+        return columns
 
     @staticmethod
     def _generate_columns(datasets):
@@ -421,18 +481,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
-            if native_filters is not None and \
-                    not native_filters.check_scalar(dataset.tract_and_patch):
-                continue
-
-            def _native_quantity_getter(native_quantity, d=dataset):
-                try:
-                    return d[native_quantity]
-                except KeyError:
-                    if native_quantity in self._native_filter_quantities:
-                        return np.repeat(getattr(d, native_quantity), len(d))
-                    return np.repeat(np.nan, len(d))
-
-            yield _native_quantity_getter
-            if not self.use_cache:
-                dataset.clear_cache()
+            if (native_filters is None or
+                native_filters.check_scalar(dataset.tract_and_patch)):
+                yield dataset.get
+                if not self.use_cache:
+                    dataset.clear_cache()
