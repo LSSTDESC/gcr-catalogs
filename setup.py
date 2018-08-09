@@ -25,12 +25,11 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.2'],
+    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.3'],
     extras_require={
         'protodc2': ['h5py'],
         'instance': ['pandas'],
