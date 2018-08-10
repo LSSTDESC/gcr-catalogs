@@ -57,10 +57,10 @@ Confluence page (*DESC member only*).
      ```
      to see all available versions.
 
--  **DC2 "Coadd Catalogs"** \
+-  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_coadd_run1.1p`: coadd catalog for Run 1.1p
-   - `dc2_coadd_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
+   - `dc2_object_run1.1p`: coadd catalog for Run 1.1p
+   - `dc2_object_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
@@ -194,8 +194,10 @@ data = catalog.get_quantities(['ra', 'dec'])
 
 - See [this notebook](examples/GCRCatalogs%20Demo.ipynb) for a detailed tutorial on how to use `GCRCatalogs`.
 
+- See [this notebook](examples/CompositeReader%20example.ipynb) for a example of using the composite catalog feature.
+
 - See [this notebook](examples/CLF%20Test.ipynb) for an actual application (the Conditional Luminosity Function test) using GCR Catalogs. (Thanks to Joe DeRose for providing the CLF test example!)
 
-- You can find more notebooks that use `GCRCatalogs` in [`LSSTDESC/DC2_Repo`](https://github.com/LSSTDESC/DC2_Repo/tree/master/Notebooks).
+- You can find more tutorial notebooks that use `GCRCatalogs` in [`LSSTDESC/DC2-analysis`](https://github.com/LSSTDESC/DC2-analysis/tree/master/tutorials).
 
 - See also the [GCR documentation](https://yymao.github.io/generic-catalog-reader/) for the complete GCR API.
