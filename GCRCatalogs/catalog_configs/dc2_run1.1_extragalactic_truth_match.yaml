@@ -4,6 +4,7 @@ catalogs:
     matching_method: galaxy_id
     subclass_name: alphaq.AlphaQGalaxyCatalog
     filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2.1.2.hdf5
+    version: 2.1.2
   - catalog_name: truth
     matching_method: object_id
     subclass_name: dc2_truth.DC2TruthCatalogReader
