@@ -1,0 +1,13 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: protodc2
+    matching_method: galaxy_id
+    subclass_name: alphaq.AlphaQGalaxyCatalog
+    filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v2.1.2.hdf5
+  - catalog_name: truth
+    matching_method: object_id
+    subclass_name: dc2_truth.DC2TruthCatalogReader
+    filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/reference_catalogs/proto_dc2_truth_star_gal_180720.db
+    base_filters:
+        - sprinkled == 0
+        - star == 0
