@@ -88,7 +88,8 @@ class FocalPlaneCatalog(BaseGenericCatalog):
             instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
             self.phosim_pars = pd.read_table(instcat_path, index_col=0, header=None, sep=' ').T
             self.visit = self.phosim_pars['obshistid'].values[0]
-        except:
+        except IndexError:
+            print('No instance catalog found in the expected path')
             self.phosim_pars = None
             self.visit = os.path.split(self._filelist[0])[1].split('_')[2]
         self.focal_plane = FocalPlane(self.visit)
