@@ -84,9 +84,16 @@ class FocalPlaneCatalog(BaseGenericCatalog):
         self._filelist = glob.glob(os.path.join(catalog_root_dir, 'lsst_e*.fits*'))
         self.rebinning = rebinning
         parent_path = os.path.dirname(catalog_root_dir)
-        instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
-        self.phosim_pars = pd.read_table(instcat_path, index_col=0, header=None, sep=' ').T
-        self.visit = self.phosim_pars['obshistid'].values[0]
+        try:
+            instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
+        except IndexError:
+            print('No instance catalog found in the expected path')
+            self.phosim_pars = None
+            self.visit = os.path.split(self._filelist[0])[1].split('_')[2]
+        else:
+            self.phosim_pars = pd.read_table(instcat_path, index_col=0, header=None, sep=' ').T
+            self.visit = self.phosim_pars['obshistid'].values[0]
+
         self.focal_plane = FocalPlane(self.visit)
 
     def _load_focal_plane(self):
