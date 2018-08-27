@@ -7,6 +7,7 @@ md5: a8f0e1d656d44eb3c718be1a98e2a0ae
 base_filters:
     - sprinkled == 0
     - star == 0
+    - agn == 0
 
 description: |
     Truth catalog for proto-dc2 run 1.1 (corresponding to proto-dc2_v2.1.2).

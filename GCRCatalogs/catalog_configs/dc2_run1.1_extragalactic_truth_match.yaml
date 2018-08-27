@@ -11,3 +11,4 @@ catalogs:
     base_filters:
         - sprinkled == 0
         - star == 0
+        - agn == 0
