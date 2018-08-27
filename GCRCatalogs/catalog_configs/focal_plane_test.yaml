@@ -1,5 +1,4 @@
 subclass_name: focal_plane.FocalPlaneCatalog
 catalog_root_dir: /global/projecta/projectdirs/lsst/global/DC2/DC2-R1-2p-WFD-r/000008
-rebinning: 0
 description: PhoSim e-images rebinned
 included_by_default: true

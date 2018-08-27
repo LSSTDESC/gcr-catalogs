@@ -3,20 +3,17 @@ import os
 import glob
 import pandas as pd
 from astropy.io import fits
-from skimage.transform import resize
+from skimage.transform import rescale
 from GCR import BaseGenericCatalog
 
 __all__ = ['FocalPlaneCatalog']
 
 
 class FitsFile(object): # from buzzard.py but using hdu=0
-    def __init__(self, path, rebin=0):
+    def __init__(self, path):
         self._path = path
         self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
         self.data = self._file_handle[0].data  #pylint: disable=E1101
-        if rebin > 0:
-            xdim, ydim = self.data.shape
-            self.data = resize(self.data, (int(xdim / rebin), int(ydim / rebin)), preserve_range=True)
 
     def __del__(self):
         del self.data
@@ -26,18 +23,20 @@ class FitsFile(object): # from buzzard.py but using hdu=0
 
 
 class Sensor(object):
-    def __init__(self, path, rebinning=16):
+    def __init__(self, path, rebinning=None):
         self.path = path
         self.filename = os.path.basename(path)
         aux = self.filename.split('_')
         self.parent_visit = aux[2]
         self.parent_raft = aux[4]
         self.name = aux[5]
-        self.rebinning = rebinning
+        self.rebinning = float(rebinning or 1)
 
     def get_data(self):
-        return FitsFile(self.path, rebin=self.rebinning).data
-
+        data = FitsFile(self.path).data
+        if self.rebinning != 1:
+            data = rescale(data, 1 / self.rebinning, preserve_range=True)
+        return data
 
 class Raft(object):
     def __init__(self, name, visit):
@@ -77,12 +76,12 @@ class FocalPlaneCatalog(BaseGenericCatalog):
     Catalog containing information about images in a single focal plane/visit
     """
 
-    def _subclass_init(self, catalog_root_dir, rebinning=16, **kwargs):
+    def _subclass_init(self, catalog_root_dir, rebinning=None, **kwargs):
         #pylint: disable=W0221
         if not os.path.isdir(catalog_root_dir):
             raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
         self._filelist = glob.glob(os.path.join(catalog_root_dir, 'lsst_e*.fits*'))
-        self.rebinning = rebinning
+        self.rebinning = float(rebinning or 1)
         parent_path = os.path.dirname(catalog_root_dir)
         try:
             instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
