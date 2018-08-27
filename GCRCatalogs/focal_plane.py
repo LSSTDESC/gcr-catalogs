@@ -35,7 +35,7 @@ class Sensor(object):
     def get_data(self):
         data = FitsFile(self.path).data
         if self.rebinning != 1:
-            data = rescale(data, 1 / self.rebinning, preserve_range=True)
+            data = rescale(data, 1 / self.rebinning, mode='constant', preserve_range=True, multichannel=False, anti_aliasing=True)
         return data
 
 class Raft(object):
