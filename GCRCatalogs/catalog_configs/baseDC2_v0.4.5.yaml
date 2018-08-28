@@ -1,0 +1,22 @@
+subclass_name: cosmodc2.UMGalaxyCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_min_9.8_centrals_v0.4.5
+catalog_path_template: baseDC2_z_{}_{}_cutout_{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    n_s: 0.963
+    sigma8: 0.8
+
+lightcone: true
+
+version: "0.4.5"
+
+check_file_metadata: true
+
+creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+
+description: |
+    This is the baseline catalog characterizing the galaxy-halo connection for LSST-DESC cosmoDC2.
