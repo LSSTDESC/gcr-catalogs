@@ -12,7 +12,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'UMGalaxyCatalog']
-__version__ = '0.1.0'
+__version__ = '1.0.0'
 
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
@@ -31,6 +31,9 @@ def _calc_conv(mag, shear1, shear2):
     conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
     return conv
 
+def _calc_mag(conv, shear1, shear2):
+    mag = 1.0/((1.0 - conv)**2 - shear1**2 - shear2**2)
+    return mag
 
 def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -107,7 +110,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
                 setattr(self.cosmology, k, v)
 
         self.version = kwargs.get('version', '0.0.0')
-        self.lightcone = kwargs.get('lightcone')
+        self.lightcone = kwargs.get('lightcone', True)
 
         #get sky area and check files if requested
         self.sky_area = self._get_skyarea_info()
@@ -151,7 +154,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             m = re.match(fname_pattern, f)
             if m is not None:
                 healpix_name = os.path.splitext(m.group())[0]
-                zlo, zhi, hpx = pattern.findall(healpix_name)
+                zlo, zhi, hpx = pattern.findall(healpix_name)[-3:]
                 healpix_pixels.add(int(hpx))
                 zvalues.add(int(zlo))
                 zvalues.add(int(zhi))
@@ -163,7 +166,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         possible_healpix_pixel_files = [self._catalog_path_template.format(z, z+1, h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
         healpix_pixel_files = [f for f in possible_healpix_pixel_files if os.path.isfile(f)]
         if assert_files_complete and len(healpix_pixel_files) != len(possible_healpix_pixel_files):
-            raise ValueError('Missing some catalog files')
+            raise ValueError('Missing some catalog files: {}'.format(', '.join([f for f in possible_healpix_pixel_files if not f in healpix_pixel_files])))
         return healpix_pixel_files
 
 
@@ -203,9 +206,13 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         pattern = re.compile(r'\d+')
         for healpix_file in self.healpix_pixel_files:
             # pylint: disable=E1101
-            fh = h5py.File(healpix_file, 'r')
+            print('Reading file {}'.format(healpix_file))
+            try:
+                fh = h5py.File(healpix_file, 'r')
+            except:
+                raise ValueError('Unable to read file {}'.format(healpix_file))
             healpix_name = os.path.splitext(os.path.basename(healpix_file))[0]
-            zlo, zhi, hpx = pattern.findall(healpix_name)
+            zlo, zhi, hpx = pattern.findall(healpix_name)[-3:]
             if hpx not in skyarea:
                 skyarea[hpx] = {}
             try:
@@ -294,7 +301,7 @@ class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
                 'shear2',
             ),
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
-            'halo_id':       'hostHaloTag',
+            'halo_id':       'uniqueHaloID',
             'halo_mass':     'hostHaloMass',
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
@@ -416,8 +423,16 @@ class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
             q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
         )))
 
-        return quantity_modifiers
+        catalog_version = StrictVersion(self.version)
+        # make quantity modifiers work in older versions
+        if catalog_version < StrictVersion('1.0'):
+            quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
 
+        # make quantity modifiers work in older versions
+        if catalog_version < StrictVersion('0.2'):
+            quantity_modifiers['halo_id'] = 'hostHaloTag'
+
+        return quantity_modifiers
 
 
 class UMGalaxyCatalog(BaseCosmoDC2Catalog):
@@ -462,12 +477,17 @@ class UMShearCatalog(UMGalaxyCatalog):
     @staticmethod
     def _generate_quantity_modifiers():
         quantity_modifiers = {
+            'ra': 'ra_lensed',
+            'dec': 'dec_lensed',
+            'convergence': 'conv', 
+            'magnification': (
+                _calc_mag,
+                'conv',
+                'shear_1',
+                'shear_2',
+            ),
             'shear_2_treecorr': 'shear_2',
             'shear_2_phosim':   (np.negative, 'shear_2'),
+            'shear_1':   (np.negative, 'shear_1'),
         }
         return quantity_modifiers
-
-    def _subclass_init(self, catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs):
-        super(UMShearCatalog, self)._subclass_init(catalog_root_dir, catalog_path_template, cosmology, healpix_pixels=None, zlo=None, zhi=None, check_file_metadata=False, **kwargs)
-        self.composite_compatible = kwargs.get('composite_compatible', [])
-        self.composite_matched_format = kwargs.get('composite_matched_format', [])
