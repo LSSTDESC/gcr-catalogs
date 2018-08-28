@@ -206,7 +206,6 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         pattern = re.compile(r'\d+')
         for healpix_file in self.healpix_pixel_files:
             # pylint: disable=E1101
-            print('Reading file {}'.format(healpix_file))
             try:
                 fh = h5py.File(healpix_file, 'r')
             except:
