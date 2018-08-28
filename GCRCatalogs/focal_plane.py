@@ -23,19 +23,21 @@ class FitsFile(object): # from buzzard.py but using hdu=0
 
 
 class Sensor(object):
-    def __init__(self, path, rebinning=None):
+    def __init__(self, path, default_rebinning=None):
         self.path = path
         self.filename = os.path.basename(path)
         aux = self.filename.split('_')
         self.parent_visit = aux[2]
         self.parent_raft = aux[4]
         self.name = aux[5]
-        self.rebinning = float(rebinning or 1)
+        self.default_rebinning = float(default_rebinning or 1)
 
-    def get_data(self):
+    def get_data(self, rebinning=None):
         data = FitsFile(self.path).data
-        if self.rebinning != 1:
-            data = rescale(data, 1 / self.rebinning, mode='constant', preserve_range=True, multichannel=False, anti_aliasing=True)
+        if rebinning is None:
+            rebinning = self.default_rebinning
+        if rebinning != 1:
+            data = rescale(data, 1 / rebinning, mode='constant', preserve_range=True, multichannel=False, anti_aliasing=True)
         return data
 
 class Raft(object):
@@ -97,7 +99,7 @@ class FocalPlaneCatalog(BaseGenericCatalog):
 
     def _load_focal_plane(self):
         for fname in self._filelist:
-            self.focal_plane.add_sensor(Sensor(fname, rebinning=self.rebinning))
+            self.focal_plane.add_sensor(Sensor(fname, default_rebinning=self.rebinning))
 
     def _generate_native_quantity_list(self):
         native_quantity_list = {'visit'}
