@@ -487,6 +487,6 @@ class UMShearCatalog(UMGalaxyCatalog):
             ),
             'shear_2_treecorr': 'shear_2',
             'shear_2_phosim':   (np.negative, 'shear_2'),
-            'shear_1':   (np.negative, 'shear_1'),
+            'shear_1':   'shear_1',
         }
         return quantity_modifiers
