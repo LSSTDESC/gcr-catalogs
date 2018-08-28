@@ -3,20 +3,17 @@ import os
 import glob
 import pandas as pd
 from astropy.io import fits
-from skimage.transform import resize
+from skimage.transform import rescale
 from GCR import BaseGenericCatalog
 
 __all__ = ['FocalPlaneCatalog']
 
 
 class FitsFile(object): # from buzzard.py but using hdu=0
-    def __init__(self, path, rebin=0):
+    def __init__(self, path):
         self._path = path
         self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
         self.data = self._file_handle[0].data  #pylint: disable=E1101
-        if rebin > 0:
-            xdim, ydim = self.data.shape
-            self.data = resize(self.data, (int(xdim / rebin), int(ydim / rebin)), preserve_range=True)
 
     def __del__(self):
         del self.data
@@ -26,18 +23,22 @@ class FitsFile(object): # from buzzard.py but using hdu=0
 
 
 class Sensor(object):
-    def __init__(self, path, rebinning=16):
+    def __init__(self, path, default_rebinning=None):
         self.path = path
         self.filename = os.path.basename(path)
         aux = self.filename.split('_')
         self.parent_visit = aux[2]
         self.parent_raft = aux[4]
         self.name = aux[5]
-        self.rebinning = rebinning
+        self.default_rebinning = float(default_rebinning or 1)
 
-    def get_data(self):
-        return FitsFile(self.path, rebin=self.rebinning).data
-
+    def get_data(self, rebinning=None):
+        data = FitsFile(self.path).data
+        if rebinning is None:
+            rebinning = self.default_rebinning
+        if rebinning != 1:
+            data = rescale(data, 1 / rebinning, mode='constant', preserve_range=True, multichannel=False, anti_aliasing=True)
+        return data
 
 class Raft(object):
     def __init__(self, name, visit):
@@ -77,21 +78,28 @@ class FocalPlaneCatalog(BaseGenericCatalog):
     Catalog containing information about images in a single focal plane/visit
     """
 
-    def _subclass_init(self, catalog_root_dir, rebinning=16, **kwargs):
+    def _subclass_init(self, catalog_root_dir, rebinning=None, **kwargs):
         #pylint: disable=W0221
         if not os.path.isdir(catalog_root_dir):
             raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
         self._filelist = glob.glob(os.path.join(catalog_root_dir, 'lsst_e*.fits*'))
-        self.rebinning = rebinning
+        self.rebinning = float(rebinning or 1)
         parent_path = os.path.dirname(catalog_root_dir)
-        instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
-        self.phosim_pars = pd.read_table(instcat_path, index_col=0, header=None, sep=' ').T
-        self.visit = self.phosim_pars['obshistid'].values[0]
+        try:
+            instcat_path = glob.glob(os.path.join(parent_path, 'instCat/phosim*.txt'))[0]
+        except IndexError:
+            print('No instance catalog found in the expected path')
+            self.phosim_pars = None
+            self.visit = os.path.split(self._filelist[0])[1].split('_')[2]
+        else:
+            self.phosim_pars = pd.read_table(instcat_path, index_col=0, header=None, sep=' ').T
+            self.visit = self.phosim_pars['obshistid'].values[0]
+
         self.focal_plane = FocalPlane(self.visit)
 
     def _load_focal_plane(self):
         for fname in self._filelist:
-            self.focal_plane.add_sensor(Sensor(fname, rebinning=self.rebinning))
+            self.focal_plane.add_sensor(Sensor(fname, default_rebinning=self.rebinning))
 
     def _generate_native_quantity_list(self):
         native_quantity_list = {'visit'}

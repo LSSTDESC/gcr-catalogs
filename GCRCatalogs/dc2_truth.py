@@ -2,17 +2,35 @@ import os
 import sqlite3
 import numpy as np
 from GCR import BaseGenericCatalog
-from .utils import md5
+from .utils import md5, is_string_like
 
 __all__ = ["DC2TruthCatalogReader"]
 
 
 class DC2TruthCatalogReader(BaseGenericCatalog):
+    """
+    DC2 truth catalog reader
+
+    Parameters
+    ----------
+    filename : str
+        path to the sqlite database file
+    base_filters : str or list of str, optional
+        set of filters to always apply to the where clause
+    """
 
     native_filter_string_only = True
 
     def _subclass_init(self, **kwargs):
         self._filename = kwargs['filename']
+        base_filters = kwargs.get('base_filters')
+        if base_filters:
+            if is_string_like(base_filters):
+                self.base_filters = (base_filters,)
+            else:
+                self.base_filters = tuple(base_filters)
+        else:
+            self.base_filters = tuple()
 
         if not os.path.isfile(self._filename):
             raise ValueError('{} is not a valid file'.format(self._filename))
@@ -56,10 +74,15 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         cursor = self._conn.cursor()
 
-        if native_filters is None:
-            query_where_clause = ''
+        if native_filters is not None:
+            all_filters = self.base_filters + tuple(native_filters)
         else:
-            query_where_clause = 'WHERE {}'.format(' AND '.join(native_filters))
+            all_filters = self.base_filters
+
+        if all_filters:
+            query_where_clause = 'WHERE {}'.format(' AND '.join(all_filters))
+        else:
+            query_where_clause = ''
 
         def dc2_truth_native_quantity_getter(quantities):
             # note the API of this getter is not normal, and hence
