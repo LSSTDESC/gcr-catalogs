@@ -166,7 +166,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         possible_healpix_pixel_files = [self._catalog_path_template.format(z, z+1, h) for z in range(self.zrange_lo, self.zrange_hi) for h in self.healpix_pixels]
         healpix_pixel_files = [f for f in possible_healpix_pixel_files if os.path.isfile(f)]
         if assert_files_complete and len(healpix_pixel_files) != len(possible_healpix_pixel_files):
-            raise ValueError('Missing some catalog files: {}'.format(', '.join([f for f in possible_healpix_pixel_files if not f in healpix_pixel_files])))
+            raise ValueError('Missing some catalog files: {}'.format(', '.join([f for f in possible_healpix_pixel_files if f not in healpix_pixel_files])))
         return healpix_pixel_files
 
 
