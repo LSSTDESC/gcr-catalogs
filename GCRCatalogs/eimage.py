@@ -3,6 +3,7 @@ import os
 import re
 from astropy.io import fits
 from skimage.transform import rescale
+from GCR import BaseGenericCatalog
 
 __all__ = ['EImageReader']
 
@@ -73,15 +74,14 @@ class FocalPlane(object):
         self.rafts[sensor.raft].add_sensor(sensor)
 
 
-class EImageReader(object):
+class EImageReader(BaseGenericCatalog):
     """
     E-image reader
     """
 
-    def __init__(self, root_dir, visits=None, default_rebinning=None,
-                 dirpath_contain=None, filename_pattern=_FILENAME_PATTERN,
-                 **kwargs):
-        self.kwargs = kwargs
+    def _subclass_init(self, root_dir, visits=None, default_rebinning=None,
+                       dirpath_contain=None, filename_pattern=_FILENAME_PATTERN,
+                       **kwargs):
 
         if not os.path.isdir(root_dir):
             raise ValueError('`root_dir` must be a valid directory')
@@ -140,3 +140,11 @@ class EImageReader(object):
         if not keys:
             return raft
         return raft[keys.pop(0)]
+
+    def _generate_native_quantity_list(self):
+        return self._valid_keys
+
+    def _iter_native_dataset(self, native_filters=None):
+        if native_filters is not None:
+            raise ValueError('*native_filters* is not supported')
+        yield self.__getitem__
