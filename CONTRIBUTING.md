@@ -6,6 +6,7 @@
 
        cd /your/own/directory
        git clone git@github.com:YourGitHubUsername/gcr-catalogs.git
+       cd gcr-catalogs
        git remote add upstream https://github.com/LSSTDESC/gcr-catalogs.git
 
 
