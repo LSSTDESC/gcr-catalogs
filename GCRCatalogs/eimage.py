@@ -126,6 +126,13 @@ class EImageReader(BaseGenericCatalog):
                 self._valid_keys.add('-'.join((visit, raft)))
                 self._valid_keys.add('-'.join((visit, raft, sensor)))
 
+        if not self.focal_planes:
+            print('[WARNING] no valid image files found!!')
+
+        # for backward compatibility
+        if len(self.focal_planes) == 1:
+            self.focal_plane = next(iter(self.focal_planes.values()), None)
+
     def __contains__(self, item):
         return item in self._valid_keys
 
