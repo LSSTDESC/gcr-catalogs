@@ -96,7 +96,7 @@ class EImageReader(BaseGenericCatalog):
     def _subclass_init(self, root_dir, visits=None, default_rebinning=None,
                        dirpath_contain=None, filename_pattern=_FILENAME_PATTERN,
                        **kwargs):
-
+        # pylint: disable=W0221
         if not os.path.isdir(root_dir):
             raise ValueError('`root_dir` must be a valid directory')
 
