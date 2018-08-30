@@ -1,0 +1,7 @@
+subclass_name: eimage.EImageReader
+root_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/DC2-R1-2p-WFD-r
+dirpath_contain: 000008_batch
+visits: 181898
+default_rebinning: 16
+description: ImSim e-images for Run 1.2i (visit 181898)
+included_by_default: true
