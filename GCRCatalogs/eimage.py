@@ -136,10 +136,10 @@ class EImageReader(BaseGenericCatalog):
         focal_plane = self.focal_planes[keys.pop(0)]
         if not keys:
             return focal_plane
-        raft = focal_plane[keys.pop(0)]
+        raft = focal_plane.rafts[keys.pop(0)]
         if not keys:
             return raft
-        return raft[keys.pop(0)]
+        return raft.sensors[keys.pop(0)]
 
     def _generate_native_quantity_list(self):
         return self._valid_keys
