@@ -28,8 +28,8 @@ class Sensor(object):
         self.filename = os.path.basename(path)
         aux = self.filename.split('_')
         self.parent_visit = aux[2]
-        self.parent_raft = aux[4]
-        self.name = aux[5]
+        self.parent_raft = 'R{}'.format(self.filename.split('_R')[1][:2])
+        self.name = 'S{}'.format(self.filename.split('_S')[1][:2])
         self.default_rebinning = float(default_rebinning or 1)
 
     def get_data(self, rebinning=None):
@@ -80,7 +80,7 @@ class FocalPlaneCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, catalog_root_dir, rebinning=None, **kwargs):
         #pylint: disable=W0221
-        if not os.path.isdir(catalog_root_dir):
+        if (not os.path.isdir(catalog_root_dir)) and ('*' not in catalog_root_dir):
             raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
         self._filelist = glob.glob(os.path.join(catalog_root_dir, 'lsst_e*.fits*'))
         self.rebinning = float(rebinning or 1)
