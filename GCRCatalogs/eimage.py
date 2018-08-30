@@ -12,17 +12,31 @@ _FILENAME_PATTERN = r'lsst_e_(\d+)(?:_f\d+)?_(R\d\d)_(S\d\d)(?:_E\d+)?(?:_[a-z])
 class FitsFile(object): # from buzzard.py but using hdu=0
     def __init__(self, path):
         self._path = path
-        self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
+        self._file_handle = None
+
+    @staticmethod
+    def _open(path):
+        return fits.open(path, mode='readonly', memmap=True, lazy_load_hdus=True)
+
+    @property
+    def file_handle(self):
+        if self._file_handle is None:
+            try:
+                self._file_handle = self._open(self._path)
+            except OSError:
+                if self._path.endswith('.gz') and os.path.isfile(self._path[:-3]):
+                    self._file_handle = self._open(self._path[:-3])
+        return self._file_handle
 
     @property
     def data(self):
         return self._file_handle[0].data  #pylint: disable=E1101
 
     def __del__(self):
-        del self.data
-        del self._file_handle[0].data  #pylint: disable=E1101
-        self._file_handle.close()
-        del self._file_handle
+        if self._file_handle is not None:
+            del self._file_handle[0].data  #pylint: disable=E1101
+            self._file_handle.close()
+            del self._file_handle
 
 
 class Sensor(object):
