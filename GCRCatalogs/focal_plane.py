@@ -12,7 +12,10 @@ __all__ = ['FocalPlaneCatalog']
 class FitsFile(object): # from buzzard.py but using hdu=0
     def __init__(self, path):
         self._path = path
-        self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
+        try:
+            self._file_handle = fits.open(self._path, mode='readonly', memmap=True, lazy_load_hdus=True)
+        except OSError:
+            self._file_handle = fits.open(self._path[:-3], mode='readonly', memmap=True, lazy_load_hdus=True)
         self.data = self._file_handle[0].data  #pylint: disable=E1101
 
     def __del__(self):
