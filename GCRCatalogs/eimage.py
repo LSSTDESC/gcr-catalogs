@@ -30,7 +30,7 @@ class FitsFile(object): # from buzzard.py but using hdu=0
 
     @property
     def data(self):
-        return self._file_handle[0].data  #pylint: disable=E1101
+        return self.file_handle[0].data  #pylint: disable=E1101
 
     def __del__(self):
         if self._file_handle is not None:
