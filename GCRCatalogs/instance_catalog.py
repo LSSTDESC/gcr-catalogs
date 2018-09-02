@@ -271,7 +271,6 @@ class InstanceCatalog(BaseGenericCatalog):
             delim_whitespace=True,
             names=[c[0] for c in self._col_names[obj_type]],
             dtype=dict(self._col_names[obj_type]),
-            na_filter=False,
             **kwargs
         )
 
@@ -281,7 +280,7 @@ class InstanceCatalog(BaseGenericCatalog):
             this_open = gzip.open if path.endswith('.gz') else open
             with this_open(path, 'rb') as f:
                 for index, line in enumerate(f):
-                    if b'agnSED/' in line:
+                    if b' agnSED/' in line:
                         self._data['_legacy_gal_line_index'] = index
                         break
 
