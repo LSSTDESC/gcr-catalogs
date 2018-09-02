@@ -217,6 +217,13 @@ class InstanceCatalog(BaseGenericCatalog):
                 raise ValueError('cannot determine whether this is a legacy instance catalog!')
             for t in self._legacy_gal_types:
                 self._object_files[t] = self._object_files['gal']
+            del self._object_files['gal']
+
+        try:
+            self.visit = int(self.header.get('obshistid'))
+        except (TypeError, ValueError):
+            warnings.warn('Cannot parse visit id {}'.format(self.header.get('obshistid')))
+            self.visit = None
 
         shape_quantities = ('gal/a_bulge',
                             'gal/b_bulge',
