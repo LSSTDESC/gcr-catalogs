@@ -198,24 +198,25 @@ class InstanceCatalog(BaseGenericCatalog):
         self._object_files = dict()
         for filename in self.header['includeobj']:
             obj_type = filename.partition('_cat_')[0]
-            full_path = os.path.join(self.base_dir, filename)
 
-            if not os.path.isfile(full_path):
-                warnings.warn('Cannot find file {}! Skipped!'.format(full_path))
-
-            elif obj_type == 'gal':
+            if obj_type == 'gal':
                 self.legacy_gal_catalog = True
-                for t in self._legacy_gal_types:
-                    self._object_files[t] = full_path
-
             elif obj_type not in self._col_names:
                 warnings.warn('Unknown object type {}! Skipped!'.format(obj_type))
+                continue
 
-            else:
-                self._object_files[obj_type] = full_path
+            full_path = os.path.join(self.base_dir, filename)
+            if not os.path.isfile(full_path):
+                warnings.warn('Cannot find file {}! Skipped!'.format(full_path))
+                continue
 
-        if self.legacy_gal_catalog and any(t in self._object_files for t in self._legacy_gal_types):
-            raise ValueError('cannot determine whether this is a legacy instance catalog!')
+            self._object_files[obj_type] = full_path
+
+        if self.legacy_gal_catalog:
+            if any(t in self._object_files for t in self._legacy_gal_types):
+                raise ValueError('cannot determine whether this is a legacy instance catalog!')
+            for t in self._legacy_gal_types:
+                self._object_files[t] = self._object_files['gal']
 
         shape_quantities = ('gal/a_bulge',
                             'gal/b_bulge',
