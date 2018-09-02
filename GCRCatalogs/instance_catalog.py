@@ -4,6 +4,7 @@ instance catalog reader
 from __future__ import division, print_function
 import os
 import gc
+import gzip
 import warnings
 from functools import partial
 import numpy as np
@@ -178,8 +179,12 @@ class InstanceCatalog(BaseGenericCatalog):
         'uDDF_hostlessSN': _point_col_names,
     }
 
+    _legacy_gal_types = ('agn_gal', 'bulge_gal', 'disk_gal')
+
     def _subclass_init(self, **kwargs):
         self.header_file = kwargs['header_file']
+        self.legacy_gal_catalog = bool(kwargs.get('legacy_gal_catalog'))
+
         if not os.path.isfile(self.header_file):
             raise ValueError('Header file {} does not exist'.format(self.header_file))
 
@@ -193,17 +198,20 @@ class InstanceCatalog(BaseGenericCatalog):
         self._object_files = dict()
         for filename in self.header['includeobj']:
             obj_type = filename.partition('_cat_')[0]
-            if obj_type not in self._col_names:
-                warnings.warn('Unknown object type {}! Skipped!'.format(obj_type))
-                continue
-
             full_path = os.path.join(self.base_dir, filename)
-            if not os.path.isfile(full_path):
+
+            if self.legacy_gal_catalog and obj_type == 'gal':
+                for t in self._legacy_gal_types:
+                    self._object_files[t] = full_path
+
+            elif obj_type not in self._col_names:
+                warnings.warn('Unknown object type {}! Skipped!'.format(obj_type))
+
+            elif not os.path.isfile(full_path):
                 warnings.warn('Cannot find file {}! Skipped!'.format(full_path))
-                continue
 
-            self._object_files[obj_type] = full_path
-
+            else:
+                self._object_files[obj_type] = full_path
 
         shape_quantities = ('gal/a_bulge',
                             'gal/b_bulge',
@@ -237,7 +245,6 @@ class InstanceCatalog(BaseGenericCatalog):
             'size_bulge_minor_true': 'gal/b_bulge',
         }
 
-
     def _generate_native_quantity_list(self):
         native_quantities = ['{}/{}'.format(obj_type, col) for obj_type in self._object_files for col, _ in self._col_names[obj_type]]
         for col, _ in self._col_names['bulge_gal']:
@@ -246,46 +253,82 @@ class InstanceCatalog(BaseGenericCatalog):
         native_quantities.append('gal/total_id')
         return native_quantities
 
+    def _pd_read_table(self, obj_type, **kwargs):
+        return pd.read_table(
+            self._object_files[obj_type],
+            delim_whitespace=True,
+            names=[c[0] for c in self._col_names[obj_type]],
+            dtype=dict(self._col_names[obj_type]),
+            na_filter=False,
+            **kwargs
+        )
 
-    def _get_data(self, obj_type):
+    def _load_legacy_gal_catalog(self, obj_type):
+        if '_legacy_gal_line_index' not in self._data:
+            path = self._object_files[obj_type]
+            this_open = gzip.open if path.endswith('.gz') else open
+            with this_open(path, 'rb') as f:
+                for index, line in enumerate(f):
+                    if b'agnSED/' in line:
+                        self._data['_legacy_gal_line_index'] = index
+                        break
+
+        if obj_type == 'agn_gal':
+            return self._pd_read_table(
+                obj_type,
+                skiprows=self._data['_legacy_gal_line_index'],
+            )
+
+        if '_legacy_gal_table' not in self._data:
+            df = self._pd_read_table(
+                obj_type,
+                nrows=self._data['_legacy_gal_line_index'],
+            )
+            df['sub_type'] = df['id'].values & (2**10-1)
+            self._data['_legacy_gal_table'] = df
+            del df
+
+        if obj_type == 'bulge_gal':
+            return self._data['_legacy_gal_table'].query('sub_type == 97')
+
+        if obj_type == 'disk_gal':
+            return self._data['_legacy_gal_table'].query('sub_type == 107')
+
+    def _load_single_catalog(self, obj_type):
+        if obj_type == 'gal':
+            df1 = self.load_single_catalog('bulge_gal')
+            df2 = self.load_single_catalog('disk_gal')
+            df1['total_id'] = df1['id'].values >> 10
+            df2['total_id'] = df2['id'].values >> 10
+            return pd.merge(df1, df2, how='outer',
+                            on='total_id',
+                            suffixes=('_bulge', '_disk'))
+
+        elif self.legacy_gal_catalog and obj_type in self._legacy_gal_types:
+            return self._load_legacy_gal_catalog(obj_type)
+
+        return self._pd_read_table(obj_type)
+
+    def load_single_catalog(self, obj_type):
         if obj_type not in self._data:
             try:
-                if obj_type == 'gal':
-                    df1 = self._get_data('bulge_gal')
-                    df2 = self._get_data('disk_gal')
-                    df1['total_id'] = df1['id'].values >> 10
-                    df2['total_id'] = df2['id'].values >> 10
-                    self._data[obj_type] = pd.merge(df1, df2, how='outer',
-                                                    on='total_id',
-                                                    suffixes=('_bulge', '_disk'))
-                else:
-                    self._data[obj_type] = pd.read_table(
-                        self._object_files[obj_type],
-                        delim_whitespace=True,
-                        names=[c[0] for c in self._col_names[obj_type]],
-                        dtype=dict(self._col_names[obj_type]),
-                        na_filter=False,
-                    )
+                self._data[obj_type] = self._load_single_catalog(obj_type)
             except MemoryError:
                 if not self._data:
                     raise
                 self._data.clear()
                 gc.collect()
-                return self._get_data(obj_type)
-
+                return self.load_single_catalog(obj_type)
         return self._data[obj_type]
-
 
     def _native_quantity_getter(self, native_quantity):
         obj_type, _, col_name = native_quantity.partition('/')
-        return self._get_data(obj_type)[col_name].values
-
+        return self.load_single_catalog(obj_type)[col_name].values
 
     def _iter_native_dataset(self, native_filters=None):
         if native_filters is not None:
             raise ValueError('`native_filters` is not supported')
         yield self._native_quantity_getter
-
 
     @staticmethod
     def parse_header(header_file):
