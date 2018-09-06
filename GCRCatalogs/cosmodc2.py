@@ -161,9 +161,12 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             healpix_files[(zlo_this, hpx_this)] = os.path.join(catalog_root_dir, f)
 
         if check_file_list_complete:
-            possible_zlo = [z for z in range(3) if (zlo is None or z >= zlo) and (zhi is None or z < zhi)]
+            if zlo is None:
+                zlo = min(z for z, _ in healpix_files)
+            if zhi is None:
+                zhi = max(z for z, _ in healpix_files) + 1
             possible_hpx = list(set(hpx for _, hpx in healpix_files)) if healpix_pixels is None else healpix_pixels
-            if not all(key in healpix_files for key in product(possible_zlo, possible_hpx)):
+            if not all(key in healpix_files for key in product(range(zlo, zhi), possible_hpx)):
                 raise ValueError('Some catalog files are missing!')
 
         return healpix_files
