@@ -14,5 +14,7 @@ catalogs:
       H0: 71.0
       Om0: 0.2648
       Ob0: 0.0448
-    check_file_metadata: false
+    check_md5: false
+    check_vesion: false
+    check_cosmology: false
     creators: [ 'Patricia Larsen']

@@ -14,7 +14,9 @@ lightcone: true
 
 version: "0.4.2"
 
-check_file_metadata: true
+healpix_pixels: [564]
+
+check_md5: false
 
 creators: [ 'Andrew Benson', 'Andrew Hearin', 'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Patricia Larsen']
 

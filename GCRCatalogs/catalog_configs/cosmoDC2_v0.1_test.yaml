@@ -16,7 +16,7 @@ version: "0.1.0"
 
 healpix_pixels: [564]
 
-check_file_metadata: true
+check_md5: false
 
 creators: [ 'Andrew Benson', 'Andrew Hearin', 'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Patricia Larsen']
 

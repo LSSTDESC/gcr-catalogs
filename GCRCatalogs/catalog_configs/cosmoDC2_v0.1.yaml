@@ -14,7 +14,7 @@ lightcone: true
 
 version: "0.1.0"
 
-check_file_metadata: true
+check_md5: false
 
 creators: [ 'Andrew Benson', 'Andrew Hearin', 'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Patricia Larsen']
 
