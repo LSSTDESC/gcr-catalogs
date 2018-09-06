@@ -424,13 +424,12 @@ class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
             q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
         )))
 
-        version = StrictVersion(self.version)
         # make quantity modifiers work in older versions
-        if version < StrictVersion('1.0'):
+        version = StrictVersion(self.version)
+        if version < StrictVersion('0.4.6'):
             quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
 
-        # make quantity modifiers work in older versions
-        if version < StrictVersion('0.2'):
+        if version <= StrictVersion('0.2'):
             quantity_modifiers['halo_id'] = 'hostHaloTag'
 
         return quantity_modifiers
