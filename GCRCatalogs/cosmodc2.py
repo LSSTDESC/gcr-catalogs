@@ -212,7 +212,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             except KeyError:
                 warnings.warn('missing cosmology {} in metadata for healpix file {}'.format(name_hdf5, file_name))
                 continue
-            value_config = getattr(self.cosmology, name_astropy).value
+            value_config = getattr(self.cosmology, name_astropy)
             if abs(value_catalog - value_config) > atol:
                 raise ValueError('Mismatch in cosmological parameters ({} should be {}, not {}) for healpix file {}'.format(name_hdf5, value_config, value_catalog, file_name))
 
@@ -247,7 +247,7 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
                 if native_quantities is None or quantity_info is None:
                     native_quantities, quantity_info = self._collect_native_quantities(fh, collect_info_dict=True)
                 elif (ensure_quantity_consistent and
-                        native_quantities != self._collect_native_quantities(fh)):
+                      native_quantities != self._collect_native_quantities(fh)):
                     raise ValueError('native quantities are not consistent among different files')
 
         sky_area = sum(sky_area.values())
