@@ -424,11 +424,11 @@ class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
 
         catalog_version = StrictVersion(self.version)
         # make quantity modifiers work in older versions
-        if catalog_version < StrictVersion('1.0'):
+        if catalog_version < StrictVersion('0.4.6'):
             quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
 
         # make quantity modifiers work in older versions
-        if catalog_version < StrictVersion('0.2'):
+        if catalog_version <= StrictVersion('0.2'):
             quantity_modifiers['halo_id'] = 'hostHaloTag'
 
         return quantity_modifiers
