@@ -212,6 +212,8 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
             except KeyError:
                 warnings.warn('missing cosmology {} in metadata for healpix file {}'.format(name_hdf5, file_name))
                 continue
+            if name_hdf5 == 'H_0':
+                value_catalog /= 100.0
             value_config = getattr(self.cosmology, name_astropy)
             if abs(value_catalog - value_config) > atol:
                 raise ValueError('Mismatch in cosmological parameters ({} should be {}, not {}) for healpix file {}'.format(name_hdf5, value_config, value_catalog, file_name))
