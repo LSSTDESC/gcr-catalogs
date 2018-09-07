@@ -4,7 +4,7 @@ catalogs:
   - catalog_name: baseDC2_v0.4.5
   - catalog_name: shear
     matching_method: MATCHING_FORMAT
-    subclass_name: cosmodc2.UMShearCatalog
+    subclass_name: cosmodc2.BaseDC2ShearCatalog
     catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_shear_addon_v0.4.5
     catalog_filename_template: baseDC2_z_{}_{}_cutout_{}.hdf5
     cosmology:

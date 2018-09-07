@@ -14,7 +14,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
 
-__all__ = ['CosmoDC2GalaxyCatalog', 'UMGalaxyCatalog']
+__all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog']
 __version__ = '1.0.0'
 
 
@@ -94,9 +94,10 @@ def _add_to_native_quantity_collector(name, obj, collector):
         collector.add(name)
 
 
-class BaseCosmoDC2Catalog(BaseGenericCatalog):
+class CosmoDC2ParentClass(BaseGenericCatalog):
     """
-    BaseCosmoDC2Catalog class for catalogs that have cosmoDC-like structures.
+    CosmoDC2ParentClass: the parent class for
+    CosmoDC2GalaxyCatalog, BaseDC2GalaxyCatalog, and BaseDC2ShearCatalog
     """
 
     def _subclass_init(self, catalog_root_dir, catalog_filename_template, **kwargs):
@@ -276,10 +277,9 @@ class BaseCosmoDC2Catalog(BaseGenericCatalog):
         return self._quantity_info.get(q_mod or quantity, default)
 
 
-class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
+class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
-    CosmoDC2 galaxy catalog class. Uses generic quantity and filter mechanisms
-    defined by BaseGenericCatalog class.
+    CosmoDC2 galaxy catalog reader, inherited from CosmoDC2ParentClass
     """
 
     def _generate_quantity_modifiers(self):
@@ -435,10 +435,9 @@ class CosmoDC2GalaxyCatalog(BaseCosmoDC2Catalog):
         return quantity_modifiers
 
 
-class UMGalaxyCatalog(BaseCosmoDC2Catalog):
+class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
-    UM galaxy catalog class. Uses generic quantity and filter mechanisms
-    defined by BaseGenericCatalog class.
+    BaseDC2 galaxy catalog reader, inherited from CosmoDC2ParentClass
     """
     def _get_group_names(self, fh):
         return [k for k in fh if k.isdigit()]
@@ -470,9 +469,9 @@ class UMGalaxyCatalog(BaseCosmoDC2Catalog):
         return quantity_modifiers
 
 
-class UMShearCatalog(UMGalaxyCatalog):
+class BaseDC2ShearCatalog(BaseDC2GalaxyCatalog):
     """
-    UM shear catalog class.
+    BaseDC2 shear catalog reader, inherited from BaseDC2GalaxyCatalog
     """
     @staticmethod
     def _generate_quantity_modifiers():
