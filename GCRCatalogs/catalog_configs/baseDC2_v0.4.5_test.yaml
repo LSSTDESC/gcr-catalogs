@@ -1,7 +1,7 @@
-subclass_name: cosmodc2.UMGalaxyCatalog
+subclass_name: cosmodc2.BaseDC2GalaxyCatalog
 
 catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_min_9.8_centrals_v0.4.5
-catalog_path_template: baseDC2_z_{}_{}_cutout_{}.hdf5
+catalog_filename_template: baseDC2_z_{}_{}_cutout_{}.hdf5
 
 cosmology:
     H0: 71.0
@@ -16,7 +16,7 @@ version: "0.4.5"
 
 healpix_pixels: [564]
 
-check_file_metadata: true
+check_md5: false
 
 creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
 

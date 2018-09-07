@@ -25,3 +25,10 @@ def is_string_like(obj):
     except (TypeError, ValueError):
         return False
     return True
+
+
+def first(iterable, default=None):
+    """
+    returns the first element of `iterable`
+    """
+    return next(iter(iterable), default)
