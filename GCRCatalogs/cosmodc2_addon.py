@@ -32,7 +32,7 @@ class CosmoDC2AddonCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         return self._native_quantities
 
-    def _process_metadata(self, ensure_quantity_consistent=False):
+    def _process_metadata(self, ensure_quantity_consistent=False, **kwargs):
         native_quantities = None
         for (_, hpx_this), file_path in self._healpix_files.items():
 
