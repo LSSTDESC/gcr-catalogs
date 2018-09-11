@@ -127,11 +127,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if StrictVersion(__version__) < self.version:
             raise ValueError('Reader version {} is less than config version {} for'.format(__version__, self.version))
 
-        self.lightcone = kwargs.get('lightcone', True)
-        self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
-        self._quantity_modifiers = self._generate_quantity_modifiers()
-        self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
-
         try:
             with open(CHECK_FILE_PATH, 'r') as f:
                 self.file_check_info = yaml.load(f)
@@ -141,6 +136,11 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             self.file_check_info = self.file_check_info.get(self.version, dict())
         if not self.file_check_info:
             warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
+
+        self.lightcone = kwargs.get('lightcone', True)
+        self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
+        self._quantity_modifiers = self._generate_quantity_modifiers()
+        self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
 
     def _get_group_names(self, fh): # pylint: disable=W0613
         return ['galaxyProperties']
