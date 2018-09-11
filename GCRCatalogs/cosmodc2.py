@@ -8,6 +8,7 @@ from itertools import product
 from functools import partial
 import warnings
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
+import yaml
 import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
@@ -17,6 +18,7 @@ from .utils import md5, first
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog']
 __version__ = '1.0.0'
 
+CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
     return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
@@ -46,7 +48,7 @@ def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust): #Rv definition with best beh
         Ab = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b)
         Ebv = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b) - 2.5*np.log10(lum_v_dust) + 2.5*np.log10(lum_v)
         Rv = Av / Ebv
-        Rv[(Av == 0) & (Ab == 0)] = 1.0         
+        Rv[(Av == 0) & (Ab == 0)] = 1.0
         #remove remaining nans and infs for image sims
         mask = np.isfinite(Rv)
         r = np.random.RandomState(43) # for reproduceability
@@ -126,10 +128,19 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             raise ValueError('Reader version {} is less than config version {} for'.format(__version__, self.version))
 
         self.lightcone = kwargs.get('lightcone', True)
-        self._md5sum = kwargs.get('md5') or {}
         self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
+
+        try:
+            with open(CHECK_FILE_PATH, 'r') as f:
+                self.file_check_info = yaml.load(f)
+        except (IOError, OSError):
+            self.file_check_info = dict()
+        else:
+            self.file_check_info = self.file_check_info.get(self.version, dict())
+        if not self.file_check_info:
+            warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
 
     def _get_group_names(self, fh): # pylint: disable=W0613
         return ['galaxyProperties']
@@ -202,14 +213,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if config_version != catalog_version:
             raise ValueError('Catalog version {} does not match config version {} for healpix file {}'.format(catalog_version, config_version, file_name))
 
-    def _check_md5(self, file_path):
-        basename = os.path.basename(file_path)
-        if basename in self._md5sum:
-            if md5(file_path) != self._md5sum[basename]:
-                raise ValueError('md5 sum does not match for healpix file {}'.format(basename))
-        else:
-            warnings.warn('No md5 sum specified in the config file for healpix file {}'.format(basename))
-
     def _check_cosmology(self, fh, file_name, atol):
         # pylint: disable=E1101
         for name_hdf5, name_astropy in (('H_0', 'h'), ('Omega_matter', 'Om0'), ('Omega_b', 'Ob0')):
@@ -225,17 +228,29 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 raise ValueError('Mismatch in cosmological parameters ({} should be {}, not {}) for healpix file {}'.format(name_hdf5, value_config, value_catalog, file_name))
 
     def _process_metadata(self, ensure_quantity_consistent=False, # pylint: disable=W0613
-                          check_version=True, check_md5=True,
+                          check_version=True, check_md5=True, check_size=True,
                           check_cosmology=True, cosmology_atol=1e-4, **kwargs):
         sky_area = dict()
         native_quantities = None
         quantity_info = None
 
-        for (_, hpx_this), file_path in self._healpix_files.items():
-            if check_md5:
-                self._check_md5(file_path)
+        if check_size and 'size' not in self.file_check_info:
+            check_size = False
+            warnings.warn('Not able to perform size check: no size specified in {}'.format(CHECK_FILE_PATH))
 
+        if check_md5 and 'md5' not in self.file_check_info:
+            check_md5 = False
+            warnings.warn('Not able to perform md5 check: no md5 sum specified in {}'.format(CHECK_FILE_PATH))
+
+        for (_, hpx_this), file_path in self._healpix_files.items():
             file_name = os.path.basename(file_path)
+
+            if check_size and os.path.getsize(file_path) != self.file_check_info['size'].get(file_name):
+                raise ValueError('File size does not match for healpix file {}'.format(file_name))
+
+            if check_md5 and md5(file_path) != self.file_check_info['md5'].get(file_name):
+                raise ValueError('md5 sum does not match for healpix file {}'.format(file_name))
+
             with h5py.File(file_path, 'r') as fh:
                 if check_version:
                     self._check_version(fh, file_name)
