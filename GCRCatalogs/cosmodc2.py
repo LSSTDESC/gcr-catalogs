@@ -27,14 +27,6 @@ def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
     return size * (1.0 - ell) / (1.0 + ell)
 
 
-def _calc_conv(mag, shear1, shear2):
-    slct = mag < 0.2
-    mag_corr = np.copy(mag)
-    mag_corr[slct] = 1.0 # manually changing the values for when magnification is near zero.
-    conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
-    return conv
-
-
 def _calc_mag(conv, shear1, shear2):
     mag = 1.0/((1.0 - conv)**2 - shear1**2 - shear2**2)
     return mag
@@ -300,12 +292,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'shear_2':       (np.negative, 'shear2'),
             'shear_2_treecorr': (np.negative, 'shear2'),
             'shear_2_phosim':   'shear2',
-            'convergence': (
-                _calc_conv,
-                'magnification',
-                'shear1',
-                'shear2',
-            ),
+            'convergence': 'convergence',
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'uniqueHaloID',
             'halo_mass':     'hostHaloMass',
