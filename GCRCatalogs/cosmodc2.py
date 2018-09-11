@@ -10,6 +10,7 @@ import warnings
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
+import healpy as hp
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
@@ -46,7 +47,7 @@ def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust): #Rv definition with best beh
         Ab = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b)
         Ebv = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b) - 2.5*np.log10(lum_v_dust) + 2.5*np.log10(lum_v)
         Rv = Av / Ebv
-        Rv[(Av == 0) & (Ab == 0)] = 1.0         
+        Rv[(Av == 0) & (Ab == 0)] = 1.0
         #remove remaining nans and infs for image sims
         mask = np.isfinite(Rv)
         r = np.random.RandomState(43) # for reproduceability
@@ -231,6 +232,10 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         native_quantities = None
         quantity_info = None
 
+        max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
+        min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
+        default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
+
         for (_, hpx_this), file_path in self._healpix_files.items():
             if check_md5:
                 self._check_md5(file_path)
@@ -247,7 +252,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 try:
                     sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
                 except KeyError:
-                    sky_area_this = np.rad2deg(np.rad2deg(4.0*np.pi/768))
+                    sky_area_this = default_sky_area
                 if sky_area.get(hpx_this, 0) < sky_area_this:
                     sky_area[hpx_this] = sky_area_this
 
