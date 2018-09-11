@@ -40,21 +40,23 @@ def _calc_mag(conv, shear1, shear2):
     return mag
 
 
-def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust):
+def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust): #Rv definition with best behavior
     with np.errstate(divide='ignore', invalid='ignore'):
-        v = lum_v_dust/lum_v
-        b = lum_b_dust/lum_b
-        bv = b/v
-        Rv = np.log10(v) / np.log10(bv)
-        Rv[(v == 1) & (b == 1)] = 1.0
-        Rv[v == b] = np.nan
+        Av = -2.5*np.log10(lum_v_dust) + 2.5*np.log10(lum_v)
+        Ab = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b)
+        Ebv = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b) - 2.5*np.log10(lum_v_dust) + 2.5*np.log10(lum_v)
+        Rv = Av / Ebv
+        Rv[(Av == 0) & (Ab == 0)] = 1.0         
+        #remove remaining nans and infs for image sims
+        mask = np.isfinite(Rv)
+        r = np.random.RandomState(43) # for reproduceability
+        Rv[~mask] = r.uniform(1.0, 5.0, np.count_nonzero(~mask))
         return Rv
 
 
 def _calc_Av(lum_v, lum_v_dust):
     with np.errstate(divide='ignore', invalid='ignore'):
         Av = -2.5*(np.log10(lum_v_dust/lum_v))
-        Av[lum_v_dust == 0] = np.nan
         return Av
 
 
