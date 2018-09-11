@@ -14,7 +14,7 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
 
-__all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog']
+__all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
 __version__ = '1.0.0'
 
 
@@ -46,7 +46,7 @@ def _calc_Rv(lum_v, lum_v_dust, lum_b, lum_b_dust): #Rv definition with best beh
         Ab = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b)
         Ebv = -2.5*np.log10(lum_b_dust) + 2.5*np.log10(lum_b) - 2.5*np.log10(lum_v_dust) + 2.5*np.log10(lum_v)
         Rv = Av / Ebv
-        Rv[(Av == 0) & (Ab == 0)] = 1.0         
+        Rv[(Av == 0) & (Ab == 0)] = 1.0
         #remove remaining nans and infs for image sims
         mask = np.isfinite(Rv)
         r = np.random.RandomState(43) # for reproduceability
@@ -113,13 +113,16 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             **kwargs
         )
 
-        cosmology = kwargs.get('cosmology', {})
-        cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
-        cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
-        self.cosmology = FlatLambdaCDM(**cosmo_astropy)
-        for k, v in cosmology.items():
-            if k not in cosmo_astropy_allowed:
-                setattr(self.cosmology, k, v)
+        if 'cosmology' in kwargs:
+            cosmology = kwargs['cosmology']
+            cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
+            cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
+            self.cosmology = FlatLambdaCDM(**cosmo_astropy)
+            for k, v in cosmology.items():
+                if k not in cosmo_astropy_allowed:
+                    setattr(self.cosmology, k, v)
+        else:
+            self.cosmology = None
 
         self.version = kwargs.get('version', '0.0.0')
         if StrictVersion(__version__) < self.version:
@@ -492,3 +495,8 @@ class BaseDC2ShearCatalog(BaseDC2GalaxyCatalog):
             'shear_1':   'shear_1',
         }
         return quantity_modifiers
+
+
+class CosmoDC2AddonCatalog(CosmoDC2ParentClass):
+    def _get_group_names(self, fh): # pylint: disable=W0613
+        return [self.get_catalog_info('addon_group')]
