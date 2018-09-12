@@ -123,15 +123,17 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if StrictVersion(__version__) < self.version:
             raise ValueError('Reader version {} is less than config version {} for'.format(__version__, self.version))
 
-        try:
-            with open(CHECK_FILE_PATH, 'r') as f:
-                self.file_check_info = yaml.load(f)
-        except (IOError, OSError):
-            self.file_check_info = dict()
-        else:
-            self.file_check_info = self.file_check_info.get(self.version, dict())
-        if not self.file_check_info:
-            warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
+        self.file_check_info = dict()
+        if kwargs.get('check_md5', True) or kwargs.get('check_size', True):
+            try:
+                with open(CHECK_FILE_PATH, 'r') as f:
+                    self.file_check_info = yaml.load(f)
+            except (IOError, OSError):
+                pass
+            else:
+                self.file_check_info = self.file_check_info.get(self.version, dict())
+            if not self.file_check_info:
+                warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
 
         self.lightcone = kwargs.get('lightcone', True)
         self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
