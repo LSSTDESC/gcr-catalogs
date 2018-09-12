@@ -17,6 +17,8 @@ version: "0.4.2"
 healpix_pixels: [564]
 
 check_md5: false
+check_size: false
+check_cosmology: false
 
 creators: [ 'Andrew Benson', 'Andrew Hearin', 'Katrin Heitmann', 'Danila Korytov', 'Eve Kovacs', 'Patricia Larsen']
 
