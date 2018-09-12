@@ -32,12 +32,13 @@ setup(
     install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.3'],
     extras_require={
         'protodc2': ['h5py'],
+        'cosmodc2': ['h5py', 'healpy'],
         'instance': ['pandas'],
         'reference': ['pandas'],
         'dc1': ['sqlalchemy', 'pymssql'],
         'dc2_coadd': ['tables', 'pandas'],
         'focal_plane': ['scikit-image', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )

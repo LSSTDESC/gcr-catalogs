@@ -11,6 +11,7 @@ from distutils.version import StrictVersion # pylint: disable=no-name-in-module,
 import yaml
 import numpy as np
 import h5py
+import healpy as hp
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
@@ -229,6 +230,10 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         native_quantities = None
         quantity_info = None
 
+        max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
+        min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
+        default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
+
         if check_size and 'size' not in self.file_check_info:
             check_size = False
             warnings.warn('Not able to perform size check: no size specified in {}'.format(CHECK_FILE_PATH))
@@ -257,7 +262,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 try:
                     sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
                 except KeyError:
-                    sky_area_this = np.rad2deg(np.rad2deg(4.0*np.pi/768))
+                    sky_area_this = default_sky_area
                 if sky_area.get(hpx_this, 0) < sky_area_this:
                     sky_area[hpx_this] = sky_area_this
 
