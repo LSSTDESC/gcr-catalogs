@@ -16,7 +16,7 @@ and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
 ## Available Catalogs
 
-You can always run the following code to see all available catalogs:
+You can always run the following code to see the up-to-date list of all available catalogs:
 ```python
 import GCRCatalogs
 sorted(GCRCatalogs.get_available_catalogs(False))
@@ -31,6 +31,14 @@ products of DESC Data Challenge 2 at the
 ["DC2 Data Product Overview"](https://confluence.slac.stanford.edu/x/oJgHDg)
 Confluence page (*DESC member only*).
 
+-  **"cosmoDC2" Extragalactic Catalogs** \
+   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
+   - `cosmoDC2_v1.0`: full cosmoDC2 catalog
+   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but has only the sky area that is needed for image simulation
+   - `cosmoDC2_v1.0_image_addon_knots`: same as `cosmoDC2_v1.0_image` but with knots from Francois Lanusse
+   - `cosmoDC2_v1.0_9556`: one healpixel of `cosmoDC2_v1.0` for testing purpose
+   - `cosmoDC2_v0.*`: older versions (v0.1, v0.4) of cosmoDC2
+
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
    - `protoDC2`: full catalog
@@ -40,11 +48,6 @@ Confluence page (*DESC member only*).
      sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto')))
      ```
      to see all available versions.
-
--  **"cosmoDC2" Extragalactic Catalogs** \
-   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `cosmoDC2_v0.1`: a pre-release of the osmoDC2 catalog
-   - `cosmoDC2_v0.1_test`: same as `cosmoDC2_v0.1` but a smaller patch of the sky for testing purpose / faster access
 
 -  **"Buzzard" Extragalactic Catalogs** \
    *by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
@@ -79,6 +82,11 @@ Confluence page (*DESC member only*).
 -  **HSC Coadd Catalog for PDR1 XMM field** \
    *by the Hyper Suprime-Cam (HSC) Collaboration*
    - `hsc-pdr1-xmm`
+
+-  **DC2 e-images** \
+   *by LSST DESC*
+   - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
+   - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
 -  **DC1 Galaxy Catalog**
    - `dc1`: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")
