@@ -18,7 +18,7 @@ healpix_pixels: [9556]
 
 check_md5: false
 
-creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Andrew Benson', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 
 description: |
-    This is the extra-galactic catalog for the LSST-DESC data challenge DC2.
+    This is small sub-volume (3.4 sq. deg.) of the extra-galactic catalog for the LSST-DESC data challenge DC2.
