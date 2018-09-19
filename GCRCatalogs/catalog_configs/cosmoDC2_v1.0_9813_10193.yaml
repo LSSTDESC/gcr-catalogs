@@ -19,7 +19,7 @@ healpix_pixels: [9813, 9814, 9815, 9816, 9817, 9818, 9937, 9938, 9939, 9940, 994
 
 check_md5: false
 
-creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Andrew Benson', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 
 description: |
     This is the extra-galactic catalog for the LSST-DESC data challenge DC2.
