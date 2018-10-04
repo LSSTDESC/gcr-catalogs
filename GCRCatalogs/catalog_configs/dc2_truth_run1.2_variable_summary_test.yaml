@@ -1,0 +1,7 @@
+subclass_name: dc2_truth.DC2TruthCatalogReader
+
+filename: /global/cscratch1/sd/danielsf/Run1.2_truth/run_1.2_trial_variable.db
+table_name: variables_and_transients
+
+description: |
+    Truth catalog for Run 1.2, summary table for variable objects.
