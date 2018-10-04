@@ -23,6 +23,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
         self._filename = kwargs['filename']
+        self._table_name = kwargs.get('table_name', 'truth')
         base_filters = kwargs.get('base_filters')
         if base_filters:
             if is_string_like(base_filters):
@@ -42,23 +43,27 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
 
         # get the descriptions of the columns as provided in the sqlite database
         cursor = self._conn.cursor()
-        results = cursor.execute('SELECT name, description FROM column_descriptions')
-        self._column_descriptions = dict(results.fetchall())
+        if self._table_name == 'truth':
+            results = cursor.execute('SELECT name, description FROM column_descriptions')
+            self._column_descriptions = dict(results.fetchall())
+        else:
+            self._column_descriptions = dict()
 
-        results = cursor.execute("PRAGMA table_info('truth')")
+        results = cursor.execute("PRAGMA table_info('{}')".format(self._table_name))
         self._native_quantity_dtypes = {t[1]: t[2] for t in results.fetchall()}
 
-        self._quantity_modifiers = {
-            'mag_true_u': 'u',
-            'mag_true_g': 'g',
-            'mag_true_r': 'r',
-            'mag_true_i': 'i',
-            'mag_true_z': 'z',
-            'mag_true_y': 'y',
-            'agn': (lambda x: x.astype(np.bool)),
-            'star': (lambda x: x.astype(np.bool)),
-            'sprinkled': (lambda x: x.astype(np.bool)),
-        }
+        if self._table_name == 'truth':
+            self._quantity_modifiers = {
+                'mag_true_u': 'u',
+                'mag_true_g': 'g',
+                'mag_true_r': 'r',
+                'mag_true_i': 'i',
+                'mag_true_z': 'z',
+                'mag_true_y': 'y',
+                'agn': (lambda x: x.astype(np.bool)),
+                'star': (lambda x: x.astype(np.bool)),
+                'sprinkled': (lambda x: x.astype(np.bool)),
+            }
 
     def _generate_native_quantity_list(self):
         return list(self._native_quantity_dtypes)
@@ -88,8 +93,9 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             # note the API of this getter is not normal, and hence
             # we have overwritten _obtain_native_data_dict
             dtype = np.dtype([(q, self._native_quantity_dtypes[q]) for q in quantities])
-            query = 'SELECT {} FROM truth {}'.format(
+            query = 'SELECT {} FROM {} {}'.format(
                 ', '.join(quantities),
+                self._table_name,
                 query_where_clause
             )
             # may need to switch to fetchmany for larger dataset
