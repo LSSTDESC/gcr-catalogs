@@ -51,12 +51,12 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
         # get the descriptions of the columns as provided in the sqlite database
         cursor = self._conn.cursor()
         if self._is_static:
-            results = cursor.execute('SELECT name, description FROM column_descriptions')
+            results = cursor.execute('SELECT name, description FROM column_descriptions;')
             self._column_descriptions = dict(results.fetchall())
         else:
             self._column_descriptions = dict()
 
-        results = cursor.execute("PRAGMA table_info('{}')".format(self._table_name))
+        results = cursor.execute('PRAGMA table_info({});'.format(self._table_name))
         self._native_quantity_dtypes = {t[1]: t[2] for t in results.fetchall()}
 
         if self._is_static:
@@ -92,7 +92,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             all_filters = self.base_filters
 
         if all_filters:
-            query_where_clause = 'WHERE {}'.format(' AND '.join(all_filters))
+            query_where_clause = 'WHERE ({})'.format(') AND ('.join(all_filters))
         else:
             query_where_clause = ''
 
@@ -100,7 +100,7 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
             # note the API of this getter is not normal, and hence
             # we have overwritten _obtain_native_data_dict
             dtype = np.dtype([(q, self._native_quantity_dtypes[q]) for q in quantities])
-            query = 'SELECT {} FROM {} {}'.format(
+            query = 'SELECT {} FROM {} {};'.format(
                 ', '.join(quantities),
                 self._table_name,
                 query_where_clause
@@ -163,7 +163,7 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
         cursor = self._conn.cursor()
         self._dtypes = dict()
         for table, table_name in self._tables.items():
-            results = cursor.execute("PRAGMA table_info('{}')".format(table_name))
+            results = cursor.execute('PRAGMA table_info({});'.format(table_name))
             self._dtypes[table] = {t[1]: t[2] for t in results.fetchall()}
         self._dtypes['light_curves'].update(self._dtypes['obs_meta'])
         del self._dtypes['obs_meta']
@@ -188,13 +188,13 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
             all_filters = self.base_filters
 
         if all_filters:
-            query_where_clause = 'WHERE {}'.format(' AND '.join(all_filters))
+            query_where_clause = 'WHERE ({})'.format(') AND ('.join(all_filters))
         else:
             query_where_clause = ''
 
         id_col_name = 'uniqueId'
         dtype = np.dtype([(id_col_name, self._dtypes['summary'][id_col_name])])
-        query = 'SELECT DISTINCT {} FROM {} {}'.format(
+        query = 'SELECT DISTINCT {} FROM {} {};'.format(
             id_col_name,
             self._tables['summary'],
             query_where_clause
@@ -204,7 +204,7 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
         for id_this in ids_needed:
             def dc2_truth_light_curve_native_quantity_getter(quantities):
                 dtype = np.dtype([(q, self._dtypes['light_curves'][q]) for q in quantities])
-                query = 'SELECT {0} FROM {1} LEFT JOIN {2} ON {1}.{4}={5} AND {1}.{3}={2}.{3}'.format(
+                query = 'SELECT {0} FROM {1} JOIN {2} ON {1}.{4}={5} AND {1}.{3}={2}.{3};'.format(
                     ', '.join(quantities),
                     self._tables['light_curves'],
                     self._tables['obs_meta'],
