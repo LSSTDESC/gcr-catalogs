@@ -169,7 +169,7 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
             self._dtypes[table] = {t[1]: t[2] for t in results.fetchall()}
 
     def _generate_native_quantity_list(self):
-        return list(self._tables['light_curves'])
+        return list(self._dtypes['light_curves'])
 
     @staticmethod
     def _obtain_native_data_dict(native_quantities_needed, native_quantity_getter):
