@@ -163,10 +163,10 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
         cursor = self._conn.cursor()
         self._dtypes = dict()
         for table, table_name in self._tables.items():
-            if table == 'obs_meta':
-                table = 'light_curves'
             results = cursor.execute("PRAGMA table_info('{}')".format(table_name))
             self._dtypes[table] = {t[1]: t[2] for t in results.fetchall()}
+        self._dtypes['light_curves'].update(self._dtypes['obs_meta'])
+        del self._dtypes['obs_meta']
 
     def _generate_native_quantity_list(self):
         return list(self._dtypes['light_curves'])
