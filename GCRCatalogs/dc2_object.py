@@ -116,7 +116,13 @@ class TableWrapper(object):
 
     get = __getitem__
 
-    def _get_constant_array(self, key): # pylint: disable=W0613
+    def _get_constant_array(self, key):  # pylint: disable=W0613
+        """Get a constant array for the given key
+
+        Current implementation uses key name `NaN` to store the
+        caching of a `NaN` array that can be used for all columns
+        that should be `NaN`.
+        """
         return self._generate_constant_array('NaN', np.nan)
 
     def _generate_constant_array(self, key, value):
