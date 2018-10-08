@@ -107,6 +107,15 @@ class TableWrapper(object):
         return item in self.columns
 
     def __getitem__(self, key):
+        """Return the values of the column specified by 'key'
+
+        Uses cached values, if available.
+
+        Missing columns are returned as constant arrays
+        according to their default value specified in the schema.
+        If the schema doesn't exist or no default value is specified
+        Then a dtype of float with a default value of np.nan is assumed.
+        """
         if self._cache is None:
             self._cache = self.storer.read()
         try:
@@ -116,14 +125,25 @@ class TableWrapper(object):
 
     get = __getitem__
 
-    def _get_constant_array(self, key):  # pylint: disable=W0613
+    def _get_constant_array(self, key, value=np.nan):  # pylint: disable=W0613
         """Get a constant array for the given key
 
         Current implementation uses key name `NaN` to store the
         caching of a `NaN` array that can be used for all columns
         that should be `NaN`.
         """
-        return self._generate_constant_array('NaN', np.nan)
+        try:
+            dtype = self._schema[key]['dtype']
+            default_value = self._schema[key]['default']
+        except KeyError:
+            dtype = float
+            default_value = value
+            # We pass the key as the stringified
+            # dtype_value
+            # So that we end up with just one column per unique
+            # dtype_value pair.
+            key = '{}_{}'.format(dtype, default_value)
+        return self._generate_constant_array(key, default_value)
 
     def _generate_constant_array(self, key, value):
         if key not in self._constant_arrays:
@@ -195,13 +215,18 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             raise RuntimeError(err_msg.format(self.base_dir))
 
         self._columns = None
+        self._schema = None
         if self._schema_path and os.path.exists(self._schema_path):
-            self._columns = self._generate_columns_from_yaml(self._schema_path)
+            self._schema = self._generate_columns_from_yaml(self._schema_path)
+            self._columns = self._schema.keys()
 
         if not self._columns:
             warn_msg = 'No columns found in schema file "{}".\nFalling back to reading all datafiles for column names'
             warnings.warn(warn_msg.format(self._schema_path))
             self._columns = self._generate_columns(self._datasets)
+            self._schema = {
+                k: {'dtype': float, 'default': np.nan}
+                for k in self._columns}
 
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
