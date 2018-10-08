@@ -69,11 +69,17 @@ class TableWrapper(object):
     """Wrapper class for pandas HDF5 storer
 
     Provides a unified API to access both fixed and table formats.
+
+    Takes a file_handle to the HDF5 file
+    An HDF group key
+    And a schema to specify dtypes and default values for missing columns.
     """
 
-    def __init__(self, file_handle, key):
+    def __init__(self, file_handle, key, schema):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
+
+        self._schema = schema
 
         self.storer = file_handle.get_storer(key)
         self.is_table = self.storer.is_table
@@ -110,11 +116,6 @@ class TableWrapper(object):
         """Return the values of the column specified by 'key'
 
         Uses cached values, if available.
-
-        Missing columns are returned as constant arrays
-        according to their default value specified in the schema.
-        If the schema doesn't exist or no default value is specified
-        Then a dtype of float with a default value of np.nan is assumed.
         """
         if self._cache is None:
             self._cache = self.storer.read()
@@ -128,9 +129,15 @@ class TableWrapper(object):
     def _get_constant_array(self, key, value=np.nan):  # pylint: disable=W0613
         """Get a constant array for the given key
 
-        Current implementation uses key name `NaN` to store the
-        caching of a `NaN` array that can be used for all columns
-        that should be `NaN`.
+        Missing columns are returned as constant arrays
+        according to their default value specified in the schema.
+        If the schema doesn't exist or no default value is specified
+        Then a dtype of float with a default value of np.nan is assumed.
+
+        The look-up key is transformed into the stringified
+        dtype_value
+        So that we end up with just one column per unique
+        dtype_value pair.
         """
         try:
             dtype = self._schema[key]['dtype']
@@ -138,10 +145,6 @@ class TableWrapper(object):
         except KeyError:
             dtype = float
             default_value = value
-            # We pass the key as the stringified
-            # dtype_value
-            # So that we end up with just one column per unique
-            # dtype_value pair.
             key = '{}_{}'.format(dtype, default_value)
         return self._generate_constant_array(key, default_value)
 
@@ -159,11 +162,11 @@ class TableWrapper(object):
 class ObjectTableWrapper(TableWrapper):
     """Same as TableWrapper but add tract and patch info"""
 
-    def __init__(self, file_handle, key):
+    def __init__(self, file_handle, key, schema):
         key_items = key.split('_')
         self.tract = int(key_items[1])
         self.patch = ','.join(key_items[2])
-        super(ObjectTableWrapper, self).__init__(file_handle, key)
+        super(ObjectTableWrapper, self).__init__(file_handle, key, schema)
 
     @property
     def tract_and_patch(self):
@@ -386,7 +389,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             A list of ObjectTableWrapper(<file path>, <key>) objects
             for all files and keys
         """
-
         datasets = list()
         for fname in sorted(os.listdir(self.base_dir)):
             if not self._filename_re.match(fname):
@@ -402,7 +404,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
             for key in fh:
                 if self._groupname_re.match(key.lstrip('/')):
-                    datasets.append(ObjectTableWrapper(fh, key))
+                    datasets.append(ObjectTableWrapper(fh, key, self._schema))
                     continue
 
                 warn_msg = 'incorrect group name "{}" in {}; skipped this group'
