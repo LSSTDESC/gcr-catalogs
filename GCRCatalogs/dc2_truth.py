@@ -210,7 +210,7 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
                     self._tables['obs_meta'],
                     'obshistid',
                     id_col_name,
-                    id_this
+                    id_this # pylint: disable=cell-var-from-loop
                 )
                 return np.array(cursor.execute(query).fetchall(), dtype)
             yield dc2_truth_light_curve_native_quantity_getter
