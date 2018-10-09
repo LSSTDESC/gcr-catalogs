@@ -168,6 +168,10 @@ class ObjectTableWrapper(TableWrapper):
         self.tract = int(key_items[1])
         self.patch = ','.join(key_items[2])
         super(ObjectTableWrapper, self).__init__(file_handle, key, schema)
+        # Add the schema info for tract, path
+        # These values will be read by `get_constant_array`
+        self._schema['tract'] = {'dtype': int, 'default': self.tract}
+        self._schema['patch'] = {'dtype': str, 'default': self.patch}
 
     @property
     def tract_and_patch(self):
