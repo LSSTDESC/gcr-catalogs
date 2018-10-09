@@ -173,8 +173,6 @@ class ObjectTableWrapper(TableWrapper):
         return {'tract': self.tract, 'patch': self.patch}
 
     def _get_constant_array(self, key):
-        if key != 'tract' and key != 'patch':
-            key = '_NaN_'
         value = getattr(self, key, np.nan)
         return self._generate_constant_array(key, value)
 
@@ -211,17 +209,17 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
+        self._columns = None
+        self._schema = None
+        if self._schema_path and os.path.exists(self._schema_path):
+            self._schema = self._generate_schema_from_yaml(self._schema_path)
+            self._columns = set(self._schema.keys())
+
         self._file_handles = dict()
         self._datasets = self._generate_datasets()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
-
-        self._columns = None
-        self._schema = None
-        if self._schema_path and os.path.exists(self._schema_path):
-            self._schema = self._generate_columns_from_yaml(self._schema_path)
-            self._columns = self._schema.keys()
 
         if not self._columns:
             warn_msg = 'No columns found in schema file "{}".\nFalling back to reading all datafiles for column names'
@@ -413,14 +411,15 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return datasets
 
     @staticmethod
-    def _generate_columns_from_yaml(schema_path):
-        """Return column names based on schema in YAML file
+    def _generate_schema_from_yaml(schema_path):
+        """Return a dictionary of columns based on schema in YAML file
 
         Args:
             schema_path (string): <file path> to schema file.
 
         Returns:
-            The column names defined in the schema.
+            The columns defined in the schema.
+            A dictionary of {<column_name>: {'dtype': ..., 'default': ...}, ...}
 
         Warns:
             If one or more column names are repeated.
@@ -432,10 +431,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         if schema is None:
             warn_msg = 'Schema file "{}" empty.'
             warnings.warn(warn_msg.format(schema_path))
-            return set()
+            return {}
 
-        columns = set(schema)
-        return columns
+        return schema
 
     @staticmethod
     def _generate_columns(datasets):
