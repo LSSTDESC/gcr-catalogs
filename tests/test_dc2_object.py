@@ -24,17 +24,9 @@ def test_get_missing_column(load_dc2_catalog):
     empty_int_column_should_be_neg1 = gc['g_parent']
     empty_bool_column_should_be_False = gc['g_base_SdssShape_flag']
 
-    print(empty_float_column_should_be_nan.dtype)
-    print(empty_int_column_should_be_neg1.dtype)
-    print(empty_bool_column_should_be_False.dtype)
     assert_array_equal(empty_float_column_should_be_nan,
                        np.repeat(np.nan, len(gc)))
-    assert_array_equal(empty_float_column_should_be_neg1,
+    assert_array_equal(empty_int_column_should_be_neg1,
                        np.repeat(-1, len(gc)))
-    assert_array_equal(empty_float_column_should_be_False,
+    assert_array_equal(empty_bool_column_should_be_False,
                        np.repeat(False, len(gc)))
-    print(empty_int_column_should_be_neg1)
-    print(empty_bool_column_should_be_False)
-
-    assert False
-
