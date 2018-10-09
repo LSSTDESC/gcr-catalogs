@@ -119,6 +119,7 @@ class TableWrapper(object):
         """
         if self._cache is None:
             self._cache = self.storer.read()
+
         try:
             return self._cache[key].values
         except KeyError:
@@ -171,10 +172,6 @@ class ObjectTableWrapper(TableWrapper):
     @property
     def tract_and_patch(self):
         return {'tract': self.tract, 'patch': self.patch}
-
-    def _get_constant_array(self, key):
-        value = getattr(self, key, np.nan)
-        return self._generate_constant_array(key, value)
 
 
 class DC2ObjectCatalog(BaseGenericCatalog):
