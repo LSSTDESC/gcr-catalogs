@@ -79,7 +79,12 @@ class TableWrapper(object):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
 
-        self._schema = schema
+        # The schema will be slightly different for each patch
+        # because we're implementing the tract, patch
+        # as default values in the schema
+        # This is perhaps wrong, but in any event we don't
+        # want to modify the originally passed-in schema.
+        self._schema = schema.copy()
 
         self.storer = file_handle.get_storer(key)
         self.is_table = self.storer.is_table
