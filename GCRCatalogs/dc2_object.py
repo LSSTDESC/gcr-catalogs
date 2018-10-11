@@ -65,7 +65,7 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class TableWrapper(object):
+class TableWrapper():
     """Wrapper class for pandas HDF5 storer
 
     Provides a unified API to access both fixed and table formats.
@@ -93,6 +93,7 @@ class TableWrapper(object):
 
     @property
     def columns(self):
+        """Get columns from either 'fixed' or 'table' formatted HDF5 files."""
         if self._columns is None:
             if self.is_table:
                 self._columns = set(self.storer.non_index_axes[0][1])
@@ -174,6 +175,7 @@ class ObjectTableWrapper(TableWrapper):
 
     @property
     def tract_and_patch(self):
+        """Return a dict of the tract and patch info."""
         return {'tract': self.tract, 'patch': self.patch}
 
 
@@ -195,6 +197,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
     """
+    # pylint: disable=too-many-instance-attributes
 
     _native_filter_quantities = {'tract', 'patch'}
 
@@ -351,7 +354,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 for band in bands:
                     band_quantity = quantity.replace('<band>', band)
                     band_quantity_info = quantity_info.copy()
-                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`','{} band'.format(band))
+                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`', '{} band'.format(band))
                     info_dict[band_quantity] = band_quantity_info
 
             else:
@@ -505,6 +508,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return self._columns.union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
+        # pylint: disable=C0330
         for dataset in self._datasets:
             if (native_filters is None or
                 native_filters.check_scalar(dataset.tract_and_patch)):
