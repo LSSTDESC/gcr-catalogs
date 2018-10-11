@@ -75,16 +75,9 @@ class TableWrapper(object):
     And a schema to specify dtypes and default values for missing columns.
     """
 
-    def __init__(self, file_handle, key, schema):
+    def __init__(self, file_handle, key, schema=None):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
-
-        # The schema will be slightly different for each patch
-        # because we're implementing the tract, patch
-        # as default values in the schema
-        # This is perhaps wrong, but in any event we don't
-        # want to modify the originally passed-in schema.
-        self._schema = schema.copy()
 
         self.storer = file_handle.get_storer(key)
         self.is_table = self.storer.is_table
@@ -92,6 +85,7 @@ class TableWrapper(object):
         if not self.is_table and not self.storer.format_type == 'fixed':
             raise ValueError('storer format type not supported!')
 
+        self._schema = {} if schema is None else dict(schema)
         self._columns = None
         self._len = None
         self._cache = None
@@ -132,35 +126,35 @@ class TableWrapper(object):
 
     get = __getitem__
 
-    def _get_constant_array(self, key, value=np.nan):  # pylint: disable=W0613
-        """Get a constant array for the given key
-
-        Missing columns are returned as constant arrays
-        according to their default value specified in the schema.
-        If the schema doesn't exist or no default value is specified
-        Then a dtype of float with a default value of np.nan is assumed.
-
-        The look-up key is transformed into the stringified
-        dtype_value
-        So that we end up with just one column per unique
-        dtype_value pair.
+    def _get_constant_array(self, key):
         """
-        try:
-            dtype = self._schema[key]['dtype']
-            default_value = self._schema[key]['default']
-        except KeyError:
-            dtype = float
-            default_value = value
-            key = '{}_{}'.format(dtype, default_value)
-        return self._generate_constant_array(key, default_value)
+        Get a constant array for a column; `key` should be the column name.
+        Find dtype and default value in `self._schema`.
+        If not found, default to np.float64 and np.nan.
+        """
+        schema_this = self._schema.get(key, {})
+        return self._generate_constant_array(
+            dtype=schema_this.get('dtype', np.float64),
+            value=schema_this.get('default', np.nan),
+        )
 
-    def _generate_constant_array(self, key, value):
+    def _generate_constant_array(self, dtype, value):
+        """
+        Actually generate a constant array according to `dtype` and `value`
+        """
+        dtype = np.dtype(dtype)
+        # here `key` is used to cache the constant array
+        # has nothing to do with column name
+        key = (dtype.str, value)
         if key not in self._constant_arrays:
-            self._constant_arrays[key] = np.repeat(value, len(self))
+            self._constant_arrays[key] = np.asarray(np.repeat(value, len(self)), dtype=dtype)
             self._constant_arrays[key].setflags(write=False)
         return self._constant_arrays[key]
 
     def clear_cache(self):
+        """
+        clear cached data
+        """
         self._columns = self._len = self._cache = None
         self._constant_arrays.clear()
 
@@ -168,7 +162,7 @@ class TableWrapper(object):
 class ObjectTableWrapper(TableWrapper):
     """Same as TableWrapper but add tract and patch info"""
 
-    def __init__(self, file_handle, key, schema):
+    def __init__(self, file_handle, key, schema=None):
         key_items = key.split('_')
         self.tract = int(key_items[1])
         self.patch = ','.join(key_items[2])
@@ -215,11 +209,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
-        self._columns = None
         self._schema = None
         if self._schema_path and os.path.exists(self._schema_path):
             self._schema = self._generate_schema_from_yaml(self._schema_path)
-            self._columns = set(self._schema.keys())
 
         self._file_handles = dict()
         self._datasets = self._generate_datasets()
@@ -227,18 +219,15 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        if not self._columns:
-            warn_msg = 'No columns found in schema file "{}".\nFalling back to reading all datafiles for column names'
-            warnings.warn(warn_msg.format(self._schema_path))
+        if self._schema:
+            self._columns = set(self._schema)
+        else:
+            warnings.warn('Falling back to reading all datafiles for column names')
             self._columns = self._generate_columns(self._datasets)
-            self._schema = {
-                k: {'dtype': float, 'default': np.nan}
-                for k in self._columns}
 
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
         self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
-
 
     def __del__(self):
         self.close_all_file_handles()
@@ -435,9 +424,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             schema = yaml.load(schema_stream)
 
         if schema is None:
-            warn_msg = 'Schema file "{}" empty.'
+            warn_msg = 'No schema can be found in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
-            return {}
 
         return schema
 
