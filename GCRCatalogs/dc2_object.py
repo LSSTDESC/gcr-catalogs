@@ -296,22 +296,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
-            modifiers['mag_{}_cModel'.format(band)] = (
-                lambda x: -2.5 * np.log10(x) + 27.0,
-                '{}_modelfit_CModel_flux'.format(band),
-            )
-
-            modifiers['magerr_{}_cModel'.format(band)] = (
-                lambda flux, err: (2.5 * err) / (flux * np.log(10)),
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
-
-            modifiers['snr_{}_cModel'.format(band)] = (
-                np.divide,
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
+            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
