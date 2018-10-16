@@ -1,6 +1,6 @@
 subclass_name: dc2_truth.DC2TruthCatalogLightCurveReader
 
-filename: /global/cscratch1/sd/danielsf/Run1.2_truth/run_1.2_trial_light_curves_181004.db
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run_1.2_trial_light_curves_181004.db
 
 table_light_curves: light_curves
 table_summary: variables_and_transients
