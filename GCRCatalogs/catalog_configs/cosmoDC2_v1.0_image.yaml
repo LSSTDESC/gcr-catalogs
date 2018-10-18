@@ -27,3 +27,5 @@ creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'P
 
 description: |
     This is the extra-galactic catalog used in image simulations for the LSST-DESC data challenge DC2.
+
+included_by_default: true
