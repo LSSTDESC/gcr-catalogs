@@ -240,7 +240,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         # A slightly crude way of checking for version of schema to have modelfit mag
         # A future improvement will be to explicitly store version information in the datasets
         # and just rely on that versioning.
-        modelfit_mag_re = re.compile('mag_.+_cModel')
+        modelfit_mag_re = re.compile('.+_modelfit_mag')
         has_modelfit_mag = [col for col in self._columns if modelfit_mag_re.match(col)]
         if has_modelfit_mag:
             self._schema_version = '1.2'
