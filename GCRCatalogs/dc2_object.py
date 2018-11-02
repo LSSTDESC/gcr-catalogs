@@ -240,8 +240,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         # A slightly crude way of checking for version of schema to have modelfit mag
         # A future improvement will be to explicitly store version information in the datasets
         # and just rely on that versioning.
-        modelfit_mag_re = re.compile('.+_modelfit_mag')
-        has_modelfit_mag = [col for col in self._columns if modelfit_mag_re.match(col)]
+        has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._columns)
         if has_modelfit_mag:
             self._schema_version = '1.2'
         else:
@@ -254,7 +253,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy', version=''):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy', version=None):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -314,6 +313,14 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
+            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
+
+            # Override _modelfit: mag, magerr and SNR for Run 1.1 files.
+            # Future versions have these already computed.
+            # The zp=27.0 is based on the default calibration for the coadds
+            #    as specified in the DM code.  It's correct for Run 1.1p.
             if version == '1.1':
                 modifiers['mag_{}_cModel'.format(band)] = (
                     lambda x: -2.5 * np.log10(x) + 27.0,
@@ -329,10 +336,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                     '{}_modelfit_CModel_flux'.format(band),
                     '{}_modelfit_CModel_fluxSigma'.format(band),
                 )
-            else:
-                modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
-                modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
-                modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
