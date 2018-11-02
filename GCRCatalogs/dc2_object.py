@@ -196,6 +196,13 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir                     (str): The directory of data files being served
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
+
+    Notes
+    -----
+    The initialization sets the version of the catalog based on the existence
+    of certain columns and sets a version accordingly.
+    This version setting should be improved and standardized as we work towardj
+    providing the version in the catalog files in the scripts in `DC2-production`.
     """
     # pylint: disable=too-many-instance-attributes
 
