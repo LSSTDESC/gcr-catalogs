@@ -187,7 +187,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
-    schema_filename   (str): The optional location of the schema file, relative to base_dir.
+    schema_filename   (str): The optional location of the schema file
+                             Relative to base_dir, unless specified as absolute path.
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
     use_cache        (bool): Whether or not to cache read data in memory
 
@@ -212,8 +213,13 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
+
         _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
-        self._schema_path = os.path.join(self.base_dir, _schema_filename)
+        if os.path.isabs(_schema_filename):
+            self._schema_path = _schema_filename
+        else:
+            self._schema_path = os.path.join(self.base_dir, _schema_filename)
+
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
         self.use_cache = bool(kwargs.get('use_cache', True))
 
