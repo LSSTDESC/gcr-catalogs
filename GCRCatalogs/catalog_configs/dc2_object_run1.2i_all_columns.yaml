@@ -1,5 +1,6 @@
 subclass_name: dc2_object.DC2ObjectCatalog
 base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2i/object_catalog
+schema_path: schema.yaml
 filename_pattern: 'object_tract_\d+\.hdf5$'
 description: DC2 Run 1.2i Object Catalog
 creators: ['Michael Wood-Vasey']
