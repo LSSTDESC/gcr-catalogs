@@ -215,10 +215,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
 
         _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
-        if os.path.isabs(_schema_filename):
-            self._schema_path = _schema_filename
-        else:
-            self._schema_path = os.path.join(self.base_dir, _schema_filename)
+        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
+        self._schema_path = os.path.join(self.base_dir, _schema_filename)
 
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
         self.use_cache = bool(kwargs.get('use_cache', True))
