@@ -361,7 +361,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _generate_info_dict(meta_path, bands='ugrizy'):
-        """Creates a 2d dictionary with information for each homonogized quantity
+        """Creates a 2d dictionary with information for each homogenized quantity
 
         Separate entries for each band are created for any key in the yaml
         dictionary at meta_path containing the substring '<band>'.
