@@ -17,7 +17,7 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
-__version__ = '1.0.0'
+__version__ = '1.1.2'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -286,7 +286,8 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             with h5py.File(file_path, 'r') as fh:
                 for group in self._get_group_names(fh):
                     # pylint: disable=E1101,W0640
-                    yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+                    if len(fh[group]):
+                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
