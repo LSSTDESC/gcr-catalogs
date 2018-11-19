@@ -525,7 +525,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         if self._schema_path and os.path.isfile(self._schema_path):
             if not overwrite:
                 raise RuntimeError('Schema file `{}` already exists! Set `overwrite=True` to overwrite.'.format(self._schema_path))
-            warnings.warn('Overwriting schema file `{}`, which is backed up at `{}.bak`'.format(self._schema_path))
+            warnings.warn('Overwriting schema file `{0}`, which is backed up at `{0}.bak`'.format(self._schema_path))
             shutil.copyfile(self._schema_path, self._schema_path + '.bak')
 
         schema = self._generate_schema_from_datafiles(self._datasets)
