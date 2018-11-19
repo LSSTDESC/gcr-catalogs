@@ -6,6 +6,7 @@ import os
 import re
 import warnings
 import itertools
+import shutil
 
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
@@ -257,7 +258,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
         self._schema = None
-        if self._schema_path and os.path.exists(self._schema_path):
+        if self._schema_path and os.path.isfile(self._schema_path):
             self._schema = self._generate_schema_from_yaml(self._schema_path)
 
         self._file_handles = dict()
@@ -514,6 +515,28 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             schema.update(dataset.native_schema)
 
         return schema
+
+    def generate_schema_yaml(self, overwrite=False):
+        """
+        Generate the schema from the datafiles and write as a yaml file.
+        This function write the schema yaml file to the schema location specified for the catalog.
+        One needs to set `overwrite=True` to overwrite an existing schema file.
+        """
+        if self._schema_path and os.path.isfile(self._schema_path):
+            if not overwrite:
+                raise RuntimeError('Schema file `{}` already exists! Set `overwrite=True` to overwrite.'.format(self._schema_path))
+            warnings.warn('Overwriting schema file `{}`, which is backed up at `{}.bak`'.format(self._schema_path))
+            shutil.copyfile(self._schema_path, self._schema_path + '.bak')
+
+        schema = self._generate_schema_from_datafiles(self._datasets)
+
+        for col, schema_this in schema.items():
+            if schema_this['dtype'] == 'bool' and (
+                    col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
+                schema_this['default'] = True
+
+        with open(self._schema_path, 'w') as schema_stream:
+            yaml.dump(schema, schema_stream)
 
     @property
     def available_tracts_and_patches(self):
