@@ -498,11 +498,13 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return schema
 
     @staticmethod
-    def _generate_schema_from_datafiles(datasets):
+    def _generate_schema_from_datafiles(datasets, default_values=None, write_to_yaml_path=None):
         """Return the native schema for given datasets
 
         Args:
             datasets (list): A list of tuples (<file path>, <key>)
+            default_values (dict): supply default values (`{col: default_value}`)
+            write_to_yaml_path (str): write out schema as a yaml file to this path
 
         Returns:
             A dict of schema ({col_name: {'dtype': dtype}}) found in all data sets
@@ -511,6 +513,14 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         schema = {}
         for dataset in datasets:
             schema.update(dataset.native_schema)
+
+        if default_values:
+            for col, default in default_values.items():
+                schema[col]['default'] = default
+
+        if write_to_yaml_path:
+            with open(write_to_yaml_path, 'w') as schema_stream:
+                yaml.dump(schema, schema_stream)
 
         return schema
 
