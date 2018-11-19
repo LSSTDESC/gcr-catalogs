@@ -5,6 +5,7 @@ DC2 Object Catalog Reader
 import os
 import re
 import warnings
+import itertools
 
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
@@ -76,7 +77,7 @@ class TableWrapper():
     And a schema to specify dtypes and default values for missing columns.
     """
 
-    _default_values = {'i': -1, 'b': False}
+    _default_values = {'i': -1, 'b': False, 'U': ''}
 
     def __init__(self, file_handle, key, schema=None):
         if not file_handle.is_open:
@@ -89,20 +90,35 @@ class TableWrapper():
             raise ValueError('storer format type not supported!')
 
         self._schema = {} if schema is None else dict(schema)
-        self._columns = None
+        self._native_schema = None
         self._len = None
         self._cache = None
         self._constant_arrays = dict()
 
     @property
+    def native_schema(self):
+        """Get the native schema from either 'fixed' or 'table' formatted HDF5 files."""
+        if self._native_schema is None:
+            self._native_schema = {}
+            if self.is_table:
+                for i in itertools.count():
+                    try:
+                        dtype = getattr(self.storer.table.attrs, 'values_block_{}_dtype'.format(i))
+                    except AttributeError:
+                        break
+                    for col in getattr(self.storer.table.attrs, 'values_block_{}_kind'.format(i)):
+                        self._native_schema[col] = {'dtype': dtype}
+            else:
+                for i in range(self.storer.nblocks):
+                    dtype = getattr(self.storer.group, 'block{}_values'.format(i)).dtype.name
+                    for col in getattr(self.storer.group, 'block{}_items'.format(i)):
+                        self._native_schema[col.decode()] = {'dtype': dtype}
+        return self._native_schema
+
+    @property
     def columns(self):
         """Get columns from either 'fixed' or 'table' formatted HDF5 files."""
-        if self._columns is None:
-            if self.is_table:
-                self._columns = set(self.storer.non_index_axes[0][1])
-            else:
-                self._columns = set(c.decode() for c in self.storer.group.axis0)
-        return self._columns
+        return set(self.native_schema)
 
     def __len__(self):
         if self._len is None:
@@ -113,7 +129,7 @@ class TableWrapper():
         return self._len
 
     def __contains__(self, item):
-        return item in self.columns
+        return item in self.native_schema
 
     def __getitem__(self, key):
         """Return the values of the column specified by 'key'
@@ -130,6 +146,10 @@ class TableWrapper():
 
     get = __getitem__
 
+    @classmethod
+    def _get_default_value(cls, dtype, key=None): # pylint: disable=W0613
+        return cls._default_values.get(np.dtype(dtype).kind, np.nan)
+
     def _get_constant_array(self, key):
         """
         Get a constant array for a column; `key` should be the column name.
@@ -140,7 +160,7 @@ class TableWrapper():
         dtype = schema_this.get('dtype', np.float64)
         default = schema_this.get(
             'default',
-            self._default_values.get(np.dtype(dtype).kind, np.nan)
+            self._get_default_value(dtype, key)
         )
         return self._generate_constant_array(dtype=dtype, value=default)
 
@@ -161,7 +181,7 @@ class TableWrapper():
         """
         clear cached data
         """
-        self._columns = self._len = self._cache = None
+        self._native_schema = self._len = self._cache = None
         self._constant_arrays.clear()
 
 
@@ -175,8 +195,14 @@ class ObjectTableWrapper(TableWrapper):
         super(ObjectTableWrapper, self).__init__(file_handle, key, schema)
         # Add the schema info for tract, path
         # These values will be read by `get_constant_array`
-        self._schema['tract'] = {'dtype': int, 'default': self.tract}
-        self._schema['patch'] = {'dtype': str, 'default': self.patch}
+        self._schema['tract'] = {'dtype': 'int64', 'default': self.tract}
+        self._schema['patch'] = {'dtype': '<U3', 'default': self.patch}
+
+    @classmethod
+    def _get_default_value(cls, dtype, key=None):
+        if key and (key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
+            return False
+        super()._get_default_value(dtype, key)
 
     @property
     def tract_and_patch(self):
@@ -239,18 +265,16 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        if self._schema:
-            self._columns = set(self._schema)
-        else:
+        if not self._schema:
             warnings.warn('Falling back to reading all datafiles for column names')
-            self._columns = self._generate_columns(self._datasets)
+            self._schema = self._generate_schema_from_datafiles(self._datasets)
 
-        bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
+        bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
         # A slightly crude way of checking for version of schema to have modelfit mag
         # A future improvement will be to explicitly store version information in the datasets
         # and just rely on that versioning.
-        has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._columns)
+        has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
         if has_modelfit_mag:
             self._schema_version = '1.2'
         else:
@@ -474,21 +498,21 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return schema
 
     @staticmethod
-    def _generate_columns(datasets):
-        """Return unique column names for given datasets
+    def _generate_schema_from_datafiles(datasets):
+        """Return the native schema for given datasets
 
         Args:
             datasets (list): A list of tuples (<file path>, <key>)
 
         Returns:
-            A set of unique column names found in all data sets
+            A dict of schema ({col_name: {'dtype': dtype}}) found in all data sets
         """
 
-        columns = set()
+        schema = {}
         for dataset in datasets:
-            columns.update(dataset.columns)
+            schema.update(dataset.native_schema)
 
-        return columns
+        return schema
 
     @property
     def available_tracts_and_patches(self):
@@ -546,7 +570,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
 
-        return self._columns.union(self._native_filter_quantities)
+        return set(self._schema).union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
         # pylint: disable=C0330
