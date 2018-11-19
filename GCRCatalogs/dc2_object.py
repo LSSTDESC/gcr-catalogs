@@ -197,7 +197,7 @@ class ObjectTableWrapper(TableWrapper):
         # Add the schema info for tract, path
         # These values will be read by `get_constant_array`
         self._schema['tract'] = {'dtype': 'int64', 'default': self.tract}
-        self._schema['patch'] = {'dtype': '<U3', 'default': self.patch}
+        self._schema['patch'] = {'dtype': '<U', 'default': self.patch}
 
     @classmethod
     def _get_default_value(cls, dtype, key=None):
