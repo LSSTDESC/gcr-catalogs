@@ -200,7 +200,8 @@ class ObjectTableWrapper(TableWrapper):
 
     @classmethod
     def _get_default_value(cls, dtype, key=None):
-        if key and (key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
+        if np.dtype(dtype).kind == 'b' and key and (
+                key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
             return False
         return super()._get_default_value(dtype, key)
 
@@ -516,7 +517,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
         if default_values:
             for col, default in default_values.items():
-                schema[col]['default'] = default
+                if col in schema:
+                    schema[col]['default'] = default
 
         if write_to_yaml_path:
             with open(write_to_yaml_path, 'w') as schema_stream:
