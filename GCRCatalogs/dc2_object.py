@@ -202,7 +202,7 @@ class ObjectTableWrapper(TableWrapper):
     def _get_default_value(cls, dtype, key=None):
         if key and (key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
             return False
-        super()._get_default_value(dtype, key)
+        return super()._get_default_value(dtype, key)
 
     @property
     def tract_and_patch(self):
