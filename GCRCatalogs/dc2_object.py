@@ -76,6 +76,8 @@ class TableWrapper():
     And a schema to specify dtypes and default values for missing columns.
     """
 
+    _default_values = {'i': -1, 'b': False}
+
     def __init__(self, file_handle, key, schema=None):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
@@ -135,10 +137,12 @@ class TableWrapper():
         If not found, default to np.float64 and np.nan.
         """
         schema_this = self._schema.get(key, {})
-        return self._generate_constant_array(
-            dtype=schema_this.get('dtype', np.float64),
-            value=schema_this.get('default', np.nan),
+        dtype = schema_this.get('dtype', np.float64)
+        default = schema_this.get(
+            'default',
+            self._default_values.get(np.dtype(dtype).kind, np.nan)
         )
+        return self._generate_constant_array(dtype=dtype, value=default)
 
     def _generate_constant_array(self, dtype, value):
         """
