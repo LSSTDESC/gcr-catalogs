@@ -202,7 +202,7 @@ class ObjectTableWrapper(TableWrapper):
     def _get_default_value(cls, dtype, key=None):
         if np.dtype(dtype).kind == 'b' and key and (
                 key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
-            return False
+            return True
         return super()._get_default_value(dtype, key)
 
     @property
