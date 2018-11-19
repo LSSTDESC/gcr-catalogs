@@ -286,7 +286,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             with h5py.File(file_path, 'r') as fh:
                 for group in self._get_group_names(fh):
                     # pylint: disable=E1101,W0640
-                    if len(fh[group]) > 0:
+                    if len(fh[group]):
                         yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
 
     def _get_quantity_info_dict(self, quantity, default=None):
