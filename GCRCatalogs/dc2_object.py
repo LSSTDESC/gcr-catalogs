@@ -16,7 +16,7 @@ __all__ = ['DC2ObjectCatalog']
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
 GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
-SCHEMA_PATH = 'schema.yaml'
+SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
@@ -187,7 +187,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
-    schema_path       (str): The optional location of the schema file
+    schema_filename   (str): The optional location of the schema file
+                             Relative to base_dir, unless specified as absolute path.
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
     use_cache        (bool): Whether or not to cache read data in memory
 
@@ -196,6 +197,13 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir                     (str): The directory of data files being served
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
+
+    Notes
+    -----
+    The initialization sets the version of the catalog based on the existence
+    of certain columns and sets a version accordingly.
+    This version setting should be improved and standardized as we work towardj
+    providing the version in the catalog files in the scripts in `DC2-production`.
     """
     # pylint: disable=too-many-instance-attributes
 
@@ -205,7 +213,11 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
-        self._schema_path = kwargs.get('schema_path', os.path.join(self.base_dir, SCHEMA_PATH))
+
+        _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
+        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
+        self._schema_path = os.path.join(self.base_dir, _schema_filename)
+
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
         self.use_cache = bool(kwargs.get('use_cache', True))
 
@@ -229,14 +241,24 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._columns = self._generate_columns(self._datasets)
 
         bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
-        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
+
+        # A slightly crude way of checking for version of schema to have modelfit mag
+        # A future improvement will be to explicitly store version information in the datasets
+        # and just rely on that versioning.
+        has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._columns)
+        if has_modelfit_mag:
+            self._schema_version = '1.2'
+        else:
+            self._schema_version = '1.1'
+
+        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands, version=self._schema_version)
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
 
     def __del__(self):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy', version=None):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -296,22 +318,29 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
-            modifiers['mag_{}_cModel'.format(band)] = (
-                lambda x: -2.5 * np.log10(x) + 27.0,
-                '{}_modelfit_CModel_flux'.format(band),
-            )
+            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
-            modifiers['magerr_{}_cModel'.format(band)] = (
-                lambda flux, err: (2.5 * err) / (flux * np.log(10)),
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
-
-            modifiers['snr_{}_cModel'.format(band)] = (
-                np.divide,
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
+            # Override _modelfit: mag, magerr and SNR for Run 1.1 files.
+            # Future versions have these already computed.
+            # The zp=27.0 is based on the default calibration for the coadds
+            #    as specified in the DM code.  It's correct for Run 1.1p.
+            if version == '1.1':
+                modifiers['mag_{}_cModel'.format(band)] = (
+                    lambda x: -2.5 * np.log10(x) + 27.0,
+                    '{}_modelfit_CModel_flux'.format(band),
+                )
+                modifiers['magerr_{}_cModel'.format(band)] = (
+                    lambda flux, err: (2.5 * err) / (flux * np.log(10)),
+                    '{}_modelfit_CModel_flux'.format(band),
+                    '{}_modelfit_CModel_fluxSigma'.format(band),
+                )
+                modifiers['snr_{}_cModel'.format(band)] = (
+                    np.divide,
+                    '{}_modelfit_CModel_flux'.format(band),
+                    '{}_modelfit_CModel_fluxSigma'.format(band),
+                )
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
