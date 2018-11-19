@@ -62,17 +62,23 @@ Confluence page (*DESC member only*).
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_object_run1.1p`: coadd catalog for Run 1.1p
-   - `dc2_object_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
+   - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns)
+   - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and native columns)
+   - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
+   - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and native columns)
+   - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_truth_run1.1`: truth catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
+   - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
+   - `dc2_truth_run1.2_variable_lightcurve`: light curves of variable objects in the truth catalog for Run 1.2
+   - `dc2_truth_run1.2_variable_summary`: summary table of variable objects in the truth catalog for Run 1.2
+   - `dc2_truth_run1.1_static`: truth catalog for Run 1.1 (static objects only, corresponds to `proto-dc2_v2.1.2`)
 
 -  **DC2 "Reference Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
    - `dc2_reference_run1.2`: reference catalog for Run 1.2 (corresponds to `proto-dc2_v3.0`)
+   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
 
 -  **DC2 "Instance Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
