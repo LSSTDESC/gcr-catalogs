@@ -6,6 +6,7 @@ import os
 import re
 import warnings
 
+from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import pandas as pd
 import yaml
@@ -276,13 +277,18 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'base_SdssCentroid_x',
             'y': 'base_SdssCentroid_y',
-            'xErr': 'base_SdssCentroid_xSigma',
-            'yErr': 'base_SdssCentroid_ySigma',
+            'xErr': 'base_SdssCentroid_xErr',
+            'yErr': 'base_SdssCentroid_yErr',
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_flux',
+            'blendedness': 'base_Blendedness_abs_instFlux',
         }
+
+        if version and StrictVersion(version) <= StrictVersion('1.1'):
+            modifiers['xErr'] = 'base_SdssCentroid_xSigma'
+            modifiers['yErr'] = 'base_SdssCentroid_ySigma'
+            modifiers['blendedness'] = 'base_Blendedness_abs_flux'
 
         not_good_flags = (
             'base_PixelFlags_flag_edge',
@@ -309,9 +315,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_instFlux'.format(band)
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
+            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_instFluxErr'.format(band)
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
@@ -322,11 +328,20 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
             modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
-            # Override _modelfit: mag, magerr and SNR for Run 1.1 files.
-            # Future versions have these already computed.
-            # The zp=27.0 is based on the default calibration for the coadds
-            #    as specified in the DM code.  It's correct for Run 1.1p.
-            if version == '1.1':
+            modifiers['psf_fwhm_{}'.format(band)] = (
+                lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
+                '{}_base_SdssShape_psf_xx'.format(band),
+                '{}_base_SdssShape_psf_yy'.format(band),
+                '{}_base_SdssShape_psf_xy'.format(band),
+            )
+
+            if version and StrictVersion(version) <= StrictVersion('1.1'):
+                modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+                modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
+
+                # The zp=27.0 is based on the default calibration for the coadds
+                #    as specified in the DM code.  It's correct for Run 1.1p.
+
                 modifiers['mag_{}_cModel'.format(band)] = (
                     lambda x: -2.5 * np.log10(x) + 27.0,
                     '{}_modelfit_CModel_flux'.format(band),
@@ -342,18 +357,11 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                     '{}_modelfit_CModel_fluxSigma'.format(band),
                 )
 
-            modifiers['psf_fwhm_{}'.format(band)] = (
-                lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
-                '{}_base_SdssShape_psf_xx'.format(band),
-                '{}_base_SdssShape_psf_yy'.format(band),
-                '{}_base_SdssShape_psf_xy'.format(band),
-            )
-
         return modifiers
 
     @staticmethod
     def _generate_info_dict(meta_path, bands='ugrizy'):
-        """Creates a 2d dictionary with information for each homonogized quantity
+        """Creates a 2d dictionary with information for each homogenized quantity
 
         Separate entries for each band are created for any key in the yaml
         dictionary at meta_path containing the substring '<band>'.
