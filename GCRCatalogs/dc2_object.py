@@ -224,6 +224,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                              Relative to base_dir, unless specified as absolute path.
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
     use_cache        (bool): Whether or not to cache read data in memory
+    is_dpdd          (bool): Whether or not to the files are already in DPDD-format
 
     Attributes
     ----------
@@ -271,18 +272,22 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             warnings.warn('Falling back to reading all datafiles for column names')
             self._schema = self._generate_schema_from_datafiles(self._datasets)
 
-        bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
+        if kwargs.get('is_dpdd'):
+            self._quantity_modifiers = {col: None for col in self._schema}
+            bands = [col[0] for col in self._schema if len(col) == 5 and col.startswith('mag_')]
 
-        # A slightly crude way of checking for version of schema to have modelfit mag
-        # A future improvement will be to explicitly store version information in the datasets
-        # and just rely on that versioning.
-        has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
-        if has_modelfit_mag:
-            self._schema_version = '1.2'
         else:
-            self._schema_version = '1.1'
+            # A slightly crude way of checking for version of schema to have modelfit mag
+            # A future improvement will be to explicitly store version information in the datasets
+            # and just rely on that versioning.
+            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
+            if has_modelfit_mag:
+                self._schema_version = '1.2'
+            else:
+                self._schema_version = '1.1'
+            bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
+            self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands, version=self._schema_version)
 
-        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands, version=self._schema_version)
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
 
     def __del__(self):

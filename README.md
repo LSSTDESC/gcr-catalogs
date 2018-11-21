@@ -65,6 +65,7 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
+   - `dc2_object_run1.2p_dpdd_only`: static object catalog for Run 1.2p (with *only* DPDD columns)
    - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and all native columns)
    - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
