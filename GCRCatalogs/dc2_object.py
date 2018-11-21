@@ -273,7 +273,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._schema = self._generate_schema_from_datafiles(self._datasets)
 
         if kwargs.get('is_dpdd'):
-            self._quantity_modifiers = {col: col for col in self._schema}
+            self._quantity_modifiers = {col: None for col in self._schema}
             bands = [col[0] for col in self._schema if len(col) == 5 and col.startswith('mag_')]
 
         else:
