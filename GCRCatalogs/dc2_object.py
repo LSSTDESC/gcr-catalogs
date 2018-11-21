@@ -274,6 +274,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: col for col in self._schema}
+            bands = [col[0] for col in self._schema if len(col) == 5 and col.startswith('mag_')]
 
         else:
             # A slightly crude way of checking for version of schema to have modelfit mag
