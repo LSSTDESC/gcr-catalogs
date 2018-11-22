@@ -1,0 +1,14 @@
+subclass_name: composite.CompositeReader
+only_use_master_attr: true
+catalogs:
+  - catalog_name: cosmoDC2_v1.1
+  - catalog_name: knots
+    matching_method: MATCHING_FORMAT
+    subclass_name: cosmodc2.CosmoDC2AddonCatalog
+    catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/cosmoDC2_v1.1.0_knots_addon
+    catalog_filename_template: z_{}_{}.knots.healpix_{}.hdf5
+    addon_group: knots
+    check_cosmology: false
+    check_size: false
+    check_md5: false
+    check_version: false
