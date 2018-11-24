@@ -1,7 +1,7 @@
 subclass_name: composite.CompositeReader
 only_use_master_attr: true
 catalogs:
-  - catalog_name: cosmoDC2_v1.1
+  - catalog_name: cosmoDC2_v1.1_image
   - catalog_name: knots
     matching_method: MATCHING_FORMAT
     subclass_name: cosmodc2.CosmoDC2AddonCatalog
