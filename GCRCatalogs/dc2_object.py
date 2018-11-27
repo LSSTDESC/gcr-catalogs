@@ -8,7 +8,6 @@ import warnings
 import itertools
 import shutil
 
-from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import pandas as pd
 import yaml
@@ -263,7 +262,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._schema = self._generate_schema_from_yaml(self._schema_path)
 
         self._file_handles = dict()
-        self._datasets = self._generate_datasets()
+        self._datasets = self._generate_datasets() # uses self._schema when available
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
@@ -281,12 +280,18 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             # A future improvement will be to explicitly store version information in the datasets
             # and just rely on that versioning.
             has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
-            if has_modelfit_mag:
-                self._schema_version = '1.2'
+
+            if any(col.endswith('_fluxSigma') for col in self._schema):
+                dm_schema_version = 1
+            elif any(col.endswith('_fluxErr') for col in self._schema):
+                dm_schema_version = 2
             else:
-                self._schema_version = '1.1'
+                dm_schema_version = 3
+
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
-            self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands, version=self._schema_version)
+
+            self._quantity_modifiers = self._generate_modifiers(
+                    self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
 
@@ -294,16 +299,25 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy', version=None):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy',
+                            has_modelfit_mag=True, dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
             pixel_scale (float): Scale of pixels in coadd images
-            bands        (list): List of photometric bands as strings
+            bands       (list):  List of photometric bands as strings
+            has_modelfit_mag (bool): Whether or not pre-calculated model fit magnitudes are present
+            dm_schema_version (int): DM schema version (1, 2, or 3)
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
+
+        if butler_schema_version not in (1, 2, 3):
+            raise ValueError('Only supports butler_schema_version == 1, 2, or 3')
+
+        FLUX = 'flux' if butler_schema_version <= 2 else 'instFlux'
+        ERR = 'Sigma' if butler_schema_version <= 1 else 'Err'
 
         modifiers = {
             'objectId': 'id',
@@ -312,18 +326,13 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'base_SdssCentroid_x',
             'y': 'base_SdssCentroid_y',
-            'xErr': 'base_SdssCentroid_xErr',
-            'yErr': 'base_SdssCentroid_yErr',
+            'xErr': 'base_SdssCentroid_x{}'.format(ERR),
+            'yErr': 'base_SdssCentroid_y{}'.format(ERR),
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_instFlux',
+            'blendedness': 'base_Blendedness_abs_{}'.format(FLUX),
         }
-
-        if version and StrictVersion(version) <= StrictVersion('1.1'):
-            modifiers['xErr'] = 'base_SdssCentroid_xSigma'
-            modifiers['yErr'] = 'base_SdssCentroid_ySigma'
-            modifiers['blendedness'] = 'base_Blendedness_abs_flux'
 
         not_good_flags = (
             'base_PixelFlags_flag_edge',
@@ -350,18 +359,14 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_instFlux'.format(band)
+            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_{}'.format(band, FLUX)
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_instFluxErr'.format(band)
+            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR)
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
-
-            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
-            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
-            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
@@ -370,26 +375,26 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 '{}_base_SdssShape_psf_xy'.format(band),
             )
 
-            if version and StrictVersion(version) <= StrictVersion('1.1'):
-                modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
-                modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
+            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
+            if not has_modelfit_mag:
                 # The zp=27.0 is based on the default calibration for the coadds
-                #    as specified in the DM code.  It's correct for Run 1.1p.
-
+                # as specified in the DM code.  It's correct for Run 1.1p.
                 modifiers['mag_{}_cModel'.format(band)] = (
                     lambda x: -2.5 * np.log10(x) + 27.0,
-                    '{}_modelfit_CModel_flux'.format(band),
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
                 )
                 modifiers['magerr_{}_cModel'.format(band)] = (
                     lambda flux, err: (2.5 * err) / (flux * np.log(10)),
-                    '{}_modelfit_CModel_flux'.format(band),
-                    '{}_modelfit_CModel_fluxSigma'.format(band),
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
+                    '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
                 )
                 modifiers['snr_{}_cModel'.format(band)] = (
                     np.divide,
-                    '{}_modelfit_CModel_flux'.format(band),
-                    '{}_modelfit_CModel_fluxSigma'.format(band),
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
+                    '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
                 )
 
         return modifiers
