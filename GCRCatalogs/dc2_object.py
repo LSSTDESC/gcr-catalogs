@@ -313,11 +313,11 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        if butler_schema_version not in (1, 2, 3):
-            raise ValueError('Only supports butler_schema_version == 1, 2, or 3')
+        if dm_schema_version not in (1, 2, 3):
+            raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
 
-        FLUX = 'flux' if butler_schema_version <= 2 else 'instFlux'
-        ERR = 'Sigma' if butler_schema_version <= 1 else 'Err'
+        FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
             'objectId': 'id',
