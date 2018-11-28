@@ -17,7 +17,7 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
-__version__ = '1.1.2'
+__version__ = '1.1.4'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
