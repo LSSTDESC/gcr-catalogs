@@ -33,10 +33,10 @@ Confluence page (*DESC member only*).
 
 -  **"cosmoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `cosmoDC2_v1.0`: full cosmoDC2 catalog
-   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but has only the sky area that is needed for image simulation
-   - `cosmoDC2_v1.0_image_addon_knots`: same as `cosmoDC2_v1.0_image` but with knots from Francois Lanusse
-   - `cosmoDC2_v1.0_9556`: one healpixel of `cosmoDC2_v1.0` for testing purpose
+   - `cosmoDC2_v1.1.4`: full cosmoDC2 catalog
+   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0` but has only the sky area that is needed for image simulation
+   - `cosmoDC2_v1.4_image_addon_knots`: same as `cosmoDC2_v1.0_image` but with knots from Francois Lanusse
+   - `cosmoDC2_v1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4` for testing purpose
    - `cosmoDC2_v0.*`: older versions (v0.1, v0.4) of cosmoDC2
 
 -  **"protoDC2" Extragalactic Catalogs** \
