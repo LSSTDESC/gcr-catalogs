@@ -1,0 +1,28 @@
+subclass_name: cosmodc2.CosmoDC2GalaxyCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/cosmoDC2_v1.1.4_rs_scatter_query_tree_double
+catalog_filename_template: z_{}_{}.step_all.healpix_{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+lightcone: true
+
+version: "1.1.4"
+
+healpix_pixels: [9559,  9686,  9687,  9814,  9815,  9816,  9942,  9943, 10070, 10071, 10072, 10198, 10199, 10200, 10326, 10327, 10450]
+
+check_md5: false
+
+check_size: false
+
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
+
+description: |
+    This is the extra-galactic catalog for the LSST-DESC data challenge DC2.
+
+included_by_default: true
