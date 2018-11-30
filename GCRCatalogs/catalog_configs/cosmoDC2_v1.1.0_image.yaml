@@ -1,6 +1,6 @@
 subclass_name: cosmodc2.CosmoDC2GalaxyCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/cosmoDC2_v1.1.3_rs_scatter_query_tree
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/cosmoDC2_v1.1.0
 catalog_filename_template: z_{}_{}.step_all.healpix_{}.hdf5
 
 cosmology:
@@ -12,7 +12,7 @@ cosmology:
 
 lightcone: true
 
-version: "1.1.3"
+version: "1.1.0"
 
 check_md5: false
 
