@@ -34,13 +34,10 @@ Confluence page (*DESC member only*).
 -  **"cosmoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
    - `cosmoDC2_v1.0`: full cosmoDC2 catalog (v1.0)
-   - `cosmoDC2_v1.1.4_image`: cosmoDC2 catalog (v1.1.4) with only the sky area that is needed for image simulation
+   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but with only the sky area that is needed for image simulation (Run 2.0)
+   - `cosmoDC2_v1.0_small`: 16 contiguous healpixels of `cosmoDC2_v1.0` for testing purpose
+   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0_image` but with cosmoDC2 v1.1.4 for Run 2.1
    - `cosmoDC2_v1.1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
-   - `cosmoDC2_v*`: other versions of cosmoDC2, you can run
-     ```python
-     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('cosmoDC2_')))
-     ```
-     to see all available versions.
 
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
