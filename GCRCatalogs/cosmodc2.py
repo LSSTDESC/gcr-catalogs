@@ -440,10 +440,12 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
         version = StrictVersion(self.version)
         if version < StrictVersion('0.4.6'):
             quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
+
         if version < StrictVersion('0.4.4'):
             self._native_quantities.difference_update(set(q for q in self._native_quantities if (
                 q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
             )))
+
         if version <= StrictVersion('0.2'):
             quantity_modifiers['halo_id'] = 'hostHaloTag'
 
