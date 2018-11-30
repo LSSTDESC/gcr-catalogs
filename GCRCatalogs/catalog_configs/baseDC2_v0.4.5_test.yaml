@@ -17,6 +17,7 @@ version: "0.4.5"
 healpix_pixels: [564]
 
 check_md5: false
+check_size: false
 
 creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
 

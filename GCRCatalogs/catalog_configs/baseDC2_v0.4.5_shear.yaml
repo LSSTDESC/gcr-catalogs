@@ -16,4 +16,5 @@ catalogs:
     check_md5: false
     check_version: false
     check_cosmology: false
+    check_size: false
     creators: ['Patricia Larsen']

@@ -16,7 +16,9 @@ version: "1.0.0"
 
 check_md5: false
 
-creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Andrew Benson', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 
 description: |
     This is the extra-galactic catalog for the LSST-DESC data challenge DC2.
+
+included_by_default: true

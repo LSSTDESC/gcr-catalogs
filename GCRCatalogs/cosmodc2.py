@@ -8,15 +8,18 @@ from itertools import product
 from functools import partial
 import warnings
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
+import yaml
 import numpy as np
 import h5py
+import healpy as hp
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
-__version__ = '1.0.0'
+__version__ = '1.1.4'
 
+CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
 def _calc_weighted_size(size1, size2, lum1, lum2):
     return ((size1*lum1) + (size2*lum2)) / (lum1+lum2)
@@ -25,14 +28,6 @@ def _calc_weighted_size(size1, size2, lum1, lum2):
 def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
     size = _calc_weighted_size(size1, size2, lum1, lum2)
     return size * (1.0 - ell) / (1.0 + ell)
-
-
-def _calc_conv(mag, shear1, shear2):
-    slct = mag < 0.2
-    mag_corr = np.copy(mag)
-    mag_corr[slct] = 1.0 # manually changing the values for when magnification is near zero.
-    conv = 1.0 - np.sqrt(1.0/mag_corr + shear1**2 + shear2**2)
-    return conv
 
 
 def _calc_mag(conv, shear1, shear2):
@@ -128,8 +123,19 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if StrictVersion(__version__) < self.version:
             raise ValueError('Reader version {} is less than config version {} for'.format(__version__, self.version))
 
+        self.file_check_info = dict()
+        if kwargs.get('check_md5', True) or kwargs.get('check_size', True):
+            try:
+                with open(CHECK_FILE_PATH, 'r') as f:
+                    self.file_check_info = yaml.load(f)
+            except (IOError, OSError):
+                pass
+            else:
+                self.file_check_info = self.file_check_info.get(self.version, dict())
+            if not self.file_check_info:
+                warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
+
         self.lightcone = kwargs.get('lightcone', True)
-        self._md5sum = kwargs.get('md5') or {}
         self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
@@ -205,14 +211,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if config_version != catalog_version:
             raise ValueError('Catalog version {} does not match config version {} for healpix file {}'.format(catalog_version, config_version, file_name))
 
-    def _check_md5(self, file_path):
-        basename = os.path.basename(file_path)
-        if basename in self._md5sum:
-            if md5(file_path) != self._md5sum[basename]:
-                raise ValueError('md5 sum does not match for healpix file {}'.format(basename))
-        else:
-            warnings.warn('No md5 sum specified in the config file for healpix file {}'.format(basename))
-
     def _check_cosmology(self, fh, file_name, atol):
         # pylint: disable=E1101
         for name_hdf5, name_astropy in (('H_0', 'h'), ('Omega_matter', 'Om0'), ('Omega_b', 'Ob0')):
@@ -228,17 +226,33 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 raise ValueError('Mismatch in cosmological parameters ({} should be {}, not {}) for healpix file {}'.format(name_hdf5, value_config, value_catalog, file_name))
 
     def _process_metadata(self, ensure_quantity_consistent=False, # pylint: disable=W0613
-                          check_version=True, check_md5=True,
+                          check_version=True, check_md5=True, check_size=True,
                           check_cosmology=True, cosmology_atol=1e-4, **kwargs):
         sky_area = dict()
         native_quantities = None
         quantity_info = None
 
-        for (_, hpx_this), file_path in self._healpix_files.items():
-            if check_md5:
-                self._check_md5(file_path)
+        max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
+        min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
+        default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
 
+        if check_size and 'size' not in self.file_check_info:
+            check_size = False
+            warnings.warn('Not able to perform size check: no size specified in {}'.format(CHECK_FILE_PATH))
+
+        if check_md5 and 'md5' not in self.file_check_info:
+            check_md5 = False
+            warnings.warn('Not able to perform md5 check: no md5 sum specified in {}'.format(CHECK_FILE_PATH))
+
+        for (_, hpx_this), file_path in self._healpix_files.items():
             file_name = os.path.basename(file_path)
+
+            if check_size and os.path.getsize(file_path) != self.file_check_info['size'].get(file_name):
+                raise ValueError('File size does not match for healpix file {}'.format(file_name))
+
+            if check_md5 and md5(file_path) != self.file_check_info['md5'].get(file_name):
+                raise ValueError('md5 sum does not match for healpix file {}'.format(file_name))
+
             with h5py.File(file_path, 'r') as fh:
                 if check_version:
                     self._check_version(fh, file_name)
@@ -250,7 +264,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 try:
                     sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
                 except KeyError:
-                    sky_area_this = np.rad2deg(np.rad2deg(4.0*np.pi/768))
+                    sky_area_this = default_sky_area
                 if sky_area.get(hpx_this, 0) < sky_area_this:
                     sky_area[hpx_this] = sky_area_this
 
@@ -272,7 +286,8 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             with h5py.File(file_path, 'r') as fh:
                 for group in self._get_group_names(fh):
                     # pylint: disable=E1101,W0640
-                    yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+                    if len(fh[group]):
+                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
@@ -300,12 +315,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'shear_2':       (np.negative, 'shear2'),
             'shear_2_treecorr': (np.negative, 'shear2'),
             'shear_2_phosim':   'shear2',
-            'convergence': (
-                _calc_conv,
-                'magnification',
-                'shear1',
-                'shear2',
-            ),
+            'convergence': 'convergence',
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'uniqueHaloID',
             'halo_mass':     'hostHaloMass',
@@ -396,22 +406,23 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
         # add magnitudes
         for band in 'ugrizyY':
             if band != 'y' and band != 'Y':
-                quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
-                quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
-                quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
-                quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
-            quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
-            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
-            quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
-            quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
-
-        # add lensed magnitudes
-        for band in 'ugrizyY':
-            if band != 'y' and band != 'Y':
                 quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
                 quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
+                quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band)
+                quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band)
+                quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest:dustAtlas'.format(band)
+                quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'SDSS_filters/magnitude:SDSS_{}:rest'.format(band)
+
             quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
             quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+            quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower())
+            quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest:dustAtlas'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'LSST_filters/magnitude:LSST_{}:rest'.format(band.lower())
+
+            if band != 'Y':
+                quantity_modifiers['mag_{}'.format(band)] = quantity_modifiers['mag_{}_lsst'.format(band)]
+                quantity_modifiers['mag_true_{}'.format(band)] = quantity_modifiers['mag_true_{}_lsst'.format(band)]
 
         # add SEDs
         translate_component_name = {'total': '', 'disk': '_disk', 'spheroid': '_bulge'}

@@ -16,7 +16,7 @@ and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
 ## Available Catalogs
 
-You can always run the following code to see all available catalogs:
+You can always run the following code to see the up-to-date list of all available catalogs:
 ```python
 import GCRCatalogs
 sorted(GCRCatalogs.get_available_catalogs(False))
@@ -31,6 +31,13 @@ products of DESC Data Challenge 2 at the
 ["DC2 Data Product Overview"](https://confluence.slac.stanford.edu/x/oJgHDg)
 Confluence page (*DESC member only*).
 
+-  **"cosmoDC2" Extragalactic Catalogs** \
+   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
+   - `cosmoDC2_v1.1.4`: full cosmoDC2 catalog
+   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.1.4` but has only the sky area that is needed for image simulation
+   - `cosmoDC2_v1.1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4` for testing purpose
+   - `cosmoDC2_v*`: older versions (`0.1`, `0.4`, `1.0`) of cosmoDC2
+
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
    - `protoDC2`: full catalog
@@ -40,11 +47,6 @@ Confluence page (*DESC member only*).
      sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto')))
      ```
      to see all available versions.
-
--  **"cosmoDC2" Extragalactic Catalogs** \
-   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `cosmoDC2_v0.1`: a pre-release of the osmoDC2 catalog
-   - `cosmoDC2_v0.1_test`: same as `cosmoDC2_v0.1` but a smaller patch of the sky for testing purpose / faster access
 
 -  **"Buzzard" Extragalactic Catalogs** \
    *by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
@@ -59,17 +61,26 @@ Confluence page (*DESC member only*).
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_object_run1.1p`: coadd catalog for Run 1.1p
-   - `dc2_object_run1.1p_tract4850`: same as `dc2_coadd_run1.1p` but has only one tract (4850) for testing purpose / faster access
+   - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+   - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
+   - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
+   - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
+   - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
+   - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
+   - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and all native columns)
+   - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_truth_run1.1`: truth catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
+   - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
+   - `dc2_truth_run1.2_variable_lightcurve`: light curves of variable objects in the truth catalog for Run 1.2
+   - `dc2_truth_run1.2_variable_summary`: summary table of variable objects in the truth catalog for Run 1.2
+   - `dc2_truth_run1.1_static`: truth catalog for Run 1.1 (static objects only, corresponds to `proto-dc2_v2.1.2`)
 
 -  **DC2 "Reference Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
    - `dc2_reference_run1.2`: reference catalog for Run 1.2 (corresponds to `proto-dc2_v3.0`)
+   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
 
 -  **DC2 "Instance Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
@@ -79,6 +90,11 @@ Confluence page (*DESC member only*).
 -  **HSC Coadd Catalog for PDR1 XMM field** \
    *by the Hyper Suprime-Cam (HSC) Collaboration*
    - `hsc-pdr1-xmm`
+
+-  **DC2 e-images** \
+   *by LSST DESC*
+   - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
+   - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
 -  **DC1 Galaxy Catalog**
    - `dc1`: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")

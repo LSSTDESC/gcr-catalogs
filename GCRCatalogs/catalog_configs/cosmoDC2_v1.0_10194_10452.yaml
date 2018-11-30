@@ -14,12 +14,12 @@ lightcone: true
 
 version: "1.0.0"
 
-healpix_pixels: [10194, 10195, 10196, 10197, 10198, 10199, 10200, 10201, 10202, 10321, 10322, 10323, 10324, 10325, 10326, 10327, 10328, 10329, 10445, 10446, 10447, 10448, 10449, 10450,
+healpix_pixels: [10194, 10195, 10196, 10197, 10198, 10199, 10200, 10201, 10202, 10321, 10322, 10323, 10324, 10325, 10326, 10327, 10328, 10329, 10444, 10445, 10446, 10447, 10448, 10449, 10450,
                  10451, 10452]
 
 check_md5: false
 
-creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Andrew Benson', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 
 description: |
     This is the extra-galactic catalog for the LSST-DESC data challenge DC2.

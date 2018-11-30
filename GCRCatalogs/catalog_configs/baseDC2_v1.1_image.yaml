@@ -1,18 +1,18 @@
-subclass_name: cosmodc2.CosmoDC2GalaxyCatalog
+subclass_name: cosmodc2.BaseDC2GalaxyCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/cosmoDC2_v1.0.0_full_highres
-catalog_filename_template: z_{}_{}.step_all.healpix_{}.hdf5
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_v1.1
+catalog_filename_template: baseDC2_z_{}_{}_cutout_{}.hdf5
 
 cosmology:
     H0: 71.0
     Om0: 0.2648
     Ob0: 0.0448
-    sigma8: 0.8
     n_s: 0.963
+    sigma8: 0.8
 
 lightcone: true
 
-version: "1.0.0"
+version: "1.1.2"
 
 healpix_pixels: [8786, 8787, 8788, 8789, 8790, 8791, 8792, 8793, 8794, 8913, 8914, 8915, 8916, 8917, 8918, 8919, 8920, 8921, 9042, 9043, 9044, 9045, 9046, 9047, 9048, 9049,
                  9050, 9169, 9170, 9171, 9172, 9173, 9174, 9175, 9176, 9177, 9178, 9298, 9299, 9300, 9301, 9302, 9303, 9304, 9305, 9306, 9425, 9426, 9427, 9428, 9429, 9430,
@@ -22,10 +22,9 @@ healpix_pixels: [8786, 8787, 8788, 8789, 8790, 8791, 8792, 8793, 8794, 8913, 891
                  10451, 10452]
 
 check_md5: false
+check_size: false
 
-creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
+creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
 
 description: |
-    This is the extra-galactic catalog used in image simulations for the LSST-DESC data challenge DC2.
-
-included_by_default: true
+    This is the baseline catalog characterizing the galaxy-halo connection for LSST-DESC cosmoDC2.

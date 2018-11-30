@@ -5,6 +5,8 @@ DC2 Object Catalog Reader
 import os
 import re
 import warnings
+import itertools
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -16,7 +18,7 @@ __all__ = ['DC2ObjectCatalog']
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
 GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
-SCHEMA_PATH = 'schema.yaml'
+SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
@@ -65,13 +67,19 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class TableWrapper(object):
+class TableWrapper():
     """Wrapper class for pandas HDF5 storer
 
     Provides a unified API to access both fixed and table formats.
+
+    Takes a file_handle to the HDF5 file
+    An HDF group key
+    And a schema to specify dtypes and default values for missing columns.
     """
 
-    def __init__(self, file_handle, key):
+    _default_values = {'i': -1, 'b': False, 'U': ''}
+
+    def __init__(self, file_handle, key, schema=None):
         if not file_handle.is_open:
             raise ValueError('file handle has been closed!')
 
@@ -81,19 +89,36 @@ class TableWrapper(object):
         if not self.is_table and not self.storer.format_type == 'fixed':
             raise ValueError('storer format type not supported!')
 
-        self._columns = None
+        self._schema = {} if schema is None else dict(schema)
+        self._native_schema = None
         self._len = None
         self._cache = None
         self._constant_arrays = dict()
 
     @property
-    def columns(self):
-        if self._columns is None:
+    def native_schema(self):
+        """Get the native schema from either 'fixed' or 'table' formatted HDF5 files."""
+        if self._native_schema is None:
+            self._native_schema = {}
             if self.is_table:
-                self._columns = set(self.storer.non_index_axes[0][1])
+                for i in itertools.count():
+                    try:
+                        dtype = getattr(self.storer.table.attrs, 'values_block_{}_dtype'.format(i))
+                    except AttributeError:
+                        break
+                    for col in getattr(self.storer.table.attrs, 'values_block_{}_kind'.format(i)):
+                        self._native_schema[col] = {'dtype': dtype}
             else:
-                self._columns = set(c.decode() for c in self.storer.group.axis0)
-        return self._columns
+                for i in range(self.storer.nblocks):
+                    dtype = getattr(self.storer.group, 'block{}_values'.format(i)).dtype.name
+                    for col in getattr(self.storer.group, 'block{}_items'.format(i)):
+                        self._native_schema[col.decode()] = {'dtype': dtype}
+        return self._native_schema
+
+    @property
+    def columns(self):
+        """Get columns from either 'fixed' or 'table' formatted HDF5 files."""
+        return set(self.native_schema)
 
     def __len__(self):
         if self._len is None:
@@ -104,11 +129,16 @@ class TableWrapper(object):
         return self._len
 
     def __contains__(self, item):
-        return item in self.columns
+        return item in self.native_schema
 
     def __getitem__(self, key):
+        """Return the values of the column specified by 'key'
+
+        Uses cached values, if available.
+        """
         if self._cache is None:
             self._cache = self.storer.read()
+
         try:
             return self._cache[key].values
         except KeyError:
@@ -116,38 +146,69 @@ class TableWrapper(object):
 
     get = __getitem__
 
-    def _get_constant_array(self, key): # pylint: disable=W0613
-        return self._generate_constant_array('NaN', np.nan)
+    @classmethod
+    def _get_default_value(cls, dtype, key=None): # pylint: disable=W0613
+        return cls._default_values.get(np.dtype(dtype).kind, np.nan)
 
-    def _generate_constant_array(self, key, value):
+    def _get_constant_array(self, key):
+        """
+        Get a constant array for a column; `key` should be the column name.
+        Find dtype and default value in `self._schema`.
+        If not found, default to np.float64 and np.nan.
+        """
+        schema_this = self._schema.get(key, {})
+        dtype = schema_this.get('dtype', np.float64)
+        default = schema_this.get(
+            'default',
+            self._get_default_value(dtype, key)
+        )
+        return self._generate_constant_array(dtype=dtype, value=default)
+
+    def _generate_constant_array(self, dtype, value):
+        """
+        Actually generate a constant array according to `dtype` and `value`
+        """
+        dtype = np.dtype(dtype)
+        # here `key` is used to cache the constant array
+        # has nothing to do with column name
+        key = (dtype.str, value)
         if key not in self._constant_arrays:
-            self._constant_arrays[key] = np.repeat(value, len(self))
+            self._constant_arrays[key] = np.asarray(np.repeat(value, len(self)), dtype=dtype)
             self._constant_arrays[key].setflags(write=False)
         return self._constant_arrays[key]
 
     def clear_cache(self):
-        self._columns = self._len = self._cache = None
+        """
+        clear cached data
+        """
+        self._native_schema = self._len = self._cache = None
         self._constant_arrays.clear()
 
 
 class ObjectTableWrapper(TableWrapper):
     """Same as TableWrapper but add tract and patch info"""
 
-    def __init__(self, file_handle, key):
+    def __init__(self, file_handle, key, schema=None):
         key_items = key.split('_')
         self.tract = int(key_items[1])
         self.patch = ','.join(key_items[2])
-        super(ObjectTableWrapper, self).__init__(file_handle, key)
+        super(ObjectTableWrapper, self).__init__(file_handle, key, schema)
+        # Add the schema info for tract, path
+        # These values will be read by `get_constant_array`
+        self._schema['tract'] = {'dtype': 'int64', 'default': self.tract}
+        self._schema['patch'] = {'dtype': '<U', 'default': self.patch}
+
+    @classmethod
+    def _get_default_value(cls, dtype, key=None):
+        if np.dtype(dtype).kind == 'b' and key and (
+                key.endswith('_flag_bad') or key.endswith('_flag_noGoodPixels')):
+            return True
+        return super()._get_default_value(dtype, key)
 
     @property
     def tract_and_patch(self):
+        """Return a dict of the tract and patch info."""
         return {'tract': self.tract, 'patch': self.patch}
-
-    def _get_constant_array(self, key):
-        if key != 'tract' and key != 'patch':
-            key = '_NaN_'
-        value = getattr(self, key, np.nan)
-        return self._generate_constant_array(key, value)
 
 
 class DC2ObjectCatalog(BaseGenericCatalog):
@@ -158,16 +219,26 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
     groupname_pattern (str): The optional regex pattern of groups in data files
-    schema_path       (str): The optional location of the schema file
+    schema_filename   (str): The optional location of the schema file
+                             Relative to base_dir, unless specified as absolute path.
     pixel_scale     (float): scale to convert pixel to arcsec (default: 0.2)
     use_cache        (bool): Whether or not to cache read data in memory
+    is_dpdd          (bool): Whether or not to the files are already in DPDD-format
 
     Attributes
     ----------
     base_dir                     (str): The directory of data files being served
     available_tracts             (list): Sorted list of available tracts
     available_tracts_and_patches (list): Available tracts and patches as dict objects
+
+    Notes
+    -----
+    The initialization sets the version of the catalog based on the existence
+    of certain columns and sets a version accordingly.
+    This version setting should be improved and standardized as we work towardj
+    providing the version in the catalog files in the scripts in `DC2-production`.
     """
+    # pylint: disable=too-many-instance-attributes
 
     _native_filter_quantities = {'tract', 'patch'}
 
@@ -175,47 +246,78 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
         self._groupname_re = re.compile(kwargs.get('groupname_pattern', GROUP_PATTERN))
-        self._schema_path = kwargs.get('schema_path', os.path.join(self.base_dir, SCHEMA_PATH))
+
+        _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
+        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
+        self._schema_path = os.path.join(self.base_dir, _schema_filename)
+
         self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
         self.use_cache = bool(kwargs.get('use_cache', True))
 
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
+        self._schema = None
+        if self._schema_path and os.path.isfile(self._schema_path):
+            self._schema = self._generate_schema_from_yaml(self._schema_path)
+
         self._file_handles = dict()
-        self._datasets = self._generate_datasets()
+        self._datasets = self._generate_datasets() # uses self._schema when available
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        self._columns = None
-        if self._schema_path and os.path.exists(self._schema_path):
-            self._columns = self._generate_columns_from_yaml(self._schema_path)
+        if not self._schema:
+            warnings.warn('Falling back to reading all datafiles for column names')
+            self._schema = self._generate_schema_from_datafiles(self._datasets)
 
-        if not self._columns:
-            warn_msg = 'No columns found in schema file "{}".\nFalling back to reading all datafiles for column names'
-            warnings.warn(warn_msg.format(self._schema_path))
-            self._columns = self._generate_columns(self._datasets)
+        if kwargs.get('is_dpdd'):
+            self._quantity_modifiers = {col: None for col in self._schema}
+            bands = [col[0] for col in self._schema if len(col) == 5 and col.startswith('mag_')]
 
-        bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
-        self._quantity_modifiers = self._generate_modifiers(self.pixel_scale, bands)
+        else:
+            # A slightly crude way of checking for version of schema to have modelfit mag
+            # A future improvement will be to explicitly store version information in the datasets
+            # and just rely on that versioning.
+            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
+
+            if any(col.endswith('_fluxSigma') for col in self._schema):
+                dm_schema_version = 1
+            elif any(col.endswith('_fluxErr') for col in self._schema):
+                dm_schema_version = 2
+            else:
+                dm_schema_version = 3
+
+            bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
+
+            self._quantity_modifiers = self._generate_modifiers(
+                    self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
-
 
     def __del__(self):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy',
+                            has_modelfit_mag=True, dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
             pixel_scale (float): Scale of pixels in coadd images
-            bands        (list): List of photometric bands as strings
+            bands       (list):  List of photometric bands as strings
+            has_modelfit_mag (bool): Whether or not pre-calculated model fit magnitudes are present
+            dm_schema_version (int): DM schema version (1, 2, or 3)
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
+
+        if dm_schema_version not in (1, 2, 3):
+            raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
+
+        FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
             'objectId': 'id',
@@ -224,12 +326,12 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'base_SdssCentroid_x',
             'y': 'base_SdssCentroid_y',
-            'xErr': 'base_SdssCentroid_xSigma',
-            'yErr': 'base_SdssCentroid_ySigma',
+            'xErr': 'base_SdssCentroid_x{}'.format(ERR),
+            'yErr': 'base_SdssCentroid_y{}'.format(ERR),
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_flux',
+            'blendedness': 'base_Blendedness_abs_{}'.format(FLUX),
         }
 
         not_good_flags = (
@@ -257,31 +359,14 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_flux'.format(band)
+            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_{}'.format(band, FLUX)
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_fluxSigma'.format(band)
+            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR)
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
-
-            modifiers['mag_{}_cModel'.format(band)] = (
-                lambda x: -2.5 * np.log10(x) + 27.0,
-                '{}_modelfit_CModel_flux'.format(band),
-            )
-
-            modifiers['magerr_{}_cModel'.format(band)] = (
-                lambda flux, err: (2.5 * err) / (flux * np.log(10)),
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
-
-            modifiers['snr_{}_cModel'.format(band)] = (
-                np.divide,
-                '{}_modelfit_CModel_flux'.format(band),
-                '{}_modelfit_CModel_fluxSigma'.format(band),
-            )
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
@@ -290,11 +375,33 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 '{}_base_SdssShape_psf_xy'.format(band),
             )
 
+            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
+
+            if not has_modelfit_mag:
+                # The zp=27.0 is based on the default calibration for the coadds
+                # as specified in the DM code.  It's correct for Run 1.1p.
+                modifiers['mag_{}_cModel'.format(band)] = (
+                    lambda x: -2.5 * np.log10(x) + 27.0,
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
+                )
+                modifiers['magerr_{}_cModel'.format(band)] = (
+                    lambda flux, err: (2.5 * err) / (flux * np.log(10)),
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
+                    '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
+                )
+                modifiers['snr_{}_cModel'.format(band)] = (
+                    np.divide,
+                    '{}_modelfit_CModel_{}'.format(band, FLUX),
+                    '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
+                )
+
         return modifiers
 
     @staticmethod
     def _generate_info_dict(meta_path, bands='ugrizy'):
-        """Creates a 2d dictionary with information for each homonogized quantity
+        """Creates a 2d dictionary with information for each homogenized quantity
 
         Separate entries for each band are created for any key in the yaml
         dictionary at meta_path containing the substring '<band>'.
@@ -324,7 +431,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 for band in bands:
                     band_quantity = quantity.replace('<band>', band)
                     band_quantity_info = quantity_info.copy()
-                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`','{} band'.format(band))
+                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`', '{} band'.format(band))
                     info_dict[band_quantity] = band_quantity_info
 
             else:
@@ -355,7 +462,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             A list of ObjectTableWrapper(<file path>, <key>) objects
             for all files and keys
         """
-
         datasets = list()
         for fname in sorted(os.listdir(self.base_dir)):
             if not self._filename_re.match(fname):
@@ -371,7 +477,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
             for key in fh:
                 if self._groupname_re.match(key.lstrip('/')):
-                    datasets.append(ObjectTableWrapper(fh, key))
+                    datasets.append(ObjectTableWrapper(fh, key, self._schema))
                     continue
 
                 warn_msg = 'incorrect group name "{}" in {}; skipped this group'
@@ -380,14 +486,15 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return datasets
 
     @staticmethod
-    def _generate_columns_from_yaml(schema_path):
-        """Return column names based on schema in YAML file
+    def _generate_schema_from_yaml(schema_path):
+        """Return a dictionary of columns based on schema in YAML file
 
         Args:
             schema_path (string): <file path> to schema file.
 
         Returns:
-            The column names defined in the schema.
+            The columns defined in the schema.
+            A dictionary of {<column_name>: {'dtype': ..., 'default': ...}, ...}
 
         Warns:
             If one or more column names are repeated.
@@ -397,29 +504,49 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             schema = yaml.load(schema_stream)
 
         if schema is None:
-            warn_msg = 'Schema file "{}" empty.'
+            warn_msg = 'No schema can be found in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
-            return set()
 
-        columns = set(schema)
-        return columns
+        return schema
 
     @staticmethod
-    def _generate_columns(datasets):
-        """Return unique column names for given datasets
+    def _generate_schema_from_datafiles(datasets):
+        """Return the native schema for given datasets
 
         Args:
             datasets (list): A list of tuples (<file path>, <key>)
 
         Returns:
-            A set of unique column names found in all data sets
+            A dict of schema ({col_name: {'dtype': dtype}}) found in all data sets
         """
 
-        columns = set()
+        schema = {}
         for dataset in datasets:
-            columns.update(dataset.columns)
+            schema.update(dataset.native_schema)
 
-        return columns
+        return schema
+
+    def generate_schema_yaml(self, overwrite=False):
+        """
+        Generate the schema from the datafiles and write as a yaml file.
+        This function write the schema yaml file to the schema location specified for the catalog.
+        One needs to set `overwrite=True` to overwrite an existing schema file.
+        """
+        if self._schema_path and os.path.isfile(self._schema_path):
+            if not overwrite:
+                raise RuntimeError('Schema file `{}` already exists! Set `overwrite=True` to overwrite.'.format(self._schema_path))
+            warnings.warn('Overwriting schema file `{0}`, which is backed up at `{0}.bak`'.format(self._schema_path))
+            shutil.copyfile(self._schema_path, self._schema_path + '.bak')
+
+        schema = self._generate_schema_from_datafiles(self._datasets)
+
+        for col, schema_this in schema.items():
+            if schema_this['dtype'] == 'bool' and (
+                    col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
+                schema_this['default'] = True
+
+        with open(self._schema_path, 'w') as schema_stream:
+            yaml.dump(schema, schema_stream)
 
     @property
     def available_tracts_and_patches(self):
@@ -477,9 +604,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
 
-        return self._columns.union(self._native_filter_quantities)
+        return set(self._schema).union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
+        # pylint: disable=C0330
         for dataset in self._datasets:
             if (native_filters is None or
                 native_filters.check_scalar(dataset.tract_and_patch)):
