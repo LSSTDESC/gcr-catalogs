@@ -139,6 +139,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
+        self.halo_mass_def = "FoF, b=0.168"
 
     def _get_group_names(self, fh): # pylint: disable=W0613
         return ['galaxyProperties']
