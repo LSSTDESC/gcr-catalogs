@@ -436,15 +436,15 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             key = 'sed_{}_{}{}{}'.format(start, width, translate_component_name[component], '' if dust else '_no_host_extinction')
             quantity_modifiers[key] = quantity
 
-        #FIXME: remove this section when these native quantity really exist.
-        self._native_quantities.difference_update(set(q for q in self._native_quantities if (
-            q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
-        )))
-
         # make quantity modifiers work in older versions
         version = StrictVersion(self.version)
         if version < StrictVersion('0.4.6'):
             quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
+
+        if version < StrictVersion('0.4.4'):
+            self._native_quantities.difference_update(set(q for q in self._native_quantities if (
+                q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
+            )))
 
         if version <= StrictVersion('0.2'):
             quantity_modifiers['halo_id'] = 'hostHaloTag'
