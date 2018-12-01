@@ -1,6 +1,7 @@
 """
 composite reader
 """
+import warnings
 from GCR import CompositeCatalog, MATCHING_FORMAT, MATCHING_ORDER
 from .register import load_catalog, load_catalog_from_config_dict
 
@@ -22,4 +23,6 @@ class CompositeReader(CompositeCatalog):
             elif method == 'MATCHING_ORDER':
                 method = MATCHING_ORDER
             methods.append(method)
-        super(CompositeReader, self).__init__(instances, identifiers, methods, **kwargs)
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'CompositeCatalog is still an experimental feature')
+            super(CompositeReader, self).__init__(instances, identifiers, methods, **kwargs)
