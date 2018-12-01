@@ -18,6 +18,8 @@ healpix_pixels: [8786, 8787, 8788, 8789, 8790, 8791, 8792, 8793, 8794, 8913, 891
                 ]
 
 check_md5: false
+check_size: false
+check_cosmology: false
 
 creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 

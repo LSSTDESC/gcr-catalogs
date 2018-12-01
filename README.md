@@ -33,10 +33,11 @@ Confluence page (*DESC member only*).
 
 -  **"cosmoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `cosmoDC2_v1.1.4`: full cosmoDC2 catalog
-   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.1.4` but has only the sky area that is needed for image simulation
-   - `cosmoDC2_v1.1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4` for testing purpose
-   - `cosmoDC2_v*`: older versions (`0.1`, `0.4`, `1.0`) of cosmoDC2
+   - `cosmoDC2_v1.0`: full cosmoDC2 catalog (v1.0)
+   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but with only the sky area that is needed for image simulation (Run 2.0)
+   - `cosmoDC2_v1.0_small`: 16 contiguous healpixels of `cosmoDC2_v1.0` for testing purpose
+   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0_image` but with cosmoDC2 v1.1.4 for Run 2.1
+   - `cosmoDC2_v1.1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
 
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
@@ -44,7 +45,7 @@ Confluence page (*DESC member only*).
    - `protoDC2_test`: same as `protoDC2` but this one skips time-consuming md5 check
    - `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog. You can run
      ```python
-     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto')))
+     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto-dc2_')))
      ```
      to see all available versions.
 
