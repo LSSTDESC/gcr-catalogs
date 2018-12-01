@@ -17,7 +17,7 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
-__version__ = '1.1.2'
+__version__ = '1.1.4'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -139,6 +139,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
+        self.halo_mass_def = kwargs.get('halo_mass_def', 'FoF, b=0.168')
 
     def _get_group_names(self, fh): # pylint: disable=W0613
         return ['galaxyProperties']
@@ -435,15 +436,15 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             key = 'sed_{}_{}{}{}'.format(start, width, translate_component_name[component], '' if dust else '_no_host_extinction')
             quantity_modifiers[key] = quantity
 
-        #FIXME: remove this section when these native quantity really exist.
-        self._native_quantities.difference_update(set(q for q in self._native_quantities if (
-            q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
-        )))
-
         # make quantity modifiers work in older versions
         version = StrictVersion(self.version)
         if version < StrictVersion('0.4.6'):
             quantity_modifiers['halo_id'] = 'UMachineNative/halo_id'
+
+        if version < StrictVersion('0.4.4'):
+            self._native_quantities.difference_update(set(q for q in self._native_quantities if (
+                q.startswith('emissionLines/') or q.endswith('ContinuumLuminosity')
+            )))
 
         if version <= StrictVersion('0.2'):
             quantity_modifiers['halo_id'] = 'hostHaloTag'

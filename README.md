@@ -33,11 +33,11 @@ Confluence page (*DESC member only*).
 
 -  **"cosmoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `cosmoDC2_v1.0`: full cosmoDC2 catalog
-   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but has only the sky area that is needed for image simulation
-   - `cosmoDC2_v1.0_image_addon_knots`: same as `cosmoDC2_v1.0_image` but with knots from Francois Lanusse
-   - `cosmoDC2_v1.0_9556`: one healpixel of `cosmoDC2_v1.0` for testing purpose
-   - `cosmoDC2_v0.*`: older versions (v0.1, v0.4) of cosmoDC2
+   - `cosmoDC2_v1.0`: full cosmoDC2 catalog (v1.0)
+   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but with only the sky area that is needed for image simulation (Run 2.0)
+   - `cosmoDC2_v1.0_small`: 16 contiguous healpixels of `cosmoDC2_v1.0` for testing purpose
+   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0_image` but with cosmoDC2 v1.1.4 for Run 2.1
+   - `cosmoDC2_v1.1.4_small`: 16 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
 
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
@@ -45,7 +45,7 @@ Confluence page (*DESC member only*).
    - `protoDC2_test`: same as `protoDC2` but this one skips time-consuming md5 check
    - `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog. You can run
      ```python
-     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto')))
+     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto-dc2_')))
      ```
      to see all available versions.
 
@@ -65,7 +65,9 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
-   - `dc2_object_run1.2p_dpdd_only`: static object catalog for Run 1.2p (with *only* DPDD columns)
+   - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
+   - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
+   - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
    - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and all native columns)
    - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
