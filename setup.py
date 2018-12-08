@@ -29,7 +29,7 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.3'],
+    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.7'],
     extras_require={
         'protodc2': ['h5py'],
         'cosmodc2': ['h5py', 'healpy'],
