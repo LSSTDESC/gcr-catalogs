@@ -9,7 +9,7 @@ from astropy.io import fits
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 
-__all__ = ['RedMapperCatalog']
+__all__ = ['RedMapperLegacyCatalog']
 
 
 class FitsFile(object):
@@ -25,7 +25,7 @@ class FitsFile(object):
         del self._file_handle
 
 
-class RedMapperCatalog(BaseGenericCatalog):
+class RedMapperLegacyCatalog(BaseGenericCatalog):
     """
     Buzzard galaxy catalog class. Uses generic quantity and filter mechanisms
     defined by BaseGenericCatalog class.
