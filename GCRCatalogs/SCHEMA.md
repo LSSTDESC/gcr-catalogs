@@ -139,3 +139,20 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
+
+## Schema for DC2 reference catalogs
+
+DC2 reference catalogs correspond to DC2 Truth Catalog such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`.
+Here are the native quantities:
+
+Quantity Label | Unit | Definition
+--- | --- | ---
+healpix_2048| - | Healpix index at nside 2048 (`nest=True`)
+object_id| - | Unique integer identifier
+star| - | ?
+agn| - | ?
+sprinkled| - | ?
+ra| degree | Right Ascension
+dec| degree | Declination
+redshift| - | Cosmological redshift (with line-of-sight motion?)
+`<band>`| - | Apparent magnitude (not lensed?) in `band` (u, g, r, i, z).
