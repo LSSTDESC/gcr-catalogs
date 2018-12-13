@@ -155,4 +155,4 @@ sprinkled| - | ?
 ra| degree | Right Ascension
 dec| degree | Declination
 redshift| - | Cosmological redshift (with line-of-sight motion?)
-`<band>`| - | Apparent magnitude (not lensed?) in `band` (u, g, r, i, z).
+`<band>`| - | Apparent magnitude (not lensed?) in `band` (u, g, r, i, z, y).
