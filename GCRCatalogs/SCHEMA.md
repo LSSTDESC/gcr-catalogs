@@ -142,17 +142,13 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 
 ## Schema for DC2 reference catalogs
 
-DC2 reference catalogs correspond to DC2 Truth Catalog such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`.
-Here are the native quantities:
+DC2 reference catalogs correspond to DC2 Truth Catalog such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`
+Definition of quantities can be accessed using `get_quantity_info`:
 
-Quantity Label | Unit | Definition
---- | --- | ---
-healpix_2048| - | Healpix index at nside 2048 (`nest=True`)
-object_id| - | Unique integer identifier
-star| - | ?
-agn| - | ?
-sprinkled| - | ?
-ra| degree | Right Ascension
-dec| degree | Declination
-redshift| - | Cosmological redshift (with line-of-sight motion?)
-`<band>`| - | Apparent (Absolute?) magnitude (not lensed?) in `band` (u, g, r, i, z, y).
+```python
+cat = GCRCatalogs.load_catalog('dc2_truth_run1.2_static')
+cat.get_quantity_info('healpix_2048')
+# {'description': 'healpixel containing the object (nside=2048; nested)'}
+```
+
+Note that the availability and definition of native quantities in the DC2 reference catalogs are more likely to change than the ones defined in the DC2 Coadd Catalogs for example.
