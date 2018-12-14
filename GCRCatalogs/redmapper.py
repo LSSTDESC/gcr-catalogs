@@ -64,6 +64,7 @@ class RedmapperCatalog(BaseGenericCatalog):
             'redshift_true_cg': 'clusters/cg_spec_z',
             'maskfrac': 'clusters/maskfrac',
             'cluster_id_member': 'members/mem_match_id',
+            'id_member': 'members/id',
             'ra_member': 'members/ra',
             'dec_member': 'members/dec',
             'refmag_member': 'members/refmag',
@@ -79,6 +80,7 @@ class RedmapperCatalog(BaseGenericCatalog):
             self._quantity_modifiers['ra_cen_%d' % (i)] = 'clusters/ra_cent/%d' % (i)
             self._quantity_modifiers['dec_cen_%d' % (i)] = 'clusters/dec_cent/%d' % (i)
             self._quantity_modifiers['p_cen_%d' % (i)] = 'clusters/p_cen/%d' % (i)
+            self._quantity_modifiers['id_cen_%d' % (i)] = 'clusters/id_cent/%d' % (i)
 
         # Add magnitudes
         for i, band in enumerate(['g', 'r', 'i', 'z', 'y']):
@@ -86,7 +88,7 @@ class RedmapperCatalog(BaseGenericCatalog):
             self._quantity_modifiers['magerr_%s_lsst_member' % (band)] = 'members/mag_err/%d' % (i)
 
     def _iter_native_dataset(self, native_filters=None):
-        if not native_filters:
+        if native_filters is not None:
             raise RuntimeError("*native_filters* not supported")
 
         yield functools.partial(self._native_quantity_getter)
