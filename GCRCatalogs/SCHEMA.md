@@ -140,10 +140,9 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 
-## Schema for DC2 reference catalogs
+## Schema for DC2 truth catalogs
 
-DC2 reference catalogs correspond to DC2 Truth Catalog such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`
-Definition of quantities can be accessed using `get_quantity_info`:
+DC2 truth catalogs correspond to catalogs such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`. Definition of quantities can be accessed using `get_quantity_info`:
 
 ```python
 cat = GCRCatalogs.load_catalog('dc2_truth_run1.2_static')
@@ -151,4 +150,4 @@ cat.get_quantity_info('healpix_2048')
 # {'description': 'healpixel containing the object (nside=2048; nested)'}
 ```
 
-Note that the availability and definition of native quantities in the DC2 reference catalogs are more likely to change than the ones defined in the DC2 Coadd Catalogs for example.
+Note that the availability and definition of native quantities in the DC2 truth catalogs are more likely to change than the ones defined in the DPDD-like object catalogs for example.
