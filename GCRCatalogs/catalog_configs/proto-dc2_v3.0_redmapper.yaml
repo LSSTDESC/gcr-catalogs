@@ -1,4 +1,4 @@
-subclass_name: redmapper.RedMapperCatalog
+subclass_name: redmapper.RedMapperLegacyCatalog
 
 catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/
 catalog_path_template:
