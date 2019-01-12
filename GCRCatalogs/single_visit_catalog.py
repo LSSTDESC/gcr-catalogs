@@ -9,9 +9,9 @@ __all__ = ['SingleVisitCatalog']
 
 available_filters = ['u', 'g', 'r', 'i', 'z', 'y']
 
-def asPandas(cat, cls=None, copy=False, unviewable="copy"):
+def asDict(cat, cls=None, copy=False, unviewable="copy"):
     """
-    Function to return a pandas dataframe view into a DM catalog.
+    Function to return a dicionary view into a DM catalog.
 
     **This function is a simple modification of the exisiting asAstropy**
     http://doxygen.lsst.codes/stack/doxygen/x_masterDoxyDoc/classlsst_1_1afw_1_1table_1_1base_1_1base_continued_1_1_catalog.html#af891786464b1e84c7f56af0101212e95
@@ -31,8 +31,7 @@ def asPandas(cat, cls=None, copy=False, unviewable="copy"):
                               - 'skip': do not include unviewable fields in the Astropy Table.
                             This option is ignored if copy=True.
     """
-    if cls is None:
-        cls = pd.DataFrame
+ 
     columns=dict()
     if unviewable not in ("copy", "raise", "skip"):
         raise ValueError("'unviewable' must be one of 'copy', 'raise', or 'skip'")
@@ -70,8 +69,17 @@ def asPandas(cat, cls=None, copy=False, unviewable="copy"):
             if copy:
                 data = data.copy()
         columns.update({name:data})
-    return cls(columns, copy=False)
+    return columns
 
+def append_dict(dict1,dict2):
+    try:
+        assert(dict1.keys() == dict2.keys())
+    except AssertionError:
+        print('The dictionaries should have the same keys')
+
+    for key in dict1.keys():
+        dict1[key] = np.concatenate([dict1[key], dict2[key]]).ravel()
+    return dict1
 
 class SingleVisitCatalog(BaseGenericCatalog):
     """
@@ -96,13 +104,13 @@ class SingleVisitCatalog(BaseGenericCatalog):
         sensors in the requested visit(s) will be queried.
     """
 
-    def __subclass_init(self, repo_path, filter_band, visit=None,
+    def _subclass_init(self, repo_path, filter_band, visit=None,
                         detector=None, **kwargs):
        
         if filter_band in available_filters:
             self.band = filter_band      
         else:
-            raise Exception('filter_band should be one of the LSST filters (u,g,r,i,z,y')
+            raise Exception('filter_band should be one of the LSST filters (u,g,r,i,z,y)')
         if (detector is not None) & (detector not in np.arange(0,189)):
             raise Exception('detector should be None or an integer in the range [0,189)')
         else:
@@ -120,25 +128,22 @@ class SingleVisitCatalog(BaseGenericCatalog):
                     if (detector is None) | (visitId['detector']==detector):
                         self.visit_list.append(visitId)
 
-    def _pd_read_visit(self, visitId, **kwargs):
-        return butler.get('src', visitId).asPandas()
+    def _read_visit(self, visitId, **kwargs):
+        return asDict(self.butler.get('src', visitId))
 
-    def load_single_catalog(self, visit, detector, **kwargs):
-        _ref = '{}/{}'.format(visit, detector)
-        visitId = {'filter': self.band, 'visit': visit, 'detector': detector}
-        if _ref not in self._data:
-            try:
-                self._data[_ref] = self._pd_read_visit(visitId)
-            except MemoryError:
-                if not self._data:
-                    raise
-                self._data.clear()
-                gc.collect()
-                return self.load_single_catalog(visitId)
-        return self._data[_ref]
+    def _load_single_catalog(self, visit_list, **kwargs): 
+        for i, visitId in enumerate(visit_list):
+            if i==0:
+               self._data = self._read_visit(visitId)
+            else:
+               self._data = append_dict(self._data,self._read_visit(visitId))
+        return self._data
+    
+    def load_single_catalog(self, **kwargs):
+        return self._load_single_catalog(self.visit_list)
 
     def _native_quantity_getter(self, native_quantity):
-        return self.load_single_catalog(visit, detector)[native_quantity].values
+        return self._data[native_quantity]
     
     def _iter_native_dataset(self, native_filters=None):
         if native_filters is not None:
@@ -146,4 +151,4 @@ class SingleVisitCatalog(BaseGenericCatalog):
         yield self._native_quantity_getter
 
     def _generate_native_quantity_list(self):
-        return self.load_single_catalog(self.visit_list[0]).keys() # All files have the same exact columns 
+        return self.load_single_catalog().keys() # All files have the same exact columns 
