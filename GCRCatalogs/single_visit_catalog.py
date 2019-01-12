@@ -3,7 +3,7 @@ import numpy as np
 import yaml
 from GCR import BaseGenericCatalog
 from lsst.daf.persistence import Butler
-
+from lsst.afw.image import Calib
 __all__ = ['SingleVisitCatalog']
 
 available_filters = ['u', 'g', 'r', 'i', 'z', 'y']
@@ -128,8 +128,21 @@ class SingleVisitCatalog(BaseGenericCatalog):
                         self.visit_list.append(visitId)
 
     def _read_visit(self, visitId, **kwargs):
-        return asDict(self.butler.get('src', visitId))
-
+        aux_dict =  asDict(self.butler.get('src', visitId))
+        # calib contains the zeropoints and is contained in the calexp
+        calib = Calib(self.butler.get('calexp_md', visitId))
+        calib.setThrowOnNegativeFlux(False)
+        aux_keys = []
+        # We select the columns with fluxes (and fluxErr)
+        for _key in aux_dict.keys():
+            if 'instFlux' in _key:
+                aux_keys.append(_key)
+        # We add the magnitudes
+        for _key in aux_keys:
+            aux_key = _key
+            #getMagnitude is a little finicky and it only accepts float (not float32...)
+            aux_dict[aux_key.replace('instFlux','mag')] = calib.getMagnitude(aux_dict[_key].astype('float'))
+        return aux_dict
     def _load_single_catalog(self, visit_list, **kwargs): 
         for i, visitId in enumerate(visit_list):
             if i==0:
