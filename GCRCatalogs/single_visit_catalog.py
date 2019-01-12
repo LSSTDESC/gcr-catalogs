@@ -1,6 +1,5 @@
 from __future__ import division, print_function
 import numpy as np
-import pandas as pd
 import yaml
 from GCR import BaseGenericCatalog
 from lsst.daf.persistence import Butler
