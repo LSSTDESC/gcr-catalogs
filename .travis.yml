@@ -8,7 +8,6 @@ before_install:
 - sudo apt-get install -y freetds-dev
 
 install:
-- pip install --upgrade numpy
 - pip install .[full]
 - pip install pylint nose
 
