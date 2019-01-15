@@ -4,4 +4,4 @@ filename_pattern: 'object_tract_4850\.hdf5$'
 description: 'DC2 Run 1.2i Object Catalog Tract 4850'
 creators: ['Michael Wood-Vasey']
 included_by_default: true
-pixel_scale: 0.185
+pixel_scale: 0.2
