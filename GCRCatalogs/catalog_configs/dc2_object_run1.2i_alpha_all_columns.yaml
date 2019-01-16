@@ -4,5 +4,4 @@ schema_filename: schema.yaml
 filename_pattern: 'object_tract_\d+\.hdf5$'
 description: DC2 Run 1.2i Object Catalog - Prototype Processing
 creators: ['Michael Wood-Vasey']
-included_by_default: true
 pixel_scale: 0.2
