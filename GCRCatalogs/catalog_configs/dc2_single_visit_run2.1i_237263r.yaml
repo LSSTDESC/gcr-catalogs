@@ -1,6 +1,6 @@
-subclass_name: single_visit_catalog.SingleVisitCatalog
+subclass_name: butler_interface.SingleVisitCatalog
 
-repo_path: /global/cscratch1/sd/jchiang8/desc/Run2.1i/prod_run_2018-12-21/output_2018-12-22/rerun/jchiang/w_2018_49
+repo: /global/cscratch1/sd/jchiang8/desc/Run2.1i/prod_run_2018-12-21/output_2018-12-22/rerun/jchiang/w_2018_49
 
 filter_band: r
 
@@ -8,6 +8,3 @@ visit: 237263
 
 description: |
     Example of DC2 run2.1i single visit catalog (full focal plane).
-
-included_by_default: true
-
