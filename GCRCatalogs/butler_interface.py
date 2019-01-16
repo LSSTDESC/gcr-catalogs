@@ -51,12 +51,18 @@ class SimpleButlerInterface(BaseGenericCatalog):
             return None
         return data
 
+    def _generate_quantity_getter(self, dataId):
+        data = self._get_data(dataId)
+        if data is None:
+            return
+        return data.get
+
     def _iter_native_dataset(self, native_filters=None):
         for dataId in self._dataId_cache:
             if native_filters is None or native_filters.check_scalar(dataId):
-                data = self._get_data(dataId)
-                if data is not None:
-                    yield data.get
+                quantity_getter = self._generate_quantity_getter(dataId)
+                if quantity_getter is not None:
+                    yield quantity_getter
 
     def _generate_native_quantity_list(self):
         return self._columns
@@ -89,16 +95,21 @@ class SingleVisitCatalog(SimpleButlerInterface):
 
         super()._subclass_init(repo, 'src', dataId, **kwargs)
 
-        self._calib = None
-        for dataId in self._dataId_cache:
-            calexp_md = self._get_data(dataId, 'calexp_md')
-            if calexp_md is not None:
-                self._calib = Calib(calexp_md)
-                break
+        self._magnitudes = {c.replace('instFlux', 'mag'): c for c in self._columns if 'instFlux' in c}
 
-        if self._calib is not None:
-            self._calib.setThrowOnNegativeFlux(False)
-            self._quantity_modifiers = {
-                c.replace('instFlux', 'mag'): (self._calib.getMagnitude, c) \
-                for c in self._columns if 'instFlux' in c
-            }
+    def _generate_quantity_getter(self, dataId):
+        data = self._get_data(dataId)
+        if data is None:
+            return
+
+        calib = Calib(self._get_data(dataId, 'calexp_md'))
+
+        def _quantity_getter(quantity):
+            if quantity in self._magnitudes:
+                return calib.getMagnitude(data.get(self._magnitudes[quantity]))
+            return data.get(quantity)
+
+        return _quantity_getter
+
+    def _generate_native_quantity_list(self):
+        return list(self._columns) + list(self._magnitudes)
