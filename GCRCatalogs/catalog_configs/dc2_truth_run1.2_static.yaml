@@ -1,8 +1,1 @@
-subclass_name: dc2_truth.DC2TruthCatalogReader
-
-filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run_1.2_trial_static.db
-
-description: |
-    Truth catalog for Run 1.2. Static objects.
-
-included_by_default: true
+alias: dc2_truth_run1.2_static_no_extinction
