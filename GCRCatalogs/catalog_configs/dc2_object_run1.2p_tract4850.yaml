@@ -1,7 +1,7 @@
 subclass_name: dc2_object.DC2ObjectCatalog
-base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2p/object_catalog
-filename_pattern: 'merged_tract_4850\.hdf5$'
+base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2p/object_catalog_v4
+filename_pattern: 'object_tract_4850\.hdf5$'
 description: 'DC2 Run 1.2p Object Catalog Tract 4850'
-creators: ['Stephane Plaszczynski']
+creators: ['Michael Wood-Vasey']
 included_by_default: true
-pixel_scale: 0.185
+pixel_scale: 0.2
