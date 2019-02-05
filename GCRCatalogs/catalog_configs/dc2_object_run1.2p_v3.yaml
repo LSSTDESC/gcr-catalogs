@@ -4,5 +4,4 @@ schema_filename: trim_schema.yaml
 filename_pattern: 'trim_merged_tract_\d+\.hdf5$'
 description: DC2 Run 1.2p Object Catalog DPDD-columns (with only DPDD columns and native columns needed for the DPDD columns)
 creators: ['Stephane Plaszczynski']
-included_by_default: true
 pixel_scale: 0.185
