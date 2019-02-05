@@ -149,10 +149,12 @@ def load_catalog(catalog_name, config_overwrite=None):
         try:
             online_config = load_yaml(url)
         except (requests.RequestException, yaml.error.YAMLError):
-            warnings.warn('Version check skipped. Not able to retrive or load online config file {}'.format(url))
+            pass
         else:
             if config['alias'] != online_config.get('alias'):
-                warnings.warn('`{}` points to local version `{}`, differs from online version `{}`'.format(
+                warnings.warn('`{}` is currently an alias of `{}`.'
+                'Please be advised that it will soon change to point to an updated version `{}`.'
+                'The updated version is already available in the master branch.'.format(
                     catalog_name,
                     config['alias'],
                     online_config.get('alias'),
