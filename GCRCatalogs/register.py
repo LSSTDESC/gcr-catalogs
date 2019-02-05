@@ -172,4 +172,8 @@ def load_catalog(catalog_name, config_overwrite=None):
 
 
 available_catalogs = get_available_configs(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
-_available_catalogs_default = {k: resolve_config_alias(v) for k, v in available_catalogs.items() if v.get('included_by_default')}
+_available_catalogs_default = {
+    k: resolve_config_alias(v)
+    for k, v in available_catalogs.items()
+    if v.get('included_by_default') or v.get('include_in_default_catalog_list')
+}
