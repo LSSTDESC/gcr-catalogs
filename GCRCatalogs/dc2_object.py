@@ -366,6 +366,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
             modifiers['cModelFlux_{}'.format(band)] = '{}_modelfit_CModel_{}'.format(band, FLUX)
             modifiers['cModelFluxErr_{}'.format(band)] = '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR)
+            modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
