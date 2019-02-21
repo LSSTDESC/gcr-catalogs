@@ -36,9 +36,12 @@ class PhotoZCatalog(BaseGenericCatalog):
         else:
             self._metadata = self.generate_metadata()
 
+        self._n_pdf_bins = len(self._metadata['pdf_bin_centers'])
+
         self._quantity_modifiers = {
             'id': 'ID',
             'pz_z_peak': 'z_peak',
+            'pz_pdf_full': '_full_pdf',
         }
         for i, z in enumerate(self._metadata['pdf_bin_centers']):
             z_str = '{:.3f}'.format(z)
@@ -109,5 +112,7 @@ class PhotoZCatalog(BaseGenericCatalog):
                 def native_quantity_getter(native_quantity):
                     # pylint: disable=W0640
                     # variables (df and slice_this) intentionally defined in loop
+                    if native_quantity == '_full_pdf':
+                        return df.iloc[slice_this, :self._n_pdf_bins].values
                     return df[native_quantity].values[slice_this]
                 yield native_quantity_getter
