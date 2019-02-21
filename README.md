@@ -39,7 +39,7 @@ Confluence page (*DESC member only*).
    - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0_image` but with cosmoDC2 v1.1.4 for Run 2.1
    - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
    - `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image`.
-   
+
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
    - `protoDC2`: full catalog
@@ -64,6 +64,7 @@ Confluence page (*DESC member only*).
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+   - `dc2_object_run1.2i_with_pz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `pz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
    - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
