@@ -20,7 +20,12 @@ __all__ = ['PhotoZCatalog']
 
 FILE_PATTERN = r'run\d\.\d+[a-z]+_PZ_tract_\d+\.h5$'
 METADATA_FILENAME = 'metadata.yaml'
-
+PDF_BIN_INFO = {
+    'start': 0.005,
+    'stop': 1.01,
+    'step': 0.01,
+    'decimals_to_round': 3,
+}
 
 class PhotoZCatalog(BaseGenericCatalog):
 
@@ -30,20 +35,26 @@ class PhotoZCatalog(BaseGenericCatalog):
         _metadata_filename = kwargs.get('metadata_filename', METADATA_FILENAME)
         self._metadata_path = os.path.join(self.base_dir, _metadata_filename)
 
+        self._pdf_bin_info = kwargs.get('pdf_bin_info', PDF_BIN_INFO)
+        self.pdf_bin_centers = np.round(np.arange(
+            self._pdf_bin_info['start'],
+            self._pdf_bin_info['stop'],
+            self._pdf_bin_info['step'],
+        ), self._pdf_bin_info['decimals_to_round'])
+        self._n_pdf_bins = len(self.pdf_bin_centers)
+
         if self._metadata_path and os.path.isfile(self._metadata_path):
             with open(self._metadata_path, 'r') as meta_stream:
                 self._metadata = yaml.load(meta_stream)
         else:
             self._metadata = self.generate_metadata()
 
-        self._n_pdf_bins = len(self._metadata['pdf_bin_centers'])
-
         self._quantity_modifiers = {
             'id': 'ID',
             'pz_z_peak': 'z_peak',
             'pz_pdf_full': '_full_pdf',
         }
-        for i, z in enumerate(self._metadata['pdf_bin_centers']):
+        for i, z in enumerate(self.pdf_bin_centers):
             z_str = '{:.3f}'.format(z)
             z_str = z_str.replace('.', '_')
             self._quantity_modifiers['pz_pdf_z{}'.format(z_str)] = i
@@ -57,7 +68,7 @@ class PhotoZCatalog(BaseGenericCatalog):
         """
         generate metadata
         """
-        datasets = list()
+        meta = list()
         for fname in sorted(os.listdir(self.base_dir)):
             if not self._filename_re.match(fname):
                 continue
@@ -84,12 +95,7 @@ class PhotoZCatalog(BaseGenericCatalog):
             indices = np.vstack((indices[:-1], indices[1:])).T
             meta_tract['patches'] = [{'patch': patches[i], 'slice': (i, j)} for i, j in indices]
 
-            datasets.append(meta_tract)
-
-        meta = {
-            'datasets': datasets,
-            'pdf_bin_centers': np.round(np.linspace(0.005, 1.005, 101), 3).tolist(),
-        }
+            meta.append(meta_tract)
 
         if write_to_yaml:
             if self._metadata_path and os.path.isfile(self._metadata_path):
@@ -102,7 +108,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         current_fname = None
-        for meta_tract in self._metadata['datasets']:
+        for meta_tract in self._metadata:
             for meta_patch in meta_tract['patches']:
                 tract_patch = {'tract': meta_tract['tract'], 'patch': meta_patch['patch']}
                 if native_filters and not native_filters.check_scalar(tract_patch):
