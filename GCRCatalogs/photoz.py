@@ -75,6 +75,10 @@ class PhotoZCatalog(BaseGenericCatalog):
                 'filename': fname,
             }
 
+            # Each file contains all patches in one tract,
+            # but we want to be able to iterate over patches as well.
+            # Here, we find the indices where the adjacent patch values differ,
+            # and we record the slice indices for each patch.
             patches = df['patch'].values.astype('<U')
             indices = np.flatnonzero(np.concatenate(([True], patches[1:] != patches[:-1], [True])))
             indices = np.vstack((indices[:-1], indices[1:])).T
