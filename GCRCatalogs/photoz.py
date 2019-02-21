@@ -107,5 +107,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
                 slice_this = slice(*meta_patch['slice'])
                 def native_quantity_getter(native_quantity):
+                    # pylint: disable=W0640
+                    # variables (df and slice_this) intentionally defined in loop
                     return df[native_quantity].values[slice_this]
                 yield native_quantity_getter
