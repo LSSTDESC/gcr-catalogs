@@ -48,6 +48,23 @@ def calc_cov(ixx_err, iyy_err, ixy_err):
     return out_data.transpose()
 
 
+def convert_flux_to_nanoJansky(flux, dm_ref_zp=27):
+    """Convert the listed DM coadd-reported flux values to nanoJansky.
+
+    Eventually this function should be a no-op.  But presently
+    The processing of Run 1.1, 1.2 to date (2019-02-17) have
+    calibrated flux values with respect to a reference ZP=27 mag
+    The reference catalog is on an AB system.
+    Re-check dm_ref_zp if calibration is updated.
+    Eventually we will get nJy from the final calibrated DRP processing.
+    """
+    AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
+    AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky  # 9 is from nano=10**(-9)
+    calibrated_flux_to_nanoJansky = 10**((AB_mag_zp_wrt_nanoJansky - dm_ref_zp)/2.5)
+
+    return calibrated_flux_to_nanoJansky * flux
+
+
 def create_basic_flag_mask(*flags):
     """Generate a mask for a set of flags
 
@@ -319,6 +336,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
         ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
+
         modifiers = {
             'objectId': 'id',
             'parentObjectId': 'parent',
@@ -359,13 +377,18 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}'.format(band)] = '{}_base_PsfFlux_{}'.format(band, FLUX)
+            modifiers['psFlux_{}'.format(band)] = (convert_flux_to_nanoJansky,
+                                                   '{}_base_PsfFlux_{}'.format(band, FLUX))
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}'.format(band)] = '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR)
+            modifiers['psFluxErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
+                                                      '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
+
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
-            modifiers['cModelFlux_{}'.format(band)] = '{}_modelfit_CModel_{}'.format(band, FLUX)
-            modifiers['cModelFluxErr_{}'.format(band)] = '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR)
+            modifiers['cModelFlux_{}'.format(band)] = (convert_flux_to_nanoJansky,
+                                                       '{}_modelfit_CModel_{}'.format(band, FLUX))
+            modifiers['cModelFluxErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
+                                                          '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
             modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
