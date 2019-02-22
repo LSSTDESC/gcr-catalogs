@@ -36,12 +36,12 @@ class PhotoZCatalog(BaseGenericCatalog):
         self._metadata_path = os.path.join(self.base_dir, _metadata_filename)
 
         self._pdf_bin_info = kwargs.get('pdf_bin_info', PDF_BIN_INFO)
-        self.pdf_bin_centers = np.round(np.arange(
+        self.pz_pdf_bin_centers = np.round(np.arange(
             self._pdf_bin_info['start'],
             self._pdf_bin_info['stop'],
             self._pdf_bin_info['step'],
         ), self._pdf_bin_info['decimals_to_round'])
-        self._n_pdf_bins = len(self.pdf_bin_centers)
+        self._n_pdf_bins = len(self.pz_pdf_bin_centers)
 
         if self._metadata_path and os.path.isfile(self._metadata_path):
             with open(self._metadata_path, 'r') as meta_stream:
@@ -53,7 +53,7 @@ class PhotoZCatalog(BaseGenericCatalog):
             'pz_z_peak': 'z_peak',
             'pz_pdf_full': '_full_pdf',
         }
-        for i, z in enumerate(self.pdf_bin_centers):
+        for i, z in enumerate(self.pz_pdf_bin_centers):
             z_str = '{:.3f}'.format(z)
             z_str = z_str.replace('.', '_')
             self._quantity_modifiers['pz_pdf_z{}'.format(z_str)] = i
