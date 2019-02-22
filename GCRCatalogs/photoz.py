@@ -50,7 +50,6 @@ class PhotoZCatalog(BaseGenericCatalog):
             self._metadata = self.generate_metadata()
 
         self._quantity_modifiers = {
-            'id': 'ID',
             'pz_z_peak': 'z_peak',
             'pz_pdf_full': '_full_pdf',
         }
@@ -126,3 +125,14 @@ class PhotoZCatalog(BaseGenericCatalog):
                         return df.iloc[slice_this, :self._n_pdf_bins].values
                     return df[native_quantity].values[slice_this]
                 yield native_quantity_getter
+
+    # Native quantity names in the photo-z catalog are too uninformative
+    # Since native quantities will become regular quantities in composite catalog,
+    # let us hide them all.
+    def list_all_quantities(self, include_native=False, with_info=False):
+        """
+        Return a list of all available quantities in this catalog.
+        If *with_info* is `True`, return a dict with quantity info.
+        See also: list_all_native_quantities
+        """
+        return super(PhotoZCatalog, self).list_all_quantities(with_info=with_info)
