@@ -1,8 +1,8 @@
 subclass_name: composite.CompositeReader
-description: DC2 Run 1.2p (v3) Object Catalog with photo-z
+description: DC2 Run 1.2i Object Catalog with photo-z
 catalogs:
-  - catalog_name: dc2_object_run1.2p_v3
+  - catalog_name: dc2_object_run1.2i
     matching_method: MATCHING_FORMAT
-  - catalog_name: pz_dc2_object_run1.2p_v3
+  - catalog_name: photoz_dc2_object_run1.2i
     matching_method: MATCHING_FORMAT
 included_by_default: true

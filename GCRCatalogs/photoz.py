@@ -36,12 +36,12 @@ class PhotoZCatalog(BaseGenericCatalog):
         self._metadata_path = os.path.join(self.base_dir, _metadata_filename)
 
         self._pdf_bin_info = kwargs.get('pdf_bin_info', PDF_BIN_INFO)
-        self.pz_pdf_bin_centers = np.round(np.arange(
+        self._pdf_bin_centers = np.round(np.arange(
             self._pdf_bin_info['start'],
             self._pdf_bin_info['stop'],
             self._pdf_bin_info['step'],
         ), self._pdf_bin_info['decimals_to_round'])
-        self._n_pdf_bins = len(self.pz_pdf_bin_centers)
+        self._n_pdf_bins = len(self._pdf_bin_centers)
 
         if self._metadata_path and os.path.isfile(self._metadata_path):
             with open(self._metadata_path, 'r') as meta_stream:
@@ -50,18 +50,21 @@ class PhotoZCatalog(BaseGenericCatalog):
             self._metadata = self.generate_metadata()
 
         self._quantity_modifiers = {
-            'pz_z_peak': 'z_peak',
-            'pz_pdf_full': '_full_pdf',
+            'photoz_mode': 'z_peak',
+            'photoz_pdf': '_FULL_PDF',
         }
-        for i, z in enumerate(self.pz_pdf_bin_centers):
-            z_str = '{:.3f}'.format(z)
-            z_str = z_str.replace('.', '_')
-            self._quantity_modifiers['pz_pdf_z{}'.format(z_str)] = i
 
         self._native_filter_quantities = {'tract', 'patch'}
 
     def _generate_native_quantity_list(self):
         return list(self._quantity_modifiers.values()) + list(self._native_filter_quantities)
+
+    @property
+    def photoz_pdf_bin_centers(self):
+        """
+        expose self._pdf_bin_centers as a public property.
+        """
+        return self._pdf_bin_centers
 
     def generate_metadata(self, write_to_yaml=False):
         """
@@ -121,7 +124,7 @@ class PhotoZCatalog(BaseGenericCatalog):
                 def native_quantity_getter(native_quantity):
                     # pylint: disable=W0640
                     # variables (df and slice_this) intentionally defined in loop
-                    if native_quantity == '_full_pdf':
+                    if native_quantity == '_FULL_PDF':
                         return df.iloc[slice_this, :self._n_pdf_bins].values
                     return df[native_quantity].values[slice_this]
                 yield native_quantity_getter
