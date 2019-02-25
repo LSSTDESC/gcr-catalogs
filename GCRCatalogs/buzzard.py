@@ -175,7 +175,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'velocity_z': 'truth/VZ',
             }
 
-            if self.version > 1.6:
+            if self.version.split('_')[0] == '1.9.2':
 
                 for i, b in enumerate(['Z_vista', 'Y_vista', 'J_vista', 'H_vista', 'Ks_vista', 'u_lsst', 
                                        'g_lsst', 'r_lsst', 'i_lsst', 'z_lsst', 'y_lsst', 'Y_wfirst',
@@ -200,10 +200,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
                     self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
-                
-                
-
-            
 
 
     def _get_healpix_pixels(self):
