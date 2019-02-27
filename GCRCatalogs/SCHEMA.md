@@ -120,8 +120,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `xErr` | pixels | Error value for `centroidX`. |   | xx |
 `yErr` | pixels | Error value for `centroidY`. |   | xx |
 `xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
-`psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
-`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
+`psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
+`psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
 `Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
 `Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
