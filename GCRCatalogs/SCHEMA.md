@@ -108,6 +108,7 @@ For quantities that are not yet documented in the table above, we document them 
    * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
    * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
    * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
+- Quantities named with `x` or `y` are in the local coordinate system of the tract+patch.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
