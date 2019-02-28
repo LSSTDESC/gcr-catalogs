@@ -175,19 +175,39 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'velocity_z': 'truth/VZ',
             }
 
+            if self.version.split('_')[0] == '1.9.2':
+
+                for i, b in enumerate(['Z_vista', 'Y_vista', 'J_vista', 'H_vista', 'Ks_vista', 'u_lsst', 
+                                       'g_lsst', 'r_lsst', 'i_lsst', 'z_lsst', 'y_lsst', 'Y_wfirst',
+                                       'J_wfirst', 'H_wfirst', 'K_wfirst']):
+
+                    self._quantity_modifiers['Mag_true_{}_z0'.format(b)] = (_abs_mask_func, 'auxmag/AMAG/{}'.format(i))
+                    self._quantity_modifiers['mag_true_{}'.format(b)] = (_mask_func, 'auxmag/TMAG/{}'.format(i))
+                    self._quantity_modifiers['mag_{}'.format(b)] = (_mask_func, 'auxmag/LMAG/{}'.format(i))
+
+            else:
+                for i, b in enumerate('ugrizyY'):
+                    if b == 'Y':
+                        i -= 1
+                    
+                    self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
+                    self._quantity_modifiers['mag_true_{}_lsst'.format(b)] = (_mask_func, 'lsst/TMAG/{}'.format(i))
+
+                    if b != 'u':
+                        i -= 1
+                        self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
+                        self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
+
+
             for i, b in enumerate('ugrizyY'):
                 if b == 'Y':
                     i -= 1
-                self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
-                self._quantity_modifiers['mag_true_{}_lsst'.format(b)] = (_mask_func, 'lsst/TMAG/{}'.format(i))
                 if b != 'Y':
                     self._quantity_modifiers['mag_true_{}'.format(b)] = self._quantity_modifiers['mag_true_{}_lsst'.format(b)]
                 if b != 'u':
                     i -= 1
                     self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
-                    self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
-                    self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
 
 
     def _get_healpix_pixels(self):

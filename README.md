@@ -55,11 +55,14 @@ Confluence page (*DESC member only*).
    - `buzzard`: full catalog, DES Y3 area
    - `buzzard_test`: same as `buzzard` but a small subset for testing purpose / faster access
    - `buzzard_high-res`: higher resolution, smaller sky area
-   - `buzzard_v1.6_x`: different realizations of `buzzard`. You can run
+   - `buzzard_v1.9.2_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
+   - `buzzard_v1.6_x`: different realizations of an older version of `buzzard`. 
+     You can run
      ```python
      sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('buzzard_v1.6')))
      ```
      to see all available versions.
+
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
