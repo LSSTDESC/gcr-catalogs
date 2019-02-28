@@ -108,6 +108,7 @@ For quantities that are not yet documented in the table above, we document them 
    * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
    * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
    * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
+- Quantities named with `x` or `y` are in the local coordinate system of the tract+patch.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
@@ -120,8 +121,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `xErr` | pixels | Error value for `centroidX`. |   | xx |
 `yErr` | pixels | Error value for `centroidY`. |   | xx |
 `xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
-`psFlux_<band>` | nmgy | Point source model flux in `<band>.` |   | x |
-`psFluxErr_<band>` | nmgy | Error value for `psFlux_<band>`. |   | x |
+`psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
+`psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
 `Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
 `Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
@@ -130,6 +131,9 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `IyyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
 `IxyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
 `I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
+`cModelFlux_<band>` | nJy | composite model (CModel) flux in `<band>` | x |  |
+`cModelFluxErr_<band>` | nJy | Error value for cModel flux in `<band>` | x |  |
+`cModelFlux_flag_<band>` | - | Flag for issues with `cModelFlux_flag_<band>` | x |  |
 `mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
 `magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
 `snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
