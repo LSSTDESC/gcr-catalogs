@@ -156,6 +156,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'IxyPSF': 'slot_PsfShape_xy',
             'mag': 'mag',
             'magerr': 'mag_err',
+            'fluxmag0': 'fluxmag0',
             'apFlux': (convert_flux_to_nanoJansky, 'slot_ApFlux_{}'.format(FLUX)),
             'apFluxErr': (convert_flux_to_nanoJansky, 'slot_ApFlux_{}{}'.format(FLUX, ERR)),
             'apFlux_flag': 'slot_ApFlux_flag',
