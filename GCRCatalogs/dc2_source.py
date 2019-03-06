@@ -18,7 +18,7 @@ __all__ = ['DC2SourceCatalog']
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'source_visit_\d+\.parquet$'
 SCHEMA_FILENAME = 'schema.yaml'
-META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
 
 
 def convert_flux_to_nanoJansky(flux, fluxmag0):
@@ -91,11 +91,6 @@ class DC2SourceCatalog(BaseGenericCatalog):
             raise RuntimeError(err_msg.format(self.base_dir))
 
         else:
-            # A slightly crude way of checking for version of schema to have modelfit mag
-            # A future improvement will be to explicitly store version information in the datasets
-            # and just rely on that versioning.
-            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
-
             if any(col.endswith('_fluxSigma') for col in self._schema):
                 dm_schema_version = 1
             elif any(col.endswith('_fluxErr') for col in self._schema):
@@ -103,10 +98,9 @@ class DC2SourceCatalog(BaseGenericCatalog):
             else:
                 dm_schema_version = 3
 
-            self._quantity_modifiers = self._generate_modifiers(
-                    self.pixel_scale, has_modelfit_mag, dm_schema_version)
+            self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
 
-        self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
+        self._quantity_info_dict = self._generate_info_dict(META_PATH)
 
     def __del__(self):
         self.close_all_file_handles()
