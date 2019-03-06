@@ -178,7 +178,6 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'base_PixelFlags_flag_crCenter',
             'base_PixelFlags_flag_bad',
             'base_PixelFlags_flag_suspectCenter',
-            'base_PixelFlags_flag_clipped',
         )
 
         modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
