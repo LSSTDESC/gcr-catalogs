@@ -132,6 +132,10 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
         modifiers = {
             'sourceId': 'id',
+            'visit': 'visit',
+            'detector': 'detector',
+            'filter': 'filter',
+            'objectId': 'objectId',
             'parentObjectId': 'parent',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
