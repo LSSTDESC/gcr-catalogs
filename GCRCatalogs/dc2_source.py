@@ -85,11 +85,25 @@ class DC2SourceCatalog(BaseGenericCatalog):
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
+        _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
+        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
+        self._schema_path = os.path.join(self.base_dir, _schema_filename)
+
+        self._schema = None
+        if self._schema_path and os.path.isfile(self._schema_path):
+            self._schema = self._generate_schema_from_yaml(self._schema_path)
+
         self._datasets = self._generate_datasets()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
+        if not self._schema:
+            warnings.warn('Falling back to reading all datafiles for column names')
+            self._schema = self._generate_schema_from_datafiles(self._datasets)
+
+        if kwargs.get('is_dpdd'):
+            self._quantity_modifiers = {col: None for col in self._schema}
         else:
             if any(col.endswith('_fluxSigma') for col in self._schema):
                 dm_schema_version = 1
@@ -106,7 +120,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(bands='ugrizy', has_modelfit_mag=True, dm_schema_version=3):
+    def _generate_modifiers(dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -122,7 +136,6 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
         FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
         ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
-
 
         modifiers = {
             'sourceId': 'id',
@@ -193,7 +206,6 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
         Args:
             meta_path (path): Path of yaml config file with object meta data
-            bands     (list): List of photometric bands as strings
 
         Returns:
             Dictionary of the form
@@ -246,19 +258,13 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
             file_path = os.path.join(self.base_dir, fname)
             try:
-                fh = self._open_hdf5(file_path)
+                df = self._open_parquet(file_path)
 
             except (IOError, OSError):
                 warnings.warn('Cannot access {}; skipped'.format(file_path))
                 continue
 
-            for key in fh:
-                if self._groupname_re.match(key.lstrip('/')):
-                    datasets.append(ObjectTableWrapper(fh, key, self._schema))
-                    continue
-
-                warn_msg = 'incorrect group name "{}" in {}; skipped this group'
-                warnings.warn(warn_msg.format(os.path.basename(file_path), key))
+            datasets.append(df)
 
         return datasets
 
@@ -299,7 +305,9 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
         schema = {}
         for dataset in datasets:
-            schema.update(dataset.native_schema)
+            # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
+            native_schema = {k: {'dtype': v} for k, v in dataset.dtypes.to_dict().items()}
+            schema.update(native_schema)
 
         return schema
 
@@ -340,12 +348,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         Return:
             The cached file handle
         """
-
-        if (file_path not in self._file_handles or
-                not self._file_handles[file_path].is_open):
-            self._file_handles[file_path] = pd.HDFStore(file_path, 'r')
-
-        return self._file_handles[file_path]
+        return pd.read_parquet(file_path)
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
