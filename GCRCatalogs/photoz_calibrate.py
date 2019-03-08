@@ -1,8 +1,9 @@
 """
-Photo-z calibration catalog reader
+PZCalibrate reference objects catalog reader
 
 This reader was designed by Yao-Yuan Mao,
-based a photo-z calibration catalog provided by Chris Morrison, in Mar 2019.
+based a catalog of "spectroscopic" reference objects for use in cross-
+correlation redshifts provided by Chris Morrison, in Mar 2019.
 """
 
 import re
@@ -13,11 +14,12 @@ from GCR import BaseGenericCatalog
 
 from .utils import first
 
-__all__ = ['PhotoZCalibCatalog']
+__all__ = ['PZCalibrateCatalog']
 
 FILE_PATTERN = r'z_(\d)\S+healpix_(\d+)_pz_calib\.npz$'
 
-class PhotoZCalibCatalog(BaseGenericCatalog):
+
+class PZCalibrateCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
