@@ -13,6 +13,8 @@ import pandas as pd
 import yaml
 from GCR import BaseGenericCatalog
 
+import pyarrow.parquet as pq
+
 __all__ = ['DC2SourceCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -305,9 +307,15 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
         schema = {}
         for dataset in datasets:
+            # I should be able to do this just from the ParquetFile schema
+            # but that's a bit clunky and I don'tk now quite how to write it out
+            df = dataset.read().to_pandas()
             # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
-            native_schema = {k: {'dtype': v} for k, v in dataset.dtypes.to_dict().items()}
+            native_schema = {k: {'dtype': v} for k, v in df.dtypes.to_dict().items()}
             schema.update(native_schema)
+            # The first non-empty one will be fine.
+            if len(native_schema) > 0:
+                break
 
         return schema
 
@@ -340,7 +348,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
             dataset.clear_cache()
 
     def _open_parquet(self, file_path):
-        """Return the a Pandas DataFrame of a Parquet file
+        """Return the Parquet filehandle for a Parquet file
 
         Args:
             file_path (str): The path of the desired file
@@ -348,7 +356,8 @@ class DC2SourceCatalog(BaseGenericCatalog):
         Return:
             The cached file handle
         """
-        return pd.read_parquet(file_path)
+        fh = pq.ParquetFile(file_path)
+        return fh
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
@@ -359,6 +368,9 @@ class DC2SourceCatalog(BaseGenericCatalog):
         # pylint: disable=C0330
         for dataset in self._datasets:
             if (native_filters is None):
-                yield dataset.get
+                def native_quantity_getter(native_quantity):
+                    return dataset.read(columns=[native_quantity]).to_pandas()[native_quantity].values
+
+                yield native_quantity_getter
                 if not self.use_cache:
                     dataset.clear_cache()
