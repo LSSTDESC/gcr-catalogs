@@ -22,6 +22,7 @@ class PhotoZCalibCatalog(BaseGenericCatalog):
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
+        self._healpix_pixels = kwargs.get('healpix_pixels')
 
         self._healpix_files = dict()
         for f in sorted(os.listdir(self.base_dir)):
@@ -29,6 +30,8 @@ class PhotoZCalibCatalog(BaseGenericCatalog):
             if m is None:
                 continue
             key = tuple(map(int, m.groups()))
+            if self._healpix_pixels and key[1] not in self._healpix_pixels:
+                continue
             self._healpix_files[key] = os.path.join(self.base_dir, f)
 
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
