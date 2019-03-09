@@ -181,6 +181,8 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                                        'g_lsst', 'r_lsst', 'i_lsst', 'z_lsst', 'y_lsst', 'Y_wfirst',
                                        'J_wfirst', 'H_wfirst', 'K_wfirst']):
 
+                    i += 6
+
                     self._quantity_modifiers['Mag_true_{}_z0'.format(b)] = (_abs_mask_func, 'auxmag/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}'.format(b)] = (_mask_func, 'auxmag/TMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}'.format(b)] = (_mask_func, 'auxmag/LMAG/{}'.format(i))
