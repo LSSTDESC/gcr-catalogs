@@ -1,10 +1,56 @@
 import os
 import sqlite3
 import numpy as np
+import h5py
 from GCR import BaseGenericCatalog
+from GCR import GCRQuery
 from .utils import md5, is_string_like
 
-__all__ = ['DC2TruthCatalogReader', 'DC2TruthCatalogLightCurveReader']
+__all__ = ['DC2TruthCatalogReader', 'DC2TruthCatalogLightCurveReader',
+           'DC2TruthLCSummaryReader']
+
+
+class DC2TruthLCSummaryReader(BaseGenericCatalog):
+    """
+    Reader for hdf5 file containing summary information for variables and
+    transients in DC2
+
+    Parameters
+    ----------
+    filename: str
+        path to the hdf5 file containing the summary catalog
+    """
+
+    def _subclass_init(self, **kwargs):
+        self._file_name = kwargs['filename']
+        self._native_filter_quantities = {'redshift', 'agn', 'sn', 'sprinkled'}
+
+    def _generate_native_quantity_list(self):
+        with h5py.File(self._file_name, 'r') as file_handle:
+            return list(file_handle.keys())
+
+    def _iter_native_dataset(self, native_filters=None):
+        names_to_filter = []
+        if native_filters is not None:
+            for name in native_filters.variable_names:
+                print('filtering %s' % name)
+                names_to_filter.append(name)
+
+        with h5py.File(self._file_name, 'r') as file_handle:
+            filter_dict = {}
+            valid = None
+            if native_filters is not None:
+                for name in names_to_filter:
+                    filter_dict[name] = file_handle[name].value
+                valid = native_filters.check_scalar(filter_dict)
+                del filter_dict
+
+            def _native_qty_getter(qty_name):
+                output = file_handle[qty_name].value
+                if valid is not None:
+                    output = output[valid]
+                return output
+            yield _native_qty_getter
 
 
 class DC2TruthCatalogReader(BaseGenericCatalog):
