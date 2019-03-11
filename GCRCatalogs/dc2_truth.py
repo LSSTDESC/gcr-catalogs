@@ -25,6 +25,38 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
         self._file_name = kwargs['filename']
         self._native_filter_quantities = {'redshift', 'agn', 'sn', 'sprinkled'}
 
+        self._info_dict = {}
+        self._info_dict['redshift'] = {'units': 'unitless'}
+        self._info_dict['ra'] = {'units': 'degrees'}
+        self._info_dict['dec'] = {'units': 'degrees'}
+        self._info_dict['uniqueId'] = {'units': 'unitless',
+                     'description': 'an int uniquely identifying the object. '
+                     'Does NOT correspond to galaxy_id in the extra-galactic '
+                     'catalog.'}
+
+        self._info_dict['galaxy_id'] = {'units': 'unitless',
+                       'description':
+                       'should correspond to galaxy_id in the extra-galactic '
+                       'catalog.  Note: sprinkled objects and all supernovae '
+                       'will not have sensible values of galaxy_id.'}
+
+        self._info_dict['agn'] = {'units': 'unitless',
+                    'description': 'an int that is 1 for AGN and 0 for '
+                    'all other objects.'}
+
+        self._info_dict['sn'] = {'units': 'unitless',
+                  'description': 'an int that is 1 for supernovae and 0 for '
+                  'all other objects'}
+
+        self._info_dict['sprinkled'] = {'units': 'unitless',
+                   'description': 'an int that is 1 if the object was '
+                   'added by the sprinkler; 0 otherwise.'}
+
+    def get_quantity_info(self, qty_name):
+        if qty_name not in self._info_dict:
+            return None
+        return self._info_dict[qty_name]
+
     def _generate_native_quantity_list(self):
         with h5py.File(self._file_name, 'r') as file_handle:
             return list(file_handle.keys())
