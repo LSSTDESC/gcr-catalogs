@@ -2,6 +2,7 @@ import os
 import sqlite3
 import numpy as np
 import h5py
+import warnings
 from GCR import BaseGenericCatalog
 from GCR import GCRQuery
 from .utils import md5, is_string_like
@@ -62,26 +63,12 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
             return list(file_handle.keys())
 
     def _iter_native_dataset(self, native_filters=None):
-        names_to_filter = []
         if native_filters is not None:
-            for name in native_filters.variable_names:
-                print('filtering %s' % name)
-                names_to_filter.append(name)
-
+            warnings.warn("Native filters are not implemented "
+                          "for this catalog; just use filters.")
         with h5py.File(self._file_name, 'r') as file_handle:
-            filter_dict = {}
-            valid = None
-            if native_filters is not None:
-                for name in names_to_filter:
-                    filter_dict[name] = file_handle[name].value
-                valid = native_filters.check_scalar(filter_dict)
-                del filter_dict
-
             def _native_qty_getter(qty_name):
-                output = file_handle[qty_name].value
-                if valid is not None:
-                    output = output[valid]
-                return output
+                return file_handle[qty_name].value
             yield _native_qty_getter
 
 
