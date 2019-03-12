@@ -144,6 +144,46 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 
+## Schema for DC2 Source Catalogs
+
+The schema for DC2 Schema Catalogs follow the following rules:
+
+- For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
+- For quantities that are defined in the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
+- For quantities that are defined in both, we provide aliases so both naming schemes would work.
+- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
+
+For quantities that are not yet documented in the table above, we document them below:
+- In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
+- Items marked with 'xx' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
+   * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
+   * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
+   * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
+- Quantities named with `x` or `y` are in the local coordinate system of the tract+patch.
+
+Quantity Label | Unit | Definition | GCRbase | DPDD
+--- | --- | --- | --- | ---
+`ra` | degree | Right Ascension | x | xx |
+`ra_err` | degree | Right Ascension | x | xx |
+`dec` | degree | Declination | x | xx |
+`dec_err` | degree | Declination | x | xx |
+`x` | pixels | 2D centroid location (x coordinate). |   | xx |
+`y` | pixels | 2D centroid location (y coordinate). |   | xx |
+`xErr` | pixels | Error value for `centroidX`. |   | xx |
+`yErr` | pixels | Error value for `centroidY`. |   | xx |
+`xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
+`psFlux` | nJy | Point source model flux. |   | x |
+`psFluxErr` | nJy | Error value for `psFlux`. |   | x |
+`psFlux_flag` | - | Flag for issues with `psFlux`. |   | x |
+`Ixx` | asec2 | Adaptive second moment of the source intensity. |   | x |
+`Iyy` | asec2 | Adaptive second moment of the source intensity. |   | x |
+`Ixy` | asec2 | Adaptive second moment of the source intensity. |   | x |
+`IxxPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
+`IyyPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
+`IxyPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
+`I_flag` | - | Flag for issues with `Ixx`, `Ixx`, and `Ixx.` |   | x |
+`blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
+`extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 ## Schema for DC2 truth catalogs
 
 DC2 truth catalogs correspond to catalogs such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`. Definition of quantities can be accessed using `get_quantity_info`:

@@ -77,6 +77,10 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and all native columns)
    - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
+-  **DC2 "Source Catalogs"** \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_source_run1.2i`: Source Table catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
    - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
