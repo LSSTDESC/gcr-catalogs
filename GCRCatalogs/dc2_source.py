@@ -117,6 +117,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
             self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH)
+        self._native_filter_quantities = self._generate_native_quantity_list()
 
     def __del__(self):
         self.close_all_file_handles()
@@ -361,8 +362,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
-
-        return set(self._schema).union(self._native_filter_quantities)
+        return set(self._schema)
 
     def _iter_native_dataset(self, native_filters=None):
         # pylint: disable=C0330
