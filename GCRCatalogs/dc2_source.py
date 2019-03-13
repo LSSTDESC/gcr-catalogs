@@ -316,7 +316,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
             native_schema = {k: {'dtype': v} for k, v in df.dtypes.to_dict().items()}
             schema.update(native_schema)
             # The first non-empty one will be fine.
-            if len(native_schema) > 0:
+            if native_schema:
                 break
 
         return schema
