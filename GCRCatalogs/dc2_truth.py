@@ -4,7 +4,6 @@ import numpy as np
 import h5py
 import warnings
 from GCR import BaseGenericCatalog
-from GCR import GCRQuery
 from .utils import md5, is_string_like
 
 __all__ = ['DC2TruthCatalogReader', 'DC2TruthCatalogLightCurveReader',
@@ -24,7 +23,6 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
         self._file_name = kwargs['filename']
-        self._native_filter_quantities = {'redshift', 'agn', 'sn', 'sprinkled'}
 
         self._info_dict = {}
         self._info_dict['redshift'] = {'units': 'unitless'}
