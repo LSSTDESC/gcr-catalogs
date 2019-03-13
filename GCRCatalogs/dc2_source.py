@@ -5,11 +5,9 @@ DC2 Source Catalog Reader
 import os
 import re
 import warnings
-import itertools
 import shutil
 
 import numpy as np
-import pandas as pd
 import yaml
 from GCR import BaseGenericCatalog
 
@@ -30,13 +28,8 @@ def convert_flux_to_nanoJansky(flux, fluxmag0):
     Eventually we will get nJy from the final calibrated DRP processing.
     """
     AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
-    AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky  # 9 is from nano=10**(-9)
-
-    # AB_mag = -2.5 * np.log10(flux/fluxmag0)
-    # AB_mag = -2.5 * np.log10(calibrated_flux_in_nanoJansky) + AB_mag_zp_wrt_nanoJansky
-    # -2.5 * np.log10(flux/fluxmag0) = -2.5 * np.log10(calibrated_flux_in_nanoJansky) + AB_mag_zp_wrt_nanoJansky
-    # 2.5 * np.log10(calibrated_flux_in_nanoJansky) = 2.5 * np.log10(flux/fluxmag0) + AB_mag_zp_wrt_nanoJansky
-    # calibrated_flux_in_nanoJansky = (flux/fluxmag0) * 10**(AB_mag_zp_wrt_nanoJansky/2.5)
+    # 9 is from nano=10**(-9)
+    AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky
 
     return 10**((AB_mag_zp_wrt_nanoJansky)/2.5) * flux / fluxmag0
 
@@ -67,12 +60,12 @@ class DC2SourceCatalog(BaseGenericCatalog):
     ----------
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
-    use_cache        (bool): Whether or not to cache read data in memory
-    is_dpdd          (bool): Whether or not to the files are already in DPDD-format
+    use_cache        (bool): Cache read data in memory
+    is_dpdd          (bool): File are already in DPDD-format.  No translation.
 
     Attributes
     ----------
-    base_dir                     (str): The directory of data files being served
+    base_dir          (str): The directory of data files being served
 
     Notes
     -----
@@ -127,7 +120,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
-            has_modelfit_mag (bool): Whether or not pre-calculated model fit magnitudes are present
+            has_modelfit_mag (bool): Are pre-calculated model fit magnitudes are present
             dm_schema_version (int): DM schema version (1, 2, or 3)
 
         Returns:
@@ -154,8 +147,10 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'xErr': 'slot_Centroid_x{}'.format(ERR),
             'yErr': 'slot_Centroid_y{}'.format(ERR),
             'xy_flag': 'slot_Centroid_flag',
-            'sky': (convert_flux_to_nanoJansky, 'base_LocalBackground_{}'.format(FLUX)),
-            'skyErr': (convert_flux_to_nanoJansky, 'base_LocalBackground_{}{}'.format(FLUX, ERR)),
+            'sky': (convert_flux_to_nanoJansky,
+                    'base_LocalBackground_{}'.format(FLUX)),
+            'skyErr': (convert_flux_to_nanoJansky,
+                       'base_LocalBackground_{}{}'.format(FLUX, ERR)),
             'sky_flag': 'base_LocalBackground_flag',
             'I_flag': 'slot_Shape_flag',
             'Ixx': 'slot_Shape_xx',
@@ -167,11 +162,15 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'mag': 'mag',
             'magerr': 'mag_err',
             'fluxmag0': 'fluxmag0',
-            'apFlux': (convert_flux_to_nanoJansky, 'slot_ApFlux_{}'.format(FLUX)),
-            'apFluxErr': (convert_flux_to_nanoJansky, 'slot_ApFlux_{}{}'.format(FLUX, ERR)),
+            'apFlux': (convert_flux_to_nanoJansky,
+                       'slot_ApFlux_{}'.format(FLUX)),
+            'apFluxErr': (convert_flux_to_nanoJansky,
+                          'slot_ApFlux_{}{}'.format(FLUX, ERR)),
             'apFlux_flag': 'slot_ApFlux_flag',
-            'psFlux': (convert_flux_to_nanoJansky, 'slot_PsfFlux_{}'.format(FLUX)),
-            'psFluxErr': (convert_flux_to_nanoJansky, 'slot_PsfFlux_{}{}'.format(FLUX, ERR)),
+            'psFlux': (convert_flux_to_nanoJansky,
+                       'slot_PsfFlux_{}'.format(FLUX)),
+            'psFluxErr': (convert_flux_to_nanoJansky,
+                          'slot_PsfFlux_{}{}'.format(FLUX, ERR)),
             'psFlux_flag': 'slot_PsfFlux_flag',
             'psNdata': 'slot_PsfFlux_area',
             'psf_fwhm_pixels': (
@@ -234,8 +233,9 @@ class DC2SourceCatalog(BaseGenericCatalog):
     def _get_quantity_info_dict(self, quantity, default=None):
         """Return a dictionary with descriptive information for a quantity
 
-        Returned information includes a quantity description, quantity units, whether
-        the quantity is defined in the DPDD, and if the quantity is available in GCRbase.
+        Returned information includes a quantity description, quantity units,
+        whether the quantity is defined in the DPDD,
+        and if the quantity is available in GCRbase.
 
         Args:
             quantity   (str): The quantity to return information for
@@ -367,9 +367,10 @@ class DC2SourceCatalog(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         # pylint: disable=C0330
         for dataset in self._datasets:
-            if (native_filters is None):
+            if native_filters is None:
                 def native_quantity_getter(native_quantity):
-                    return dataset.read(columns=[native_quantity]).to_pandas()[native_quantity].values
+                    data = dataset.read(columns=[native_quantity])
+                    return data.to_pandas()[native_quantity].values
 
                 yield native_quantity_getter
                 if not self.use_cache:
