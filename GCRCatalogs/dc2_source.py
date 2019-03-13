@@ -88,6 +88,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         if self._schema_path and os.path.isfile(self._schema_path):
             self._schema = self._generate_schema_from_yaml(self._schema_path)
 
+        self._file_handles = dict()
         self._datasets = self._generate_datasets()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
@@ -357,8 +358,18 @@ class DC2SourceCatalog(BaseGenericCatalog):
         Return:
             The cached file handle
         """
-        fh = pq.ParquetFile(file_path)
-        return fh
+        if (file_path not in self._file_handles):
+            self._file_handles[file_path] = pq.ParquetFile(file_path)
+
+        return self._file_handles[file_path]
+
+    def close_all_file_handles(self):
+        """Clear all cached file handles"""
+
+        for fh in self._file_handles.values():
+            del fh
+
+        self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
