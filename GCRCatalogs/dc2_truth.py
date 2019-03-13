@@ -51,10 +51,8 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
                    'description': 'an int that is 1 if the object was '
                    'added by the sprinkler; 0 otherwise.'}
 
-    def get_quantity_info(self, qty_name):
-        if qty_name not in self._info_dict:
-            return None
-        return self._info_dict[qty_name]
+    def _get_quantity_info(self, qty_name, default=None):
+        return self._info_dict.get(quantity, default)
 
     def _generate_native_quantity_list(self):
         with h5py.File(self._file_name, 'r') as file_handle:
