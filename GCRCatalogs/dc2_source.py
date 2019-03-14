@@ -8,10 +8,11 @@ import warnings
 import shutil
 
 import numpy as np
+import pyarrow.parquet as pq
 import yaml
+
 from GCR import BaseGenericCatalog
 
-import pyarrow.parquet as pq
 
 __all__ = ['DC2SourceCatalog']
 
@@ -21,14 +22,17 @@ SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
 
 
+#pylint: disable=C0103
 def convert_flux_to_nanoJansky(flux, fluxmag0):
     """Convert the listed DM coadd-reported flux values to nanoJansky.
 
     Based on the given fluxmag0 value, which is AB mag = 0.
     Eventually we will get nJy from the final calibrated DRP processing.
     """
+    #pylint: disable=C0103
     AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
     # 9 is from nano=10**(-9)
+    #pylint: disable=C0103
     AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky
 
     return 10**((AB_mag_zp_wrt_nanoJansky)/2.5) * flux / fluxmag0
@@ -131,8 +135,8 @@ class DC2SourceCatalog(BaseGenericCatalog):
         if dm_schema_version not in (1, 2, 3):
             raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
 
-        FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
-        ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
+        flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
             'sourceId': 'id',
@@ -145,13 +149,13 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'slot_Centroid_x',
             'y': 'slot_Centroid_y',
-            'xErr': 'slot_Centroid_x{}'.format(ERR),
-            'yErr': 'slot_Centroid_y{}'.format(ERR),
+            'xErr': 'slot_Centroid_x{}'.format(flux_err_name),
+            'yErr': 'slot_Centroid_y{}'.format(flux_err_name),
             'xy_flag': 'slot_Centroid_flag',
             'sky': (convert_flux_to_nanoJansky,
-                    'base_LocalBackground_{}'.format(FLUX)),
+                    'base_LocalBackground_{}'.format(flux_name)),
             'skyErr': (convert_flux_to_nanoJansky,
-                       'base_LocalBackground_{}{}'.format(FLUX, ERR)),
+                       'base_LocalBackground_{}{}'.format(flux_name, flux_err_name)),
             'sky_flag': 'base_LocalBackground_flag',
             'I_flag': 'slot_Shape_flag',
             'Ixx': 'slot_Shape_xx',
@@ -164,14 +168,14 @@ class DC2SourceCatalog(BaseGenericCatalog):
             'magerr': 'mag_err',
             'fluxmag0': 'fluxmag0',
             'apFlux': (convert_flux_to_nanoJansky,
-                       'slot_ApFlux_{}'.format(FLUX)),
+                       'slot_ApFlux_{}'.format(flux_name)),
             'apFluxErr': (convert_flux_to_nanoJansky,
-                          'slot_ApFlux_{}{}'.format(FLUX, ERR)),
+                          'slot_ApFlux_{}{}'.format(flux_name, flux_err_name)),
             'apFlux_flag': 'slot_ApFlux_flag',
             'psFlux': (convert_flux_to_nanoJansky,
-                       'slot_PsfFlux_{}'.format(FLUX)),
+                       'slot_PsfFlux_{}'.format(flux_name)),
             'psFluxErr': (convert_flux_to_nanoJansky,
-                          'slot_PsfFlux_{}{}'.format(FLUX, ERR)),
+                          'slot_PsfFlux_{}{}'.format(flux_name, flux_err_name)),
             'psFlux_flag': 'slot_PsfFlux_flag',
             'psNdata': 'slot_PsfFlux_area',
             'psf_fwhm_pixels': (
@@ -183,7 +187,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
             # There are no 'slot_*' values for the extendedness and blendedness
             # in the Run 1.2i processing (as of 2019-03-05)
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_{}'.format(FLUX),
+            'blendedness': 'base_Blendedness_abs_{}'.format(flux_name),
         }
 
         not_good_flags = (
