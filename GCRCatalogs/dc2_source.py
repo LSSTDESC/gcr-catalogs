@@ -382,8 +382,9 @@ class DC2SourceCatalog(BaseGenericCatalog):
         # pylint: disable=C0330
         for dataset in self._datasets:
             if native_filters is None:
-                def native_quantity_getter(native_quantity):
-                    return dataset.read(columns=[native_quantity]).to_pandas()[native_quantity].values
+                def native_quantity_getter(native_quantity, dataset=dataset):
+                    data = dataset.read(columns=[native_quantity])
+                    return data.to_pandas()[native_quantity].values
 
                 yield native_quantity_getter
                 if not self.use_cache:
