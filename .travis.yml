@@ -5,7 +5,7 @@ python:
 
 before_install:
 - sudo apt-get -qq update
-- sudo apt-get install -y freetds-dev
+- sudo apt-get install -y freetds-dev hdf5-serial-dev
 
 install:
 - pip install .[full]
