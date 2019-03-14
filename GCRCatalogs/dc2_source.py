@@ -226,8 +226,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
                 in_GCRbase=info_list[2],
                 in_DPDD=info_list[3]
             )
-
-        info_dict[quantity] = quantity_info
+            info_dict[quantity] = quantity_info
 
         return info_dict
 
@@ -358,7 +357,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         Return:
             The cached file handle
         """
-        if (file_path not in self._file_handles):
+        if file_path not in self._file_handles:
             self._file_handles[file_path] = pq.ParquetFile(file_path)
 
         return self._file_handles[file_path]
@@ -380,8 +379,7 @@ class DC2SourceCatalog(BaseGenericCatalog):
         for dataset in self._datasets:
             if native_filters is None:
                 def native_quantity_getter(native_quantity):
-                    data = dataset.read(columns=[native_quantity])
-                    return data.to_pandas()[native_quantity].values
+                    return dataset.read(columns=[native_quantity]).to_pandas()[native_quantity].values
 
                 yield native_quantity_getter
                 if not self.use_cache:
