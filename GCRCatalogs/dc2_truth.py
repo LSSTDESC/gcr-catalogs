@@ -51,7 +51,7 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
                    'description': 'an int that is 1 if the object was '
                    'added by the sprinkler; 0 otherwise.'}
 
-    def _get_quantity_info(self, qty_name, default=None):
+    def _get_quantity_info(self, quantity, default=None):
         return self._info_dict.get(quantity, default)
 
     def _generate_native_quantity_list(self):
