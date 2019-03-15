@@ -29,7 +29,7 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.7', 'pyarrow'],
+    install_requires=['future', 'requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.8.7'],
     extras_require={
         'protodc2': ['h5py'],
         'cosmodc2': ['h5py', 'healpy'],
@@ -39,7 +39,7 @@ setup(
         'dc2_coadd': ['tables', 'pandas'],
         'dc2_source': ['pyarrow', 'pandas'],
         'focal_plane': ['scikit-image', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy', 'pyarrow'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
