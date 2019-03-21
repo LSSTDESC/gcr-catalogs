@@ -37,8 +37,9 @@ setup(
         'reference': ['pandas'],
         'dc1': ['sqlalchemy', 'pymssql'],
         'dc2_coadd': ['tables', 'pandas'],
+        'dc2_source': ['pyarrow', 'pandas'],
         'focal_plane': ['scikit-image', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy', 'pyarrow'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
