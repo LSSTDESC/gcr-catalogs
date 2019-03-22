@@ -38,6 +38,41 @@ class PZCalibrateCatalog(BaseGenericCatalog):
 
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
 
+        self._quantity_dict = {
+            "QSO": "Flag selecting QSOs by BlackHoleMass and EddingtonRatio. Objects have a mag/redshift "
+                   "distributions similar to those in DESI and are meant to be used as reference objects "
+                   "in cross-correlation redshift analyses.",
+            "LRG": "Flag selecting LRGs by stellar mass. Objects have a mag/redshift "
+                   "distributions similar to those in DESI and are meant to be used as reference objects "
+                   "in cross-correlation redshift analyses.",
+            "ELG": "Flag selecting ELGs by star formation rate. Objects have a mag/redshift "
+                   "distributions similar to those in DESI and are meant to be used as reference objects "
+                   "in cross-correlation redshift analyses.",
+            "MagLim": "Flag selection all objects R<19.4. Objects have a mag/redshift "
+                      "distributions similar to those in DESI and are meant to be used as reference objects "
+                      "in cross-correlation redshift analyses.",
+            "AllReferences": "Union of QSO, LRG, ELG, and MagLim flags. Objects have a mag/redshift "
+                             "distributions similar to those in DESI and are meant to be used as reference "
+                             "objects in cross-correlation redshift analyses.",
+        }
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        """Return a dictionary with descriptive information for a quantity
+
+        Returned information includes a quantity description, quantity units, whether
+        the quantity is defined in the DPDD, and if the quantity is available in GCRbase.
+
+        Args:
+            quantity   (str): The quantity to return information for
+            default (object): Value to return if no information is available (default None)
+
+        Returns:
+            String describing the quantity.
+        """
+        if quantity in self._quantity_dict:
+            return self._quantity_dict[quantity]
+        return default
+
     def _generate_native_quantity_list(self):
         return list(np.load(first(self._healpix_files.values())).keys())
 
