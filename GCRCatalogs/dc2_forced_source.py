@@ -139,16 +139,18 @@ class DC2ForcedSourceCatalog(BaseGenericCatalog):
         flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
-            'sourceId': 'id',
             'visit': 'visit',
             'detector': 'detector',
             'filter': 'filter',
-            'objectId': 'objectId',
+            'objectId': 'id',
             'psFlux': (convert_flux_to_nanoJansky,
                        'slot_PsfFlux_{}'.format(flux_name)),
             'psFluxErr': (convert_flux_to_nanoJansky,
                           'slot_PsfFlux_{}{}'.format(flux_name, flux_err_name)),
             'psFlux_flag': 'slot_PsfFlux_flag',
+            'mag': 'mag',
+            'magerr': 'mag_err',
+            'fluxmag0': 'fluxmag0',
         }
 
         not_good_flags = (
