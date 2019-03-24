@@ -69,9 +69,7 @@ class PZCalibrateCatalog(BaseGenericCatalog):
         Returns:
             String describing the quantity.
         """
-        if quantity in self._quantity_dict:
-            return self._quantity_dict[quantity]
-        return default
+        return self._quantity_dict.get(quantity, default)
 
     def _generate_native_quantity_list(self):
         return list(np.load(first(self._healpix_files.values())).keys())
