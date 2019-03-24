@@ -1,10 +1,71 @@
 import os
 import sqlite3
 import numpy as np
+import h5py
+import warnings
 from GCR import BaseGenericCatalog
 from .utils import md5, is_string_like
 
-__all__ = ['DC2TruthCatalogReader', 'DC2TruthCatalogLightCurveReader']
+__all__ = ['DC2TruthCatalogReader', 'DC2TruthCatalogLightCurveReader',
+           'DC2TruthLCSummaryReader']
+
+
+class DC2TruthLCSummaryReader(BaseGenericCatalog):
+    """
+    Reader for hdf5 file containing summary information for variables and
+    transients in DC2
+
+    Parameters
+    ----------
+    filename: str
+        path to the hdf5 file containing the summary catalog
+    """
+
+    def _subclass_init(self, **kwargs):
+        self._file_name = kwargs['filename']
+
+        self._info_dict = {}
+        self._info_dict['redshift'] = {'units': 'unitless'}
+        self._info_dict['ra'] = {'units': 'degrees'}
+        self._info_dict['dec'] = {'units': 'degrees'}
+        self._info_dict['uniqueId'] = {'units': 'unitless',
+                     'description': 'an int uniquely identifying the object. '
+                     'Does NOT correspond to galaxy_id in the extra-galactic '
+                     'catalog.'}
+
+        self._info_dict['galaxy_id'] = {'units': 'unitless',
+                       'description':
+                       'should correspond to galaxy_id in the extra-galactic '
+                       'catalog.  Note: sprinkled objects and all supernovae '
+                       'will not have sensible values of galaxy_id.'}
+
+        self._info_dict['agn'] = {'units': 'unitless',
+                    'description': 'an int that is 1 for AGN and 0 for '
+                    'all other objects.'}
+
+        self._info_dict['sn'] = {'units': 'unitless',
+                  'description': 'an int that is 1 for supernovae and 0 for '
+                  'all other objects'}
+
+        self._info_dict['sprinkled'] = {'units': 'unitless',
+                   'description': 'an int that is 1 if the object was '
+                   'added by the sprinkler; 0 otherwise.'}
+
+    def _get_quantity_info(self, quantity, default=None):
+        return self._info_dict.get(quantity, default)
+
+    def _generate_native_quantity_list(self):
+        with h5py.File(self._file_name, 'r') as file_handle:
+            return list(file_handle.keys())
+
+    def _iter_native_dataset(self, native_filters=None):
+        if native_filters is not None:
+            warnings.warn("Native filters are not implemented "
+                          "for this catalog; just use filters.")
+        with h5py.File(self._file_name, 'r') as file_handle:
+            def _native_qty_getter(qty_name):
+                return file_handle[qty_name].value
+            yield _native_qty_getter
 
 
 class DC2TruthCatalogReader(BaseGenericCatalog):

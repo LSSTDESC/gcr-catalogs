@@ -1,8 +1,6 @@
-subclass_name: dc2_truth.DC2TruthCatalogReader
+subclass_name: dc2_truth.DC2TruthLCSummaryReader
 
-filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run_1.2_trial_light_curves_181004.db
-table_name: variables_and_transients
-is_static: False
+filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run1p2_light_curve_reference_190311.h5
 
 description: |
     Truth catalog for Run 1.2, summary table for variable objects.
