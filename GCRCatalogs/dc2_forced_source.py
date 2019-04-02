@@ -166,10 +166,7 @@ class DC2ForcedSourceCatalog(BaseGenericCatalog):
         )
 
         modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
-        modifiers['clean'] = (
-            create_basic_flag_mask,
-            'deblend_skipped',
-        ) + not_good_flags
+        modifiers['clean'] = modifiers['good']  # No distinction for forced
 
         return modifiers
 
