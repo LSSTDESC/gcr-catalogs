@@ -55,6 +55,8 @@ class PZCalibrateCatalog(BaseGenericCatalog):
                              "distributions similar to those in DESI and are meant to be used as reference "
                              "objects in cross-correlation redshift analyses.",
         }
+        
+        self._quantity_modifiers = {q: q for q in self._quantity_dict}
 
     def _get_quantity_info_dict(self, quantity, default=None):
         """Return a dictionary with descriptive information for a quantity
