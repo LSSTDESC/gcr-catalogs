@@ -103,7 +103,7 @@ class SingleVisitCatalog(SimpleButlerInterface):
             return
 
         calib = Calib(self._get_data(dataId, 'calexp_md'))
-
+        calib.setThrowOnNegativeFlux(False) # This prevents the getMagnitude method to throw an exception with negative fluxes
         def _quantity_getter(quantity):
             if quantity in self._magnitudes:
                 return calib.getMagnitude(data.get(self._magnitudes[quantity]))
