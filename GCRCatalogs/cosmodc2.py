@@ -16,7 +16,8 @@ from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
 from .utils import md5, first
 
-__all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
+__all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
+           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
 __version__ = '1.1.4'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
@@ -102,11 +103,20 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if not os.path.isdir(catalog_root_dir):
             raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
 
-        self._healpix_files = self._get_healpix_file_list(
-            catalog_root_dir,
-            catalog_filename_template,
-            **kwargs
-        )
+        self.lightcone = kwargs.get('lightcone', True)
+
+        if self.lightcone:
+            self._healpix_files = self._get_healpix_file_list(
+                catalog_root_dir,
+                catalog_filename_template,
+                **kwargs
+            )
+        else:
+            self._snapshot_files, self._redshift = self._get_snapshot_file_list(
+                catalog_root_dir,
+                catalog_filename_template,
+                **kwargs
+            )
 
         if 'cosmology' in kwargs:
             cosmology = kwargs['cosmology']
@@ -135,10 +145,14 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if not self.file_check_info:
                 warnings.warn('Cannot find valid infomation for file checks! Version {} not available in {}'.format(self.version, CHECK_FILE_PATH))
 
-        self.lightcone = kwargs.get('lightcone', True)
-        self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
+        if self.lightcone:
+            self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
+            self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
+        else:
+            self._native_filter_quantities = {'block'}
+            self.box_size, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
+
         self._quantity_modifiers = self._generate_quantity_modifiers()
-        self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
         self.halo_mass_def = kwargs.get('halo_mass_def', 'FoF, b=0.168')
 
     def _get_group_names(self, fh): # pylint: disable=W0613
@@ -184,10 +198,49 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
         return healpix_files
 
+    @staticmethod
+    def _get_snapshot_file_list(catalog_root_dir, catalog_filename_template,
+                                step=None, blocks=None,
+                                check_file_list_complete=True, **kwargs):
+
+        snapshot_files = dict()
+        redshift = kwargs.get('redshift', None)
+
+        if step is None:
+            raise ValueError('Step must be specified')
+
+        fname_pattern = catalog_filename_template.format(r'(\d+)', r'(\d.\d+)', r'(\d+)')
+
+        for f in sorted(os.listdir(os.path.join(catalog_root_dir, 'STEP' + str(step)))):
+            m = re.match(fname_pattern, f)
+            if m is None:
+                continue
+
+            step_this, z_this, block_this = tuple((float(v) if '.' in v else int(v) for v in m.groups()))
+
+            # check if this file is needed
+            if (blocks is not None and block_this not in blocks):
+                continue
+
+            if redshift is None:
+                redshift = z_this
+            elif z_this != redshift:
+                raise ValueError('Mismatch in redshifts in filename and/or configuration file')
+
+            snapshot_files[(step_this, block_this)] = os.path.join(catalog_root_dir, 'STEP' + str(step), f)
+
+        if check_file_list_complete:
+            possible_blocks = list(set(b for _, b in snapshot_files)) if blocks is None else blocks
+            if not all(key in snapshot_files for key in product(range(step, step+1), possible_blocks)):
+                raise ValueError('Some catalog files are missing!')
+
+        return snapshot_files, redshift
+
     def _collect_native_quantities(self, fh, collect_info_dict=False):
         native_quantities = set()
         collect = partial(_add_to_native_quantity_collector, collector=native_quantities)
         group_name = first(self._get_group_names(fh))
+
         fh[group_name].visititems(collect)
 
         if collect_info_dict:
@@ -229,13 +282,21 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
     def _process_metadata(self, ensure_quantity_consistent=False, # pylint: disable=W0613
                           check_version=True, check_md5=True, check_size=True,
                           check_cosmology=True, cosmology_atol=1e-4, **kwargs):
-        sky_area = dict()
         native_quantities = None
         quantity_info = None
 
-        max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
-        min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
-        default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
+        lightcone = self.lightcone
+
+        if lightcone:
+            sky_area = dict()
+            max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
+            min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
+            default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
+            files_to_check = self._healpix_files
+        else:
+            default_box_size = 3000.
+            box_size = 0.
+            files_to_check = self._snapshot_files
 
         if check_size and 'size' not in self.file_check_info:
             check_size = False
@@ -245,7 +306,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             check_md5 = False
             warnings.warn('Not able to perform md5 check: no md5 sum specified in {}'.format(CHECK_FILE_PATH))
 
-        for (_, hpx_this), file_path in self._healpix_files.items():
+        for (_, file_key), file_path in files_to_check.items():
             file_name = os.path.basename(file_path)
 
             if check_size and os.path.getsize(file_path) != self.file_check_info['size'].get(file_name):
@@ -261,13 +322,25 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 if check_cosmology:
                     self._check_cosmology(fh, file_name, cosmology_atol)
 
-                # get sky area
-                try:
-                    sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
-                except KeyError:
-                    sky_area_this = default_sky_area
-                if sky_area.get(hpx_this, 0) < sky_area_this:
-                    sky_area[hpx_this] = sky_area_this
+                if lightcone:
+                    # get sky area
+                    try:
+                        sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
+                    except KeyError:
+                        sky_area_this = default_sky_area
+                    if sky_area.get(file_key, 0) < sky_area_this:
+                        sky_area[file_key] = sky_area_this
+                else:
+                    try:
+                        box_size_this = fh['metaData/box_size'].value
+                    except KeyError:
+                        box_size_this = default_box_size
+                    box_size = max(box_size, box_size_this)
+                    try:
+                        self.redshift = fh['metaData/redshift'].value
+                    except KeyError:
+                        self.redshift = self._redshift
+                        print('Redshift missing from metaData; using redshift supplied from filename or configuration file')
 
                 # get native quantities
                 if native_quantities is None or quantity_info is None:
@@ -276,19 +349,37 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                       native_quantities != self._collect_native_quantities(fh)):
                     raise ValueError('native quantities are not consistent among different files')
 
-        sky_area = sum(sky_area.values())
-        return sky_area, native_quantities, quantity_info
+        if lightcone:
+            return_size = sum(sky_area.values())
+        else:
+            return_size = box_size
+
+        return return_size, native_quantities, quantity_info
 
     def _iter_native_dataset(self, native_filters=None):
-        for (zlo_this, hpx_this), file_path in self._healpix_files.items():
-            d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
-            if native_filters is not None and not native_filters.check_scalar(d):
-                continue
-            with h5py.File(file_path, 'r') as fh:
-                for group in self._get_group_names(fh):
-                    # pylint: disable=E1101,W0640
-                    if len(fh[group]):
-                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+        
+        lightcone = self.lightcone
+
+        if lightcone:
+            for (zlo_this, hpx_this), file_path in self._healpix_files.items():
+                d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
+                if native_filters is not None and not native_filters.check_scalar(d):
+                    continue
+                with h5py.File(file_path, 'r') as fh:
+                    for group in self._get_group_names(fh):
+                        # pylint: disable=E1101,W0640
+                        if len(fh[group]):
+                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+        else:
+            for (step_this, block_this), file_path in self._snapshot_files.items():
+                d = {'block': block_this}
+                if native_filters is not None and not native_filters.check_scalar(d):
+                    continue
+                with h5py.File(file_path, 'r') as fh:
+                    for group in self._get_group_names(fh):
+                        if len(fh[group]):
+                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
@@ -466,6 +557,34 @@ class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
             'ra_true':       'ra',
             'dec_true':      'dec',
             'redshift_true': 'redshift',
+            'halo_id':       'target_halo_id',
+            'halo_mass':     'target_halo_mass',
+            'stellar_mass':  'obs_sm',
+            'position_x': 'x',
+            'position_y': 'y',
+            'position_z': 'z',
+            'velocity_x': 'vx',
+            'velocity_y': 'vy',
+            'velocity_z': 'vz',
+            'is_central': (lambda x: x == -1, 'upid'),
+        }
+
+        # add magnitudes
+        for band in 'gri':
+            quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'restframe_extincted_sdss_abs_mag{}'.format(band)
+
+        return quantity_modifiers
+
+
+class BaseDC2SnapshotGalaxyCatalog(CosmoDC2ParentClass):
+    """
+    BaseDC2 snapshot galaxy catalog reader, inherited from CosmoDC2ParentClass
+    """
+    @staticmethod
+    def _generate_quantity_modifiers():
+        quantity_modifiers = {
+            'galaxy_id' :    'galaxy_id',
             'halo_id':       'target_halo_id',
             'halo_mass':     'target_halo_mass',
             'stellar_mass':  'obs_sm',
