@@ -105,18 +105,13 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
         self.lightcone = kwargs.get('lightcone', True)
 
-        if self.lightcone:
-            self._healpix_files = self._get_healpix_file_list(
-                catalog_root_dir,
-                catalog_filename_template,
-                **kwargs
-            )
-        else:
-            self._snapshot_files, self._redshift = self._get_snapshot_file_list(
-                catalog_root_dir,
-                catalog_filename_template,
-                **kwargs
-            )
+        get_file_list = self._get_healpix_file_list if self.lightcone else self._get_snapshot_file_list
+        self._file_list = get_file_list(
+            catalog_root_dir,
+            catalog_filename_template,
+            **kwargs
+        )
+        self._healpix_files = self._file_list # for backward compatibility 
 
         if 'cosmology' in kwargs:
             cosmology = kwargs['cosmology']
@@ -149,8 +144,8 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             self.sky_area, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
             self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
         else:
-            self._native_filter_quantities = {'block'}
             self.box_size, self._native_quantities, self._quantity_info = self._process_metadata(**kwargs)
+            self._native_filter_quantities = {'block'}
 
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self.halo_mass_def = kwargs.get('halo_mass_def', 'FoF, b=0.168')
@@ -204,10 +199,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                                 check_file_list_complete=True, **kwargs):
 
         snapshot_files = dict()
-        redshift = kwargs.get('redshift', None)
-
-        if step is None:
-            raise ValueError('Step must be specified')
 
         fname_pattern = catalog_filename_template.format(r'(\d+)')
 
@@ -222,16 +213,10 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if (blocks is not None and block_this not in blocks):
                 continue
 
-            if redshift is None:
-                redshift = z_this
-            elif z_this != redshift:
-                raise ValueError('Mismatch in redshifts in filename and/or configuration file')
-
             snapshot_files[block_this] = os.path.join(catalog_root_dir, f)
 
-        if check_file_list_complete:
-            possible_blocks = list(set(b for _, b in snapshot_files)) if blocks is None else blocks
-            if not all(key in snapshot_files for key in product(range(step, step+1), possible_blocks)):
+        if check_file_list_complete and blocks is not None:
+            if not all(block_this in snapshot_files for block_this in blocks):
                 raise ValueError('Some catalog files are missing!')
 
         return snapshot_files
@@ -295,7 +280,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         else:
             default_box_size = 3000.
             box_size = 0.
-            files_to_check = self._snapshot_files
 
         if check_size and 'size' not in self.file_check_info:
             check_size = False
@@ -359,25 +343,19 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         
         lightcone = self.lightcone
 
-        if lightcone:
-            for (zlo_this, hpx_this), file_path in self._healpix_files.items():
-                d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
-                if native_filters is not None and not native_filters.check_scalar(d):
-                    continue
-                with h5py.File(file_path, 'r') as fh:
-                    for group in self._get_group_names(fh):
-                        # pylint: disable=E1101,W0640
-                        if len(fh[group]):
-                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+        if self.lightcone:
+            key_to_dict = lambda key: dict(zip(('redshift_block_lower', 'healpix_pixel'), key))
         else:
-            for (step_this, block_this), file_path in self._snapshot_files.items():
-                d = {'block': block_this}
-                if native_filters is not None and not native_filters.check_scalar(d):
-                    continue
-                with h5py.File(file_path, 'r') as fh:
-                    for group in self._get_group_names(fh):
-                        if len(fh[group]):
-                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+            key_to_dict = lambda key: {'block': key}
+        for key, file_path in self._file_list.items():
+            d = key_to_dict(key)
+            if native_filters is not None and not native_filters.check_scalar(d):
+                continue
+            with h5py.File(file_path, 'r') as fh:
+                for group in self._get_group_names(fh):
+                    # pylint: disable=E1101,W0640
+                    if len(fh[group]):
+                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
 
 
     def _get_quantity_info_dict(self, quantity, default=None):
