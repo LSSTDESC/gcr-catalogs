@@ -329,7 +329,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                     except KeyError:
                         sky_area_this = default_sky_area
                     if sky_area.get(file_key, 0) < sky_area_this:
-                        sky_area[file_key] = sky_area_this
+                        sky_area[hpx_this] = sky_area_this
                 else:
                     try:
                         box_size_this = fh['metaData/box_size'].value
