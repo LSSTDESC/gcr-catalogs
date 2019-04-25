@@ -306,7 +306,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             check_md5 = False
             warnings.warn('Not able to perform md5 check: no md5 sum specified in {}'.format(CHECK_FILE_PATH))
 
-        for (_, file_key), file_path in files_to_check.items():
+        for file_key, file_path in self._file_list.items():
             file_name = os.path.basename(file_path)
 
             if check_size and os.path.getsize(file_path) != self.file_check_info['size'].get(file_name):
