@@ -339,7 +339,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                     try:
                         self.redshift = fh['metaData/redshift'].value
                     except KeyError:
-                        self.redshift = self._redshift
                         print('Redshift missing from metaData; using redshift supplied from filename or configuration file')
 
                 # get native quantities
