@@ -10,7 +10,6 @@ cosmology:
     n_s: 0.963
     sigma8: 0.8
 
-redshift: 1.006
 
 
 lightcone: false
