@@ -216,7 +216,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if m is None:
                 continue
 
-            step_this, z_this, block_this = tuple((float(v) if '.' in v else int(v) for v in m.groups()))
+            block_this = int(m.groups()[0])
 
             # check if this file is needed
             if (blocks is not None and block_this not in blocks):
