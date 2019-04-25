@@ -227,7 +227,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             elif z_this != redshift:
                 raise ValueError('Mismatch in redshifts in filename and/or configuration file')
 
-            snapshot_files[(step_this, block_this)] = os.path.join(catalog_root_dir, 'STEP' + str(step), f)
+            snapshot_files[block_this] = os.path.join(catalog_root_dir, f)
 
         if check_file_list_complete:
             possible_blocks = list(set(b for _, b in snapshot_files)) if blocks is None else blocks
