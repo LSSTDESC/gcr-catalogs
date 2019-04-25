@@ -211,7 +211,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
         fname_pattern = catalog_filename_template.format(r'(\d+)')
 
-        for f in sorted(os.listdir(os.path.join(catalog_root_dir, 'STEP' + str(step)))):
+        for f in sorted(os.listdir(catalog_root_dir)):
             m = re.match(fname_pattern, f)
             if m is None:
                 continue
