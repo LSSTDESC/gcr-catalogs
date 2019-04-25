@@ -1,7 +1,7 @@
 subclass_name: cosmodc2.BaseDC2SnapshotGalaxyCatalog
 
 catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_snapshots_v0.1
-catalog_filename_template: baseDC2_Step{}_z{}_#{}.hdf5
+catalog_filename_template: baseDC2_Step247_z1.006_#{}.hdf5
 
 cosmology:
     H0: 71.0
