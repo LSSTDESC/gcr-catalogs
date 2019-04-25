@@ -292,7 +292,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
             min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
             default_sky_area = hp.nside2pixarea(min_valid_nside, degrees=True)
-            files_to_check = self._healpix_files
         else:
             default_box_size = 3000.
             box_size = 0.
