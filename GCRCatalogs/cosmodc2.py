@@ -234,7 +234,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if not all(key in snapshot_files for key in product(range(step, step+1), possible_blocks)):
                 raise ValueError('Some catalog files are missing!')
 
-        return snapshot_files, redshift
+        return snapshot_files
 
     def _collect_native_quantities(self, fh, collect_info_dict=False):
         native_quantities = set()
