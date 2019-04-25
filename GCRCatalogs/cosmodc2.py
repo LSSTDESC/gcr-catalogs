@@ -209,7 +209,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if step is None:
             raise ValueError('Step must be specified')
 
-        fname_pattern = catalog_filename_template.format(r'(\d+)', r'(\d.\d+)', r'(\d+)')
+        fname_pattern = catalog_filename_template.format(r'(\d+)')
 
         for f in sorted(os.listdir(os.path.join(catalog_root_dir, 'STEP' + str(step)))):
             m = re.match(fname_pattern, f)
