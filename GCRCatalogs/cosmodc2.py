@@ -328,7 +328,8 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                         sky_area_this = float(fh['metaData/skyArea'].value) # pylint: disable=E1101
                     except KeyError:
                         sky_area_this = default_sky_area
-                    if sky_area.get(file_key, 0) < sky_area_this:
+                    hpx_this = file_key[1]
+                    if sky_area.get(hpx_this, 0) < sky_area_this:
                         sky_area[hpx_this] = sky_area_this
                 else:
                     try:
