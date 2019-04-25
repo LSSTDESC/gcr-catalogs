@@ -200,7 +200,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
     @staticmethod
     def _get_snapshot_file_list(catalog_root_dir, catalog_filename_template,
-                                step=None, blocks=None,
+                                blocks=None,
                                 check_file_list_complete=True, **kwargs):
 
         snapshot_files = dict()
