@@ -319,7 +319,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'convergence': 'convergence',
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'uniqueHaloID',
-            'halo_mass':     'hostHaloMass',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
             'stellar_mass_disk':        'diskMassStellar',
@@ -451,6 +451,13 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
 
         return quantity_modifiers
 
+    def get_quantity_info(self,q):
+        info_dict = self._get_quantity_info_dict(q)
+        if q == 'hostHaloMass':
+            if 'units' in info_dict:
+                info_dict['units'] = 'Msun/h'
+        
+        return info_dict
 
 class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
