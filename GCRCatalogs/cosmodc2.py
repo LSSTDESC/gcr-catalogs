@@ -451,13 +451,14 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
 
         return quantity_modifiers
 
-    def get_quantity_info(self,q):
-        info_dict = self._get_quantity_info_dict(q)
-        if q == 'hostHaloMass':
-            if 'units' in info_dict:
-                info_dict['units'] = 'Msun/h'
-        
-        return info_dict
+
+    def _collect_native_quantities(self, fh, collect_info_dict=False):
+        orig_output = super()._collect_native_quantities(fh, collect_info_dict)
+        # a hot fix of the unit of native halo mass (hostHaloMass), which should be Msun/h
+        if collect_info_dict:
+            orig_output[1]['hostHaloMass']['units'] = 'Msun/h'
+        return orig_output
+
 
 class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
