@@ -530,8 +530,7 @@ class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     def _get_group_names(self, fh):
         return [k for k in fh if k.isdigit()]
 
-    @staticmethod
-    def _generate_quantity_modifiers():
+    def _generate_quantity_modifiers(self):
         quantity_modifiers = {
             'galaxy_id' :    'galaxy_id',
             'ra_true':       'ra',
@@ -563,8 +562,7 @@ class BaseDC2SnapshotGalaxyCatalog(CosmoDC2ParentClass):
     """
     _default_box_size = 3000.0
 
-    @staticmethod
-    def _generate_quantity_modifiers():
+    def _generate_quantity_modifiers(self):
         quantity_modifiers = {
             'galaxy_id' :    'galaxy_id',
             'halo_id':       'target_halo_id',
