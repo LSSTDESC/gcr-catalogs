@@ -538,7 +538,7 @@ class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
             'dec_true':      'dec',
             'redshift_true': 'redshift',
             'halo_id':       'target_halo_id',
-            'halo_mass':     'target_halo_mass',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
             'stellar_mass':  'obs_sm',
             'position_x': 'x',
             'position_y': 'y',
@@ -568,7 +568,7 @@ class BaseDC2SnapshotGalaxyCatalog(CosmoDC2ParentClass):
         quantity_modifiers = {
             'galaxy_id' :    'galaxy_id',
             'halo_id':       'target_halo_id',
-            'halo_mass':     'target_halo_mass',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
             'stellar_mass':  'obs_sm',
             'position_x': 'x',
             'position_y': 'y',
