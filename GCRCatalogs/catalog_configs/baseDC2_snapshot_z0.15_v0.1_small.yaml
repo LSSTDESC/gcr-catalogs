@@ -1,0 +1,27 @@
+subclass_name: cosmodc2.BaseDC2SnapshotGalaxyCatalog
+
+catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_snapshots_v0.1/STEP432
+catalog_filename_template: baseDC2_Step432_z0.1538_#{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    n_s: 0.963
+    sigma8: 0.8
+
+
+
+blocks: [0, 1]
+
+lightcone: false
+
+version: "0.1.0"
+
+check_md5: false
+check_size: false
+
+creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
+
+description: |
+    This is the baseline snapshot catalog characterizing the galaxy-halo connection for LSST-DESC cosmoDC2.
