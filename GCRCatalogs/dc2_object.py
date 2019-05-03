@@ -498,8 +498,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             try:
                 fh = self._open_hdf5(file_path)
 
-            except (IOError, OSError):
+            except (IOError, OSError) as e:
                 warnings.warn('Cannot access {}; skipped'.format(file_path))
+                print(e)
                 continue
 
             for key in fh:
