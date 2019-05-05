@@ -13,7 +13,7 @@ import yaml
 
 from GCR import BaseGenericCatalog
 
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
 __all__ = ['DC2Catalog']
 
