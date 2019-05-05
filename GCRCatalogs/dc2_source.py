@@ -12,7 +12,7 @@ import pyarrow.parquet as pq
 import yaml
 
 from GCR import BaseGenericCatalog
-form .dc2_catalog import DC2Catalog
+from .dc2_catalog import DC2Catalog
 
 
 __all__ = ['DC2SourceCatalog']
