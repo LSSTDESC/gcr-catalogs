@@ -12,7 +12,7 @@ import pyarrow.parquet as pq
 import yaml
 
 from GCR import BaseGenericCatalog
-from .dc2_catalog import DC2Catalog
+from .dc2_catalog import DC2Catalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 
 __all__ = ['DC2SourceCatalog']

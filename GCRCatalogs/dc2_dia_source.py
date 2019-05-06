@@ -12,7 +12,7 @@ import pyarrow.parquet as pq
 import yaml
 
 from GCR import BaseGenericCatalog
-from .dc2_catalog import DC2Catalog
+from .dc2_catalog import DC2Catalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 
 __all__ = ['DC2DiaSourceCatalog']
@@ -83,7 +83,7 @@ class DC2DiaSourceCatalog(DC2Catalog):
         self._native_filter_quantities = self._generate_native_quantity_list()
 
     @staticmethod
-    def _generate_modifiers(**kwargs):
+    def _generate_modifiers(dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
