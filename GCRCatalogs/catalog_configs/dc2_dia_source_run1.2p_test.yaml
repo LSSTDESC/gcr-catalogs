@@ -1,7 +1,7 @@
-subclass_name: dc2_source.DC2SourceCatalog
-base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2p/dia_source_catalog
+subclass_name: dc2_dia_source.DC2DiaSourceCatalog
+base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2p/dia_source_catalog_test
 schema_filename: schema.yaml
 filename_pattern: 'dia_src_visit_\d+\.parquet$'
-description: DC2 Run 1.2p DIA Source Catalog
+description: DC2 Run 1.2p DIA Source Catalog test patch
 creators: ['Michael Wood-Vasey']
 included_by_default: true
