@@ -97,6 +97,9 @@ class DC2DiaSourceCatalog(DC2Catalog):
 
         modifiers = {
             'diaSourceId': 'id',
+            'visit': 'visit',
+            'filter': 'filter',
+            'detector': 'detector',
             'parentDiaSourceId': 'parent',
 #            'midPointTai': 'dateobs'?  I don't know what this is called
             'ra': (np.rad2deg, 'coord_ra'),
@@ -116,7 +119,6 @@ class DC2DiaSourceCatalog(DC2Catalog):
             'totFluxErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
             'isDipole': 'ip_diffim_DipoleFit_flag_classification',
             'ixyPSF': 'slot_PsfShape_xy',
-            'filter': 'filter',
             'xy_flag': 'slot_Centroid_flag',
             'I_flag': 'slot_Shape_flag',
             'Ixx': 'slot_Shape_xx',
