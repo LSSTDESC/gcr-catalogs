@@ -118,13 +118,6 @@ class DC2DiaSourceCatalog(DC2Catalog):
             'ixyPSF': 'slot_PsfShape_xy',
             'filter': 'filter',
             'xy_flag': 'slot_Centroid_flag',
-            'sky': (convert_flux_to_nanoJansky,
-                    'base_LocalBackground_{}'.format(flux_name),
-                    'fluxmag0'),
-            'skyErr': (convert_flux_to_nanoJansky,
-                       'base_LocalBackground_{}{}'.format(flux_name, flux_err_name),
-                       'fluxmag0'),
-            'sky_flag': 'base_LocalBackground_flag',
             'I_flag': 'slot_Shape_flag',
             'Ixx': 'slot_Shape_xx',
             'IxxPSF': 'slot_PsfShape_xx',
@@ -138,9 +131,6 @@ class DC2DiaSourceCatalog(DC2Catalog):
             'apFlux_flag': 'slot_ApFlux_flag',
             'psFlux_flag': 'slot_PsfFlux_flag',
             'psNdata': 'slot_PsfFlux_area',
-            # There are no 'slot_*' values for the extendedness and blendedness
-            # in the Run 1.2i processing (as of 2019-03-05)
-            'extendedness': 'base_ClassificationExtendedness_value',
         }
 
         not_good_flags = (
@@ -153,9 +143,6 @@ class DC2DiaSourceCatalog(DC2Catalog):
         )
 
         modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
-        modifiers['clean'] = (
-            create_basic_flag_mask,
-            'deblend_skipped',
-        ) + not_good_flags
+        modifiers['clean'] = modifiers['good']
 
         return modifiers
