@@ -5,13 +5,9 @@ DC2 Source Catalog Reader
 import os
 import re
 import warnings
-import shutil
 
 import numpy as np
-import pyarrow.parquet as pq
-import yaml
 
-from GCR import BaseGenericCatalog
 from .dc2_catalog import DC2Catalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 

@@ -5,13 +5,7 @@ DC2 Forced Source Catalog Reader
 import os
 import re
 import warnings
-import shutil
 
-import numpy as np
-import pyarrow.parquet as pq
-import yaml
-
-from GCR import BaseGenericCatalog
 from .dc2_catalog import DC2Catalog
 
 __all__ = ['DC2ForcedSourceCatalog']

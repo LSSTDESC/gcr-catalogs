@@ -1,5 +1,5 @@
 """
-DC2 Source Catalog Reader
+DC2 Catalog Reader
 """
 
 import os
