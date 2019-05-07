@@ -19,7 +19,7 @@ SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_source_meta.yaml')
 
 class DC2DiaSourceCatalog(DC2Catalog):
-    r"""DC2 DIA Object Catalog reader
+    r"""DC2 DIA Source Catalog reader
 
     Parameters
     ----------
