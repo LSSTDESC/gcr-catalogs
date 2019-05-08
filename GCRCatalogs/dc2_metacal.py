@@ -127,7 +127,7 @@ class DC2MetacalCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'base_SdssCentroid_x',
             'y': 'base_SdssCentroid_y',
-            'xErr': 'base_SdssCentroid_x{}'.format(ERR),s
+            'xErr': 'base_SdssCentroid_x{}'.format(ERR),
             'yErr': 'base_SdssCentroid_y{}'.format(ERR),
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
