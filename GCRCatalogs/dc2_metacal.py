@@ -104,7 +104,7 @@ class DC2MetacalCatalog(BaseGenericCatalog):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3):
+    def _generate_modifiers(dm_schema_version=3, bands='riz'):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -127,13 +127,46 @@ class DC2MetacalCatalog(BaseGenericCatalog):
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'base_SdssCentroid_x',
             'y': 'base_SdssCentroid_y',
-            'xErr': 'base_SdssCentroid_x{}'.format(ERR),
+            'xErr': 'base_SdssCentroid_x{}'.format(ERR),s
             'yErr': 'base_SdssCentroid_y{}'.format(ERR),
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
             'blendedness': 'base_Blendedness_abs_{}'.format(FLUX),
+            # Metacal fields
+            'mcal_g': (lambda *x: np.vstack(x).T, 'mcal_gauss_g1', 'mcal_gauss_g2'),
+            # metacalibrated variants - we add the shear and then
+            # apply the response
+            'mcal_g_1p': (lambda *x: np.vstack(x).T, 'mcal_gauss_g1_1p', 'mcal_gauss_g2_1p'),
+            'mcal_g_1m': (lambda *x: np.vstack(x).T, 'mcal_gauss_g1_1m', 'mcal_gauss_g2_1m'),
+            'mcal_g_2p': (lambda *x: np.vstack(x).T, 'mcal_gauss_g1_2p', 'mcal_gauss_g2_2p'),
+            'mcal_g_2m': (lambda *x: np.vstack(x).T, 'mcal_gauss_g1_2m', 'mcal_gauss_g2_2m'),
+            # Size parameter and metacal variants
+            'mcal_T': 'mcal_gauss_T',
+            'mcal_T_1p': 'mcal_gauss_T_1p',
+            'mcal_T_1m': 'mcal_gauss_T_1m',
+            'mcal_T_2p': 'mcal_gauss_T_2p',
+            'mcal_T_2m': 'mcal_gauss_T_2m',
+            # Rounded SNR values, as used in the selection,
+            # together with the metacal variants
+            "mcal_s2n": 'mcal_gauss_s2n',
+            "mcal_s2n_1p": 'mcal_gauss_s2n_1p',
+            "mcal_s2n_1m": 'mcal_gauss_s2n_1m',
+            "mcal_s2n_2p": 'mcal_gauss_s2n_2p',
+            "mcal_s2n_2m": 'mcal_gauss_s2n_2m'
         }
+
+        # Adds band dependent info and their variants
+        for band in bands:
+            for variant in ['','_1p','_1m','_2p','_2m']:
+                modifiers['mcal_flux_{}{}'.format(band,variant)] = 'mcal_gauss_flux_{}{}'.format(band,variant)
+                modifiers['mcal_flux_err_{}{}'.format(band,variant)] = 'mcal_gauss_flux_err_{}{}'.format(band,variant)
+
+                modifiers['mcal_s2n_{}{}'.format(band,variant)] = (
+                        np.divide,
+                        'mcal_gauss_flux_{}{}'.format(band, variant),
+                        'mcal_gauss_flux_err_{}{}'.format(band, variant),
+                    )
 
         not_good_flags = (
             'base_PixelFlags_flag_edge',
