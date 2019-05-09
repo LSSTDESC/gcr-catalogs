@@ -67,7 +67,6 @@ class DC2DiaSourceCatalog(DC2DMCatalog):
             'apFluxErr': (convert_flux_to_nanoJansky,
                           'slot_ApFlux_{}{}'.format(flux_name, flux_err_name),
                           'fluxmag0'),
-            'apFlux_flag': 'slot_ApFlux_flag',
             'psFlux': (convert_flux_to_nanoJansky,
                        'slot_PsfFlux_{}'.format(flux_name),
                        'fluxmag0'),

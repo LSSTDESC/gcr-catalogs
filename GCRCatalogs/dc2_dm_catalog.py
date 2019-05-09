@@ -123,7 +123,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
         self.close_all_file_handles()
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3):
+    def _generate_modifiers(dm_schema_version=3):  # pylint: disable=unused-argument
         """Creates a dictionary relating native and homogenized column names
 
         Args:
