@@ -34,7 +34,7 @@ class DC2MetacalCatalog(DC2DMCatalog):
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_metacal_meta.yaml')
 
     @staticmethod
-    def _generate_modifiers(bands='riz'):
+    def _generate_modifiers(dm_schema_version=3, bands='riz'):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
