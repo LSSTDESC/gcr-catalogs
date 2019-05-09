@@ -3,17 +3,10 @@ DC2 Forced Source Catalog Reader
 """
 
 import os
-import re
-import warnings
 
-from .dc2_catalog import DC2Catalog
+from .dc2_catalog import DC2Catalog, convert_flux_to_nanoJansky
 
 __all__ = ['DC2ForcedSourceCatalog']
-
-FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATTERN = r'fourced_source_visit_\d+\.parquet$'
-SCHEMA_FILENAME = 'schema.yaml'
-META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_forced_source_meta.yaml')
 
 
 class DC2ForcedSourceCatalog(DC2Catalog):
@@ -35,46 +28,10 @@ class DC2ForcedSourceCatalog(DC2Catalog):
     """
     # pylint: disable=too-many-instance-attributes
 
-    def _subclass_init(self, **kwargs):
-        self.base_dir = kwargs['base_dir']
-        self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
-        self.use_cache = bool(kwargs.get('use_cache', True))
-
-        if not os.path.isdir(self.base_dir):
-            raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
-
-        _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
-        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
-        self._schema_path = os.path.join(self.base_dir, _schema_filename)
-
-        self._schema = None
-        if self._schema_path and os.path.isfile(self._schema_path):
-            self._schema = self._generate_schema_from_yaml(self._schema_path)
-
-        self._file_handles = dict()
-        self._datasets = self._generate_datasets()
-        if not self._datasets:
-            err_msg = 'No catalogs were found in `base_dir` {}'
-            raise RuntimeError(err_msg.format(self.base_dir))
-
-        if not self._schema:
-            warnings.warn('Falling back to reading all datafiles for column names')
-            self._schema = self._generate_schema_from_datafiles(self._datasets)
-
-        if kwargs.get('is_dpdd'):
-            self._quantity_modifiers = {col: None for col in self._schema}
-        else:
-            if any(col.endswith('_fluxSigma') for col in self._schema):
-                dm_schema_version = 1
-            elif any(col.endswith('_fluxErr') for col in self._schema):
-                dm_schema_version = 2
-            else:
-                dm_schema_version = 3
-
-            self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
-
-        self._quantity_info_dict = self._generate_info_dict(META_PATH)
-        self._native_filter_quantities = self._generate_native_quantity_list()
+    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    FILE_PATTERN = r'fourced_source_visit_\d+\.parquet$'
+    SCHEMA_FILENAME = 'schema.yaml'
+    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_forced_source_meta.yaml')
 
     @staticmethod
     def _generate_modifiers(dm_schema_version=3):

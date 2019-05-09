@@ -17,11 +17,6 @@ from abc import ABCMeta, abstractmethod
 
 __all__ = ['DC2Catalog']
 
-FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-FILE_PATTERN = r'source_visit_\d+\.parquet$'
-SCHEMA_FILENAME = 'schema.yaml'
-META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
-
 
 #pylint: disable=C0103
 def convert_flux_to_nanoJansky(flux, fluxmag0):
@@ -77,15 +72,20 @@ class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
     """
     # pylint: disable=too-many-instance-attributes
 
+    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    FILE_PATTERN = r'source_visit_\d+\.parquet$'
+    SCHEMA_FILENAME = 'schema.yaml'
+    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
+
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
-        self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
+        self._filename_re = re.compile(kwargs.get('filename_pattern', self.FILE_PATTERN))
         self.use_cache = bool(kwargs.get('use_cache', True))
 
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
-        _schema_filename = kwargs.get('schema_filename', SCHEMA_FILENAME)
+        _schema_filename = kwargs.get('schema_filename', self.SCHEMA_FILENAME)
         # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
         self._schema_path = os.path.join(self.base_dir, _schema_filename)
 
@@ -115,7 +115,7 @@ class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
 
             self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
 
-        self._quantity_info_dict = self._generate_info_dict(META_PATH)
+        self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
         self._native_filter_quantities = self._generate_native_quantity_list()
 
     def __del__(self):
