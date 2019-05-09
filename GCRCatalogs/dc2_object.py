@@ -22,32 +22,6 @@ SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
-def calc_cov(ixx_err, iyy_err, ixy_err):
-    """Calculate the covariance between three arrays of second moments
-
-    Args:
-        ixx_err (float): The error in the second moment Ixx
-        iyy_err (float): The error in the second moment Iyy
-        ixy_err (float): The error in the second moment Ixy
-
-    Returns:
-        Elements of the covariance matrix ordered as
-            [ixx * ixx, ixx * ixy, ixx * iyy, ixy * ixy, ixy * iyy, iyy * iyy]
-    """
-
-    # This array is missing the off-diagonal correlation coefficients
-    out_data = np.array([
-        ixx_err * ixx_err,
-        ixx_err * ixy_err,
-        ixx_err * iyy_err,
-        ixy_err * ixy_err,
-        ixy_err * iyy_err,
-        iyy_err * iyy_err
-    ])
-
-    return out_data.transpose()
-
-
 def convert_flux_to_nanoJansky(flux, dm_ref_zp=27):
     """Convert the listed DM coadd-reported flux values to nanoJansky.
 

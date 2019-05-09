@@ -8,11 +8,11 @@ import numpy as np
 
 from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
-__all__ = ['DC2SourceCatalog']
+__all__ = ['DC2DiaSourceCatalog']
 
 
-class DC2SourceCatalog(DC2DMCatalog):
-    r"""DC2 Source Catalog reader
+class DC2DiaSourceCatalog(DC2DMCatalog):
+    r"""DC2 DIA Source Catalog reader
 
     Parameters
     ----------
@@ -31,9 +31,9 @@ class DC2SourceCatalog(DC2DMCatalog):
     # pylint: disable=too-many-instance-attributes
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    FILE_PATTERN = r'source_visit_\d+\.parquet$'
+    FILE_PATTERN = r'dia_src_visit_\d+\.parquet$'
     SCHEMA_FILENAME = 'schema.yaml'
-    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
+    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_source_meta.yaml')
 
     @staticmethod
     def _generate_modifiers(dm_schema_version=3):
@@ -45,34 +45,41 @@ class DC2SourceCatalog(DC2DMCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
-
-        if dm_schema_version not in (1, 2, 3):
-            raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
-
         flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
         flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
-            'sourceId': 'id',
+            'diaSourceId': 'id',
             'visit': 'visit',
-            'detector': 'detector',
             'filter': 'filter',
-            'objectId': 'objectId',
-            'parentObjectId': 'parent',
+            'detector': 'detector',
+            'parentDiaSourceId': 'parent',
+#            'midPointTai': 'dateobs'?  I don't know what this is called
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
             'x': 'slot_Centroid_x',
             'y': 'slot_Centroid_y',
-            'xErr': 'slot_Centroid_x{}'.format(flux_err_name),
-            'yErr': 'slot_Centroid_y{}'.format(flux_err_name),
-            'xy_flag': 'slot_Centroid_flag',
-            'sky': (convert_flux_to_nanoJansky,
-                    'base_LocalBackground_{}'.format(flux_name),
-                    'fluxmag0'),
-            'skyErr': (convert_flux_to_nanoJansky,
-                       'base_LocalBackground_{}{}'.format(flux_name, flux_err_name),
+            'xErr': 'slot_Centroid_xErr',
+            'yErr': 'slot_Centroid_yErr',
+            'apFlux': (convert_flux_to_nanoJansky,
+                       'slot_ApFlux_{}'.format(flux_name),
                        'fluxmag0'),
-            'sky_flag': 'base_LocalBackground_flag',
+            'apFluxErr': (convert_flux_to_nanoJansky,
+                          'slot_ApFlux_{}{}'.format(flux_name, flux_err_name),
+                          'fluxmag0'),
+            'psFlux': (convert_flux_to_nanoJansky,
+                       'slot_PsfFlux_{}'.format(flux_name),
+                       'fluxmag0'),
+            'psFluxErr': (convert_flux_to_nanoJansky,
+                          'slot_PsfFlux_{}{}'.format(flux_name, flux_err_name),
+                          'fluxmag0'),
+            'dipAngle': 'ip_diffim_DipoleFit_orientation',
+            'dipChi2': 'ip_diffim_DipoleFit_chi2dof',
+            'totFlux': 'ip_diffim_forced_PsfFlux_instFlux',
+            'totFluxErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
+            'isDipole': 'ip_diffim_DipoleFit_flag_classification',
+            'ixyPSF': 'slot_PsfShape_xy',
+            'xy_flag': 'slot_Centroid_flag',
             'I_flag': 'slot_Shape_flag',
             'Ixx': 'slot_Shape_xx',
             'IxxPSF': 'slot_PsfShape_xx',
@@ -83,31 +90,9 @@ class DC2SourceCatalog(DC2DMCatalog):
             'mag': 'mag',
             'magerr': 'mag_err',
             'fluxmag0': 'fluxmag0',
-            'apFlux': (convert_flux_to_nanoJansky,
-                       'slot_ApFlux_{}'.format(flux_name),
-                       'fluxmag0'),
-            'apFluxErr': (convert_flux_to_nanoJansky,
-                          'slot_ApFlux_{}{}'.format(flux_name, flux_err_name),
-                          'fluxmag0'),
             'apFlux_flag': 'slot_ApFlux_flag',
-            'psFlux': (convert_flux_to_nanoJansky,
-                       'slot_PsfFlux_{}'.format(flux_name),
-                       'fluxmag0'),
-            'psFluxErr': (convert_flux_to_nanoJansky,
-                          'slot_PsfFlux_{}{}'.format(flux_name, flux_err_name),
-                          'fluxmag0'),
             'psFlux_flag': 'slot_PsfFlux_flag',
             'psNdata': 'slot_PsfFlux_area',
-            'psf_fwhm_pixels': (
-                lambda xx, yy, xy: 2.355 * (xx * yy - xy * xy) ** 0.25,
-                'slot_PsfShape_xx',
-                'slot_PsfShape_yy',
-                'slot_PsfShape_xy',
-            ),
-            # There are no 'slot_*' values for the extendedness and blendedness
-            # in the Run 1.2i processing (as of 2019-03-05)
-            'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_{}'.format(flux_name),
         }
 
         not_good_flags = (
@@ -120,9 +105,6 @@ class DC2SourceCatalog(DC2DMCatalog):
         )
 
         modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
-        modifiers['clean'] = (
-            create_basic_flag_mask,
-            'deblend_skipped',
-        ) + not_good_flags
+        modifiers['clean'] = modifiers['good']
 
         return modifiers
