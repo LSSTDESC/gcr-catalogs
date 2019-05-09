@@ -64,11 +64,14 @@ class DC2MetacalCatalog(DC2DMCatalog):
 
             # Adds band dependent info and their variants
             for band in bands:
-                modifiers['mcal_flux_{}{}'.format(band, variant)] = (lambda x: x / 0.2**2,
-                'mcal_gauss_flux_{}{}'.format(band, variant))
-                modifiers['mcal_flux_err_{}{}'.format(band, variant)] =  (lambda x: x / 0.2**2,
-                'mcal_gauss_flux_err_{}{}'.format(band, variant))
-
+                modifiers['mcal_flux_{}{}'.format(band, variant)] = (
+                    lambda x: x / 0.2**2,
+                    'mcal_gauss_flux_{}{}'.format(band, variant)
+                )
+                modifiers['mcal_flux_err_{}{}'.format(band, variant)] = (
+                    lambda x: x / 0.2**2,
+                    'mcal_gauss_flux_err_{}{}'.format(band, variant)
+                )
                 modifiers['mcal_mag_{}{}'.format(band, variant)] = (
                     lambda x: -2.5 * np.log10(x/ 0.2**2) + 27.0,
                     'mcal_gauss_flux_{}{}'.format(band, variant),
