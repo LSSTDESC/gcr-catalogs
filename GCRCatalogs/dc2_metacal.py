@@ -33,21 +33,6 @@ class DC2MetacalCatalog(DC2DMCatalog):
     SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_metacal_meta.yaml')
 
-    def _subclass_init(self, **kwargs):
-        """
-        Grabs additional keywords in the config file to apply potential fixes to
-        the catalog
-        """
-
-        if kwargs.get('fix_flux_scaling'):
-            # This is to account for a missing factor of pixel size in the fluxes
-            # included in `run1.2i metacal-test3`
-            self._flux_scaling = 0.2**2
-        else:
-            self._flux_scaling = 1.
-
-        super(DC2MetacalCatalog, self)._subclass_init(**kwargs)
-
     @staticmethod
     def _generate_modifiers(bands='riz'):
         """Creates a dictionary relating native and homogenized column names
@@ -79,9 +64,9 @@ class DC2MetacalCatalog(DC2DMCatalog):
 
             # Adds band dependent info and their variants
             for band in bands:
-                modifiers['mcal_flux_{}{}'.format(band,variant)] = (lambda x: x / self._flux_scaling,
+                modifiers['mcal_flux_{}{}'.format(band,variant)] = (lambda x: x / 0.2**2,
                 'mcal_gauss_flux_{}{}'.format(band,variant))
-                modifiers['mcal_flux_err_{}{}'.format(band,variant)] =  (lambda x: x / self._flux_scaling,
+                modifiers['mcal_flux_err_{}{}'.format(band,variant)] =  (lambda x: x / 0.2**2,
                 'mcal_gauss_flux_err_{}{}'.format(band,variant))
 
                 modifiers['mcal_mag_{}{}'.format(band, variant)] = (
