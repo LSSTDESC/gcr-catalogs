@@ -1,5 +1,9 @@
 """
-DC2 Catalog Reader
+DC2 DM Catalog Reader
+
+Read DC2 catalogs based off LSST Data Management (DM) Science Pipelines output
+as extracted and reformatted as Parquet files.
+Readers that provide access to DC2 DM data should inherit from this class.
 """
 
 import os
@@ -66,9 +70,6 @@ class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
     Attributes
     ----------
     base_dir          (str): The directory of data files being served
-
-    Notes
-    -----
     """
     # pylint: disable=too-many-instance-attributes
 
