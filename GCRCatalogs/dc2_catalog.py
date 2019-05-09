@@ -17,7 +17,7 @@ import yaml
 
 from GCR import BaseGenericCatalog
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 
 __all__ = ['DC2Catalog']
 
@@ -123,7 +123,6 @@ class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
         self.close_all_file_handles()
 
     @staticmethod
-    @abstractmethod
     def _generate_modifiers(dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
@@ -133,7 +132,7 @@ class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
-        pass
+        return dict()
 
     @staticmethod
     def _generate_info_dict(meta_path):
