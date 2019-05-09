@@ -70,13 +70,13 @@ class DC2MetacalCatalog(DC2DMCatalog):
                 'mcal_gauss_flux_err_{}{}'.format(band,variant))
 
                 modifiers['mcal_mag_{}{}'.format(band, variant)] = (
-                    lambda x: -2.5 * np.log10(x) + 27.0,
-                    'mcal_flux_{}{}'.format(band, variant),
+                    lambda x: -2.5 * np.log10(x/ 0.2**2) + 27.0,
+                    'mcal_gauss_flux_{}{}'.format(band, variant),
                 )
                 modifiers['mcal_mag_err_{}{}'.format(band, variant)] = (
-                    lambda flux, err: (2.5 * err) / (flux * np.log(10)),
-                    'mcal_flux_{}{}'.format(band, variant),
-                    'mcal_flux_err_{}{}'.format(band, variant),
+                    lambda flux, err: (2.5 * err/ 0.2**2) / (flux/ 0.2**2 * np.log(10)),
+                    'mcal_gauss_flux_{}{}'.format(band, variant),
+                    'mcal_gauss_flux_err_{}{}'.format(band, variant),
                 )
 
         return modifiers
