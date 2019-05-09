@@ -3,7 +3,7 @@ DC2 Metacal Catalog Reader
 """
 
 import os
-
+import numpy as np
 from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 __all__ = ['DC2MetacalCatalog']
