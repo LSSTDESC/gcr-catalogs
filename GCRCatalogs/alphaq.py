@@ -148,6 +148,8 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         if StrictVersion(__version__) < config_version:
             raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
 
+        self.catalog_version = catalog_version
+
         # specify quantity modifiers
         self._quantity_modifiers = {
             'galaxy_id' :    'galaxyID',
@@ -169,7 +171,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             ),
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'hostHaloTag',
-            'halo_mass':     'hostHaloMass',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
             'stellar_mass_disk':        'diskMassStellar',
@@ -246,9 +248,9 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'otherLuminosities/spheroidLuminositiesStellar:B:rest',
                 'otherLuminosities/spheroidLuminositiesStellar:B:rest:dustAtlas',
             ),
-            'position_x': 'x',
-            'position_y': 'y',
-            'position_z': 'z',
+            'position_x': (lambda x: x/self.cosmology.h, 'x'),
+            'position_y': (lambda x: x/self.cosmology.h, 'y'),
+            'position_z': (lambda x: x/self.cosmology.h, 'z'),
             'velocity_x': 'vx',
             'velocity_y': 'vy',
             'velocity_z': 'vz',
@@ -304,6 +306,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                 'ellipticity_2_disk_true':  'morphology/diskEllipticity2',
                 'ellipticity_1_bulge_true': 'morphology/spheroidEllipticity1',
                 'ellipticity_2_bulge_true': 'morphology/spheroidEllipticity2',
+                'halo_mass': 'hostHaloMass',
+                'position_x': 'x',
+                'position_y': 'y',
+                'position_z': 'z',
             })
 
         if catalog_version < StrictVersion('2.1.2'):
@@ -357,7 +363,15 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if quantity_key not in fh:
                 return default
             modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
-            return {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
+            return_qty = {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
+            # a hot fix of the units of native halo mass (hostHaloMass) and x for v3+
+            if self.catalog_version >= StrictVersion('3.0'):
+                if quantity == 'hostHaloMass':
+                    return_qty = {'units': 'Msun/h'}
+            else:
+                if quantity == 'x' or quantity == 'y' or quantity == 'z':
+                    return_qty = {'units': 'comoving Mpc'}
+            return return_qty
 
 
     def _get_quantity_info_dict(self, quantity, default=None):
