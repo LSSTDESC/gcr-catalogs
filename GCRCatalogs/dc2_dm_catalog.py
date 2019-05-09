@@ -19,7 +19,7 @@ from GCR import BaseGenericCatalog
 
 from abc import ABCMeta
 
-__all__ = ['DC2Catalog']
+__all__ = ['DC2DMCatalog']
 
 
 #pylint: disable=C0103
@@ -57,7 +57,7 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class DC2Catalog(BaseGenericCatalog, metaclass=ABCMeta):
+class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
     r"""DC2 Catalog reader
 
     Parameters

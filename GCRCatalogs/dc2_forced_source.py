@@ -4,12 +4,12 @@ DC2 Forced Source Catalog Reader
 
 import os
 
-from .dc2_catalog import DC2Catalog, convert_flux_to_nanoJansky
+from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky
 
 __all__ = ['DC2ForcedSourceCatalog']
 
 
-class DC2ForcedSourceCatalog(DC2Catalog):
+class DC2ForcedSourceCatalog(DC2DMCatalog):
     r"""DC2 Forced Source Catalog reader
 
     Parameters
