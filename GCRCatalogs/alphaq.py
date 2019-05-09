@@ -365,12 +365,10 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
             return_qty = {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
             # a hot fix of the units of native halo mass (hostHaloMass) and x for v3+
-            if self.catalog_version >= StrictVersion('3.0'):
-                if quantity == 'hostHaloMass':
-                    return_qty = {'units': 'Msun/h'}
-            else:
-                if quantity == 'x' or quantity == 'y' or quantity == 'z':
-                    return_qty = {'units': 'comoving Mpc'}
+            if self.catalog_version >= StrictVersion('3.0') and quantity == 'hostHaloMass':
+                    return_qty['units'] = 'Msun/h'
+            if self.catalog_version < StrictVersion('3.0') and quantity in set('xyz'):
+                    return_qty['units'] = 'comoving Mpc'
             return return_qty
 
 
