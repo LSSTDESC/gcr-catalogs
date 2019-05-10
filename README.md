@@ -56,7 +56,7 @@ Confluence page (*DESC member only*).
    - `buzzard_test`: same as `buzzard` but a small subset for testing purpose / faster access
    - `buzzard_high-res`: higher resolution, smaller sky area
    - `buzzard_v1.9.2_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
-   - `buzzard_v1.6_x`: different realizations of an older version of `buzzard`. 
+   - `buzzard_v1.6_x`: different realizations of an older version of `buzzard`.
      You can run
      ```python
      sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('buzzard_v1.6')))
@@ -70,6 +70,8 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
+   - `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract (5063)for testing purpose / faster access
+   - `dc2_object_run1.2i_tract5063_with_metacal`: same as `dc2_object_run1.2i_tract5063` but with metacal (columns that start with `mcal_`). Metacal catalog provided by Johann Cohen-Tanugi and Erin Sheldon.
    - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
