@@ -39,7 +39,7 @@ class DC2MetacalCatalog(DC2DMCatalog):
         Wraps default init method to apply various corrections to the catalog.
         """
         # Default values of reader parameters
-        self._bands = kwargs.get('bands', default='riz')
+        self._bands = kwargs.get('bands', 'riz') # default to 'riz' if 'bands' not exist
 
         self._flux_scaling = 1.0
         if kwargs.get('apply_metacal_test3_fix'):
