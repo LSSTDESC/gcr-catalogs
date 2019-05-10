@@ -366,7 +366,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             return_qty = {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
             # a hot fix of the units of native halo mass (hostHaloMass) and x for v3+
             if self.catalog_version >= StrictVersion('3.0') and quantity == 'hostHaloMass':
-                    return_qty['units'] = 'Msun/h'
+                return_qty['units'] = 'Msun/h'
             if self.catalog_version < StrictVersion('3.0') and quantity in set('xyz'):
                     return_qty['units'] = 'comoving Mpc'
             return return_qty
