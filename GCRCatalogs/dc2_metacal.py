@@ -33,12 +33,32 @@ class DC2MetacalCatalog(DC2DMCatalog):
     SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_metacal_meta.yaml')
 
-    @staticmethod
-    def _generate_modifiers(dm_schema_version=3, bands='riz'):
+
+    def _subclass_init(self, **kwargs):
+        """
+        Overrides default init method to apply various corrections to the catalog
+        """
+        # Default values of reader parameters
+        self._flux_scaling = 1.0
+        self._bands = 'riz'
+
+        if kwargs.get('bands'):
+            self._bands = kwargs['bands']
+
+        if kwargs.get('fix_metacal_test3'):
+            # In Run 1.2i metacal_test3, the fluxes returned by metacal are not
+            # properly scaled by the pixel size, it's necessary to apply a
+            # 0.2**2 correction factor
+            self._flux_scaling = 1. / 0.2**2
+
+        super(DC2MetacalCatalog, self)._subclass_init(**kwargs)
+
+
+    def _generate_modifiers(self, dm_schema_version=3):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
-            Bands availble: r,i,z
+            dm_schema_version (int): DM schema version (1, 2, or 3)
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
@@ -63,21 +83,21 @@ class DC2MetacalCatalog(DC2DMCatalog):
             modifiers['mcal_s2n{}'.format(variant)] = 'mcal_gauss_s2n{}'.format(variant)
 
             # Adds band dependent info and their variants
-            for band in bands:
+            for band in self._bands:
                 modifiers['mcal_flux_{}{}'.format(band, variant)] = (
-                    lambda x: x / 0.2**2,
+                    lambda x: x * self._flux_scaling,
                     'mcal_gauss_flux_{}{}'.format(band, variant)
                 )
                 modifiers['mcal_flux_err_{}{}'.format(band, variant)] = (
-                    lambda x: x / 0.2**2,
+                    lambda x: x * self._flux_scaling,
                     'mcal_gauss_flux_err_{}{}'.format(band, variant)
                 )
                 modifiers['mcal_mag_{}{}'.format(band, variant)] = (
-                    lambda x: -2.5 * np.log10(x/ 0.2**2) + 27.0,
+                    lambda x: -2.5 * np.log10(x * self._flux_scaling) + 27.0,
                     'mcal_gauss_flux_{}{}'.format(band, variant),
                 )
                 modifiers['mcal_mag_err_{}{}'.format(band, variant)] = (
-                    lambda flux, err: (2.5 * err/ 0.2**2) / (flux/ 0.2**2 * np.log(10)),
+                    lambda flux, err: (2.5 * err ) / (flux * np.log(10)),
                     'mcal_gauss_flux_{}{}'.format(band, variant),
                     'mcal_gauss_flux_err_{}{}'.format(band, variant),
                 )

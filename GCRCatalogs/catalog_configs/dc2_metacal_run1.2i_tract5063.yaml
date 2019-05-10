@@ -5,3 +5,5 @@ filename_pattern: 'metacal_tract_\d+\.parquet$'
 description: DC2 Run 1.2i Metacal Catalog
 creators: ['Francois Lanusse', 'Johann Cohen-Tanugi']
 included_by_default: true
+bands: 'riz'
+fix_metacal_test3: true
