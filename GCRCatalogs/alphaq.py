@@ -368,7 +368,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             if self.catalog_version >= StrictVersion('3.0') and quantity == 'hostHaloMass':
                 return_qty['units'] = 'Msun/h'
             if self.catalog_version < StrictVersion('3.0') and quantity in set('xyz'):
-                    return_qty['units'] = 'comoving Mpc'
+                return_qty['units'] = 'comoving Mpc'
             return return_qty
 
 
