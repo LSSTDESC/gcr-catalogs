@@ -20,12 +20,12 @@ def load_yaml(yaml_file):
         r = requests.get(yaml_file, stream=True)
     except (requests.exceptions.MissingSchema, requests.exceptions.URLRequired):
         with open(yaml_file) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
     else:
         if r.status_code == 404:
             raise requests.RequestException('404 Not Found!')
         r.raw.decode_content = True
-        config = yaml.load(r.raw)
+        config = yaml.safe_load(r.raw)
     return config
 
 

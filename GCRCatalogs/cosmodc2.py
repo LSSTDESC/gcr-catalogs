@@ -132,7 +132,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         if kwargs.get('check_md5', True) or kwargs.get('check_size', True):
             try:
                 with open(CHECK_FILE_PATH, 'r') as f:
-                    self.file_check_info = yaml.load(f)
+                    self.file_check_info = yaml.safe_load(f)
             except (IOError, OSError):
                 pass
             else:
