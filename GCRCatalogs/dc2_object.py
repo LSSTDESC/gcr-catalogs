@@ -417,7 +417,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         """
 
         with open(meta_path, 'r') as ofile:
-            base_dict = yaml.load(ofile)
+            base_dict = yaml.safe_load(ofile)
 
         info_dict = dict()
         for quantity, info_list in base_dict.items():
@@ -503,7 +503,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         """
 
         with open(schema_path, 'r') as schema_stream:
-            schema = yaml.load(schema_stream)
+            schema = yaml.safe_load(schema_stream)
 
         if schema is None:
             warn_msg = 'No schema can be found in schema file {}'

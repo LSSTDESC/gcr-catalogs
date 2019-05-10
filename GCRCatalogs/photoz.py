@@ -45,7 +45,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
         if self._metadata_path and os.path.isfile(self._metadata_path):
             with open(self._metadata_path, 'r') as meta_stream:
-                self._metadata = yaml.load(meta_stream)
+                self._metadata = yaml.safe_load(meta_stream)
         else:
             self._metadata = self.generate_metadata()
 
