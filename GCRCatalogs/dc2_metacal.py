@@ -39,17 +39,14 @@ class DC2MetacalCatalog(DC2DMCatalog):
         Overrides default init method to apply various corrections to the catalog
         """
         # Default values of reader parameters
+        self._bands = kwargs.get('bands', 'riz')
+
         self._flux_scaling = 1.0
-        self._bands = 'riz'
-
-        if kwargs.get('bands'):
-            self._bands = kwargs['bands']
-
         if kwargs.get('fix_metacal_test3'):
             # In Run 1.2i metacal_test3, the fluxes returned by metacal are not
             # properly scaled by the pixel size, it's necessary to apply a
             # 0.2**2 correction factor
-            self._flux_scaling = 1. / 0.2**2
+            self._flux_scaling /= 0.2**2
 
         super(DC2MetacalCatalog, self)._subclass_init(**kwargs)
 
