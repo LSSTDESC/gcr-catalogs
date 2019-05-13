@@ -83,6 +83,14 @@ Confluence page (*DESC member only*).
    *by LSST DESC, compiled by Michael Wood-Vasey*
    - `dc2_source_run1.2i`: Source Table catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
 
+-  **DC2 "Forced Source Catalogs"** \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_forced_source_run1.2p`: Forced Source Table catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).  This is the forced-position photometry based on the positions in the Object Table.
+
+-  **DC2 "DIA Source Test Catalogs"** \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_dia_source_run1.2p_test`: DIASource Table catalog for a test DIA processing of Tract+Paptch 4849+6,6 for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).
+
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
    - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
