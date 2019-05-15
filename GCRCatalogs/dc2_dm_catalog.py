@@ -247,7 +247,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
             # but that's a bit clunky and I don'tk now quite how to write it out
             df = dataset.read().to_pandas()
             # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
-            native_schema = {k: {'dtype': v} for k, v in df.dtypes.to_dict().items()}
+            native_schema = {k: {'dtype': v.str} for k, v in df.dtypes.to_dict().items()}
             schema.update(native_schema)
             # The first non-empty one will be fine.
             if native_schema:
