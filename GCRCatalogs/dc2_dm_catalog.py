@@ -270,7 +270,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
         schema = self._generate_schema_from_datafiles(self._datasets)
 
         for col, schema_this in schema.items():
-            if schema_this['dtype'] == 'bool' and (
+            if np.dtype(schema_this['dtype']).kind == 'b' and (
                     col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
                 schema_this['default'] = True
 
