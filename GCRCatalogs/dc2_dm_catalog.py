@@ -17,8 +17,6 @@ import yaml
 
 from GCR import BaseGenericCatalog
 
-from abc import ABCMeta
-
 __all__ = ['DC2DMCatalog']
 
 
@@ -57,7 +55,7 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
+class DC2DMCatalog(BaseGenericCatalog):
     r"""DC2 Catalog reader
 
     Parameters
