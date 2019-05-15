@@ -279,9 +279,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
 
     def clear_cache(self):
         """Empty the catalog reader cache and frees up memory allocation"""
-
-        for dataset in self._datasets:
-            dataset.clear_cache()
+        warnings.warn('clear_cache() has no effect on parquet file format')
 
     def _open_parquet(self, file_path):
         """Return the Parquet filehandle for a Parquet file
