@@ -502,11 +502,15 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             If one or more column names are repeated.
         """
 
-        with open(schema_path, 'r') as schema_stream:
-            schema = yaml.safe_load(schema_stream)
+        schema = None
+        try:
+            with open(schema_path, 'r') as schema_stream:
+                schema = yaml.safe_load(schema_stream)
+        except (IOError, OSError, yaml.YAMLError):
+            pass
 
         if schema is None:
-            warn_msg = 'No schema can be found in schema file {}'
+            warn_msg = 'No schema found or loaded in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
 
         return schema
