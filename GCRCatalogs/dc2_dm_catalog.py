@@ -17,8 +17,6 @@ import yaml
 
 from GCR import BaseGenericCatalog
 
-from abc import ABCMeta
-
 __all__ = ['DC2DMCatalog']
 
 
@@ -57,7 +55,7 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
+class DC2DMCatalog(BaseGenericCatalog):
     r"""DC2 Catalog reader
 
     Parameters
@@ -217,11 +215,15 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
             If one or more column names are repeated.
         """
 
-        with open(schema_path, 'r') as schema_stream:
-            schema = yaml.safe_load(schema_stream)
+        schema = None
+        try:
+            with open(schema_path, 'r') as schema_stream:
+                schema = yaml.safe_load(schema_stream)
+        except (IOError, OSError, yaml.YAMLError):
+            pass
 
         if schema is None:
-            warn_msg = 'No schema can be found in schema file {}'
+            warn_msg = 'No schema found or loaded in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
 
         return schema
@@ -243,7 +245,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
             # but that's a bit clunky and I don'tk now quite how to write it out
             df = dataset.read().to_pandas()
             # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
-            native_schema = {k: {'dtype': v} for k, v in df.dtypes.to_dict().items()}
+            native_schema = {k: {'dtype': v.str} for k, v in df.dtypes.to_dict().items()}
             schema.update(native_schema)
             # The first non-empty one will be fine.
             if native_schema:
@@ -266,7 +268,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
         schema = self._generate_schema_from_datafiles(self._datasets)
 
         for col, schema_this in schema.items():
-            if schema_this['dtype'] == 'bool' and (
+            if np.dtype(schema_this['dtype']).kind == 'b' and (
                     col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
                 schema_this['default'] = True
 
@@ -275,9 +277,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
 
     def clear_cache(self):
         """Empty the catalog reader cache and frees up memory allocation"""
-
-        for dataset in self._datasets:
-            dataset.clear_cache()
+        warnings.warn('clear_cache() has no effect on parquet file format')
 
     def _open_parquet(self, file_path):
         """Return the Parquet filehandle for a Parquet file
