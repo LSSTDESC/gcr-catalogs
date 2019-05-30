@@ -1,3 +1,6 @@
+"""
+test_register.py
+"""
 import GCRCatalogs
 
 _default_catalogs = {
@@ -18,8 +21,3 @@ def test_default_catalog_config():
         c = GCRCatalogs.get_catalog_config(k)
         assert set(c) == set(v)
         assert c['subclass_name'] == v['subclass_name']
-
-def test_readers():
-    readers = set((GCRCatalogs.register.resolve_config_alias(v)['subclass_name'] for v in GCRCatalogs.available_catalogs.values()))
-    for reader in readers:
-        GCRCatalogs.register.import_subclass(reader, 'GCRCatalogs', GCRCatalogs.BaseGenericCatalog)
