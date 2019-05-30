@@ -10,11 +10,11 @@ before_install:
 install:
 - pip install -U numpy
 - pip install .[full]
-- pip install pylint nose
+- pip install pylint pytest
 
 before_script:
 - export CHANGED=$(git diff --diff-filter=d --name-only $TRAVIS_COMMIT_RANGE | grep '^\(GCRCatalogs\|tests\)/.\+\.py$')
 
 script:
-- nosetests tests/test_import.py
+- python -m pytest tests/test_import.py
 - '[ -z "$CHANGED" ] || pylint --disable=C0103,C0301,W0511 --extension-pkg-whitelist=numpy $CHANGED; EXITCODE=$?; if [ $(($EXITCODE&7)) -gt 0 ]; then exit $EXITCODE; fi;'
