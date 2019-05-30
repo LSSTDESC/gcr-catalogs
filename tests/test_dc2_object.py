@@ -1,19 +1,19 @@
 """
 Tests for DC2 Object Reader
 """
-
+import os
+import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
-import pytest
-
 import GCRCatalogs
 
 # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='module')
 def load_dc2_catalog():
     """Convenience function to provide catalog"""
-    reader = 'dc2_object_run1.1p_tract4850.yaml'
-    config = {'base_dir': 'dc2_object_data',
+    this_dir = os.path.dirname(__file__)
+    reader = 'dc2_object_run1.1p_tract4850'
+    config = {'base_dir': os.path.join(this_dir, 'dc2_object_data'),
               'filename_pattern': 'test_object_tract_4850.hdf5'}
     return GCRCatalogs.load_catalog(reader, config)
 
