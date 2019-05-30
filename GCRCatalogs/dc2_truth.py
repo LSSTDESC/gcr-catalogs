@@ -1,8 +1,8 @@
 import os
+import warnings
 import sqlite3
 import numpy as np
 import h5py
-import warnings
 from GCR import BaseGenericCatalog
 from .utils import md5, is_string_like
 
@@ -66,6 +66,16 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
             def _native_qty_getter(qty_name):
                 return file_handle[qty_name].value
             yield _native_qty_getter
+
+    def get_quantities(self, quantities, filters=None, native_filters=None, return_iterator=False):
+        if native_filters is not None:
+            warnings.warn('For this particular truth catalog, `native_filters` is no longer supported.\n'
+                'Please use `filters` instead. For now this code will include your `native_filters` in `filters`.\n'
+                '(Note that `native_filters` still works for other GCR catalogs.)')
+            filters = self._preprocess_filters(native_filters) & self._preprocess_filters(filters)
+            native_filters = None
+
+        return super().get_quantities(quantities, filters, native_filters, return_iterator)
 
 
 class DC2TruthCatalogReader(BaseGenericCatalog):
