@@ -117,9 +117,6 @@ Confluence page (*DESC member only*).
    - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
    - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
--  **DC1 Galaxy Catalog**
-   - `dc1`: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")
-
 
 ## Use GCRCatalogs at NERSC
 
