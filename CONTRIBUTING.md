@@ -29,14 +29,14 @@
    ```python
    import sys
    sys.path.insert(0, '/your/own/directory/gcr-catalogs')
-   ```
+   ```   
+   You can also use `pytest` to run a minimal set of tests. 
 
 7. Commit and push to your forked repo
 
        git add <files changed>
        git commit -m <short but meaningful message>
        git push origin newBranchName
-
 
 8. Go to your forked repo's GitHub page and "create a pull request". 
 
