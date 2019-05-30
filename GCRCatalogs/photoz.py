@@ -95,7 +95,7 @@ class PhotoZCatalog(BaseGenericCatalog):
             patches = df['patch'].values.astype('<U')
             indices = np.flatnonzero(np.concatenate(([True], patches[1:] != patches[:-1], [True])))
             indices = np.vstack((indices[:-1], indices[1:])).T
-            meta_tract['patches'] = [{'patch': patches[i], 'slice': (i, j)} for i, j in indices]
+            meta_tract['patches'] = [{'patch': str(patches[i]), 'slice': [int(i), int(j)]} for i, j in indices]
 
             meta.append(meta_tract)
 
