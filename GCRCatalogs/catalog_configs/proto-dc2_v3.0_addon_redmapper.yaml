@@ -4,3 +4,4 @@ catalogs:
     matching_method: galaxyID
   - catalog_name: proto-dc2_v3.0_redmapper
     matching_method: galaxy_id
+    members_only: true
