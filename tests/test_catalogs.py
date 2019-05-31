@@ -11,6 +11,5 @@ def test_load_catalog_and_quantities(catalog):
     cat = GCRCatalogs.load_catalog(catalog)
     qs = cat.list_all_quantities()[:1] + cat.list_all_native_quantities()[:1]
     assert qs, 'No quantities found in ' + catalog
-    for data in cat.get_quantities(qs, return_iterator=True):
-        assert all(data.get(q) is not None for q in qs), 'some quantities cannot be loaded'
-        break
+    data = next(cat.get_quantities(qs, return_iterator=True))
+    assert all(data.get(q) is not None for q in qs), 'some quantities cannot be loaded'
