@@ -1,7 +1,7 @@
 subclass_name: composite.CompositeReader
 catalogs:
-  - catalog_name: proto-dc2_v3.0_test
-    matching_method: galaxyID
   - catalog_name: proto-dc2_v3.0_redmapper
     matching_method: galaxy_id
     members_only: true
+  - catalog_name: proto-dc2_v3.0_test
+    matching_method: galaxyID
