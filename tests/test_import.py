@@ -5,7 +5,6 @@ _default_catalogs = {
     'buzzard',
     'buzzard_test',
     'buzzard_high-res',
-    'dc1',
 }
 
 def test_default_catalogs():
