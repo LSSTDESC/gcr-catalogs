@@ -47,9 +47,6 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
-        flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
-        flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
-
         # Quantities defined in the DPDD but that we don't know how
         # to calculate yet are commented out in the dict below.
         # Based on the LSST DPDD 2018-10-24 +
