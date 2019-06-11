@@ -10,8 +10,6 @@ cosmology:
     n_s: 0.963
     sigma8: 0.8
 
-
-
 blocks: [0, 1]
 
 lightcone: false

@@ -5,4 +5,4 @@ filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run1p2_light_
 description: |
     Truth catalog for Run 1.2, summary table for variable objects.
 
-included_by_default: true
+include_in_default_catalog_list: true

@@ -5,4 +5,3 @@ catalogs:
     matching_method: 'id'
   - catalog_name: dc2_object_run1.2i_tract5063
     matching_method: 'id'
-included_by_default: true
