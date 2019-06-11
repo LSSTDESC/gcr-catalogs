@@ -276,8 +276,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 dm_schema_version = 1
             elif any(col.endswith('_fluxErr') for col in self._schema):
                 dm_schema_version = 2
-            else:
+            elif any(col == 'base_Blendedness_abs_instFlux' for col in self._schema):
                 dm_schema_version = 3
+            else:
+                dm_schema_version = 4
 
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
