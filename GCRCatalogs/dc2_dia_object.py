@@ -88,8 +88,8 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         modifiers['clean'] = modifiers['good']
 
         for band in bands:
-            modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
-            modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
+            modifiers['magMean_{}'.format(band)] = '{}_mag'.format(band)
+            modifiers['magMeanErr_{}'.format(band)] = '{}_mag_err'.format(band)
             modifiers['psFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
                                                        '{}_base_PsfFlux_{}'.format(band, FLUX))
             modifiers['psFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
@@ -97,10 +97,10 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
                                                           '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
 #            modifiers['psFluxSigma_{}'.format(band)] = (convert_flux_to_nanoJansky,
 #                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
-            modifiers['totFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                       '{}_base_PsfFlux_{}'.format(band, FLUX))
-            modifiers['totFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['totFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
+#            modifiers['totFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
+#                                                       '{}_base_PsfFlux_{}'.format(band, FLUX))
+#            modifiers['totFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
+#            modifiers['totFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
+#                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
 
         return modifiers
