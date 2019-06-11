@@ -4,10 +4,7 @@ test_reader_modules.py
 import pytest
 import GCRCatalogs
 
-all_readers = set((
-    GCRCatalogs.register.resolve_config_alias(v)['subclass_name']
-    for v in GCRCatalogs.available_catalogs.values()
-))
+all_readers = GCRCatalogs.register.get_reader_list()
 
 @pytest.mark.parametrize('reader', all_readers)
 def test_reader_module(reader):
