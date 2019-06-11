@@ -4,20 +4,10 @@ test_register.py
 import pytest
 import GCRCatalogs
 
-_default_catalogs_min_set = {
-    'protoDC2',
-    'buzzard',
-    'buzzard_test',
-    'buzzard_high-res',
-}
-
 # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='module')
 def default_catalogs():
     return GCRCatalogs.get_available_catalogs()
-
-def test_default_catalog_set(default_catalogs):
-    assert set(default_catalogs).issuperset(_default_catalogs_min_set)
 
 def test_available_catalog_set(default_catalogs):
     assert set(GCRCatalogs.available_catalogs).issuperset(set(default_catalogs))

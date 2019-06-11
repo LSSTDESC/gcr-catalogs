@@ -4,5 +4,5 @@ schema_filename: trim_schema.yaml
 filename_pattern: 'trim_object_tract_\d+\.hdf5$'
 description: DC2 Run 1.2i Object Catalog
 creators: ['Michael Wood-Vasey']
-included_by_default: true
 pixel_scale: 0.2
+include_in_default_catalog_list: true

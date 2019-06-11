@@ -1,1 +1,2 @@
 alias: dc2_truth_run1.2_static_no_extinction
+include_in_default_catalog_list: true
