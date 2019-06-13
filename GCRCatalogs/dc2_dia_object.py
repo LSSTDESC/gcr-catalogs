@@ -47,6 +47,9 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
+        flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
+
         # Quantities defined in the DPDD but that we don't know how
         # to calculate yet are commented out in the dict below.
         # Based on the LSST DPDD 2018-10-24 +
@@ -91,16 +94,16 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
             modifiers['magMean_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magMeanErr_{}'.format(band)] = '{}_mag_err'.format(band)
             modifiers['psFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                       '{}_base_PsfFlux_{}'.format(band, FLUX))
+                                                       '{}_base_PsfFlux_{}'.format(band, flux_name))
             modifiers['psFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
             modifiers['psFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
+                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
 #            modifiers['psFluxSigma_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
+#                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
 #            modifiers['totFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                       '{}_base_PsfFlux_{}'.format(band, FLUX))
+#                                                       '{}_base_PsfFlux_{}'.format(band, flux_name))
 #            modifiers['totFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
 #            modifiers['totFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                          '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
+#                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
 
         return modifiers
