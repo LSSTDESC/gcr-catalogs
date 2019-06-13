@@ -52,6 +52,7 @@ class DC2DiaSourceCatalog(DC2DMCatalog):
             'diaSourceId': 'id',
             'diaObjectId': 'objectId',
             'visit': 'visit',
+            'mjd': 'mjd',
             'filter': 'filter',
             'detector': 'detector',
             'parentDiaSourceId': 'parent',
