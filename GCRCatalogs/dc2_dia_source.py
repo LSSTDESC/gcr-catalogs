@@ -50,6 +50,7 @@ class DC2DiaSourceCatalog(DC2DMCatalog):
 
         modifiers = {
             'diaSourceId': 'id',
+            'diaObjectId': 'objectId',
             'visit': 'visit',
             'filter': 'filter',
             'detector': 'detector',
