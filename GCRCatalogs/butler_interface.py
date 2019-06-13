@@ -6,7 +6,6 @@ from GCR import BaseGenericCatalog
 _HAS_LSST_STACK = True
 try:
     from lsst.daf.persistence import Butler, NoResults
-    from lsst.afw.image import Calib
 except ImportError:
     _HAS_LSST_STACK = False
 
@@ -95,21 +94,22 @@ class SingleVisitCatalog(SimpleButlerInterface):
 
         super()._subclass_init(repo, 'src', dataId, **kwargs)
 
-        self._magnitudes = {c.replace('instFlux', 'mag'): c for c in self._columns if 'instFlux' in c}
+        self._magnitudes = {c.replace('instFlux', 'mag'): c for c in self._columns if ('instFlux' in c) and ('Err' not in c)}
+        self._magnitude_errors = {c.replace('instFluxErr', 'magErr'): c for c in self._columns if 'instFluxErr' in c} 
 
     def _generate_quantity_getter(self, dataId):
         data = self._get_data(dataId)
         if data is None:
             return
 
-        calib = Calib(self._get_data(dataId, 'calexp_md'))
-        calib.setThrowOnNegativeFlux(False) # This prevents the getMagnitude method to throw an exception with negative fluxes
+        calib = self._butler.get('calexp_photoCalib', dataId)  
         def _quantity_getter(quantity):
             if quantity in self._magnitudes:
-                return calib.getMagnitude(data.get(self._magnitudes[quantity]))
+                return calib.instFluxToMagnitude(data, quantity.split('mag')[0][:-1])[:,0] # It needs both the source catalog and the flux type: e.g., 'base_PsfFlux'
+            elif quantity in self._magnitude_errors:
+                return calib.instFluxToMagnitude(data, quantity.split('magErr')[0][:-1])[:,1] 
             return data.get(quantity)
-
         return _quantity_getter
 
     def _generate_native_quantity_list(self):
-        return list(self._columns) + list(self._magnitudes)
+        return list(self._columns) + list(self._magnitudes) + list(self._magnitude_errors)
