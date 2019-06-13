@@ -1,4 +1,4 @@
-subclass_name: dc2_dia_source.DC2DiaObjectCatalog
+subclass_name: dc2_dia_object.DC2DiaObjectCatalog
 base_dir: /global/projecta/projectdirs/lsst/production/DC2_PhoSim/Run1.2p/dpdd/dia_object_catalog_test
 schema_filename: schema.yaml
 filename_pattern: 'dia_object_tract_\d+\.parquet$'
