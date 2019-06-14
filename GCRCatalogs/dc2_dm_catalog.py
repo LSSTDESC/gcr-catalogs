@@ -6,10 +6,11 @@ as extracted and reformatted as Parquet files.
 Readers that provide access to DC2 DM data should inherit from this class.
 """
 
+import math
 import os
 import re
-import warnings
 import shutil
+import warnings
 
 import numpy as np
 import pyarrow.parquet as pq
@@ -34,17 +35,14 @@ def convert_nanoJansky_to_mag(flux):
 
 
 #pylint: disable=C0103
-def convert_nanoJansky_err_to_mag_err(flux, flux_err):
-    """Convert calibrated nanoJansky flux and nanoJansky flux err to AB mag err.
+def convert_flux_err_to_mag_err(flux, flux_err):
+    """Convert flux and flux err to mag err.
 
     Assumes flux_err is symmetric.
-    Calculates an _average_ magnitude error based on the average between
+    Uses instantaneous derivative.
+    So a negative flux measurement (with a positive flux_err) will produce a finite, but negative mag_err.
     """
-    mag_err_hi = convert_nanoJansky_to_mag(flux - flux_err)
-    mag_err_lo = convert_nanoJansky_to_mag(flux + flux_err)
-    mag_err = (mag_err_lo + mag_err_hi) / 2
-
-    return mag_err
+    return (2.5 / math.log(10)) * (flux_err / flux)
 
 
 #pylint: disable=C0103

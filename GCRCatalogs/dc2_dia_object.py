@@ -8,8 +8,11 @@ import warnings
 
 import numpy as np
 
-from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
-
+from .dc2_dm_catalog import (DC2DMCatalog,
+                             convert_flux_to_nanoJansky,
+                             convert_nanoJansky_to_mag,
+                             convert_flux_err_to_mag_err,
+                             create_basic_flag_mask)
 
 __all__ = ['DC2DiaObjectCatalog']
 
@@ -67,15 +70,6 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
 # 'pmParallaxLnl': 
 # 'pmParallaxChi2': 
 # 'pmParallaxNdata': 
-#            'psFluxMean': (convert_flux_to_nanoJansky,
-#                           'slot_PsfFlux_{}'.format(flux_name),
-#                           'fluxmag0'),
-#            'psFluxMeanErr': (convert_flux_to_nanoJansky,
-#                              'slot_PsfFlux_{}{}'.format(flux_name, flux_err_name),
-#                              'fluxmag0'),
-#            'psFluxSigma':  # std of distribution of psFlux
-#            'psFluxChi2':
-#            'psFluxNdata':
 #            'totFluxMean': 'ip_diffim_forced_PsfFlux_instFlux',
 #            'totFluxMeanErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
 #            'totFluxSigma': 'ip_diffim_forced_PsfFlux_instFluxErr',
@@ -90,20 +84,24 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         modifiers['good'] = (create_basic_flag_mask,)
         modifiers['clean'] = modifiers['good']
 
+        multiband_columns_to_copy = [
+            'psFluxMean', 'psFluxMeanErr',
+            'psFluxSigma', 'psFluxChi2', 'psFluxNdata']
+
         for band in bands:
-            modifiers['magMean_{}'.format(band)] = '{}_mag'.format(band)
-            modifiers['magMeanErr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                       '{}_base_PsfFlux_{}'.format(band, flux_name))
-            modifiers['psFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
-                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
-#            modifiers['psFluxSigma_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
-#            modifiers['totFluxMean_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                       '{}_base_PsfFlux_{}'.format(band, flux_name))
-#            modifiers['totFluxMean_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-#            modifiers['totFluxMeanErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
-#                                                          '{}_base_PsfFlux_{}{}'.format(band, flux_name, flux_err_name))
+            for base_col in multiband_columns_to_copy:
+                    col_name = f'{base_col}_{band}'
+                    modifiers[col_name] = col_name
+
+        # Create new convenience magnitude columns based on flux values
+        for band in bands:
+            modifiers[f'magMean_{band}'] = (convert_nanoJansky_to_mag,
+                                            f'{band}_mag')
+            modifiers[f'magMeanErr_{band}'] = (convert_flux_err_to_mag_err,
+                                               '{band}_mag',
+                                               '{band}_mag_err')
+            modifiers[f'magMeanStd_{band}'] = (convert_flux_err_to_mag_err,
+                                               f'psFluxMean_{band}',
+                                               f'psFluxSigma_{band}')
 
         return modifiers
