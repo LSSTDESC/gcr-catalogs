@@ -21,6 +21,33 @@ __all__ = ['DC2DMCatalog']
 
 
 #pylint: disable=C0103
+def convert_nanoJansky_to_mag(flux):
+    """Convert calibrated nanoJansky flux to AB mag.
+    """
+    #pylint: disable=C0103
+    AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
+    # 9 is from nano=10**(-9)
+    #pylint: disable=C0103
+    AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky
+
+    return -2.5 * np.log10(flux) + AB_mag_zp_wrt_nanoJansky
+
+
+#pylint: disable=C0103
+def convert_nanoJansky_err_to_mag_err(flux, flux_err):
+    """Convert calibrated nanoJansky flux and nanoJansky flux err to AB mag err.
+
+    Assumes flux_err is symmetric.
+    Calculates an _average_ magnitude error based on the average between
+    """
+    mag_err_hi = convert_nanoJansky_to_mag(flux - flux_err)
+    mag_err_lo = convert_nanoJansky_to_mag(flux + flux_err)
+    mag_err = (mag_err_lo + mag_err_hi) / 2
+
+    return mag_err
+
+
+#pylint: disable=C0103
 def convert_flux_to_nanoJansky(flux, fluxmag0):
     """Convert the listed DM coadd-reported flux values to nanoJansky.
 
