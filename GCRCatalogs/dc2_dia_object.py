@@ -60,7 +60,7 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         #    which clarifies DIASource vs DIAForceSource
         #    and how to calculate various DIAObject properties based on DIASources
         modifiers = {
-            'diaObjectId': 'id',
+            'diaObjectId': 'diaObjectId',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
 #            'radecCov': A covariance matrix for the uncertainty in ra, dec
