@@ -96,10 +96,10 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         # Create new convenience magnitude columns based on flux values
         for band in bands:
             modifiers[f'magMean_{band}'] = (convert_nanoJansky_to_mag,
-                                            f'{band}_mag')
+                                            f'psFluxMean_{band}')
             modifiers[f'magMeanErr_{band}'] = (convert_flux_err_to_mag_err,
-                                               '{band}_mag',
-                                               '{band}_mag_err')
+                                               'psFluxMean_{band}',
+                                               'psFluxMeanErr_{band}')
             modifiers[f'magMeanStd_{band}'] = (convert_flux_err_to_mag_err,
                                                f'psFluxMean_{band}',
                                                f'psFluxSigma_{band}')
