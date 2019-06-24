@@ -38,11 +38,14 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_object_meta.yaml')
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3, bands='ugrizy'):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands='ugrizy'):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
-            dm_schema_version (int): DM schema version (1, 2, or 3)
+            dm_schema_version (int):  Only DM Schema version 3 or greater supported.
+                The current implementation is a no-op for both version 3 and 4.
+                No DIA products have been prepared with DM schema v1 and v2.
+                Function will raise a Runtime error if dm_schema_version <= 3 specified.
             bands (list): Filter names.  These will be used for defined suffixes to flux quanties.
                 E.g., bands='gr' would create just `psFlux_g`, `psFlux_g`, `psFlux_r`, and psFluxErr_r'
                 in addition to other band-dependent columns.
@@ -51,6 +54,9 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
+        if dm_schema_version < 3:
+            err_msg = 'DM Schema Version {} not supported.'
+            raise RuntimeError(err_msg.format(dm_schema_version))
 
         # Quantities defined in the DPDD but that we don't know how
         # to calculate yet are commented out in the dict below.
