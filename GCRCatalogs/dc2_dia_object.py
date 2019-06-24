@@ -38,11 +38,15 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_object_meta.yaml')
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3, bands='ugrizy'):
+    def _generate_modifiers(dm_schema_version=3, bands='ugrizy'):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
             dm_schema_version (int): DM schema version (1, 2, or 3)
+            bands (list): Filter names.  These will be used for defined suffixes to flux quanties.
+                E.g., bands='gr' would create just `psFlux_g`, `psFlux_g`, `psFlux_r`, and psFluxErr_r'
+                in addition to other band-dependent columns.
+                This argument should be left at the default when preparing DC2 DPDD tables.
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
