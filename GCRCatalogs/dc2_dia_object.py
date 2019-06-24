@@ -58,18 +58,18 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
             'diaObjectId': 'diaObjectId',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
-#            'radecCov': A covariance matrix for the uncertainty in ra, dec
-#            'radecTai': 'dateobs'?  I don't know what this is called
-# 'pm': 
-# 'pmParallaxCov': 
-# 'pmParallaxLnl': 
-# 'pmParallaxChi2': 
-# 'pmParallaxNdata': 
+#            'radecCov':  # A covariance matrix for the uncertainty in ra, dec
+#            'radecTai': 'dateobs'?  # I don't know what this is called
+#            'pm':
+#            'pmParallaxCov':
+#            'pmParallaxLnl':
+#            'pmParallaxChi2':
+#            'pmParallaxNdata':
 #            'totFluxMean': 'ip_diffim_forced_PsfFlux_instFlux',
 #            'totFluxMeanErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
 #            'totFluxSigma': 'ip_diffim_forced_PsfFlux_instFluxErr',
-#  'lcPeriodic'
-#  'lcNonPeriodic'
+#            'lcPeriodic'
+#            'lcNonPeriodic'
 #  These are possible to calculate if you require the Object Table
 #            'nearbyObj':
 #            'nearbyObjDist':
@@ -85,8 +85,8 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
 
         for band in bands:
             for base_col in multiband_columns_to_copy:
-                    col_name = f'{base_col}_{band}'
-                    modifiers[col_name] = col_name
+                col_name = f'{base_col}_{band}'
+                modifiers[col_name] = col_name
 
         # Create new convenience magnitude columns based on flux values
         for band in bands:
