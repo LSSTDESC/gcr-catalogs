@@ -4,4 +4,3 @@ schema_filename: schema.yaml
 filename_pattern: 'dia_object_tract_\d+\.parquet$'
 description: DC2 Run 1.2p DIA Object Catalog test patch
 creators: ['Michael Wood-Vasey']
-included_by_default: true
