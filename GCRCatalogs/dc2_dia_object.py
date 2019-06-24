@@ -3,13 +3,10 @@ DC2 DIA Object Catalog Reader
 """
 
 import os
-import re
-import warnings
 
 import numpy as np
 
 from .dc2_dm_catalog import (DC2DMCatalog,
-                             convert_flux_to_nanoJansky,
                              convert_nanoJansky_to_mag,
                              convert_flux_err_to_mag_err,
                              create_basic_flag_mask)
@@ -50,8 +47,6 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
-        flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
-        flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         # Quantities defined in the DPDD but that we don't know how
         # to calculate yet are commented out in the dict below.
