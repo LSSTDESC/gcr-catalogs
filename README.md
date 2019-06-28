@@ -170,7 +170,7 @@ If you want to use `GCRCatalogs` in a Python script, you can either activate DES
 Python environment before you run the script, or edit the hashbang line of the script to be:
 
 ```bash
-#!/global/common/software/lsst/common/miniconda/current/bin/python
+#!/global/common/software/lsst/common/miniconda/current/envs/stack/bin/python
 ```
 
 ### Use the latest version of GCRCatalogs
