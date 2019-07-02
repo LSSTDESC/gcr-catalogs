@@ -1,5 +1,5 @@
 subclass_name: dc2_object.DC2ObjectCatalog
-base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run2.1i/w_2019_19-v1/dpdd/calexp-v1:coadd-dr1b-v1/object_table_summary
+base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-dr1b-v1/object_table_summary
 schema_filename: schema.yaml
 filename_pattern: 'object_tract_\d+\.hdf5$'
 description: DC2 Run 2.1i Object Catalog (with only DPDD columns and native columns needed for the DPDD columns)
