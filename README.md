@@ -66,6 +66,8 @@ Confluence page (*DESC member only*).
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_object_run2.1i_dr1`: static object catalog for Run 2.1i dr1 (with only DPDD columns and native columns needed for the DPDD columns; use `dc2_object_run2.1i_dr1_all_columns` if you need additional columns)
+   - `dc2_object_run2.1i_dr1_tract4850`: same as `dc2_object_run2.1i_dr1` but only has one tract (4850) for testing purpose / faster access
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
@@ -82,6 +84,14 @@ Confluence page (*DESC member only*).
 -  **DC2 "Source Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
    - `dc2_source_run1.2i`: Source Table catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+
+-  **DC2 "Forced Source Catalogs"** \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_forced_source_run1.2p`: Forced Source Table catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).  This is the forced-position photometry based on the positions in the Object Table.
+
+-  **DC2 "DIA Source Test Catalogs"** \
+   *by LSST DESC, compiled by Michael Wood-Vasey*
+   - `dc2_dia_source_run1.2p_test`: DIASource Table catalog for a test DIA processing of Tract+Paptch 4849+6,6 for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).
 
 -  **DC2 "Truth Catalogs"** \
    *by LSST DESC, compiled by Scott Daniel*
@@ -108,9 +118,6 @@ Confluence page (*DESC member only*).
    *by LSST DESC*
    - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
    - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
-
--  **DC1 Galaxy Catalog**
-   - `dc1`: Galaxy catalog used for DC1 (also known as "the catalog on fatboy")
 
 
 ## Use GCRCatalogs at NERSC
@@ -164,7 +171,7 @@ If you want to use `GCRCatalogs` in a Python script, you can either activate DES
 Python environment before you run the script, or edit the hashbang line of the script to be:
 
 ```bash
-#!/global/common/software/lsst/common/miniconda/current/bin/python
+#!/global/common/software/lsst/common/miniconda/current/envs/stack/bin/python
 ```
 
 ### Use the latest version of GCRCatalogs

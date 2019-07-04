@@ -2,5 +2,5 @@ subclass_name: dc2_object.DC2ObjectCatalog
 base_dir: /global/cscratch1/sd/desc/hsc
 description: XMM field of the HSC PDR1
 creators: ['Hyper Suprime-Cam (HSC) collaboration']
-included_by_default: true
 pixel_scale: 0.168
+include_in_default_catalog_list: true

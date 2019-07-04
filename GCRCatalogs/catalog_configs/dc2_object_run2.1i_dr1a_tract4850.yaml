@@ -1,0 +1,7 @@
+subclass_name: dc2_object.DC2ObjectCatalog
+base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-v1/object_table_summary
+schema_filename: trim_schema.yaml
+filename_pattern: 'trim_object_tract_4850\.hdf5$'
+description: DC2 Run 2.1i Object Catalog Tract 4850 (with only DPDD columns and native columns needed for the DPDD columns)
+creators: ['DESC DC2 Team']
+pixel_scale: 0.2

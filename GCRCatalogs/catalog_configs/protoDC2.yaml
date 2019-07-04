@@ -1,2 +1,2 @@
 alias: proto-dc2_v5.0
-included_by_default: true
+include_in_default_catalog_list: true

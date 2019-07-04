@@ -45,7 +45,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
         if self._metadata_path and os.path.isfile(self._metadata_path):
             with open(self._metadata_path, 'r') as meta_stream:
-                self._metadata = yaml.load(meta_stream)
+                self._metadata = yaml.safe_load(meta_stream)
         else:
             self._metadata = self.generate_metadata()
 
@@ -95,7 +95,7 @@ class PhotoZCatalog(BaseGenericCatalog):
             patches = df['patch'].values.astype('<U')
             indices = np.flatnonzero(np.concatenate(([True], patches[1:] != patches[:-1], [True])))
             indices = np.vstack((indices[:-1], indices[1:])).T
-            meta_tract['patches'] = [{'patch': patches[i], 'slice': (i, j)} for i, j in indices]
+            meta_tract['patches'] = [{'patch': str(patches[i]), 'slice': [int(i), int(j)]} for i, j in indices]
 
             meta.append(meta_tract)
 

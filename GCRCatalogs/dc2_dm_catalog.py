@@ -6,10 +6,11 @@ as extracted and reformatted as Parquet files.
 Readers that provide access to DC2 DM data should inherit from this class.
 """
 
+import math
 import os
 import re
-import warnings
 import shutil
+import warnings
 
 import numpy as np
 import pyarrow.parquet as pq
@@ -17,9 +18,31 @@ import yaml
 
 from GCR import BaseGenericCatalog
 
-from abc import ABCMeta
-
 __all__ = ['DC2DMCatalog']
+
+
+#pylint: disable=C0103
+def convert_nanoJansky_to_mag(flux):
+    """Convert calibrated nanoJansky flux to AB mag.
+    """
+    #pylint: disable=C0103
+    AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
+    # 9 is from nano=10**(-9)
+    #pylint: disable=C0103
+    AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky
+
+    return -2.5 * np.log10(flux) + AB_mag_zp_wrt_nanoJansky
+
+
+#pylint: disable=C0103
+def convert_flux_err_to_mag_err(flux, flux_err):
+    """Convert flux and flux err to mag err.
+
+    Assumes flux_err is symmetric.
+    Uses instantaneous derivative.
+    So a negative flux measurement (with a positive flux_err) will produce a finite, but negative mag_err.
+    """
+    return (2.5 / math.log(10)) * (flux_err / flux)
 
 
 #pylint: disable=C0103
@@ -57,7 +80,7 @@ def create_basic_flag_mask(*flags):
     return out
 
 
-class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
+class DC2DMCatalog(BaseGenericCatalog):
     r"""DC2 Catalog reader
 
     Parameters
@@ -147,7 +170,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
         """
 
         with open(meta_path, 'r') as ofile:
-            base_dict = yaml.load(ofile)
+            base_dict = yaml.safe_load(ofile)
 
         info_dict = dict()
         for quantity, info_list in base_dict.items():
@@ -217,11 +240,15 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
             If one or more column names are repeated.
         """
 
-        with open(schema_path, 'r') as schema_stream:
-            schema = yaml.load(schema_stream)
+        schema = None
+        try:
+            with open(schema_path, 'r') as schema_stream:
+                schema = yaml.safe_load(schema_stream)
+        except (IOError, OSError, yaml.YAMLError):
+            pass
 
         if schema is None:
-            warn_msg = 'No schema can be found in schema file {}'
+            warn_msg = 'No schema found or loaded in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
 
         return schema
@@ -243,7 +270,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
             # but that's a bit clunky and I don'tk now quite how to write it out
             df = dataset.read().to_pandas()
             # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
-            native_schema = {k: {'dtype': v} for k, v in df.dtypes.to_dict().items()}
+            native_schema = {k: {'dtype': v.str} for k, v in df.dtypes.to_dict().items()}
             schema.update(native_schema)
             # The first non-empty one will be fine.
             if native_schema:
@@ -266,7 +293,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
         schema = self._generate_schema_from_datafiles(self._datasets)
 
         for col, schema_this in schema.items():
-            if schema_this['dtype'] == 'bool' and (
+            if np.dtype(schema_this['dtype']).kind == 'b' and (
                     col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
                 schema_this['default'] = True
 
@@ -275,9 +302,7 @@ class DC2DMCatalog(BaseGenericCatalog, metaclass=ABCMeta):
 
     def clear_cache(self):
         """Empty the catalog reader cache and frees up memory allocation"""
-
-        for dataset in self._datasets:
-            dataset.clear_cache()
+        warnings.warn('clear_cache() has no effect on parquet file format')
 
     def _open_parquet(self, file_path):
         """Return the Parquet filehandle for a Parquet file

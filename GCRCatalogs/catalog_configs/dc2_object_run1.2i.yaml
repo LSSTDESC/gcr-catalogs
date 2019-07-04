@@ -1,8 +1,8 @@
 subclass_name: dc2_object.DC2ObjectCatalog
-base_dir: /global/projecta/projectdirs/lsst/global/in2p3/Run1.2i/object_catalog_new
+base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run1.2i/dpdd/object_catalog
 schema_filename: trim_schema.yaml
 filename_pattern: 'trim_object_tract_\d+\.hdf5$'
 description: DC2 Run 1.2i Object Catalog
 creators: ['Michael Wood-Vasey']
-included_by_default: true
 pixel_scale: 0.2
+include_in_default_catalog_list: true

@@ -115,3 +115,6 @@ Session.vim
 
 .noseids
 .vscode/
+pytest_session.txt
+.pytest_cache/
+

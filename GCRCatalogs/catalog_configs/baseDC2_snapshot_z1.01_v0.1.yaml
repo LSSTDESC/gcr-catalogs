@@ -10,8 +10,6 @@ cosmology:
     n_s: 0.963
     sigma8: 0.8
 
-
-
 lightcone: false
 
 version: "0.1.0"

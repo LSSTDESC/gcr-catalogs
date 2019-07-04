@@ -9,4 +9,4 @@ table_obs_metadata: obs_metadata
 description: |
     Truth catalog for Run 1.2, light curve tables for variable objects.
 
-included_by_default: true
+include_in_default_catalog_list: true

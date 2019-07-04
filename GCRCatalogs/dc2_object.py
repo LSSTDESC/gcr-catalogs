@@ -276,8 +276,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 dm_schema_version = 1
             elif any(col.endswith('_fluxErr') for col in self._schema):
                 dm_schema_version = 2
-            else:
+            elif any(col == 'base_Blendedness_abs_instFlux' for col in self._schema):
                 dm_schema_version = 3
+            else:
+                dm_schema_version = 4
 
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
@@ -291,25 +293,25 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _generate_modifiers(pixel_scale=0.2, bands='ugrizy',
-                            has_modelfit_mag=True, dm_schema_version=3):
+                            has_modelfit_mag=True, dm_schema_version=4):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
             pixel_scale (float): Scale of pixels in coadd images
             bands       (list):  List of photometric bands as strings
             has_modelfit_mag (bool): Whether or not pre-calculated model fit magnitudes are present
-            dm_schema_version (int): DM schema version (1, 2, or 3)
+            dm_schema_version (int): DM schema version (1, 2, 3, 4)
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        if dm_schema_version not in (1, 2, 3):
-            raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
+        if dm_schema_version not in (1, 2, 3, 4):
+            raise ValueError('Only supports dm_schema_version == 1, 2, 3, 4')
 
         FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
         ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
-
+        BLENDEDNESS_SUFFIX = '_%s' % FLUX if dm_schema_version <= 3 else ''
 
         modifiers = {
             'objectId': 'id',
@@ -323,7 +325,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             'xy_flag': 'base_SdssCentroid_flag',
             'psNdata': 'base_PsfFlux_area',
             'extendedness': 'base_ClassificationExtendedness_value',
-            'blendedness': 'base_Blendedness_abs_{}'.format(FLUX),
+            'blendedness': 'base_Blendedness_abs{}'.format(BLENDEDNESS_SUFFIX),
         }
 
         not_good_flags = (
@@ -417,7 +419,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         """
 
         with open(meta_path, 'r') as ofile:
-            base_dict = yaml.load(ofile)
+            base_dict = yaml.safe_load(ofile)
 
         info_dict = dict()
         for quantity, info_list in base_dict.items():
@@ -502,11 +504,15 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             If one or more column names are repeated.
         """
 
-        with open(schema_path, 'r') as schema_stream:
-            schema = yaml.load(schema_stream)
+        schema = None
+        try:
+            with open(schema_path, 'r') as schema_stream:
+                schema = yaml.safe_load(schema_stream)
+        except (IOError, OSError, yaml.YAMLError):
+            pass
 
         if schema is None:
-            warn_msg = 'No schema can be found in schema file {}'
+            warn_msg = 'No schema found or loaded in schema file {}'
             warnings.warn(warn_msg.format(schema_path))
 
         return schema
@@ -543,7 +549,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         schema = self._generate_schema_from_datafiles(self._datasets)
 
         for col, schema_this in schema.items():
-            if schema_this['dtype'] == 'bool' and (
+            if np.dtype(schema_this['dtype']).kind == 'b' and (
                     col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
                 schema_this['default'] = True
 

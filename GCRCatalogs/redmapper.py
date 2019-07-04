@@ -51,20 +51,11 @@ class RedmapperCatalog(BaseGenericCatalog):
         self.lightcone = kwargs.get('lightcone')
         self.sky_area = kwargs.get('sky_area')
         self.cache = dict() if use_cache else None
+        self._members_only = kwargs.get('members_only')
         self._quantity_modifiers = self._generate_quantity_modifiers()
 
     def _generate_quantity_modifiers(self):
         quantity_modifiers = {
-            'cluster_id': 'clusters/mem_match_id',
-            'ra': 'clusters/ra',
-            'dec': 'clusters/dec',
-            'redshift': 'clusters/z_lambda',
-            'redshift_err': 'clusters/z_lambda_e',
-            'richness': 'clusters/lambda',
-            'richness_err': 'clusters/lambda_e',
-            'scaleval': 'clusters/scaleval',
-            'redshift_true_cg': 'clusters/cg_spec_z',
-            'maskfrac': 'clusters/maskfrac',
             'cluster_id_member': 'members/mem_match_id',
             'id_member': 'members/id',
             'ra_member': 'members/ra',
@@ -78,17 +69,31 @@ class RedmapperCatalog(BaseGenericCatalog):
             'theta_r_member': 'members/theta_r',
         }
 
-        # add centrals
-        for i in range(5):
-            quantity_modifiers['ra_cen_%d' % (i)] = 'clusters/ra_cent/%d' % (i)
-            quantity_modifiers['dec_cen_%d' % (i)] = 'clusters/dec_cent/%d' % (i)
-            quantity_modifiers['p_cen_%d' % (i)] = 'clusters/p_cen/%d' % (i)
-            quantity_modifiers['id_cen_%d' % (i)] = 'clusters/id_cent/%d' % (i)
-
         # Add magnitudes
         for i, band in enumerate(['g', 'r', 'i', 'z', 'y']):
             quantity_modifiers['mag_%s_lsst_member' % (band)] = 'members/mag/%d' % (i)
             quantity_modifiers['magerr_%s_lsst_member' % (band)] = 'members/mag_err/%d' % (i)
+
+        if not self._members_only:
+            quantity_modifiers.update({
+                'cluster_id': 'clusters/mem_match_id',
+                'ra': 'clusters/ra',
+                'dec': 'clusters/dec',
+                'redshift': 'clusters/z_lambda',
+                'redshift_err': 'clusters/z_lambda_e',
+                'richness': 'clusters/lambda',
+                'richness_err': 'clusters/lambda_e',
+                'scaleval': 'clusters/scaleval',
+                'redshift_true_cg': 'clusters/cg_spec_z',
+                'maskfrac': 'clusters/maskfrac',
+            })
+
+            # add centrals
+            for i in range(5):
+                quantity_modifiers['ra_cen_%d' % (i)] = 'clusters/ra_cent/%d' % (i)
+                quantity_modifiers['dec_cen_%d' % (i)] = 'clusters/dec_cent/%d' % (i)
+                quantity_modifiers['p_cen_%d' % (i)] = 'clusters/p_cen/%d' % (i)
+                quantity_modifiers['id_cen_%d' % (i)] = 'clusters/id_cent/%d' % (i)
 
         return quantity_modifiers
 
@@ -102,6 +107,8 @@ class RedmapperCatalog(BaseGenericCatalog):
         native_quantities = set()
 
         for subset in self._catalog_path_template.keys():
+            if self._members_only and subset == 'clusters':
+                continue
             f = self._open_dataset(subset)
             for name, (dt, _) in f.data.dtype.fields.items():
                 if dt.shape:
@@ -144,25 +151,30 @@ class RedMapperLegacyCatalog(RedmapperCatalog):
             'cluster_id_member' :   'members/MEM_MATCH_ID',
             'ra'                :   'members/RA',
             'dec'               :   'members/DEC',
-            'cluster_id'        :   'clusters/MEM_MATCH_ID',
-            'ra_cluster'        :   'clusters/RA',
-            'dec_cluster'       :   'clusters/DEC',
             'redshift_true'     :   'members/Z',
             'redshift'          :   'members/ZRED',
-            'redshift_cluster'  :   'clusters/Z_LAMBDA',
-            'redshift_true_cluster'  :   'clusters/Z',
             'p_mem'             :   'members/P',
             'p_free'            :   'members/PFREE',
-            'p_cen'             :   'clusters/P_BCG',
-            'richness'          :   'clusters/LAMBDA_CHISQ',
-            'halo_id'           :   'clusters/MEM_MATCH_ID',
-            'halo_mass'         :   'clusters/M200',
-            'lim_limmag_dered'  :   'clusters/LIM_LIMMAG_DERED',
-            'scaleval'          :   'clusters/SCALEVAL',
         }
 
         # add magnitudes
         for i, band in enumerate(['u','g','r','i','z']):
             quantity_modifiers['mag_{}_lsst'.format(band)] = 'members/MODEL_MAG/{}'.format(i)
             quantity_modifiers['magerr_{}_lsst'.format(band)] = 'members/MODEL_MAGERR/{}'.format(i)
+
+        if not self._members_only:
+            quantity_modifiers.update({
+                'cluster_id'        :   'clusters/MEM_MATCH_ID',
+                'ra_cluster'        :   'clusters/RA',
+                'dec_cluster'       :   'clusters/DEC',
+                'redshift_cluster'  :   'clusters/Z_LAMBDA',
+                'redshift_true_cluster':'clusters/Z',
+                'p_cen'             :   'clusters/P_BCG',
+                'richness'          :   'clusters/LAMBDA_CHISQ',
+                'halo_id'           :   'clusters/MEM_MATCH_ID',
+                'halo_mass'         :   'clusters/M200',
+                'lim_limmag_dered'  :   'clusters/LIM_LIMMAG_DERED',
+                'scaleval'          :   'clusters/SCALEVAL',
+            })
+
         return quantity_modifiers
