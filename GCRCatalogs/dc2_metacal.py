@@ -32,17 +32,17 @@ class DC2MetacalCatalog(DC2DMCatalog):
     FILE_PATTERN = r'metacal_tract_\d+\.parquet$'
     SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_metacal_meta.yaml')
-
+    METACAL_ZEROPOINT = 27.0
 
     def _subclass_init(self, **kwargs):
         """
-        Overrides default init method to apply various corrections to the catalog
+        Wraps default init method to apply various corrections to the catalog.
         """
         # Default values of reader parameters
-        self._bands = kwargs.get('bands', 'riz')
+        self._bands = kwargs.get('bands', 'riz') # default to 'riz' if 'bands' not exist
 
         self._flux_scaling = 1.0
-        if kwargs.get('fix_metacal_test3'):
+        if kwargs.get('apply_metacal_test3_fix'):
             # In Run 1.2i metacal_test3, the fluxes returned by metacal are not
             # properly scaled by the pixel size, it's necessary to apply a
             # 0.2**2 correction factor
@@ -90,7 +90,7 @@ class DC2MetacalCatalog(DC2DMCatalog):
                     'mcal_gauss_flux_err_{}{}'.format(band, variant)
                 )
                 modifiers['mcal_mag_{}{}'.format(band, variant)] = (
-                    lambda x: -2.5 * np.log10(x * self._flux_scaling) + 27.0,
+                    lambda x: -2.5 * np.log10(x * self._flux_scaling) + self.METACAL_ZEROPOINT,
                     'mcal_gauss_flux_{}{}'.format(band, variant),
                 )
                 modifiers['mcal_mag_err_{}{}'.format(band, variant)] = (
