@@ -1,8 +1,0 @@
-subclass_name: composite.CompositeReader
-description: DC2 Run 1.2i Object Catalog with metacal
-catalogs:
-  - catalog_name: dc2_metacal_run1.2i_tract5063
-    matching_method: 'id'
-  - catalog_name: dc2_object_run1.2i
-    matching_method: 'id'
-included_by_default: true
