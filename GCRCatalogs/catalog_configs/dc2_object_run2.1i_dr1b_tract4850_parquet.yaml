@@ -1,9 +1,3 @@
-subclass_name: dc2_dm_catalog.DC2DMCatalog
-base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-dr1b-v1/object_table_summary
-schema_filename: dpdd_schema.yaml
+based_on: dc2_object_run2.1i_dr1b_parquet
 filename_pattern: 'dpdd_object_tract_4850\.parquet$'
-description: DC2 Run 2.1i DPDD Object Table
-creators: ['DESC DC2 Team']
-pixel_scale: 0.2
-include_in_default_catalog_list: true
-is_dpdd: true
+description: DC2 Run 2.1i DPDD Object Table - Just Tract 4850
