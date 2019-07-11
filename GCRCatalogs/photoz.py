@@ -270,6 +270,7 @@ class PhotoZCatalog2(BaseGenericCatalog):
             if native_filters and not native_filters.check_scalar(tract_patch):
                 continue
             yield dataset.get
+            dataset.close() # to avoid OS complaining too many open files
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""
