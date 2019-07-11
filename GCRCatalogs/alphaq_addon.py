@@ -38,7 +38,7 @@ class AlphaQAddonCatalog(BaseGenericCatalog):
         assert not native_filters, '*native_filters* is not supported'
         with h5py.File(self._addon_filename, 'r') as fh_addon:
             def native_quantity_getter(native_quantity):
-                return fh_addon['{}/{}'.format(self._addon_group,native_quantity)].value # pylint: disable=E1101
+                return fh_addon['{}/{}'.format(self._addon_group,native_quantity)][()]
             yield native_quantity_getter
 
 
@@ -62,7 +62,7 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
     def _generate_native_quantity_list(self):
         native_quantities = set()
         with h5py.File(self._filename, 'r') as fh:
-            data = fh['tidal'].value # pylint: disable=E1101
+            data = fh['tidal'][()]
             for name, (dt, _) in data.dtype.fields.items():
                 native_quantities.add(name)
                 if dt.shape:
@@ -72,7 +72,7 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
 
     def _iter_native_dataset(self, native_filters=None):
         with h5py.File(self._filename, 'r') as fh:
-            data = fh['tidal'].value # pylint: disable=E1101
+            data = fh['tidal'][()]
             def native_quantity_getter(native_quantity):
                 if '/' not in native_quantity:
                     return data[native_quantity]
