@@ -1,41 +1,48 @@
 """
 Photo-z catalog reader
 
-This reader was designed by Yao-Yuan Mao,
+The PhotoZCatalog reader was designed by Yao-Yuan Mao,
 based a photo-z catalog provided by Sam Schmidt, in Feb 2019.
+
+The PhotoZCatalog2 reader, which uses PhotoZFileObject, was designed by Yao-Yuan Mao,
+based a photo-z catalog provided by Sam Schmidt, in Jul 2019.
 """
 
 import re
 import os
 import warnings
 import shutil
+import glob
 
 import yaml
 import numpy as np
 import pandas as pd
-
+import h5py
 from GCR import BaseGenericCatalog
 
-__all__ = ['PhotoZCatalog']
+from .utils import first
 
-FILE_PATTERN = r'run\d\.\d+[a-z]+_PZ_tract_\d+\.h5$'
-METADATA_FILENAME = 'metadata.yaml'
-PDF_BIN_INFO = {
-    'start': 0.005,
-    'stop': 1.01,
-    'step': 0.01,
-    'decimals_to_round': 3,
-}
+__all__ = ['PhotoZCatalog', 'PhotoZCatalog2']
+
 
 class PhotoZCatalog(BaseGenericCatalog):
 
+    _FILE_PATTERN = r'run\d\.\d+[a-z]+_PZ_tract_\d+\.h5$'
+    _METADATA_FILENAME = 'metadata.yaml'
+    _PDF_BIN_INFO = {
+        'start': 0.005,
+        'stop': 1.01,
+        'step': 0.01,
+        'decimals_to_round': 3,
+    }
+
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
-        self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
-        _metadata_filename = kwargs.get('metadata_filename', METADATA_FILENAME)
+        self._filename_re = re.compile(kwargs.get('filename_pattern', self._FILE_PATTERN))
+        _metadata_filename = kwargs.get('metadata_filename', self._METADATA_FILENAME)
         self._metadata_path = os.path.join(self.base_dir, _metadata_filename)
 
-        self._pdf_bin_info = kwargs.get('pdf_bin_info', PDF_BIN_INFO)
+        self._pdf_bin_info = kwargs.get('pdf_bin_info', self._PDF_BIN_INFO)
         self._pdf_bin_centers = np.round(np.arange(
             self._pdf_bin_info['start'],
             self._pdf_bin_info['stop'],
@@ -139,3 +146,133 @@ class PhotoZCatalog(BaseGenericCatalog):
         See also: list_all_native_quantities
         """
         return super(PhotoZCatalog, self).list_all_quantities(with_info=with_info)
+
+
+class PhotoZFileObject():
+    """
+    HDF5 file wrapper for PhotoZCatalog2
+    """
+    _KEY_PDF_BINS = 'pdf/zgrid'
+    def __init__(self, path, filename_pattern=None):
+
+        if isinstance(filename_pattern, re.Pattern): # pylint: disable=no-member
+            filename_re = filename_pattern
+        else:
+            filename_re = re.compile(filename_pattern)
+
+        basename = os.path.basename(path)
+        match = filename_re.match(basename)
+        if match is None:
+            raise ValueError('filename {} does not match required pattern')
+
+        tract, patch_x, patch_y, index = match.groups()
+
+        self.path = path
+        self.tract = int(tract)
+        self.patch = '{},{}'.format(patch_x, patch_y)
+        self.index = int(index)
+        self._handle = None
+        self._keys = None
+        self._len = None
+
+    def keys(self):
+        if self._keys is None:
+            collector = set()
+            def collect(name, obj):
+                if isinstance(obj, h5py.Dataset) and name != self._KEY_PDF_BINS:
+                    collector.add(name)
+            self.handle.visititems(collect)
+            self._keys = tuple(collector)
+        return list(self._keys) + ['tract', 'patch']
+
+    def __len__(self):
+        if self._len is None:
+            self._len = self.handle[first(self.keys())].shape[0]
+        return self._len
+
+    def __getitem__(self, key):
+        if key == 'tract':
+            return np.repeat(self.tract, len(self))
+        if key == 'patch':
+            return np.repeat(self.patch, len(self))
+        return self.handle[key][()]
+
+    get = __getitem__
+
+    @property
+    def handle(self):
+        if self._handle is None:
+            self._handle = h5py.File(self.path, mode='r')
+        return self._handle
+
+    def open(self):
+        return self.handle
+
+    def close(self):
+        if self._handle is not None:
+            self._handle.close()
+            self._handle = None
+
+    @property
+    def pdf_bins(self):
+        return self[self._KEY_PDF_BINS]
+
+
+class PhotoZCatalog2(BaseGenericCatalog):
+
+    _FILE_RE_PATTERN = r'photoz_pdf_Run\d\.[0-9a-z]+_tract_(\d{4})_patch_(\d)_(\d)_idx_(\d+).hdf5'
+    _FILE_GLOB_PATTERN = 'photoz_*.hdf5'
+    _TRACT_GLOB_PATTERN = '*'
+
+    def _subclass_init(self, **kwargs):
+        self.base_dir = kwargs['base_dir']
+        self._filename_re = re.compile(kwargs.get('filename_pattern', self._FILE_RE_PATTERN))
+        self._file_glob_pattern = kwargs.get('filename_glob_pattern', self._FILE_GLOB_PATTERN)
+        self._tract_glob_pattern = kwargs.get('tract_glob_pattern', self._TRACT_GLOB_PATTERN)
+        self._datasets = self._generate_datasets()
+
+        self._quantity_modifiers = {
+            'id': 'id/galaxy_id',
+            'photoz_pdf': 'pdf/pdf',
+            'photoz_mode': 'point_estimates/z_mode',
+            'photoz_mean': 'point_estimates/z_mean',
+            'photoz_median': 'point_estimates/z_median',
+            'photoz_mode_ml': 'point_estimates/z_mode_ml',
+            'photoz_mode_ml_red_chi2': 'point_estimates/z_mode_ml_red_chi2',
+            'photoz_odds': 'point_estimates/ODDS',
+        }
+
+        self._native_filter_quantities = {'tract', 'patch'}
+
+    def _generate_native_quantity_list(self):
+        return first(self._datasets).keys()
+
+    def _generate_datasets(self):
+        datasets = list()
+        for path in glob.glob(os.path.join(self.base_dir, self._tract_glob_pattern, self._file_glob_pattern)):
+            try:
+                dataset = PhotoZFileObject(path, self._filename_re)
+            except ValueError:
+                continue
+            datasets.append(dataset)
+        return sorted(datasets, key=(lambda d: d.index))
+
+    @property
+    def photoz_pdf_bin_centers(self):
+        """
+        expose self._pdf_bin_centers as a public property.
+        """
+        return first(self._datasets).pdf_bins
+
+    def _iter_native_dataset(self, native_filters=None):
+        for dataset in self._datasets:
+            tract_patch = {'tract': dataset.tract, 'patch': dataset.patch}
+            if native_filters and not native_filters.check_scalar(tract_patch):
+                continue
+            yield dataset.get
+            dataset.close() # to avoid OS complaining too many open files
+
+    def close_all_file_handles(self):
+        """Clear all cached file handles"""
+        for dataset in self._datasets:
+            dataset.close()
