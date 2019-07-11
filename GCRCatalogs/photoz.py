@@ -227,7 +227,7 @@ class PhotoZCatalog2(BaseGenericCatalog):
         self._datasets = self._generate_datasets()
 
         self._quantity_modifiers = {
-            'galaxy_id': 'id/galaxy_id',
+            'id': 'id/galaxy_id',
             'photoz_pdf': 'pdf/pdf',
             'photoz_mode': 'point_estimates/z_mode',
             'photoz_mean': 'point_estimates/z_mean',
