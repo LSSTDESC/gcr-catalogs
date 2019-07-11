@@ -152,6 +152,7 @@ class PhotoZFileObject():
     """
     HDF5 file wrapper for PhotoZCatalog2
     """
+    _KEY_PDF_BINS = 'pdf/zgrid'
     def __init__(self, path, filename_pattern=None):
 
         if isinstance(filename_pattern, re.Pattern): # pylint: disable=no-member
@@ -178,7 +179,7 @@ class PhotoZFileObject():
         if self._keys is None:
             collector = set()
             def collect(name, obj):
-                if isinstance(obj, h5py.Dataset) and name != 'pdf/zgrid':
+                if isinstance(obj, h5py.Dataset) and name != self._KEY_PDF_BINS:
                     collector.add(name)
             self.handle.visititems(collect)
             self._keys = tuple(collector)
@@ -186,7 +187,7 @@ class PhotoZFileObject():
 
     def __len__(self):
         if self._len is None:
-            self._len = len(self['id/galaxy_id'])
+            self._len = self.handle[first(self.keys())].shape[0]
         return self._len
 
     def __getitem__(self, key):
@@ -214,7 +215,7 @@ class PhotoZFileObject():
 
     @property
     def pdf_bins(self):
-        return self['pdf/zgrid']
+        return self[self._KEY_PDF_BINS]
 
 
 class PhotoZCatalog2(BaseGenericCatalog):
