@@ -27,7 +27,7 @@ class AlphaQAddonCatalog(BaseGenericCatalog):
             #get all the names of objects in this tree
             hgroup.visit(hobjects.append)
             #filter out the group objects and keep the dataste objects
-            hdatasets = [hobject for hobject in hobjects if type(hgroup[hobject]) == h5py.Dataset]
+            hdatasets = [hobject for hobject in hobjects if isinstance(hgroup[hobject], h5py.Dataset)]
             addon_native_quantities = set(hdatasets)
         return addon_native_quantities
 
