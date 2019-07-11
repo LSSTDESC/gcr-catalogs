@@ -154,7 +154,11 @@ class PhotoZFileObject():
     """
     def __init__(self, path, filename_pattern=None):
 
-        filename_re = filename_pattern if isinstance(filename_pattern, re.Pattern) else re.compile(filename_pattern)
+        if isinstance(filename_pattern, re.Pattern): # pylint: disable=no-member
+            filename_re = filename_pattern
+        else:
+            filename_re = re.compile(filename_pattern)
+
         basename = os.path.basename(path)
         match = filename_re.match(basename)
         if match is None:
