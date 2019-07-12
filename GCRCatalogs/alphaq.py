@@ -107,29 +107,28 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
         self.lightcone = kwargs.get('lightcone')
 
         with h5py.File(self._file, 'r') as fh:
-            # pylint: disable=no-member
             # get version
             catalog_version = list()
             for version_label in ('Major', 'Minor', 'MinorMinor'):
                 try:
-                    catalog_version.append(fh['/metaData/version' + version_label].value)
+                    catalog_version.append(fh['/metaData/version' + version_label][()])
                 except KeyError:
                     break
             catalog_version = StrictVersion('.'.join(map(str, catalog_version or (2, 0))))
 
             # get cosmology
             self.cosmology = FlatLambdaCDM(
-                H0=fh['metaData/simulationParameters/H_0'].value,
-                Om0=fh['metaData/simulationParameters/Omega_matter'].value,
-                Ob0=fh['metaData/simulationParameters/Omega_b'].value,
+                H0=fh['metaData/simulationParameters/H_0'][()],
+                Om0=fh['metaData/simulationParameters/Omega_matter'][()],
+                Ob0=fh['metaData/simulationParameters/Omega_b'][()],
             )
-            self.cosmology.sigma8 = fh['metaData/simulationParameters/sigma_8'].value
-            self.cosmology.n_s = fh['metaData/simulationParameters/N_s'].value
-            self.halo_mass_def = fh['metaData/simulationParameters/haloMassDefinition'].value
+            self.cosmology.sigma8 = fh['metaData/simulationParameters/sigma_8'][()]
+            self.cosmology.n_s = fh['metaData/simulationParameters/N_s'][()]
+            self.halo_mass_def = fh['metaData/simulationParameters/haloMassDefinition'][()]
 
             # get sky area
             if catalog_version >= StrictVersion("2.1.1"):
-                self.sky_area = float(fh['metaData/skyArea'].value)
+                self.sky_area = float(fh['metaData/skyArea'][()])
             else:
                 self.sky_area = 25.0 #If the sky area isn't specified use the default value of the sky area.
 
@@ -353,7 +352,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             raise ValueError('*native_filters* is not supported')
         with h5py.File(self._file, 'r') as fh:
             def _native_quantity_getter(native_quantity):
-                return fh['galaxyProperties/{}'.format(native_quantity)].value # pylint: disable=no-member
+                return fh['galaxyProperties/{}'.format(native_quantity)][()]
             yield _native_quantity_getter
 
 
