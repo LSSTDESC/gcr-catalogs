@@ -5,4 +5,4 @@ filename_pattern: 'metacal_tract_4850.parquet$'
 description: DC2 Run 2.1i coadd v1 Metacal Catalog (griz)
 creators: ['Francois Lanusse', 'Johann Cohen-Tanugi']
 bands: 'griz'
-fix_metacal_test3: true
+apply_metacal_test3_fix: true
