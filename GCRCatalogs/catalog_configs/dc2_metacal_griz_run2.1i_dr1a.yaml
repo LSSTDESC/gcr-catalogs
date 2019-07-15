@@ -6,4 +6,5 @@ description: DC2 Run 2.1i coadd-v1 Metacal Catalog (griz)
 creators: ['Francois Lanusse', 'Johann Cohen-Tanugi']
 included_by_default: true
 bands: 'griz'
-fix_metacal_test3: true
+apply_metacal_test3_fix: true
+
