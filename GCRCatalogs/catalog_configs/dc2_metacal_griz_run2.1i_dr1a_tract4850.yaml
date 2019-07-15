@@ -4,6 +4,5 @@ schema_filename: schema.yaml
 filename_pattern: 'metacal_tract_4850.parquet$'
 description: DC2 Run 2.1i coadd v1 Metacal Catalog (griz)
 creators: ['Francois Lanusse', 'Johann Cohen-Tanugi']
-included_by_default: true
 bands: 'griz'
 apply_metacal_test3_fix: true
