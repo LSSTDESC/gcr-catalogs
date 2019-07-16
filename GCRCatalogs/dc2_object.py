@@ -287,6 +287,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                     self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
+        self._len = None
 
     def __del__(self):
         self.close_all_file_handles()
@@ -622,3 +623,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 yield dataset.get
                 if not self.use_cache:
                     dataset.clear_cache()
+
+    def __len__(self):
+        if self._len is None:
+            self._len = sum(len(dataset) for dataset in self._datasets)
+        return self._len
