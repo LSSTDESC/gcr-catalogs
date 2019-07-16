@@ -626,5 +626,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     def __len__(self):
         if self._len is None:
+            # pylint: disable=attribute-defined-outside-init
             self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
