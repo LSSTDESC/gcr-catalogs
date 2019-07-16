@@ -240,11 +240,10 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         return native_quantities
 
     def _check_version(self, fh, file_name):
-        # pylint: disable=E1101
         catalog_version = list()
         for version_label in ('Major', 'Minor', 'MinorMinor'):
             try:
-                catalog_version.append(fh['/metaData/version' + version_label].value)
+                catalog_version.append(fh['/metaData/version' + version_label][()])
             except KeyError:
                 break
         catalog_version = StrictVersion('.'.join(map(str, catalog_version or (0, 0))))
@@ -253,10 +252,9 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             raise ValueError('Catalog version {} does not match config version {} for healpix file {}'.format(catalog_version, config_version, file_name))
 
     def _check_cosmology(self, fh, file_name, atol):
-        # pylint: disable=E1101
         for name_hdf5, name_astropy in (('H_0', 'h'), ('Omega_matter', 'Om0'), ('Omega_b', 'Ob0')):
             try:
-                value_catalog = fh['metaData/{}'.format(name_hdf5)].value
+                value_catalog = fh['metaData/{}'.format(name_hdf5)][()]
             except KeyError:
                 warnings.warn('missing cosmology {} in metadata for healpix file {}'.format(name_hdf5, file_name))
                 continue
@@ -305,7 +303,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
                 if self.lightcone: # get sky area
                     try:
-                        sky_area_this = fh['metaData/skyArea'].value # pylint: disable=E1101
+                        sky_area_this = fh['metaData/skyArea'][()]
                     except KeyError:
                         sky_area_this = default_sky_area
                     sky_area_this = float(sky_area_this)
@@ -316,7 +314,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 else: # get other meta info (box size and redshift)
                     for key in ('box_size', 'redshift'):
                         try:
-                            value_this = fh['metaData/'+key].value # pylint: disable=E1101
+                            value_this = fh['metaData/'+key][()]
                         except KeyError:
                             pass
                         else:
@@ -357,9 +355,9 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 continue
             with h5py.File(file_path, 'r') as fh:
                 for group in self._get_group_names(fh):
-                    # pylint: disable=E1101,W0640
+                    # pylint: disable=W0640
                     if len(fh[group]):
-                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)].value
+                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)][()]
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)

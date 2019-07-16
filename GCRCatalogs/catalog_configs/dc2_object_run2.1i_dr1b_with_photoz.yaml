@@ -1,0 +1,8 @@
+subclass_name: composite.CompositeReader
+description: DC2 Run 2.1i DR1b Object Catalog with photo-z
+catalogs:
+  - catalog_name: dc2_object_run2.1i_dr1b
+    matching_method: MATCHING_FORMAT
+  - subclass_name: photoz.PhotoZCatalog2
+    base_dir: '/global/projecta/projectdirs/lsst/groups/PZ/PhotoZDC2/run2.1i_all_patches/outputs'
+    matching_method: MATCHING_FORMAT

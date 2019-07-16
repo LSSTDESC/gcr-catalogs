@@ -64,7 +64,7 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
                           "for this catalog; just use filters.")
         with h5py.File(self._file_name, 'r') as file_handle:
             def _native_qty_getter(qty_name):
-                return file_handle[qty_name].value
+                return file_handle[qty_name][()]
             yield _native_qty_getter
 
     def get_quantities(self, quantities, filters=None, native_filters=None, return_iterator=False):
@@ -274,9 +274,15 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
 
         for id_this in ids_needed:
             def dc2_truth_light_curve_native_quantity_getter(quantities):
+                # When 'obshistid' is needed, change it to 'obs_meta.obshistid'
+                # so that the SQL query would work
+                quantities_str = ', '.join((
+                    (self._tables['obs_meta'] + '.obshistid') if q == 'obshistid'
+                    else q for q in quantities
+                ))
                 dtype = np.dtype([(q, self._dtypes['light_curves'][q]) for q in quantities])
                 query = 'SELECT {0} FROM {1} JOIN {2} ON {1}.{4}={5} AND {1}.{3}={2}.{3};'.format(
-                    ', '.join(quantities),
+                    quantities_str,
                     self._tables['light_curves'],
                     self._tables['obs_meta'],
                     'obshistid',
