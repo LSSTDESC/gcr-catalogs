@@ -25,8 +25,10 @@ class CompositeReader(CompositeCatalog):
             method = catalog_dict.get('matching_method', 'MATCHING_FORMAT')
             if method == 'MATCHING_FORMAT':
                 method = MATCHING_FORMAT
+                self.__len__ = instances[0].__len__
             elif method == 'MATCHING_ORDER':
                 method = MATCHING_ORDER
+                self.__len__ = instances[0].__len__
             methods.append(method)
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', 'CompositeCatalog is still an experimental feature')

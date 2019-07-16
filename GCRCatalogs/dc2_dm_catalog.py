@@ -141,6 +141,7 @@ class DC2DMCatalog(BaseGenericCatalog):
 
         self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
         self._native_filter_quantities = self._generate_native_quantity_list()
+        self._len = None
 
     def __del__(self):
         self.close_all_file_handles()
@@ -341,3 +342,9 @@ class DC2DMCatalog(BaseGenericCatalog):
                 yield native_quantity_getter
                 if not self.use_cache:
                     dataset.clear_cache()
+
+    def __len__(self):
+        if self._len is None:
+            # pylint: disable=attribute-defined-outside-init
+            self._len = sum(dataset.scan_contents() for dataset in self._datasets)
+        return self._len
