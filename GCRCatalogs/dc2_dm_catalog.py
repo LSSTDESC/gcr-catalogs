@@ -345,5 +345,5 @@ class DC2DMCatalog(BaseGenericCatalog):
 
     def __len__(self):
         if self._len is None:
-            self._len = sum(len(dataset) for dataset in self._datasets)
+            self._len = sum(dataset.scan_contents() for dataset in self._datasets)
         return self._len
