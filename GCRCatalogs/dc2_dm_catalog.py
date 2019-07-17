@@ -260,3 +260,19 @@ class DC2DMCatalog(BaseGenericCatalog):
             # pylint: disable=attribute-defined-outside-init
             self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
+
+    @property
+    def available_tracts(self):
+        """Returns a sorted list of available tracts
+
+        Returns:
+            A sorted list of available tracts as integers
+        """
+
+        return [dataset.tract for dataset in self._datasets]
+
+    def close_all_file_handles(self):
+        """Clear all cached file handles"""
+
+        for dataset in self._datasets:
+            dataset.close()
