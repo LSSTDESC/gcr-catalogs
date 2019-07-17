@@ -9,14 +9,13 @@ Readers that provide access to DC2 DM data should inherit from this class.
 import math
 import os
 import re
-import shutil
-import warnings
 
 import numpy as np
 import pyarrow.parquet as pq
 import yaml
-
 from GCR import BaseGenericCatalog
+
+from .utils import first
 
 __all__ = ['DC2DMCatalog']
 
@@ -80,6 +79,42 @@ def create_basic_flag_mask(*flags):
     return out
 
 
+class ParquetFileWrapper():
+    def __init__(self, file_path, tract=None):
+        self.path = file_path
+        self._handle = None
+        self._columns = None
+        if tract is not None:
+            self.tract = int(tract)
+
+    @property
+    def handle(self):
+        if self._handle is None:
+            self._handle = pq.ParquetFile(self.path)
+        return self._handle
+
+    def close(self):
+        self._handle = None
+
+    def __len__(self):
+        return int(self.handle.scan_contents)
+
+    def __contains__(self, item):
+        return item in self.columns
+
+    def read_columns(self, columns, as_dict=False):
+        d = self.handle.read(columns=columns).to_pandas()
+        if as_dict:
+            return {c: d[c].values for c in columns}
+        return d
+
+    @property
+    def columns(self):
+        if self._columns is None:
+            self._columns = self.handle.schema.names
+        return list(self._columns)
+
+
 class DC2DMCatalog(BaseGenericCatalog):
     r"""DC2 Catalog reader
 
@@ -98,53 +133,35 @@ class DC2DMCatalog(BaseGenericCatalog):
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'source_visit_\d+\.parquet$'
-    SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', self.FILE_PATTERN))
-        self.use_cache = bool(kwargs.get('use_cache', True))
 
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
-        _schema_filename = kwargs.get('schema_filename', self.SCHEMA_FILENAME)
-        # If _schema_filename is an absolute path, os.path.join will just return _schema_filename
-        self._schema_path = os.path.join(self.base_dir, _schema_filename)
-
-        self._schema = None
-        if self._schema_path and os.path.isfile(self._schema_path):
-            self._schema = self._generate_schema_from_yaml(self._schema_path)
-
-        self._file_handles = dict()
         self._datasets = self._generate_datasets()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
 
-        if not self._schema:
-            warnings.warn('Falling back to reading all datafiles for column names')
-            self._schema = self._generate_schema_from_datafiles(self._datasets)
-
+        self._columns = first(self._datasets).columns
         if kwargs.get('is_dpdd'):
-            self._quantity_modifiers = {col: None for col in self._schema}
+            self._quantity_modifiers = {col: None for col in self._columns}
         else:
-            if any(col.endswith('_fluxSigma') for col in self._schema):
+            if any(col.endswith('_fluxSigma') for col in self._columns):
                 dm_schema_version = 1
-            elif any(col.endswith('_fluxErr') for col in self._schema):
+            elif any(col.endswith('_fluxErr') for col in self._columns):
                 dm_schema_version = 2
             else:
                 dm_schema_version = 3
-
             self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
-        self._native_filter_quantities = self._generate_native_quantity_list()
+        self._native_filter_quantities = {'tract'}
         self._len = None
-
-    def __del__(self):
-        self.close_all_file_handles()
 
     @staticmethod
     def _generate_modifiers(dm_schema_version=3):  # pylint: disable=unused-argument
@@ -210,141 +227,52 @@ class DC2DMCatalog(BaseGenericCatalog):
             for all files and keys
         """
         datasets = list()
-        for fname in sorted(os.listdir(self.base_dir)):
+        for fname in os.listdir(self.base_dir):
             if not self._filename_re.match(fname):
                 continue
-
             file_path = os.path.join(self.base_dir, fname)
-            try:
-                df = self._open_parquet(file_path)
+            tract = int(re.search(r'_(\d{4})\.', fname).groups()[0])
+            datasets.append(ParquetFileWrapper(file_path, tract=tract))
 
-            except (IOError, OSError):
-                warnings.warn('Cannot access {}; skipped'.format(file_path))
-                continue
-
-            datasets.append(df)
-
-        return datasets
-
-    @staticmethod
-    def _generate_schema_from_yaml(schema_path):
-        """Return a dictionary of columns based on schema in YAML file
-
-        Args:
-            schema_path (string): <file path> to schema file.
-
-        Returns:
-            The columns defined in the schema.
-            A dictionary of {<column_name>: {'dtype': ..., 'default': ...}, ...}
-
-        Warns:
-            If one or more column names are repeated.
-        """
-
-        schema = None
-        try:
-            with open(schema_path, 'r') as schema_stream:
-                schema = yaml.safe_load(schema_stream)
-        except (IOError, OSError, yaml.YAMLError):
-            pass
-
-        if schema is None:
-            warn_msg = 'No schema found or loaded in schema file {}'
-            warnings.warn(warn_msg.format(schema_path))
-
-        return schema
-
-    @staticmethod
-    def _generate_schema_from_datafiles(datasets):
-        """Return the native schema for given datasets
-
-        Args:
-            datasets (list): A list of tuples (<file path>, <key>)
-
-        Returns:
-            A dict of schema ({col_name: {'dtype': dtype}}) found in all data sets
-        """
-
-        schema = {}
-        for dataset in datasets:
-            # I should be able to do this just from the ParquetFile schema
-            # but that's a bit clunky and I don'tk now quite how to write it out
-            df = dataset.read().to_pandas()
-            # Reformat k, v as k: {'dtype': v} because that's our chosen schema format
-            native_schema = {k: {'dtype': v.str} for k, v in df.dtypes.to_dict().items()}
-            schema.update(native_schema)
-            # The first non-empty one will be fine.
-            if native_schema:
-                break
-
-        return schema
-
-    def generate_schema_yaml(self, overwrite=False):
-        """
-        Generate the schema from the datafiles and write as a yaml file.
-        This function write the schema yaml file to the schema location specified for the catalog.
-        One needs to set `overwrite=True` to overwrite an existing schema file.
-        """
-        if self._schema_path and os.path.isfile(self._schema_path):
-            if not overwrite:
-                raise RuntimeError('Schema file `{}` already exists! Set `overwrite=True` to overwrite.'.format(self._schema_path))
-            warnings.warn('Overwriting schema file `{0}`, which is backed up at `{0}.bak`'.format(self._schema_path))
-            shutil.copyfile(self._schema_path, self._schema_path + '.bak')
-
-        schema = self._generate_schema_from_datafiles(self._datasets)
-
-        for col, schema_this in schema.items():
-            if np.dtype(schema_this['dtype']).kind == 'b' and (
-                    col.endswith('_flag_bad') or col.endswith('_flag_noGoodPixels')):
-                schema_this['default'] = True
-
-        with open(self._schema_path, 'w') as schema_stream:
-            yaml.dump(schema, schema_stream)
-
-    def clear_cache(self):
-        """Empty the catalog reader cache and frees up memory allocation"""
-        warnings.warn('clear_cache() has no effect on parquet file format')
-
-    def _open_parquet(self, file_path):
-        """Return the Parquet filehandle for a Parquet file
-
-        Args:
-            file_path (str): The path of the desired file
-
-        Return:
-            The cached file handle
-        """
-        if file_path not in self._file_handles:
-            self._file_handles[file_path] = pq.ParquetFile(file_path)
-
-        return self._file_handles[file_path]
-
-    def close_all_file_handles(self):
-        """Clear all cached file handles"""
-
-        for fh in self._file_handles.values():
-            del fh
-
-        self._file_handles.clear()
+        return sorted(datasets, key=lambda d: d.tract)
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
-        return set(self._schema)
+        return self._columns
+
+    @staticmethod
+    def _obtain_native_data_dict(native_quantities_needed, native_quantity_getter):
+        """
+        Overloading this so that we can query the database backend
+        for multiple columns at once
+        """
+        return native_quantity_getter.read_columns(list(native_quantities_needed), as_dict=True)
 
     def _iter_native_dataset(self, native_filters=None):
-        # pylint: disable=C0330
         for dataset in self._datasets:
-            if native_filters is None:
-                def native_quantity_getter(native_quantity, dataset=dataset):
-                    data = dataset.read(columns=[native_quantity])
-                    return data.to_pandas()[native_quantity].values
-
-                yield native_quantity_getter
-                if not self.use_cache:
-                    dataset.clear_cache()
+            if (native_filters is not None and
+                    not native_filters.check_scalar({'tract': dataset.tract})):
+                continue
+            yield dataset
 
     def __len__(self):
         if self._len is None:
             # pylint: disable=attribute-defined-outside-init
-            self._len = sum(dataset.scan_contents() for dataset in self._datasets)
+            self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
+
+    @property
+    def available_tracts(self):
+        """Returns a sorted list of available tracts
+
+        Returns:
+            A sorted list of available tracts as integers
+        """
+
+        return [dataset.tract for dataset in self._datasets]
+
+    def close_all_file_handles(self):
+        """Clear all cached file handles"""
+
+        for dataset in self._datasets:
+            dataset.close()
