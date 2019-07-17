@@ -3,6 +3,10 @@ DC2 Object Catalog Reader
 """
 
 import os
+import re
+import numpy as np
+
+from .utils import first
 
 from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
@@ -32,15 +36,16 @@ class DC2ObjectCatalog(DC2DMCatalog):
     FILE_PATTERN = r'object_tract_\d+\.parquet$'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
+    
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', self.FILE_PATTERN))
 
-        self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
-
         if not os.path.isdir(self.base_dir):
             raise ValueError('`base_dir` {} is not a valid directory'.format(self.base_dir))
 
+        self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
+        
         self._datasets = self._generate_datasets()
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
@@ -53,21 +58,21 @@ class DC2ObjectCatalog(DC2DMCatalog):
             # A slightly crude way of checking for version of schema to have modelfit mag
             # A future improvement will be to explicitly store version information in the datasets
             # and just rely on that versioning.
-            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
-
-            if any(col.endswith('_fluxSigma') for col in self._schema):
+            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._columns)
+            
+            if any(col.endswith('_fluxSigma') for col in self._columns):
                 dm_schema_version = 1
-            elif any(col.endswith('_fluxErr') for col in self._schema):
+            elif any(col.endswith('_fluxErr') for col in self._columns):
                 dm_schema_version = 2
-            elif any(col == 'base_Blendedness_abs_instFlux' for col in self._schema):
+            elif any(col == 'base_Blendedness_abs_instFlux' for col in self._columns):
                 dm_schema_version = 3
             else:
                 dm_schema_version = 4
-
-            bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
-
+    
+            bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
+    
             self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+                    self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
         self._native_filter_quantities = {'tract'}
