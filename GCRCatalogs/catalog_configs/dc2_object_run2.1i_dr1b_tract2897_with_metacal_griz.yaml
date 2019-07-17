@@ -1,8 +1,0 @@
-subclass_name: composite.CompositeReader
-description: DC2 Run 2.1i Object Catalog with metacal (griz)
-catalogs:
-  - catalog_name: dc2_object_run2.1i_dr1b_tract2897
-    matching_method: 'id'
-  - catalog_name: dc2_metacal_griz_run2.1i_dr1b_tract2897
-    matching_method: 'id'
-
