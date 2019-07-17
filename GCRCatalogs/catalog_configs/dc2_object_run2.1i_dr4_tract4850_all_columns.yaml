@@ -1,0 +1,3 @@
+based_on: dc2_object_run2.1i_dr4_all_columns
+filename_pattern: 'object_tract_4850\.hdf5$'
+description: DC2 Run 2.1i Object Catalog (DR4) with only tract 4850
