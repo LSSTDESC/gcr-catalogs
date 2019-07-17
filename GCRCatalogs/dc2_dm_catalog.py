@@ -317,7 +317,7 @@ class DC2DMVisitCatalog(DC2DMCatalog):
         match = re.search(r'visit_(\d+)', filename)
         if match is None:
             raise ValueError('Filename format not expected!')
-        return {'visit': int(match.groups[0])}
+        return {'visit': int(match.groups()[0])}
 
     @staticmethod
     def _sort_datasets(datasets):
