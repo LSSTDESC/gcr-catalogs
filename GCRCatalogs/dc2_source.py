@@ -6,12 +6,12 @@ import os
 
 import numpy as np
 
-from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
+from .dc2_dm_catalog import DC2DMVisitCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 __all__ = ['DC2SourceCatalog']
 
 
-class DC2SourceCatalog(DC2DMCatalog):
+class DC2SourceCatalog(DC2DMVisitCatalog):
     r"""DC2 Source Catalog reader
 
     Parameters

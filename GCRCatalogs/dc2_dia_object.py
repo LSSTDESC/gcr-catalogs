@@ -6,7 +6,7 @@ import os
 
 import numpy as np
 
-from .dc2_dm_catalog import (DC2DMCatalog,
+from .dc2_dm_catalog import (DC2DMTractCatalog,
                              convert_nanoJansky_to_mag,
                              convert_flux_err_to_mag_err,
                              create_basic_flag_mask)
@@ -14,7 +14,7 @@ from .dc2_dm_catalog import (DC2DMCatalog,
 __all__ = ['DC2DiaObjectCatalog']
 
 
-class DC2DiaObjectCatalog(DC2DMCatalog):
+class DC2DiaObjectCatalog(DC2DMTractCatalog):
     r"""DC2 DIA Object Catalog reader
 
     Parameters
@@ -33,8 +33,7 @@ class DC2DiaObjectCatalog(DC2DMCatalog):
     """
     # pylint: disable=too-many-instance-attributes
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    FILE_PATTERN = r'dia_object_\d+\.parquet$'
-    SCHEMA_FILENAME = 'schema.yaml'
+    FILE_PATTERN = r'dia_object_tract_\d+\.parquet$'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_object_meta.yaml')
 
     @staticmethod

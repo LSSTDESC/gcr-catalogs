@@ -4,12 +4,12 @@ DC2 Metacal Catalog Reader
 
 import os
 import numpy as np
-from .dc2_dm_catalog import DC2DMCatalog
+from .dc2_dm_catalog import DC2DMTractCatalog
 
 __all__ = ['DC2MetacalCatalog']
 
 
-class DC2MetacalCatalog(DC2DMCatalog):
+class DC2MetacalCatalog(DC2DMTractCatalog):
     r"""DC2 Metacal Catalog reader
 
     Parameters

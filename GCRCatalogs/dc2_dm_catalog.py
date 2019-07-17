@@ -17,7 +17,7 @@ from GCR import BaseGenericCatalog
 
 from .utils import first
 
-__all__ = ['DC2DMCatalog']
+__all__ = ['DC2DMCatalog', 'DC2DMTractCatalog', 'DC2DMVisitCatalog']
 
 
 #pylint: disable=C0103
@@ -80,12 +80,11 @@ def create_basic_flag_mask(*flags):
 
 
 class ParquetFileWrapper():
-    def __init__(self, file_path, tract=None):
+    def __init__(self, file_path, info=None):
         self.path = file_path
         self._handle = None
         self._columns = None
-        if tract is not None:
-            self.tract = int(tract)
+        self._info = info or dict()
 
     @property
     def handle(self):
@@ -107,6 +106,15 @@ class ParquetFileWrapper():
         if as_dict:
             return {c: d[c].values for c in columns}
         return d
+
+    @property
+    def info(self):
+        return dict(self._info)
+
+    def __getattr__(self, name):
+        if name not in self._info:
+            raise AttributeError('Attribute {} does not exist'.format(name))
+        return self._info[name]
 
     @property
     def columns(self):
@@ -132,8 +140,8 @@ class DC2DMCatalog(BaseGenericCatalog):
     # pylint: disable=too-many-instance-attributes
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    FILE_PATTERN = r'source_visit_\d+\.parquet$'
-    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
+    FILE_PATTERN = r'.+\.parquet$'
+    META_PATH = None
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
@@ -159,12 +167,12 @@ class DC2DMCatalog(BaseGenericCatalog):
                 dm_schema_version = 3
             self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
 
-        self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
-        self._native_filter_quantities = {'tract'}
+        if self.META_PATH:
+            self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
         self._len = None
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3):  # pylint: disable=unused-argument
+    def _generate_modifiers(dm_schema_version=3): # pylint: disable=unused-argument
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -187,8 +195,8 @@ class DC2DMCatalog(BaseGenericCatalog):
                 {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
         """
 
-        with open(meta_path, 'r') as ofile:
-            base_dict = yaml.safe_load(ofile)
+        with open(meta_path, 'r') as f:
+            base_dict = yaml.safe_load(f)
 
         info_dict = dict()
         for quantity, info_list in base_dict.items():
@@ -219,6 +227,14 @@ class DC2DMCatalog(BaseGenericCatalog):
 
         return self._quantity_info_dict.get(quantity, default)
 
+    @staticmethod
+    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+        return dict()
+
+    @staticmethod
+    def _sort_datasets(datasets):
+        return datasets
+
     def _generate_datasets(self):
         """Return viable data sets from all files in self.base_dir
 
@@ -231,10 +247,10 @@ class DC2DMCatalog(BaseGenericCatalog):
             if not self._filename_re.match(fname):
                 continue
             file_path = os.path.join(self.base_dir, fname)
-            tract = int(re.search(r'_(\d{4})\.', fname).groups()[0])
-            datasets.append(ParquetFileWrapper(file_path, tract=tract))
+            info = self._extract_dataset_info(fname)
+            datasets.append(ParquetFileWrapper(file_path, info))
 
-        return sorted(datasets, key=lambda d: d.tract)
+        return self._sort_datasets(datasets)
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
@@ -251,7 +267,7 @@ class DC2DMCatalog(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             if (native_filters is not None and
-                    not native_filters.check_scalar({'tract': dataset.tract})):
+                    not native_filters.check_scalar(dataset.info)):
                 continue
             yield dataset
 
@@ -261,18 +277,54 @@ class DC2DMCatalog(BaseGenericCatalog):
             self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
 
-    @property
-    def available_tracts(self):
-        """Returns a sorted list of available tracts
-
-        Returns:
-            A sorted list of available tracts as integers
-        """
-
-        return [dataset.tract for dataset in self._datasets]
-
     def close_all_file_handles(self):
         """Clear all cached file handles"""
 
         for dataset in self._datasets:
             dataset.close()
+
+
+class DC2DMTractCatalog(DC2DMCatalog):
+    FILE_PATTERN = r'.+_tract_\d+\.parquet$'
+
+    @staticmethod
+    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+        match = re.search(r'tract_(\d+)', filename)
+        if match is None:
+            raise ValueError('Filename format not expected!')
+        return {'tract': int(match.groups[0])}
+
+    @staticmethod
+    def _sort_datasets(datasets):
+        return sorted(datasets, key=lambda d: d.tract)
+
+    @property
+    def available_tracts(self):
+        """Returns a sorted list of available tracts
+        Returns:
+            A sorted list of available tracts as integers
+        """
+        return [dataset.tract for dataset in self._datasets]
+
+
+class DC2DMVisitCatalog(DC2DMCatalog):
+    FILE_PATTERN = r'.+_visit_\d+\.parquet$'
+
+    @staticmethod
+    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+        match = re.search(r'visit_(\d+)', filename)
+        if match is None:
+            raise ValueError('Filename format not expected!')
+        return {'visit': int(match.groups[0])}
+
+    @staticmethod
+    def _sort_datasets(datasets):
+        return sorted(datasets, key=lambda d: d.visit)
+
+    @property
+    def available_visits(self):
+        """Returns a sorted list of available visits
+        Returns:
+            A sorted list of available visits as integers
+        """
+        return [dataset.visit for dataset in self._datasets]
