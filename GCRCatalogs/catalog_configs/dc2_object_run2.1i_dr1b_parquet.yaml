@@ -1,4 +1,4 @@
-subclass_name: dc2_dm_object.DC2ObjectCatalog
+subclass_name: dc2_object.DC2ObjectParquetCatalog
 base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-dr1b-v1/object_table_parquet
 filename_pattern: 'object_tract_\d+\.parquet$'
 description: DC2 Run 2.1i Object Table, all columns.
