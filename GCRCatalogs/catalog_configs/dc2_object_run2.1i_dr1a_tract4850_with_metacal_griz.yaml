@@ -3,7 +3,7 @@ description: DC2 Run 2.1i Object Catalog with metacal (griz)
 catalogs:
   - catalog_name: dc2_object_run2.1i_dr1a_all_columns
     filename_pattern: 'object_tract_4850\.hdf5$'
-    matching_method: 'id'
-  - catalog_name: dc2_metacal_griz_run2.1i_dr1a_tract4850
-    matching_method: 'id'
-
+    matching_method: MATCHING_ORDER
+  - catalog_name: dc2_metacal_griz_run2.1i_dr1a
+    filename_pattern: 'metacal_tract_4850\.parquet$'
+    matching_method: MATCHING_ORDER
