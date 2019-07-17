@@ -1,5 +1,5 @@
 subclass_name: dc2_dm_object.DC2ObjectCatalog
-base_dir: /global/cscratch1/sd/yymao/desc/dc2_object_run2.1i_dr1b
+base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-dr1b-v1/object_table_parquet
 filename_pattern: 'object_tract_\d+\.parquet$'
 description: DC2 Run 2.1i Object Table, all columns.
 creators: ['DESC DC2 Team']
