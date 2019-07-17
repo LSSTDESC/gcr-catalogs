@@ -654,8 +654,6 @@ class DC2ObjectParquetCatalog(DC2DMCatalog):
     FILE_PATTERN = r'object_tract_\d+\.parquet$'
     META_PATH = META_PATH
 
-    _generate_modifiers = DC2ObjectCatalog._generate_modifiers # pylint: disable=protected-access
-
     def _subclass_init(self, **kwargs):
 
         # hack to skip the call of `_generate_modifiers` in the base class
@@ -685,3 +683,7 @@ class DC2ObjectParquetCatalog(DC2DMCatalog):
 
             self._quantity_modifiers = self._generate_modifiers(
                 self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+
+    @staticmethod
+    def _generate_modifiers(*args, **kwargs): # pylint: disable=arguments-differ
+        return DC2ObjectCatalog._generate_modifiers(*args, **kwargs) # pylint: disable=protected-access
