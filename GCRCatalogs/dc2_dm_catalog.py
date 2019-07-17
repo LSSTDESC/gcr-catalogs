@@ -304,7 +304,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
         Returns:
             A sorted list of available tracts as integers
         """
-        return [dataset.tract for dataset in self._datasets]
+        return [dataset.info['tract'] for dataset in self._datasets]
 
 
 class DC2DMVisitCatalog(DC2DMCatalog):
@@ -327,4 +327,4 @@ class DC2DMVisitCatalog(DC2DMCatalog):
         Returns:
             A sorted list of available visits as integers
         """
-        return [dataset.visit for dataset in self._datasets]
+        return [dataset.info['visit'] for dataset in self._datasets]
