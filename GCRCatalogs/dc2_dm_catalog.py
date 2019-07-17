@@ -285,6 +285,7 @@ class DC2DMCatalog(BaseGenericCatalog):
 
 
 class DC2DMTractCatalog(DC2DMCatalog):
+    _native_filter_quantities = {'tract'}
     FILE_PATTERN = r'.+_tract_\d+\.parquet$'
 
     @staticmethod
@@ -308,6 +309,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
 
 
 class DC2DMVisitCatalog(DC2DMCatalog):
+    _native_filter_quantities = {'visit'}
     FILE_PATTERN = r'.+_visit_\d+\.parquet$'
 
     @staticmethod
