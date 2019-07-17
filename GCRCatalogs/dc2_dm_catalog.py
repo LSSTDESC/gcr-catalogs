@@ -293,7 +293,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
         match = re.search(r'tract_(\d+)', filename)
         if match is None:
             raise ValueError('Filename format not expected!')
-        return {'tract': int(match.groups[0])}
+        return {'tract': int(match.groups()[0])}
 
     @staticmethod
     def _sort_datasets(datasets):
