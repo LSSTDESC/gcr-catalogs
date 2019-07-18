@@ -296,7 +296,6 @@ class DC2DMTractCatalog(DC2DMCatalog):
     FILE_PATTERN = r'.+_tract_\d+\.parquet$'
 
     def _subclass_init(self, **kwargs):
-        super()._subclass_init(**kwargs)
         self._tracts = None
         if 'tract' in kwargs and 'tracts' in kwargs:
             raise ValueError('Conflict options (tract and tracts) defined')
@@ -304,6 +303,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
             self._tracts = [int(kwargs['tract'])]
         if 'tracts' in kwargs:
             self._tracts = [int(t) for t in kwargs['tracts']]
+        super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
         match = re.search(r'tract_(\d+)', filename)
