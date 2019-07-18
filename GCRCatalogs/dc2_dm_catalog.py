@@ -9,6 +9,7 @@ Readers that provide access to DC2 DM data should inherit from this class.
 import math
 import os
 import re
+import warnings
 
 import numpy as np
 import pyarrow.parquet as pq
@@ -229,7 +230,12 @@ class DC2DMCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _extract_dataset_info(filename): # pylint: disable=unused-argument
-        return dict()
+        """
+        Should return a dict that contains infomation of each dataset
+        that is parsed from the filename
+        Should return None if no infomation need to be stored
+        Should return False if this dataset needs to be skipped
+        """
 
     @staticmethod
     def _sort_datasets(datasets):
@@ -246,8 +252,10 @@ class DC2DMCatalog(BaseGenericCatalog):
         for fname in os.listdir(self.base_dir):
             if not self._filename_re.match(fname):
                 continue
-            file_path = os.path.join(self.base_dir, fname)
             info = self._extract_dataset_info(fname)
+            if info is False:
+                continue
+            file_path = os.path.join(self.base_dir, fname)
             datasets.append(ParquetFileWrapper(file_path, info))
 
         return self._sort_datasets(datasets)
@@ -279,7 +287,6 @@ class DC2DMCatalog(BaseGenericCatalog):
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""
-
         for dataset in self._datasets:
             dataset.close()
 
@@ -288,16 +295,31 @@ class DC2DMTractCatalog(DC2DMCatalog):
     _native_filter_quantities = {'tract'}
     FILE_PATTERN = r'.+_tract_\d+\.parquet$'
 
-    @staticmethod
-    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+    def _subclass_init(self, **kwargs):
+        super()._subclass_init(**kwargs)
+        self._tracts = None
+        if 'tract' in kwargs and 'tracts' in kwargs:
+            raise ValueError('Conflict options (tract and tracts) defined')
+        if 'tract' in kwargs:
+            self._tracts = [int(kwargs['tract'])]
+        if 'tracts' in kwargs:
+            self._tracts = [int(t) for t in kwargs['tracts']]
+
+    def _extract_dataset_info(self, filename):
         match = re.search(r'tract_(\d+)', filename)
         if match is None:
-            raise ValueError('Filename format not expected!')
-        return {'tract': int(match.groups()[0])}
+            warnings.warn('Filename {} does not contain tract info or not in correct format. Skipped')
+            return False
+        tract = int(match.groups()[0])
+        if self._tracts and tract not in self._tracts:
+            return False
+        return {'tract': tract}
 
-    @staticmethod
-    def _sort_datasets(datasets):
-        return sorted(datasets, key=lambda d: d.tract)
+    def _sort_datasets(self, datasets):
+        current_tracts = set(dataset.info['tract'] for dataset in datasets)
+        if self._tracts and not all(t in current_tracts for t in self._tracts):
+            warnings.warn('Not all tracts that were requested are loaded. Use `available_tracts` to see what tracts have been loaded.')
+        return sorted(datasets, key=lambda d: d.info['tract'])
 
     @property
     def available_tracts(self):
@@ -312,16 +334,31 @@ class DC2DMVisitCatalog(DC2DMCatalog):
     _native_filter_quantities = {'visit'}
     FILE_PATTERN = r'.+_visit_\d+\.parquet$'
 
-    @staticmethod
-    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+    def _subclass_init(self, **kwargs):
+        super()._subclass_init(**kwargs)
+        self._visits = None
+        if 'visit' in kwargs and 'visits' in kwargs:
+            raise ValueError('Conflict options (visit and visits) defined')
+        if 'visit' in kwargs:
+            self._visits = [int(kwargs['visit'])]
+        if 'visits' in kwargs:
+            self._visits = [int(t) for t in kwargs['visits']]
+
+    def _extract_dataset_info(self, filename):
         match = re.search(r'visit_(\d+)', filename)
         if match is None:
-            raise ValueError('Filename format not expected!')
-        return {'visit': int(match.groups()[0])}
+            warnings.warn('Filename {} does not contain visit info or not in correct format. Skipped')
+            return False
+        visit = int(match.groups()[0])
+        if self._visits and visit not in self._visits:
+            return False
+        return {'visit': visit}
 
-    @staticmethod
-    def _sort_datasets(datasets):
-        return sorted(datasets, key=lambda d: d.visit)
+    def _sort_datasets(self, datasets):
+        current_visits = set(dataset.info['visit'] for dataset in datasets)
+        if self._visits and not all(v in current_visits for v in self._visits):
+            warnings.warn('Not all visits that were requested are loaded. Use `available_tracts` to see what visits have been loaded.')
+        return sorted(datasets, key=lambda d: d.info['visit'])
 
     @property
     def available_visits(self):
