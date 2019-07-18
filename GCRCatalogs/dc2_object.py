@@ -13,7 +13,7 @@ import pandas as pd
 import yaml
 from GCR import BaseGenericCatalog
 
-from .dc2_dm_catalog import DC2DMCatalog
+from .dc2_dm_catalog import DC2DMTractCatalog
 
 __all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog']
 
@@ -633,7 +633,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return self._len
 
 
-class DC2ObjectParquetCatalog(DC2DMCatalog):
+class DC2ObjectParquetCatalog(DC2DMTractCatalog):
     r"""DC2 Object (Parquet) Catalog reader
 
     Parameters

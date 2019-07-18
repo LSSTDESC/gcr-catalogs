@@ -6,12 +6,12 @@ import os
 
 import numpy as np
 
-from .dc2_dm_catalog import DC2DMCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
+from .dc2_dm_catalog import DC2DMVisitCatalog, convert_flux_to_nanoJansky, create_basic_flag_mask
 
 __all__ = ['DC2DiaSourceCatalog']
 
 
-class DC2DiaSourceCatalog(DC2DMCatalog):
+class DC2DiaSourceCatalog(DC2DMVisitCatalog):
     r"""DC2 DIA Source Catalog reader
 
     Parameters
@@ -32,7 +32,6 @@ class DC2DiaSourceCatalog(DC2DMCatalog):
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'dia_src_visit_\d+\.parquet$'
-    SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_source_meta.yaml')
 
     @staticmethod
