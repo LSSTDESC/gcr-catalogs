@@ -1,3 +1,0 @@
-based_on: dc2_object_run2.1i_dr1b_parquet
-filename_pattern: 'dpdd_object_tract_4850\.parquet$'
-description: DC2 Run 2.1i DPDD Object Table - Just Tract 4850
