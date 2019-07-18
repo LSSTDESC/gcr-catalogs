@@ -67,14 +67,16 @@ Confluence page (*DESC member only*).
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
    - `dc2_object_run2.1i_dr4`: static object catalog for Run 2.1i dr4
+   - `dc2_object_run2.1i_dr4_tract3830`: static object catalog for Run 2.1i dr4 (one tract only, for testing purpose / faster access)
    - `dc2_object_run2.1i_dr1b`: static object catalog for Run 2.1i dr1b
+   - `dc2_object_run2.1i_dr1b_tract3830`: static object catalog for Run 2.1i dr1b (one tract only, for testing purpose / faster access)
    - `dc2_object_run2.1i_dr1b_with_metacal_griz`: static object catalog for Run 2.1i dr1b + metacal
    - `dc2_object_run2.1i_dr1b_with_photoz_tract3830`: static object catalog for Run 2.1i dr1b + photoz (tract 3830; full version also exists, but is slow)
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
-   - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850)for testing purpose / faster access
-   - `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract (5063)for testing purpose / faster access
+   - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850) for testing purpose / faster access
+   - `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract (5063) for testing purpose / faster access
    - `dc2_object_run1.2i_tract5063_with_metacal`: same as `dc2_object_run1.2i_tract5063` but with metacal (columns that start with `mcal_`). Metacal catalog provided by Johann Cohen-Tanugi and Erin Sheldon.
    - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
