@@ -5,4 +5,3 @@ catalogs:
     matching_method: 'id'
   - catalog_name: dc2_metacal_griz_run2.1i_dr1b
     matching_method: 'id'
-included_in_default_list: true

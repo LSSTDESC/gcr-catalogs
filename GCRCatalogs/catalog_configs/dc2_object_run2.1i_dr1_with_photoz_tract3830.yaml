@@ -1,5 +1,5 @@
 subclass_name: composite.CompositeReader
-description: DC2 Run 2.1i DR1b Object Catalog with photo-z, for tract 3830 only
+description: DC2 Run 2.1i DR1(b) Object Catalog with photo-z, for tract 3830 only
 creators: ['DESC DC2 Team', 'Sam Schmidt']
 catalogs:
   - subclass_name: dc2_object.DC2ObjectCatalog
