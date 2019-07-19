@@ -335,7 +335,6 @@ class DC2DMVisitCatalog(DC2DMCatalog):
     FILE_PATTERN = r'.+_visit_\d+\.parquet$'
 
     def _subclass_init(self, **kwargs):
-        super()._subclass_init(**kwargs)
         self._visits = None
         if 'visit' in kwargs and 'visits' in kwargs:
             raise ValueError('Conflict options (visit and visits) defined')
@@ -343,6 +342,7 @@ class DC2DMVisitCatalog(DC2DMCatalog):
             self._visits = [int(kwargs['visit'])]
         if 'visits' in kwargs:
             self._visits = [int(t) for t in kwargs['visits']]
+        super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
         match = re.search(r'visit_(\d+)', filename)
