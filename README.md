@@ -136,7 +136,7 @@ at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 ### With Jupyter notebooks:
 
 It is recommended that you first install DESC-specific kernels for your
-NERSC jupyter-dev environment (*you only need to do this once*).
+NERSC jupyter environment (*you only need to do this once*).
 To do so, log in to cori.nersc.gov and run:
 ```bash
 source /global/common/software/lsst/common/miniconda/kernels/setup.sh
@@ -144,7 +144,7 @@ source /global/common/software/lsst/common/miniconda/kernels/setup.sh
 Detailed instructions can also be found at [this Confluence page](https://confluence.slac.stanford.edu/x/1_ubDQ)
 (*DESC members only*).
 
-Then, you can [start a NERSC notebook server](https://jupyter-dev.nersc.gov)
+Then, you can [start a NERSC notebook server](https://jupyter.nersc.gov)
 and open a notebook with the `desc-python` or `desc-stack` kernel.
 `GCRCatalogs` and necessary dependencies are already installed in these two kernels.
 You can check if it works simply by running:
