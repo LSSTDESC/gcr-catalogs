@@ -1,0 +1,15 @@
+subclass_name: composite.CompositeReader
+description: DC2 Run 2.1i DR1(b) Object Catalog with photo-z, for tract 3830 only
+creators: ['DESC DC2 Team', 'Sam Schmidt']
+catalogs:
+  - subclass_name: dc2_object.DC2ObjectCatalog
+    base_dir: /global/projecta/projectdirs/lsst/production/DC2_ImSim/Run2.1i/dpdd/calexp-v1:coadd-dr1b-v1/object_table_summary
+    schema_filename: schema.yaml
+    filename_pattern: 'object_tract_3830\.hdf5$'
+    pixel_scale: 0.2
+    matching_method: MATCHING_FORMAT
+  - subclass_name: photoz.PhotoZCatalog2
+    base_dir: '/global/projecta/projectdirs/lsst/groups/PZ/PhotoZDC2/run2.1i_all_patches/outputs'
+    tract_glob_pattern: '3830'
+    matching_method: MATCHING_FORMAT
+include_in_default_catalog_list: true
