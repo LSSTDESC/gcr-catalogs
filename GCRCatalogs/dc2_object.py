@@ -14,6 +14,7 @@ import yaml
 from GCR import BaseGenericCatalog
 
 from .dc2_dm_catalog import DC2DMTractCatalog
+from .dc2_dm_catalog import convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
 
 __all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog']
 
@@ -24,7 +25,7 @@ SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
 
-def convert_flux_to_nanoJansky(flux, dm_ref_zp=27):
+def convert_dm_ref_zp_flux_to_nanoJansky(flux, dm_ref_zp=27):
     """Convert the listed DM coadd-reported flux values to nanoJansky.
 
     Eventually this function should be a no-op.  But presently
@@ -356,17 +357,17 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
             modifiers['magerr_{}'.format(band)] = '{}_mag_err'.format(band)
-            modifiers['psFlux_{}'.format(band)] = (convert_flux_to_nanoJansky,
+            modifiers['psFlux_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                    '{}_base_PsfFlux_{}'.format(band, FLUX))
             modifiers['psFlux_flag_{}'.format(band)] = '{}_base_PsfFlux_flag'.format(band)
-            modifiers['psFluxErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
+            modifiers['psFluxErr_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                       '{}_base_PsfFlux_{}{}'.format(band, FLUX, ERR))
 
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
-            modifiers['cModelFlux_{}'.format(band)] = (convert_flux_to_nanoJansky,
+            modifiers['cModelFlux_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                        '{}_modelfit_CModel_{}'.format(band, FLUX))
-            modifiers['cModelFluxErr_{}'.format(band)] = (convert_flux_to_nanoJansky,
+            modifiers['cModelFluxErr_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                           '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
             modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
 
@@ -665,25 +666,98 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
-            # A slightly crude way of checking for version of schema to have modelfit mag
-            # A future improvement will be to explicitly store version information in the datasets
-            # and just rely on that versioning.
-            has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._columns)
-
-            if any(col.endswith('_fluxSigma') for col in self._columns):
-                dm_schema_version = 1
-            elif any(col.endswith('_fluxErr') for col in self._columns):
-                dm_schema_version = 2
-            elif any(col == 'base_Blendedness_abs_instFlux' for col in self._columns):
-                dm_schema_version = 3
-            else:
-                dm_schema_version = 4
-
-            bands = [col[0] for col in self._columns if len(col) == 5 and col.endswith('_mag')]
+            # The following is in principle fragile, but in practice we
+            bands = [col[-1] for col in self._columns if len(col) == 8 and col.beginswith('psFlux_')]
 
             self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+                self.pixel_scale, bands)
 
     @staticmethod
-    def _generate_modifiers(*args, **kwargs): # pylint: disable=arguments-differ
-        return DC2ObjectCatalog._generate_modifiers(*args, **kwargs) # pylint: disable=protected-access
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
+        """Creates a dictionary relating native and homogenized column names
+
+        Args:
+            pixel_scale (float): Scale of pixels in coadd images
+            bands       (list):  List of photometric bands as strings
+
+        Returns:
+            A dictionary of the form {<homogenized name>: <native name>, ...}
+        """
+
+        FLUX = 'instFlux'
+        ERR = 'Err'
+
+        modifiers = {
+            'objectId': 'id',
+            'parentObjectId': 'parent',
+            'ra': (np.rad2deg, 'coord_ra'),
+            'dec': (np.rad2deg, 'coord_dec'),
+            'x': 'base_SdssCentroid_x',
+            'y': 'base_SdssCentroid_y',
+            'xErr': f'base_SdssCentroid_x{ERR}',
+            'yErr': f'base_SdssCentroid_y{ERR}',
+            'xy_flag': 'base_SdssCentroid_flag',
+            'psNdata': 'base_PsfFlux_area',
+            'extendedness': 'base_ClassificationExtendedness_value',
+            'blendedness': 'base_Blendedness_abs',
+        }
+
+        not_good_flags = (
+            'base_PixelFlags_flag_edge',
+            'base_PixelFlags_flag_interpolatedCenter',
+            'base_PixelFlags_flag_saturatedCenter',
+            'base_PixelFlags_flag_crCenter',
+            'base_PixelFlags_flag_bad',
+            'base_PixelFlags_flag_suspectCenter',
+            'base_PixelFlags_flag_clipped',
+        )
+
+        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+        modifiers['clean'] = (
+            create_basic_flag_mask,
+            'deblend_skipped',
+        ) + not_good_flags
+
+        # cross-band average, second moment values
+        modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
+        for ax in ['xx', 'yy', 'xy']:
+            modifiers[f'I{ax}'] = f'ext_shapeHSM_HsmSourceMoments_{ax}'
+            modifiers[f'I{ax}PSF'] = f'base_SdssShape_psf_{ax}'
+
+        for band in bands:
+            modifiers[f'psFlux_{band}'] = (convert_flux_to_nanoJansky,
+                                           f'{band}_base_PsfFlux_{FLUX}')
+            modifiers[f'psFlux_flag_{band}'] = f'{band}_base_PsfFlux_flag'
+            modifiers[f'psFluxErr_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
+                                              f'{band}_base_PsfFlux_{FLUX}{ERR}')
+            modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
+                                        f'psFlux_{band}')
+            modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
+                                           f'psFlux_{band}',
+                                           f'psFluxErr_{band}')
+
+            modifiers[f'cModelFlux_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
+                                               f'{band}_modelfit_CModel_{FLUX}')
+            modifiers[f'cModelFluxErr_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
+                                                  f'{band}_modelfit_CModel_{FLUX}{ERR}')
+            modifiers[f'cModelFlux_flag_{band}'] = (convert_flux_err_to_mag_err,
+                                                    f'{band}_modelfit_CModel_flag')
+            modifiers[f'mag_{band}_cModel'] = (convert_nanoJansky_to_mag,
+                                               f'cModelFlux_{band}')
+            modifiers[f'magerr_{band}_cModel'] = (convert_flux_err_to_mag_err,
+                                                  f'cModelFlux_{band}',
+                                                  f'cModelFluxErr_{band}')
+
+            # Per-band shape information
+            modifiers[f'I_flag_{band}'] = f'{band}_base_SdssShape_flag'
+
+            for ax in ['xx', 'yy', 'xy']:
+                modifiers[f'I{ax}_{band}'] = f'{band}_base_SdssShape_{ax}'
+                modifiers[f'I{ax}PSF_{band}'] = f'{band}_base_SdssShape_psf_{ax}'
+
+            modifiers[f'psf_fwhm_{band}'] = (
+                lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
+                f'IxxPSF_{band}', f'IyyPSF_{band}', f'IxyPSF_{band}')
+
+        return modifiers
+
