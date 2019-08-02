@@ -25,7 +25,7 @@
 
 5. Develop a new reader or make changes to an exisiting reader
 
-       If you are writing a new reader please see this [guide](https://github.com/yymao/generic-catalog-reader#usage)
+       If you are writing a new reader please see https://github.com/yymao/generic-catalog-reader#usage
        for an overview and a simple example of a minimal reader. The guide will explain that your 
        reader must be a subclass of a generic GCRCatalogs parent class and that you will need to 
        supply a minimum of 3 methods and atranslation dictionary between the quantities in your 
