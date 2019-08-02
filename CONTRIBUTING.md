@@ -23,8 +23,18 @@
        git checkout -b newBranchName master
 
 
-5. Make changes
+5. Develop a new reader or make changes to an exisiting reader
 
+       If you are writing a new reader please see this [guide](https://github.com/yymao/generic-catalog-reader#usage)
+       for an overview and a simple example of a minimal reader. The guide will explain that your reader must be 
+       a subclass of a generic GCRCatalogs parent class and that you will need to supply a minimum of 3 methods and a
+       translation dictionary between the quantities in your catalog and the quantities that are presented to the user 
+       via the GCRCatalogs interface. You can also peruse the code for the various readers in this repository for additional
+       examples. You will also need to supply a yaml configuration file that lives in the catalog_configs subdirectory for
+       GCRCatalogs. This configuration file specifies the location of your catalog and any other important input parameters. 
+       
+       Otherwise, make your changes as desired.
+       
 6. Test by adding your clone to the path when running Python: 
    ```python
    import sys
