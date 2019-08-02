@@ -28,7 +28,7 @@
    If you are writing a new reader please see this [guide](https://github.com/yymao/generic-catalog-reader#usage)
    for an overview and a simple example of a minimal reader. The guide will explain that your 
    reader must be a subclass of the `BaseGenericCatalog` parent class and that you will need to 
-   supply a minimum of 3 methods to sepcify how to read in the underlying file.
+   supply a minimum of 3 methods to specify how to read in the underlying file.
    You can also supply a translation dictionary between the native quantities in your 
    catalog and the quantities that are presented to the user via the `GCRCatalogs` interface. 
    You can also peruse the code for the various readers in this repository for additional
