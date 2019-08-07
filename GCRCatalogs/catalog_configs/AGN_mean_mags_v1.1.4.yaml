@@ -1,0 +1,17 @@
+subclass_name: agn.AGNCatalog
+
+base_dir: /global/projecta/projectdirs/lsst/groups/SSim/DC2/cosmoDC2_v1.1.4
+filename: agn_mean_mags.h5
+
+sky_area: 439.78987
+
+cosmology:
+  H0: 71.0
+  Om0: 0.2648
+  Ob0: 0.0448
+  sigma8: 0.8
+  n_s: 0.963
+
+creators: ['Scott Daniel']
+description: |
+  AGN mean magnitudes added to instance catalogs for image simulation run on cosmoDC2 v1.1.4.
