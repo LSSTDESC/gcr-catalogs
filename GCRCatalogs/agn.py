@@ -57,10 +57,6 @@ class AGNCatalog(BaseGenericCatalog):
                                                               'mag_{}_lsst(galaxy)'.format(band),
                                                               'mag_{}_lsst(agn)'.format(band),
                                                               )
-            quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_mag_sum,
-                                                              'mag_{}_lsst(galaxy)'.format(band),
-                                                              'mag_{}_lsst(agn)'.format(band),
-                                                              )
 
         return quantity_modifiers
 
