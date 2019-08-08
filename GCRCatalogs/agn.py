@@ -25,7 +25,7 @@ class AGNCatalog(BaseGenericCatalog):
     def _subclass_init(self, base_dir, filename, **kwargs): #pylint: disable=W0221
 
         if not os.path.isdir(base_dir):
-            raise RuntimeError("Catalog directory %s does not exist." % (catalog_root_dir))
+            raise RuntimeError("Catalog directory %s does not exist." % (base_dir))
 
         self._path = os.path.join(base_dir, filename)
         self._handle = h5py.File(self._path)
