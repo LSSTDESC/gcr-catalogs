@@ -38,21 +38,22 @@ class AGNCatalog(BaseGenericCatalog):
 
     def _generate_quantity_modifiers(self):
         quantity_modifiers = {
-            'blackHoleEddingtonRatio': 'blackHoleEddingtonRatio',
-            'blackHoleMass':           'blackHoleMass',
-            'dec':                     'dec',
-            'galaxy_id':               'galaxy_id',
-            'halo_mass':               'halo_mass',
-            'is_central':              'is_central',
-            'ra':                      'ra',
-            'redshift':                'redshift',
-            'redshift_true':           'redshift',
+            'blackHoleEddingtonRatio':  'blackHoleEddingtonRatio',
+            'blackHoleMass':            'blackHoleMass',
+            'Mag_true_i_agnonly_lsst_z0':'M_i', 
+            'dec':                      'dec',
+            'galaxy_id':                'galaxy_id',
+            'halo_mass':                'halo_mass',
+            'is_central':               'is_central',
+            'ra':                       'ra',
+            'redshift':                 'redshift',
+            'redshift_true':            'redshift',
         }
 
         # magnitudes
         for band in ['u', 'g', 'r', 'i', 'z', 'y']:
             quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = 'mag_{}_lsst(galaxy)'.format(band)
-            quantity_modifiers['agn_{}_lsst'.format(band)] = 'mag_{}_lsst(agn)'.format(band)
+            quantity_modifiers['mag_{}_agnonly_lsst'.format(band)] = 'mag_{}_lsst(agn)'.format(band)
             quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_mag_sum,
                                                               'mag_{}_lsst(galaxy)'.format(band),
                                                               'mag_{}_lsst(agn)'.format(band),
