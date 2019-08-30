@@ -1,0 +1,7 @@
+subclass_name: agncombined.AGNCombinedCatalog
+only_use_master_attr: true
+catalogs:
+ - catalog_name: cosmoDC2_v1.1.4_image
+   matching_method: galaxy_id
+ - catalog_name: AGN_mean_mags_v1.1.4
+   matching_method: galaxy_id
