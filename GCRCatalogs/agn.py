@@ -47,7 +47,6 @@ class AGNCatalog(BaseGenericCatalog):
             'is_central':               'is_central',
             'ra':                       'ra',
             'redshift':                 'redshift',
-            'redshift_true':            'redshift',
         }
 
         # magnitudes
