@@ -29,14 +29,9 @@ class AGNCombinedCatalog(CompositeReader):
         """
         AGNComposite catalog reader, inherited from CompositeCatalog class 
         """
-        self.suppress_overwrite = kwargs.get('suppress_overwrite')
-        if self.suppress_overwrite:
-            print(self.suppress_overwrite)
-            # suppress the overwrite of these clashing variable names by values in the second catalog
-        
         self._catalog_names = [cat.identifier for cat in self._catalogs]
 
-        for band in 'ugriz': # do not use extincted values
+        for band in 'ugriz':
              self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
                  get_composite_mag,
                  (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
@@ -45,4 +40,3 @@ class AGNCombinedCatalog(CompositeReader):
              self._quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = (
                  self._catalog_names[0], 'mag_{}_lsst'.format(band)
              )
-        
