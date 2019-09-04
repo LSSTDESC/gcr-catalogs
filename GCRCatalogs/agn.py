@@ -38,19 +38,19 @@ class AGNCatalog(BaseGenericCatalog):
 
     def _generate_quantity_modifiers(self):
         quantity_modifiers = {
-            'blackHoleEddingtonRatio':                      'blackHoleEddingtonRatio',
+            'Av':                                           'Av',
             'blackHoleAccretionRate':                       'blackHoleAccretionRate',
+            'blackHoleEddingtonRatio':                      'blackHoleEddingtonRatio',
             'blackHoleMass':                                'blackHoleMass',
             'dec':                                          'dec',
             'galaxy_id':                                    'galaxy_id',
             'halo_mass':                                    'halo_mass',
             'is_central':                                   'is_central',
+            'Mag_true_i_agnonly_lsst_z0':                   'M_i(extincted)',
+            'Mag_true_i_agnonly_no_agn_extinction_lsst_z0': 'M_i', 
             'ra':                                           'ra',
             'redshift':                                     'redshift',
-            'Av':                                           'Av',
             'stellar_mass':                                 'stellar_mass',
-            'Mag_true_i_agnonly_no_agn_extinction_lsst_z0': 'M_i', 
-            'Mag_true_i_agnonly_lsst_z0':                   'M_i(extincted)',
         }
 
         # magnitudes
