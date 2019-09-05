@@ -673,7 +673,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                 self.pixel_scale, bands)
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):
+    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -726,10 +726,12 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
 
         for band in bands:
             modifiers[f'psFlux_{band}'] = (convert_flux_to_nanoJansky,
-                                           f'{band}_base_PsfFlux_{FLUX}')
+                                           f'{band}_base_PsfFlux_{FLUX}',
+                                           f'{band}_FLUXMAG0')
             modifiers[f'psFlux_flag_{band}'] = f'{band}_base_PsfFlux_flag'
-            modifiers[f'psFluxErr_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
-                                              f'{band}_base_PsfFlux_{FLUX}{ERR}')
+            modifiers[f'psFluxErr_{band}'] = (convert_flux_to_nanoJansky,
+                                              f'{band}_base_PsfFlux_{FLUX}{ERR}',
+                                              f'{band}_FLUXMAG0')
             modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
                                         f'psFlux_{band}')
             modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
@@ -760,4 +762,3 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                 f'IxxPSF_{band}', f'IyyPSF_{band}', f'IxyPSF_{band}')
 
         return modifiers
-
