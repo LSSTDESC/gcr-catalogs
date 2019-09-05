@@ -22,6 +22,15 @@ __all__ = ['DC2DMCatalog', 'DC2DMTractCatalog', 'DC2DMVisitCatalog']
 
 
 #pylint: disable=C0103
+def convert_flux_to_mag(flux, fluxmag0):
+    """Convert calibrated flux to AB mag.
+    """
+    flux_nJ = convert_flux_to_nanoJansky(flux, fluxmag0)
+    mag_AB = convert_nanoJansky_to_mag(flux_nJ)
+    return mag_AB
+
+
+#pylint: disable=C0103
 def convert_nanoJansky_to_mag(flux):
     """Convert calibrated nanoJansky flux to AB mag.
     """

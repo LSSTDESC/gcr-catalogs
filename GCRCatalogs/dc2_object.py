@@ -14,7 +14,7 @@ import yaml
 from GCR import BaseGenericCatalog
 
 from .dc2_dm_catalog import DC2DMTractCatalog
-from .dc2_dm_catalog import convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
+from .dc2_dm_catalog import convert_flux_to_mag, convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
 
 __all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog']
 
@@ -23,6 +23,21 @@ FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
 GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
 SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
+
+
+def convert_dm_ref_zp_flux_to_mag(flux, dm_ref_zp=27):
+    """Convert the listed DM coadd-reported flux values to AB mag
+
+    Eventually this function should be a no-op.  But presently
+    The processing of Run 1.1, 1.2 to date (2019-02-17) have
+    calibrated flux values with respect to a reference ZP=27 mag
+    The reference catalog is on an AB system.
+    Re-check dm_ref_zp if calibration is updated.
+    Eventually we will get nJy from the final calibrated DRP processing.
+    """
+    flux_nJ = convert_dm_ref_zp_flux_to_nanoJansky(flux, dm_ref_zp=dm_ref_zp)
+    mag_AB = convert_nanoJansky_to_mag(flux_nJ)
+    return mag_AB
 
 
 def convert_dm_ref_zp_flux_to_nanoJansky(flux, dm_ref_zp=27):
@@ -667,7 +682,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
             # The following is in principle fragile, but in practice we
-            bands = [col[-1] for col in self._columns if len(col) == 8 and col.beginswith('psFlux_')]
+            bands = [col[0] for col in self._columns if len(col) == 10 and col.endswith('_FLUXMAG0')]
 
             self._quantity_modifiers = self._generate_modifiers(
                 self.pixel_scale, bands)
@@ -726,17 +741,18 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
 
         for band in bands:
             modifiers[f'psFlux_{band}'] = (convert_flux_to_nanoJansky,
-                                           f'{band}_base_PsfFlux_{FLUX}',
+                                           f'{band}_slot_PsfFlux_{FLUX}',
                                            f'{band}_FLUXMAG0')
-            modifiers[f'psFlux_flag_{band}'] = f'{band}_base_PsfFlux_flag'
+            modifiers[f'psFlux_flag_{band}'] = f'{band}_slot_PsfFlux_flag'
             modifiers[f'psFluxErr_{band}'] = (convert_flux_to_nanoJansky,
-                                              f'{band}_base_PsfFlux_{FLUX}{ERR}',
+                                              f'{band}_slot_PsfFlux_{FLUX}{ERR}',
                                               f'{band}_FLUXMAG0')
-            modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
-                                        f'psFlux_{band}')
+            modifiers[f'mag_{band}'] = (convert_flux_to_mag,
+                                        f'{band}_slot_PsfFlux_{FLUX}',
+                                        f'{band}_FLUXMAG0')
             modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
-                                           f'psFlux_{band}',
-                                           f'psFluxErr_{band}')
+                                           f'{band}_slot_PsfFlux_{FLUX}',
+                                           f'{band}_slot_PsfFlux_{FLUX}{ERR}')
 
             modifiers[f'cModelFlux_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                f'{band}_modelfit_CModel_{FLUX}')
@@ -744,11 +760,11 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                                                   f'{band}_modelfit_CModel_{FLUX}{ERR}')
             modifiers[f'cModelFlux_flag_{band}'] = (convert_flux_err_to_mag_err,
                                                     f'{band}_modelfit_CModel_flag')
-            modifiers[f'mag_{band}_cModel'] = (convert_nanoJansky_to_mag,
-                                               f'cModelFlux_{band}')
+            modifiers[f'mag_{band}_cModel'] = (convert_dm_ref_zp_flux_to_mag,
+                                               f'{band}_modelfit_CModel_{FLUX}')
             modifiers[f'magerr_{band}_cModel'] = (convert_flux_err_to_mag_err,
-                                                  f'cModelFlux_{band}',
-                                                  f'cModelFluxErr_{band}')
+                                                  f'{band}_modelfit_CModel_{FLUX}',
+                                                  f'{band}_modelfit_CModel_{FLUX}{ERR}')
 
             # Per-band shape information
             modifiers[f'I_flag_{band}'] = f'{band}_base_SdssShape_flag'
