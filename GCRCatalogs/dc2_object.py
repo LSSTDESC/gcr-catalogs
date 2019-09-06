@@ -754,14 +754,16 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                                            f'{band}_slot_PsfFlux_{FLUX}',
                                            f'{band}_slot_PsfFlux_{FLUX}{ERR}')
 
-            modifiers[f'cModelFlux_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
-                                               f'{band}_modelfit_CModel_{FLUX}')
-            modifiers[f'cModelFluxErr_{band}'] = (convert_dm_ref_zp_flux_to_nanoJansky,
-                                                  f'{band}_modelfit_CModel_{FLUX}{ERR}')
-            modifiers[f'cModelFlux_flag_{band}'] = (convert_flux_err_to_mag_err,
-                                                    f'{band}_modelfit_CModel_flag')
-            modifiers[f'mag_{band}_cModel'] = (convert_dm_ref_zp_flux_to_mag,
-                                               f'{band}_modelfit_CModel_{FLUX}')
+            modifiers[f'cModelFlux_{band}'] = (convert_flux_to_nanoJansky,
+                                               f'{band}_modelfit_CModel_{FLUX}',
+                                               f'{band}_FLUXMAG0')
+            modifiers[f'cModelFluxErr_{band}'] = (convert_flux_to_nanoJansky,
+                                                  f'{band}_modelfit_CModel_{FLUX}{ERR}',
+                                                  f'{band}_FLUXMAG0')
+            modifiers[f'cModelFlux_flag_{band}'] = f'{band}_modelfit_CModel_flag'
+            modifiers[f'mag_{band}_cModel'] = (convert_flux_to_mag,
+                                               f'{band}_modelfit_CModel_{FLUX}',
+                                               f'{band}_FLUXMAG0')
             modifiers[f'magerr_{band}_cModel'] = (convert_flux_err_to_mag_err,
                                                   f'{band}_modelfit_CModel_{FLUX}',
                                                   f'{band}_modelfit_CModel_{FLUX}{ERR}')
