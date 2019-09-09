@@ -5,3 +5,4 @@ catalogs:
    matching_method: galaxy_id
  - catalog_name: AGN_mean_mags_v1.1.4
    matching_method: galaxy_id
+suppress_overwrite: ['ra', 'redshift', 'is_central', 'halo_mass', 'galaxy_id', 'dec', 'stellar_mass']

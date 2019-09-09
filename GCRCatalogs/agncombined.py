@@ -40,3 +40,8 @@ class AGNCombinedCatalog(CompositeReader):
              self._quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = (
                  self._catalog_names[0], 'mag_{}_lsst'.format(band)
              )
+        
+        suppress_overwrite = kwargs.get('suppress_overwrite', None) #schema variables from main catalog
+        if suppress_overwrite:
+            for q in suppress_overwrite:
+                self._quantity_modifiers[q] = (self._catalog_names[0], q)
