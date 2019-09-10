@@ -38,28 +38,51 @@ class AGNCatalog(BaseGenericCatalog):
 
     def _generate_quantity_modifiers(self):
         quantity_modifiers = {
-            'blackHoleEddingtonRatio': 'blackHoleEddingtonRatio',
-            'blackHoleMass':           'blackHoleMass',
-            'dec':                     'dec',
-            'galaxy_id':               'galaxy_id',
-            'halo_mass':               'halo_mass',
-            'is_central':              'is_central',
-            'ra':                      'ra',
-            'redshift':                'redshift',
-            'redshift_true':           'redshift',
+            'Av':                                           'Av',
+            'blackHoleAccretionRate':                       'blackHoleAccretionRate',
+            'blackHoleEddingtonRatio':                      'blackHoleEddingtonRatio',
+            'blackHoleMass':                                'blackHoleMass',
+            'dec':                                          'dec',
+            'galaxy_id':                                    'galaxy_id',
+            'halo_mass':                                    'halo_mass',
+            'is_central':                                   'is_central',
+            'Mag_true_i_agnonly_lsst_z0':                   'M_i(extincted)',
+            'Mag_true_i_agnonly_no_agn_extinction_lsst_z0': 'M_i', 
+            'ra':                                           'ra',
+            'redshift':                                     'redshift',
+            'stellar_mass':                                 'stellar_mass',
         }
 
         # magnitudes
         for band in ['u', 'g', 'r', 'i', 'z', 'y']:
-            quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = 'mag_{}_lsst(galaxy)'.format(band)
-            quantity_modifiers['agn_{}_lsst'.format(band)] = 'mag_{}_lsst(agn)'.format(band)
-            quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_mag_sum,
+            quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = 'mag_{}_lsst(galaxy)'.format(band) # galaxy with no AGN
+            quantity_modifiers['mag_{}_agnonly_no_agn_extinction_lsst'.format(band)] = 'mag_{}_lsst(agn)'.format(band)
+            quantity_modifiers['mag_{}_agnonly_lsst'.format(band)] = 'mag_{}_lsst(agn_extincted)'.format(band)
+            quantity_modifiers['mag_{}_no_agn_extinction_lsst'.format(band)] = (_calc_mag_sum,
                                                               'mag_{}_lsst(galaxy)'.format(band),
                                                               'mag_{}_lsst(agn)'.format(band),
                                                               )
+            quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_mag_sum,
+                                                              'mag_{}_lsst(galaxy)'.format(band),
+                                                              'mag_{}_lsst(agn_extincted)'.format(band),
+                                                              )
+        # Magnitudes
+        for band in ['g', 'r', 'i']: # only gri galaxy rest-frame magnitudes are provided in the AGN catalog
+            quantity_modifiers['Mag_true_{}_noagn_lsst_z0'.format(band)] = 'Mag_true_{}_lsst_z0'.format(band)
 
+        for band in ['i']: # only the i-band AGN rest-frame magnitude is provided in the AGN catalog
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = (_calc_mag_sum,
+                                                                      'Mag_true_{}_lsst_z0'.format(band),
+                                                                      'M_{}(extincted)'.format(band),
+                                                                     )
+            quantity_modifiers['Mag_true_{}_no_agn_extinction_lsst_z0'.format(band)] = (_calc_mag_sum,
+                                                                      'Mag_true_{}_lsst_z0'.format(band),
+                                                                      'M_{}'.format(band),
+                                                                     )
+            
         return quantity_modifiers
 
+    
     def _iter_native_dataset(self, native_filters=None):
         if native_filters is not None:
             raise RuntimeError("*native_filters* not supported")
