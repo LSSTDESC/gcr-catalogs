@@ -5,7 +5,6 @@ This reader was designed by Yao-Yuan Mao and Eve Kovacs
 based a catalog provided by Scott Daniel.
 """
 
-import re
 import os
 from GCRCatalogs.composite import CompositeReader
 import numpy as np
