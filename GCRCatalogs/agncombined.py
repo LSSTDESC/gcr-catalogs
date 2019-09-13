@@ -30,16 +30,17 @@ class AGNCombinedCatalog(CompositeReader):
         self._catalog_names = [cat.identifier for cat in self._catalogs]
 
         for band in 'ugriz':
-             self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
-                 get_composite_mag,
-                 (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
-                 (self._catalog_names[1], 'mag_{}_lsst(agn)'.format(band)),
-                 )
-             self._quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = (
-                 self._catalog_names[0], 'mag_{}_lsst'.format(band)
-             )
-        
+            self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
+                get_composite_mag,
+                (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
+                (self._catalog_names[1], 'mag_{}_lsst(agn)'.format(band)),
+            )
+            self._quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = (
+                self._catalog_names[0], 'mag_{}_lsst'.format(band)
+            )
+
         suppress_overwrite = kwargs.get('suppress_overwrite', None) #schema variables from main catalog
         if suppress_overwrite:
             for q in suppress_overwrite:
-                self._quantity_modifiers[q] = (self._catalog_names[0], q)
+                if self._quantity_modifiers.get(q) == (self._catalog_names[1], q):
+                    self._quantity_modifiers[q] = (self._catalog_names[0], q)
