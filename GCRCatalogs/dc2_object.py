@@ -678,8 +678,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
-            # The following is in principle fragile, but in practice we
-            bands = [col[0] for col in self._columns if len(col) == 10 and col.endswith('_FLUXMAG0')]
+            bands = [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
 
             self._quantity_modifiers = self._generate_modifiers(
                 self.pixel_scale, bands)
