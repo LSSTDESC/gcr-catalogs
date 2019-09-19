@@ -51,6 +51,7 @@ class AGNCatalog(BaseGenericCatalog):
             'ra':                                           'ra',
             'redshift':                                     'redshift',
             'stellar_mass':                                 'stellar_mass',
+            'duty_cycle_on':                                'duty_cycle_on',
         }
 
         # magnitudes
