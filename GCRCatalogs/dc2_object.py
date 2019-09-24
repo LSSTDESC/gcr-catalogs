@@ -764,6 +764,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                                                   f'{band}_modelfit_CModel_{FLUX}',
                                                   f'{band}_modelfit_CModel_{FLUX}{ERR}')
 
+            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
+
             # Per-band shape information
             modifiers[f'I_flag_{band}'] = f'{band}_base_SdssShape_flag'
 
