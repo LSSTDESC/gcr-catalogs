@@ -658,16 +658,12 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
     Attributes
     ----------
     base_dir          (str): The directory of data files being served
-
-    Notes
-    -----
     """
-    # pylint: disable=too-many-instance-attributes
-    FILE_DIR = FILE_DIR
-    FILE_PATTERN = r'object_tract_\d+\.parquet$'
-    META_PATH = META_PATH
 
     def _subclass_init(self, **kwargs):
+
+        self.FILE_PATTERN = r'object_tract_\d+\.parquet$'
+        self.META_PATH = META_PATH
 
         # hack to skip the call of `_generate_modifiers` in the base class
         # TODO: fix this some day
