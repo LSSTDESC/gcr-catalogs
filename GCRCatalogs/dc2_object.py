@@ -302,7 +302,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
             self._quantity_modifiers = self._generate_modifiers(
-                    self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+                self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
@@ -408,8 +408,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                                                            '{}_modelfit_CModel_{}'.format(band, FLUX))
                 modifiers['magerr_{}_cModel'.format(band)] = (convert_flux_err_to_mag_err,
                                                               '{}_modelfit_CModel_{}'.format(band, FLUX),
-                                                              '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
-                )
+                                                              '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
                 modifiers['snr_{}_cModel'.format(band)] = (
                     np.divide,
                     '{}_modelfit_CModel_{}'.format(band, FLUX),
