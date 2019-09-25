@@ -405,7 +405,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 # The zp=27.0 is based on the default calibration for the coadds
                 # as specified in the DM code.  It's correct for Run 1.1p.
                 modifiers['mag_{}_cModel'.format(band)] = (convert_dm_ref_zp_flux_to_mag,
-                                                           'mag_{}_cModel'.format(band))
+                                                           '{}_modelfit_CModel_{}'.format(band, FLUX))
                 modifiers['magerr_{}_cModel'.format(band)] = (convert_flux_err_to_mag_err,
                                                               '{}_modelfit_CModel_{}'.format(band, FLUX),
                                                               '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
