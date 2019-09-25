@@ -141,7 +141,6 @@ class DC2DMCatalog(BaseGenericCatalog):
     ----------
     base_dir          (str): Directory of data files being served, required
     filename_pattern  (str): The optional regex pattern of served data files
-    use_cache        (bool): Cache read data in memory
     is_dpdd          (bool): File are already in DPDD-format.  No translation.
 
     Attributes
