@@ -302,7 +302,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
             self._quantity_modifiers = self._generate_modifiers(
-                    self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+                self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
@@ -405,11 +405,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 # The zp=27.0 is based on the default calibration for the coadds
                 # as specified in the DM code.  It's correct for Run 1.1p.
                 modifiers['mag_{}_cModel'.format(band)] = (convert_dm_ref_zp_flux_to_mag,
-                                                           'mag_{}_cModel'.format(band))
+                                                           '{}_modelfit_CModel_{}'.format(band, FLUX))
                 modifiers['magerr_{}_cModel'.format(band)] = (convert_flux_err_to_mag_err,
                                                               '{}_modelfit_CModel_{}'.format(band, FLUX),
-                                                              '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
-                )
+                                                              '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
                 modifiers['snr_{}_cModel'.format(band)] = (
                     np.divide,
                     '{}_modelfit_CModel_{}'.format(band, FLUX),
@@ -658,16 +657,12 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
     Attributes
     ----------
     base_dir          (str): The directory of data files being served
-
-    Notes
-    -----
     """
-    # pylint: disable=too-many-instance-attributes
-    FILE_DIR = FILE_DIR
-    FILE_PATTERN = r'object_tract_\d+\.parquet$'
-    META_PATH = META_PATH
 
     def _subclass_init(self, **kwargs):
+
+        self.FILE_PATTERN = r'object_tract_\d+\.parquet$'
+        self.META_PATH = META_PATH
 
         # hack to skip the call of `_generate_modifiers` in the base class
         # TODO: fix this some day
