@@ -20,6 +20,14 @@ def get_composite_mag(original_mag, agn_mag):
     return -2.5*np.log10(_calc_flux(original_mag) + _calc_flux(agn_mag))
 
 
+def get_composite_mag_with_dutycycle(original_mag, agn_mag, duty_cycle_flag):
+    # mask those agn whose duty-cycle flag is off
+    if np.ma.isMaskedArray(agn_mag)  and np.ma.isMaskedArray(duty_cycle_flag):
+        agn_mag[~duty_cycle_flag] = np.ma.masked
+    #return composite mag
+    return get_composite_mag(original_mag, agn_mag)
+
+
 class AGNCombinedCatalog(CompositeReader):
 
     def _subclass_init(self, **kwargs):
@@ -28,13 +36,22 @@ class AGNCombinedCatalog(CompositeReader):
         AGNComposite catalog reader, inherited from CompositeCatalog class 
         """
         self._catalog_names = [cat.identifier for cat in self._catalogs]
-
+        self.duty_cycle_on = kwargs.get('duty_cycle_on', True)
+        
         for band in 'ugriz':
-            self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
-                get_composite_mag,
-                (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
-                (self._catalog_names[1], 'mag_{}_lsst(agn)'.format(band)),
-            )
+            if self.duty_cycle_on:
+                self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
+                    get_composite_mag_with_dutycycle,
+                    (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
+                    (self._catalog_names[1], 'mag_{}_lsst(agn)'.format(band)),
+                    (self._catalog_names[1], 'duty_cycle_on'),
+                )
+            else:
+                self._quantity_modifiers['mag_{}_lsst'.format(band)] = (
+                    get_composite_mag,
+                    (self._catalog_names[0], 'mag_{}_lsst'.format(band)),
+                    (self._catalog_names[1], 'mag_{}_lsst(agn)'.format(band)),
+                )
             self._quantity_modifiers['mag_{}_noagn_lsst'.format(band)] = (
                 self._catalog_names[0], 'mag_{}_lsst'.format(band)
             )
