@@ -1,0 +1,8 @@
+subclass_name: composite.CompositeReader
+description: DC2 Run 2.1.1i Object Catalog Matched Table addon catalog
+creators: ['Javi Sanchez', 'Eve Kovacs']
+catalogs:
+  - catalog_name: dc2_object_run2.1i_dr1
+    matching_method: objectId
+  - catalog_name: dc2_object_run2.1.1i_matched 
+    matching_method: objectId
