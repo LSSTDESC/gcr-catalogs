@@ -46,8 +46,8 @@ class DC2MatchedTable(BaseGenericCatalog):
         self._quantity_modifiers = {}
         modified_quantity_list = [c for c in cols if not is_star in c and not match_flag in c]
         for q in modified_quantity_list:
-            self._quantity_modifiers[q + '_galaxy'] =  (lambda x: x[self._galaxy_match_mask], q)
-            self._quantity_modifiers[q + '_star'] =  (lambda x: x[self._star_match_mask], q)
+            self._quantity_modifiers[q + '_galaxy'] =  (lambda x: ma.MaskedArray(x, mask=self._galaxy_match_mask), q)
+            self._quantity_modifiers[q + '_star'] =  (lambda x: ma.MaskedArray(x, mask=self._star_match_mask), q)
 
 
     def _generate_native_quantity_list(self):
