@@ -1,9 +1,9 @@
 subclass_name: agncombined.AGNCombinedCatalog
 only_use_master_attr: true
 catalogs:
- - catalog_name: cosmoDC2_v1.1.4_image
+ - catalog_name: cosmoDC2_v1.1.4_small
    matching_method: galaxy_id
  - catalog_name: AGN_mean_mags_v1.1.4
    matching_method: galaxy_id
-duty_cycle_on: true
+duty_cycle_on: false
 suppress_overwrite: ['ra', 'redshift', 'is_central', 'halo_mass', 'galaxy_id', 'dec', 'stellar_mass']
