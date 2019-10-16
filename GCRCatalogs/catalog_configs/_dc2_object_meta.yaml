@@ -20,7 +20,7 @@ I_flag_<band>: ['Flag for issues with `Ixx_<band>` `Ixx_<band>` and `Ixx_<band>.
 mag_<band>_cModel: ['Composite model (cModel) magnitude in `<band>` fitted by cModel.', 'mag', true, false]
 magerr_<band>_cModel: ['Error value for `mag_<band>_cModel.`', 'mag', true, false]
 snr_<band>_cModel: ['Signal to noise ratio for magnitude in `<band>` fitted by cModel.', 'none', false, false]
-psf_fwhm_<band>: ['PSF FWHM calculated from `base_SdssShape`', 'pixels', false, false]
+psf_fwhm_<band>: ['PSF FWHM calculated from `base_SdssShape`', 'asec', false, false]
 good: ['True if the source has no flagged pixels.', 'none', false, false]
 clean: ['True if the source has no flagged pixels and is not deblended (`good && deblend_skipped`).', 'none', false, false]
 Ixx: ['Adaptive second moment of the source intensity across bands.', 'asec2', false, true]
