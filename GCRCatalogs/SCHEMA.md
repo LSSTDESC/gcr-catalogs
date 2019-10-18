@@ -137,7 +137,7 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
 `magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
 `snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
-`psf_fwhm_<band>` | pixels | PSF FWHM calculated from 'base_SdssShape' |   |   |
+`psf_fwhm_<band>` | asec | PSF FWHM calculated from 'base_SdssShape' |   |   |
 `good` | - | True if the source has no flagged pixels. |   |   |
 `clean` | - |  True if the source has no flagged pixels and is not skipped by the deblender (`good && ~deblend_skipped`). |   |   |
 `I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
