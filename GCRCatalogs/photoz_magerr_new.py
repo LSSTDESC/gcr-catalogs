@@ -11,6 +11,7 @@ import pandas as pd
 import glob
 import h5py
 from GCR import BaseGenericCatalog
+from GCRCatalogs.composite import CompositeReader
 
 from .utils import first
 
@@ -52,9 +53,11 @@ class PZMagErrCatalog(BaseGenericCatalog):
 
 #######################
 class PZMagErrPDFsCatalog(BaseGenericCatalog):
+#class PZMagErrPDFsCatalog(CompositeReader):
+
 
     def _subclass_init(self, **kwargs):
-        self.base_dir = kwargs['base_dir']
+        self.base_dir = kwargs.get('base_dir')
         self._file_glob_pattern = kwargs.get('filename_glob_pattern',
                                              FILE_GLOB_PATTERN_PDF)
         self._filename_re = re.compile(kwargs.get('filename_pattern',
