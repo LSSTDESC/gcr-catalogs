@@ -76,7 +76,7 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
 
         self._datasets = self._generate_datasets()
         self._quantity_modifiers = {
-            'id': 'id/galaxy_id',
+            'galaxy_id': 'id/galaxy_id',
             'photoz_pdf': 'pdf/pdf',
             'photoz_mode': 'point_estimates/z_mode',
             'photoz_mean': 'point_estimates/z_mean',
@@ -194,7 +194,12 @@ class PhotoZFileObject3():
     @property
     def handle(self):
         if self._handle is None:
-            self._handle = h5py.File(self.path, mode='r')
+            try: 
+                self._handle = h5py.File(self.path, mode='r')
+            except OSError:
+                print(f'could not open {self.path}')
+            #print(f"opening file {self.path}")
+ 
         return self._handle
 
     def open(self):

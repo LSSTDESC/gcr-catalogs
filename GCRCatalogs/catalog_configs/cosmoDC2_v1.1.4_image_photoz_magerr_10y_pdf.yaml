@@ -1,0 +1,7 @@
+subclass_name: composite.CompositeReader
+only_use_master_attr: true
+catalogs:
+  - catalog_name: cosmoDC2_v1.1.4_image_photoz_magerr_10y
+    matching_method: galaxy_id
+  - catalog_name: cosmoDC2_v1.1.4_image_photoz_magerr_10y_PDFcat
+    matching_method: galaxy_id
