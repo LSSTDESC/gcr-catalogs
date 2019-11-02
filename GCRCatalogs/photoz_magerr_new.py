@@ -51,10 +51,8 @@ class PZMagErrCatalog(BaseGenericCatalog):
             df = pd.read_hdf(file_path)
             yield lambda col: df[col].values # pylint: disable=cell-var-from-loop
 
-#######################
-class PZMagErrPDFsCatalog(BaseGenericCatalog):
-#class PZMagErrPDFsCatalog(CompositeReader):
 
+class PZMagErrPDFsCatalog(BaseGenericCatalog):
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs.get('base_dir')
@@ -89,7 +87,7 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
 
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
 
-############################
+
     def _generate_datasets(self):
         datasets = list()
         for path in glob.glob(os.path.join(self.base_dir,
@@ -101,33 +99,21 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
             datasets.append(dataset)
         return sorted(datasets, key=(lambda d: d.healpix_pixel))
 
-
-########################
         
-#    def _generate_native_quantity_list(self):
-#        return pd.read_hdf(first(self._healpix_files.values())).columns.tolist()
-
     def _generate_native_quantity_list(self):
         return first(self._datasets).keys()
 
     
-#    def _iter_native_dataset(self, native_filters=None):
-#        for (zlo_this, hpx_this), file_path in self._healpix_files.items():
-#            d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
-#            if native_filters is not None and not native_filters.check_scalar(d):
-#                continue
-#            df = pd.read_hdf(file_path)
-#            yield lambda col: df[col].values # pylint: disable=cell-var-from-loop
-
     def _iter_native_dataset(self, native_filters=None):
-        for dataset in self._datasets:
-            #tract_patch = {'tract': dataset.tract, 'patch': dataset.patch}
-            pix_block = {'healpix_pixel':dataset.healpix_pixel,
-                 'redshift_block_lower': dataset.z_block_lower}
+        for (zlo_this, hpx_this), file_path in self._healpix_files.items():
+            pix_block = {'healpix_pixel':hpx_this,
+                         'redshift_block_lower': zlo_this}
             if native_filters and not native_filters.check_scalar(pix_block):
                 continue
+            dataset = PhotoZFileObject3(file_path, self._filename_re)
             yield dataset.get
-            dataset.close() # to avoid OS complaining too many open files
+            dataset.close() # to avoid OS complaining too many open files         
+
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""
@@ -135,8 +121,6 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
             dataset.close()
 
 
-
-#######################
 class PhotoZFileObject3():
     """
     HDF5 file wrapper for PhotoZCatalog3
@@ -154,15 +138,10 @@ class PhotoZFileObject3():
         if match is None:
             raise ValueError('filename {} does not match required pattern')
 
-        #tract, patch_x, patch_y, index = match.groups()
-        #key = tuple(map(int,m.groups()))
         z_block_lower, pixelid = tuple(map(int,match.groups()))
         self.z_block_lower = int(z_block_lower)
         self.healpix_pixel = int(pixelid)
         self.path = path
-        #self.tract = int(tract)
-        #self.patch = '{},{}'.format(patch_x, patch_y)
-        #self.index = int(index)
         self._handle = None
         self._keys = None
         self._len = None
@@ -198,8 +177,6 @@ class PhotoZFileObject3():
                 self._handle = h5py.File(self.path, mode='r')
             except OSError:
                 print(f'could not open {self.path}')
-            #print(f"opening file {self.path}")
- 
         return self._handle
 
     def open(self):
