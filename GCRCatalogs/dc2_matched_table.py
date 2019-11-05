@@ -13,6 +13,7 @@ https://gist.github.com/fjaviersanchez/787bb5cd6b598226174e1cd9661465ca
 import os
 import re
 import numpy.ma as ma
+from functools import partial
 from astropy.io import fits
 from GCRCatalogs import BaseGenericCatalog
 
@@ -131,6 +132,10 @@ class DC2MatchedTable(BaseGenericCatalog):
         for file_path in self._files.values():
             with fits.open(file_path) as hdul:
                 handle = list(hdul)[1]
-                def native_quantity_getter(native_quantity):
-                    return handle.data[native_quantity]
-                yield native_quantity_getter
+                #def native_quantity_getter(native_quantity):
+                #    return handle.data[native_quantity]
+                yield partial(self._native_quantity_getter, handle=handle)
+
+    @staticmethod
+    def _native_quantity_getter(native_quantity, handle):
+        return handle.data[native_quantity]
