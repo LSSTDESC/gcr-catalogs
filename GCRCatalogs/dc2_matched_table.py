@@ -1,8 +1,13 @@
 """
 DC2 matched table reader
 
-This reader was written by Eve Kovacs
-based on a matching table provided by Javier Sanchez .
+This reader was written by Eve Kovacs.
+The reader ingests the matching table provided by Javier Sanchez
+(fits file format). The tables are produced by matching objects in the DC2
+object catalogs with objects in the cosmoDC2 catalog. Code can be found in
+https://github.com/LSSTDESC/CatalogMatcher/blob/master/CatalogMatcher/match.py#L44
+The complete script is available in
+https://gist.github.com/fjaviersanchez/787bb5cd6b598226174e1cd9661465ca
 """
 
 import os
@@ -125,6 +130,7 @@ class DC2MatchedTable(BaseGenericCatalog):
 
         for file_path in self._files.values():
             with fits.open(file_path) as hdul:
-                def native_quantity_getter(native_quantity, hdul):
-                    return list(hdul)[1].data[native_quantity]
+                handle = list(hdul)[1]
+                def native_quantity_getter(native_quantity):
+                    return handle.data[native_quantity]
                 yield native_quantity_getter
