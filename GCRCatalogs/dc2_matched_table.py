@@ -123,7 +123,7 @@ class DC2MatchedTable(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         assert not native_filters, '*native_filters* is not supported'
 
-        for file_path in self._files.items():
+        for file_path in self._files.values():
             with fits.open(file_path) as hdul:
                 def native_quantity_getter(native_quantity, hdul):
                     return list(hdul)[1].data[native_quantity]
