@@ -7,22 +7,26 @@ based a catalog provided by Sam Schmidt.
 
 import re
 import os
-import pandas as pd
+import numpy as np
 import glob
+import pandas as pd
 import h5py
 from GCR import BaseGenericCatalog
 from GCRCatalogs.composite import CompositeReader
 
 from .utils import first
 
-__all__ = ['PZMagErrCatalog','PZMagErrPDFsCatalog']
+__all__ = ['PZMagErrCatalog', 'PZMagErrPDFsCatalog']
 
 FILE_PATTERN = r'z_(\d)\S+healpix_(\d+)_magwerr\.h5$'
 FILE_PATTERN_PDF = r'photoz_pdf_z_(\d)\S+healpix_(\d+).hdf5'
 FILE_GLOB_PATTERN_PDF = 'photoz_pdf_z_*.hdf5'
 
 class PZMagErrCatalog(BaseGenericCatalog):
-
+    """
+    Class to handle mock errors on CosmoDC2v1.1.4 truth catalog
+    """
+    
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
@@ -53,6 +57,9 @@ class PZMagErrCatalog(BaseGenericCatalog):
 
 
 class PZMagErrPDFsCatalog(BaseGenericCatalog):
+    """
+    Class to handle hdf5 photoz PDF output files
+    """
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs.get('base_dir')
@@ -99,11 +106,9 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
             datasets.append(dataset)
         return sorted(datasets, key=(lambda d: d.healpix_pixel))
 
-        
     def _generate_native_quantity_list(self):
         return first(self._datasets).keys()
 
-    
     def _iter_native_dataset(self, native_filters=None):
         for (zlo_this, hpx_this), file_path in self._healpix_files.items():
             pix_block = {'healpix_pixel':hpx_this,
@@ -114,12 +119,10 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
             yield dataset.get
             dataset.close() # to avoid OS complaining too many open files         
 
-
     def close_all_file_handles(self):
         """Clear all cached file handles"""
         for dataset in self._datasets:
             dataset.close()
-
 
 class PhotoZFileObject3():
     """
@@ -138,7 +141,7 @@ class PhotoZFileObject3():
         if match is None:
             raise ValueError('filename {} does not match required pattern')
 
-        z_block_lower, pixelid = tuple(map(int,match.groups()))
+        z_block_lower, pixelid = tuple(map(int, match.groups()))
         self.z_block_lower = int(z_block_lower)
         self.healpix_pixel = int(pixelid)
         self.path = path
