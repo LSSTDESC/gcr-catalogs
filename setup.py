@@ -13,7 +13,7 @@ with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) 
 
 setup(
     name='GCRCatalogs',
-    version=__version__, # pylint: disable=E0602
+    version=__version__, # pylint: disable=E0602 # noqa: F821
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
