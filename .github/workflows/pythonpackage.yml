@@ -32,7 +32,7 @@ jobs:
       run: |
         pip install pylint
         # stop the build if there are Pylint errors
-        pylint --disable=I,C,R,W0511 --extension-pkg-whitelist=numpy gcr-catalogs  
+        pylint --disable=I,C,R,W0511 --extension-pkg-whitelist=numpy GCRCatalogs
     - name: Test with pytest
       run: |
         pip install pytest
