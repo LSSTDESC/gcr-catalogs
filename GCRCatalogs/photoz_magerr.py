@@ -124,6 +124,13 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
         for dataset in self._datasets:
             dataset.close()
 
+    @property
+    def photoz_pdf_bin_centers(self):
+        """
+        expose self._pdf_bin_centers as a public property.
+        """
+        return first(self._datasets).pdf_bins
+            
 class PhotoZFileObject3():
     """
     HDF5 file wrapper for PhotoZCatalog3
