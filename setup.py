@@ -13,7 +13,7 @@ with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) 
 
 setup(
     name='GCRCatalogs',
-    version=__version__, # pylint: disable=E0602
+    version=__version__, # pylint: disable=E0602 # noqa: F821
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
@@ -38,7 +38,7 @@ setup(
         'dc2_coadd': ['tables', 'pandas'],
         'dc2_source': ['pyarrow', 'pandas'],
         'focal_plane': ['scikit-image', 'pandas'],
-        'full': ['h5py', 'sqlalchemy', 'pymssql', 'pandas', 'tables', 'scikit-image', 'healpy', 'pyarrow'],
+        'full': ['h5py', 'sqlalchemy', 'pymssql<3.0', 'pandas', 'tables', 'scikit-image', 'healpy', 'pyarrow'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml']},
 )
