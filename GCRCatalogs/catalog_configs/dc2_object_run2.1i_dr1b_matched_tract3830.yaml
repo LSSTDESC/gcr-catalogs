@@ -1,0 +1,13 @@
+subclass_name: dc2_matched_table.DC2MatchedTable
+table_dir: /global/projecta/projectdirs/lsst/groups/SSim/DC2/
+table_filename_template: matched_ids_run{}_{}_{{}}.fits.gz
+tracts: [3830]
+data_release: dr1b_dpdd
+version: '2.1i'
+truth_version: 'cosmoDC2_v1.1.4'
+object_id: 'objectId'
+truth_id: 'truthId'
+match_flag: 'is_matched'
+is_star: 'is_star'
+creator: 'Javier Sanchez'
+description: 'This is the table of matches between the object catalog and the extragalactic catalog'
