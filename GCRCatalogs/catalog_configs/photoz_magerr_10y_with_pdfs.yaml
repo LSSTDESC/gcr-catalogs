@@ -1,0 +1,9 @@
+subclass_name: composite.CompositeReader
+only_use_master_attr: true
+description:
+     This is a composite of the photoz PDFs/point estimates to the extragalactic catalog
+catalogs:
+  - catalog_name: photoz_magerr_10y_estimate_image
+    matching_method: baseDC2/galaxy_id
+  - catalog_name: cosmoDC2_v1.1.4_image_photoz_magerr_10y_PDFcat
+    matching_method: galaxy_id
