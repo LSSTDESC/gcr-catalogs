@@ -25,7 +25,6 @@ class PZMagErrCatalog(BaseGenericCatalog):
     """
     Class to handle mock errors on CosmoDC2v1.1.4 truth catalog
     """
-    
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
         self._filename_re = re.compile(kwargs.get('filename_pattern', FILE_PATTERN))
@@ -194,7 +193,7 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
                 continue
             dataset = PhotoZFileObject3(file_path, self._filename_re)
             yield dataset.get
-            dataset.close() # to avoid OS complaining too many open files         
+            dataset.close() # to avoid OS complaining too many open files
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""
@@ -241,7 +240,7 @@ class PhotoZFileObject3():
                     collector.add(name)
             self.handle.visititems(collect)
             self._keys = tuple(collector)
-        return list(self._keys) 
+        return list(self._keys)
 
     def __len__(self):
         if self._len is None:
@@ -260,7 +259,7 @@ class PhotoZFileObject3():
     @property
     def handle(self):
         if self._handle is None:
-            try: 
+            try:
                 self._handle = h5py.File(self.path, mode='r')
             except OSError:
                 print(f'could not open {self.path}')
