@@ -1,9 +1,10 @@
 """
-PZCalibrate reference objects catalog reader
+PZCalibrate redshift reference objects catalog reader.
 
 This reader was designed by Yao-Yuan Mao,
-based a catalog of "spectroscopic" reference objects for use in cross-
-correlation redshifts provided by Chris Morrison, in Mar 2019.
+based a catalog of "spectroscopic" reference objects for use in ensemble
+redshift estimation that includes cross-correlation. Catalog created by Chris
+Morrison in Mar 2019.
 """
 
 import re

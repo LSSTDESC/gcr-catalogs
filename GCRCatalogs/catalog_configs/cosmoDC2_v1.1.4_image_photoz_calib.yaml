@@ -4,3 +4,20 @@ catalogs:
   - catalog_name: cosmoDC2_v1.1.4_image
   - catalog_name: pz_calibrate_references_cosmoDC2_v1.1.4_image
     matching_method: MATCHING_FORMAT
+
+description: |
+    Catalog containing boolean columns indetifying objects as DESI-like QSOs,
+    LRGs, ELGs, or a magnitude limited sample. Selections are made on the
+    cosmosDC2 truth information in both magnitude and galaxy properties.
+    All samples are selected to be independent. See
+    http://github.com/LSSTDESC/pz_calibrate/docs/notebooks/CreateGCRFiles.ipynb
+
+    The samples are selected follows:
+    OSOs : 19.5 < mag_r < 23.4, highest value of `blackHoleMass` *
+           `blackHoleEddingtonRatio` until the target DESI density is met.
+    ELGs : 19.5 < mag_r < 23.4, highest value of `totalStarFormationRate` until
+           target DESI density is met and is also not selected as a QSO.
+    LRGs : 19.5  < mag_r, mag_z < 23.0, highest value of `stellar_mass` until
+           target DESI density is met. Must also not be OSO or ELG.
+    MagLim : mag_r < 19.5
+    AllReferences : Union of above selections.

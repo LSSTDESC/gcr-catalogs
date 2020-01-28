@@ -62,7 +62,21 @@ class PhotoZCatalog(BaseGenericCatalog):
         }
 
         self._native_filter_quantities = {'tract', 'patch'}
+        self._info_dict = {}
+        self._info_dict['galaxy_id']={'units':'unitless',
+                                 'description': 'ID of galaxy matching the entry from the main catalog'}
+        self._info_dict['photoz_mode_ml_red_chi2']={'units':'unitless',
+                                                    'description':'reduced chi sq at the max likelihood redshift and type.  A high chi2 value indicates a potentially bad fit'}
+        self._info_dict['photoz_pdf']={'units':'unitless','description':'posterior probability distributions for individual galaxies computed on a redshift grid.  The specific redshift grid is stored in pdf/zgrid'}
+        self._info_dict['photoz_mode']={'units':'unitless','description':'mode of the posterior pdf for an individual galaxy'}
+        self._info_dict['photoz_mean']={'units':'unitless','description':'mean value of the posterior pdf for an individual galaxy'}
+        self._info_dict['photoz_median']={'units':'unitless','description':'median value of the posterior pdf for an individual galaxy, defined by where the CDF of the distribution is 0.5 '}
+        self._info_dict['photoz_mode_ml']={'units':'unitless','description':'index value of pdf/zgrid corresponding to the max likelihood redshift *before* the magnitude/type prior is applied'}
+        self._info_dict['photoz_odds']={'units':'unitless','description':'ODDS parameter: the integral of the posterior within a fixed interval around the mode of the posterior used to quantify photo-z quality.  A high ODDS value close to 1.0 indicated a compact, single peaked posterior, while low ODDS values could indicate multiple peaks or a broad posterior'}
 
+    def _get_quantity_info_dict(self, quantity, default=None):
+        return self._info_dict.get(quantity,default)
+    
     def _generate_native_quantity_list(self):
         return list(self._quantity_modifiers.values()) + list(self._native_filter_quantities)
 
@@ -243,6 +257,20 @@ class PhotoZCatalog2(BaseGenericCatalog):
         }
 
         self._native_filter_quantities = {'tract', 'patch'}
+        self._info_dict = {}
+        self._info_dict['galaxy_id']={'units':'unitless',
+                                 'description': 'ID of galaxy matching the entry from the main catalog'}
+        self._info_dict['photoz_mode_ml_red_chi2']={'units':'unitless',
+                                                    'description':'reduced chi sq at the max likelihood redshift and type.  A high chi2 value indicates a potentially bad fit'}
+        self._info_dict['photoz_pdf']={'units':'unitless','description':'posterior probability distributions for individual galaxies computed on a redshift grid.  The specific redshift grid is stored in pdf/zgrid'}
+        self._info_dict['photoz_mode']={'units':'unitless','description':'mode of the posterior pdf for an individual galaxy'}
+        self._info_dict['photoz_mean']={'units':'unitless','description':'mean value of the posterior pdf for an individual galaxy'}
+        self._info_dict['photoz_median']={'units':'unitless','description':'median value of the posterior pdf for an individual galaxy, defined by where the CDF of the distribution is 0.5 '}
+        self._info_dict['photoz_mode_ml']={'units':'unitless','description':'index value of pdf/zgrid corresponding to the max likelihood redshift *before* the magnitude/type prior is applied'}
+        self._info_dict['photoz_odds']={'units':'unitless','description':'ODDS parameter: the integral of the posterior within a fixed interval around the mode of the posterior used to quantify photo-z quality.  A high ODDS value close to 1.0 indicated a compact, single peaked posterior, while low ODDS values could indicate multiple peaks or a broad posterior'}
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        return self._info_dict.get(quantity,default)
 
     def _generate_native_quantity_list(self):
         return first(self._datasets).keys()
