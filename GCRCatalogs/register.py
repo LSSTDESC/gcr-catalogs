@@ -3,6 +3,7 @@ import importlib
 import warnings
 import yaml
 import requests
+import socket
 from GCR import BaseGenericCatalog
 
 
@@ -12,6 +13,21 @@ _CONFIG_DIRNAME = 'catalog_configs'
 _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
 _YAML_EXTENSIONS = ('.yaml', '.yml')
 
+# Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
+_PATH_LIKE = ('filename', 'addon_filename', 'base_dir', 'root_dir',
+              'catalog_root_dir', 'header_file', 'repo')
+
+def _get_rootdir():
+    with open(os.path.join(os.path.dirname(__file__),'site_config/site_rootdir.yaml')) as f:
+        d = yaml.safe_load(f)
+        host = socket.getfqdn()
+        for (k,v) in d.items():
+            if k in host:
+                return v
+        return None
+
+_ROOT_DIR = _get_rootdir()
+
 
 def load_yaml_local(yaml_file):
     with open(yaml_file) as f:
@@ -20,7 +36,7 @@ def load_yaml_local(yaml_file):
 
 def load_yaml(yaml_file):
     """
-    Load *yaml_file*. Ruturn a dictionary.
+    Load *yaml_file*. Return a dictionary.
     """
     try:
         r = requests.get(yaml_file, stream=True)
@@ -33,6 +49,16 @@ def load_yaml(yaml_file):
         config = yaml.safe_load(r.raw)
     return config
 
+def _resolve_dict(d):
+    for (k,v) in d.items():
+        if k in _PATH_LIKE:
+            d[k] = os.path.join(_ROOT_DIR, v)
+        elif k == 'catalogs':
+            # list of items, each of which is catalog spec.
+            for c in v:
+                _resolve_dict(c)
+    return d
+                
 
 class Config():
     def __init__(self, config_path, config_dir=''):
@@ -55,7 +81,7 @@ class Config():
             self._content = load_yaml_local(self.path)
         return self._content
 
-
+    
 class ConfigRegister():
     def __init__(self, config_dir):
         self._config_dir = config_dir
@@ -102,6 +128,11 @@ class ConfigRegister():
 
                 return self.resolve_config(base_config, past_refs)
 
+        # Finally resolve relative paths in the config
+        config = _resolve_dict(config)
+
+        # temp for debugging: write out resolved config
+        print(yaml.dump(config))
         return config
 
     def get_resolved(self, name):
@@ -266,3 +297,5 @@ def load_catalog(catalog_name, config_overwrite=None):
     return load_catalog_from_config_dict(config)
 
 _config_register = ConfigRegister(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
+
+
