@@ -52,7 +52,7 @@ def load_yaml(yaml_file):
 def _resolve_dict(d):
     for (k,v) in d.items():
         if k in _PATH_LIKE:
-            d[k] = os.path.join(_ROOT_DIR, v)
+            d[k] = os.path.join(str(_ROOT_DIR), str(v))
         elif k == 'catalogs':
             # list of items, each of which is catalog spec.
             for c in v:
