@@ -48,8 +48,6 @@ def set_root_dir(path):
     '''
     try:
         os.listdir(path)
-    except:
-        raise
 
     _ROOT_DIR = path
         
