@@ -46,8 +46,8 @@ def set_root_dir(path):
     '''
     If 'path' is acceptable, set root dir to it
     '''
-    try:
-        os.listdir(path)
+    # Will throw exception if path is not suitable
+    os.listdir(path)
 
     _ROOT_DIR = path
         
