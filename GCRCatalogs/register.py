@@ -5,9 +5,9 @@ import yaml
 import requests
 import socket
 from GCR import BaseGenericCatalog
+from .utils import is_string_like
 
-
-__all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog']
+__all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog', 'get_root_dir', 'set_root_dir', 'reset_root_dir']
 
 _CONFIG_DIRNAME = 'catalog_configs'
 _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
@@ -17,22 +17,48 @@ _YAML_EXTENSIONS = ('.yaml', '.yml')
 _PATH_LIKE = ('filename', 'addon_filename', 'base_dir', 'root_dir',
               'catalog_root_dir', 'header_file', 'repo')
 
-def _get_rootdir():
+_DICT_LIST = ('catalogs')
+
+def _get_site_info():
+    '''
+    Return a string which, when executing at a recognized site with 
+    well-known name, will include the name for that site
+    '''
+    return socket.getfqdn()
+
+def _get_default_rootdir():
     with open(os.path.join(os.path.dirname(__file__),'site_config/site_rootdir.yaml')) as f:
         d = yaml.safe_load(f)
-        host = socket.getfqdn()
+        site_info = _get_site_info()
         for (k,v) in d.items():
-            if k in host:
+            if k in site_info:
                 return v
+        warnings.warn('No default root dir found')
         return None
 
-_ROOT_DIR = _get_rootdir()
+_DEFAULT_ROOT_DIR = _get_default_rootdir()
+_ROOT_DIR = _DEFAULT_ROOT_DIR
 
+def get_root_dir():
+    return _ROOT_DIR
+
+def set_root_dir(path):
+    '''
+    If 'path' is acceptable, set root dir to it
+    '''
+    try:
+        os.listdir(path)
+    except:
+        raise
+
+    _ROOT_DIR = path
+        
+def reset_root_dir():
+    _ROOT_DIR = _DEFAULT_ROOT_DIR
 
 def load_yaml_local(yaml_file):
     with open(yaml_file) as f:
         return yaml.safe_load(f)
-
 
 def load_yaml(yaml_file):
     """
@@ -51,10 +77,15 @@ def load_yaml(yaml_file):
 
 def _resolve_dict(d):
     for (k,v) in d.items():
-        if k in _PATH_LIKE:
-            d[k] = os.path.join(str(_ROOT_DIR), str(v))
-        elif k == 'catalogs':
-            # list of items, each of which is catalog spec.
+        if k in _PATH_LIKE and is_string_like(v):
+            if str(v).startswith('/'):
+                continue
+            elif _ROOT_DIR is None:
+                raise Exception('GCRCatalogs root dir not set')
+            else:
+                d[k] = os.path.join(_ROOT_DIR, v)
+        elif k in _DICT_LIST:
+            # list of dicts, each of which may have _PATH_LIKE keywords
             for c in v:
                 _resolve_dict(c)
     return d
@@ -297,5 +328,3 @@ def load_catalog(catalog_name, config_overwrite=None):
     return load_catalog_from_config_dict(config)
 
 _config_register = ConfigRegister(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
-
-
