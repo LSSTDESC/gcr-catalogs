@@ -48,7 +48,7 @@ def set_root_dir(path):
     # os.listdir will throw exception if path is ill-formed or doesn't exist
     try:
         os.listdir(path)
-    except:
+    except Exception:
         warnings.warn("root dir has been set to non-existent path '{}'".format(path))
 
     _ROOT_DIR = path
