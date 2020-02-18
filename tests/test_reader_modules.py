@@ -3,10 +3,11 @@ test_reader_modules.py
 """
 import pytest
 import GCRCatalogs
+import os
 
-# Cheat so this test can be run anywhere
 if GCRCatalogs.register._ROOT_DIR is None:
-    GCRCatalogs.register._ROOT_DIR = '/something'
+    # Adust so test can be run anywhere
+    GCRCatalogs.register.set_root_dir(os.getenv('HOME'))
 
 all_readers = GCRCatalogs.register.get_reader_list()
 

@@ -5,7 +5,6 @@ import yaml
 import requests
 import socket
 from GCR import BaseGenericCatalog
-from .utils import is_string_like
 
 __all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog', 'get_root_dir', 'set_root_dir', 'reset_root_dir']
 
@@ -14,8 +13,8 @@ _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GC
 _YAML_EXTENSIONS = ('.yaml', '.yml')
 
 # Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
-_PATH_LIKE = ('filename', 'addon_filename', 'base_dir', 'root_dir',
-              'catalog_root_dir', 'header_file', 'repo')
+_PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
+                   'catalog_root_dir', 'header_file', 'repo')
 
 _DICT_LIST = ('catalogs')
 
@@ -46,8 +45,11 @@ def set_root_dir(path):
     '''
     If 'path' is acceptable, set root dir to it
     '''
-    # Will throw exception if path is not suitable
-    os.listdir(path)
+    # os.listdir will throw exception if path is ill-formed or doesn't exist
+    try:
+        os.listdir(path)
+    except:
+        warnings.warn("root dir has been set to non-existent path '{}'".format(path))
 
     _ROOT_DIR = path
         
@@ -75,8 +77,8 @@ def load_yaml(yaml_file):
 
 def _resolve_dict(d):
     for (k,v) in d.items():
-        if k in _PATH_LIKE and is_string_like(v):
-            if str(v).startswith('/'):
+        if k in _PATH_LIKE_KEYS and isinstance(v, str):
+            if v.startswith('/'):
                 continue
             elif _ROOT_DIR is None:
                 raise Exception('GCRCatalogs root dir not set')
