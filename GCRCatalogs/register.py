@@ -85,7 +85,7 @@ def _resolve_dict(d):
             if not v.startswith(_ROOT_DIR_SIGNAL):
                 continue
             elif _ROOT_DIR is None:
-                warning.warn('unresolvable reference to root dir in "{}"'.format(v))
+                warnings.warn('unresolvable reference to root dir in "{}"'.format(v))
                 continue
             else:
                 d[k] = os.path.join(_ROOT_DIR, v[len(_ROOT_DIR_SIGNAL):])
