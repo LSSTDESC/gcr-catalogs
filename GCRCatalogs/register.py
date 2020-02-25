@@ -10,6 +10,9 @@ __all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_
 
 _CONFIG_DIRNAME = 'catalog_configs'
 _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
+# Substitute for the following string if it starts a value for a path-like
+# keyword
+_ROOT_DIR_SIGNAL = "^/"
 _YAML_EXTENSIONS = ('.yaml', '.yml')
 
 # Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
@@ -79,18 +82,21 @@ def load_yaml(yaml_file):
 def _resolve_dict(d):
     for (k,v) in d.items():
         if k in _PATH_LIKE_KEYS and isinstance(v, str):
-            if v.startswith('/'):
+            if not v.startswith(_ROOT_DIR_SIGNAL):
                 continue
             elif _ROOT_DIR is None:
-                raise Exception('GCRCatalogs root dir not set')
+                warning.warn('unresolvable reference to root dir in "{}"'.format(v))
+                continue
             else:
-                d[k] = os.path.join(_ROOT_DIR, v)
+                d[k] = os.path.join(_ROOT_DIR, v[len(_ROOT_DIR_SIGNAL):])
         elif k in _DICT_LIST:
-            # list of dicts, each of which may have _PATH_LIKE keywords
-            for c in v:
-                _resolve_dict(c)
+            # Confirm it really is a list of dicts here; then resolve
+            if isinstance(v, list):
+                for c in v:
+                    if isinstance(c, dict):
+                        _resolve_dict(c)
     return d
-                
+
 
 class Config():
     def __init__(self, config_path, config_dir=''):
@@ -112,7 +118,6 @@ class Config():
         if self._content is None:
             self._content = load_yaml_local(self.path)
         return self._content
-
     
 class ConfigRegister():
     def __init__(self, config_dir):
@@ -121,6 +126,7 @@ class ConfigRegister():
         self._configs_resolved = dict()
 
         for config_file in os.listdir(self._config_dir):
+            #print(config_file)                    ##  DEBUG
             config = Config(config_file, self._config_dir)
             if not config.ignore:
                 self._configs[config.name] = config
