@@ -175,7 +175,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'velocity_z': 'truth/VZ',
             }
 
-            if self.version.split('_')[0] == '1.9.2':
+            if (self.version.split('_')[0] == '1.9.2') | (self.version.split('_')[0] == '2.0.0'):
 
                 for i, b in enumerate(['Z_vista', 'Y_vista', 'J_vista', 'H_vista', 'Ks_vista', 'u_lsst', 
                                        'g_lsst', 'r_lsst', 'i_lsst', 'z_lsst', 'y_lsst', 'Y_wfirst',
