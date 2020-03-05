@@ -62,12 +62,15 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
         """
 
         modifiers = {
-            'objectId': 'id',
             'mcal_psf_g1': 'mcal_psf_g1_mean',
             'mcal_psf_g2': 'mcal_psf_g2_mean',
             'mcal_T_psf' : 'mcal_psf_T_mean',
             'mcal_flags' : 'mcal_flags'
         }
+
+        # newer metacal catalogs no longer have the id column
+        if 'id' in self._columns:
+            modifiers['objectId'] = 'id'
 
         # Additional metacal values and their variants
         for variant in ['', '_1p', '_1m', '_2p', '_2m']:
