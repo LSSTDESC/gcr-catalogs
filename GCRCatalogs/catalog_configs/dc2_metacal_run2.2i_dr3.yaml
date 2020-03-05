@@ -1,0 +1,5 @@
+subclass_name: dc2_metacal.DC2MetacalCatalog
+base_dir: /global/cfs/cdirs/lsst/production/DC2_ImSim/Run2.2i/dpdd/Run2.2i-dr3/metacal_table_summary
+filename_pattern: 'metacal_tract_\d+\.parquet$'
+description: DC2 Run 2.2i DR3 Metacal Table
+creators: ['Johann Cohen-Tanugi']
