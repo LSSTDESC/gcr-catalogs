@@ -1,6 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: cosmodc2.BaseDC2SnapshotGalaxyCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/cosmoDC2/baseDC2_snapshots_v0.1/STEP432
+catalog_root_dir: ^/cosmoDC2/baseDC2_snapshots_v0.1/STEP432
 catalog_filename_template: baseDC2_Step432_z0.1538_#{}.hdf5
 
 cosmology:

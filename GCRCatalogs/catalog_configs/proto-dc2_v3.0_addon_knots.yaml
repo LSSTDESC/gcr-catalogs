@@ -1,9 +1,11 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: composite.CompositeReader
 catalogs:
   - catalog_name: proto-dc2_v3.0
   - catalog_name: knots
     matching_method: MATCHING_FORMAT
     subclass_name: alphaq_addon.AlphaQAddonCatalog
-    filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/ANL_AlphaQ_v3.0.hdf5
-    addon_filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/protoDC2_knots_v3.0.hdf5
+    filename: ^/descqa-catalog/ANL_AlphaQ_v3.0.hdf5
+    addon_filename: ^/descqa-catalog/protoDC2_knots_v3.0.hdf5
     addon_group: knots

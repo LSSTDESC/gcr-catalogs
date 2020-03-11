@@ -1,3 +1,5 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: composite.CompositeReader
 description: DC2 Run 1.2p (v3) Object Catalog with photo-z
 catalogs:

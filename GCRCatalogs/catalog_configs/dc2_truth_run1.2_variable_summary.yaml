@@ -1,6 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: dc2_truth.DC2TruthLCSummaryReader
 
-filename: /global/projecta/projectdirs/lsst/groups/SSim/DC2/Run1.2/run1p2_light_curve_reference_190311.h5
+filename: ^/SSim-DC2/Run1.2/run1p2_light_curve_reference_190311.h5
 
 description: |
     Truth catalog for Run 1.2, summary table for variable objects.

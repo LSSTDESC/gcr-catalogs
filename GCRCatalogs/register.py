@@ -17,7 +17,7 @@ _YAML_EXTENSIONS = ('.yaml', '.yml')
 
 # Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
 _PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
-                   'catalog_root_dir', 'header_file', 'repo')
+                   'catalog_root_dir', 'header_file', 'repo', 'table_dir')
 
 _DICT_LIST = ('catalogs')
 
