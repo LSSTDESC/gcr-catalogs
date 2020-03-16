@@ -78,9 +78,7 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
-   - `dc2_object_run1.2i_tract4850`: same as `dc2_object_run1.2i_all_columns` but only has one tract (4850) for testing purpose / faster access
-   - `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract (5063) for testing purpose / faster access
-   - `dc2_object_run1.2i_tract5063_with_metacal`: same as `dc2_object_run1.2i_tract5063` but with metacal (columns that start with `mcal_`). Metacal catalog provided by Johann Cohen-Tanugi and Erin Sheldon.
+   - `dc2_object_run1.2i_tract4850`, `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract for testing purpose / faster access
    - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
