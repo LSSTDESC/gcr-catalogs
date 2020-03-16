@@ -105,8 +105,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                     i -= 1
                 self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_lsst'.format(b)] = (_mask_func, 'lsst/OMAG/{}'.format(i))
-                if b != 'Y':
-                    self._quantity_modifiers['mag_{}'.format(b)] = self._quantity_modifiers['mag_{}_lsst'.format(b)]
                 if b != 'y' and b != 'Y':
                     self._quantity_modifiers['Mag_true_{}_sdss_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}_stripe82'.format(b)] = (_mask_func, 'stripe82/TMAG/{}'.format(i))
@@ -137,8 +135,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 self._quantity_modifiers['Mag_true_{}_irac_z0'.format(b)] = (_abs_mask_func, 'irac/AMAG/{}'.format(i))
                 self._quantity_modifiers['mag_{}_irac'.format(b)] = (_mask_func, 'irac/OMAG/{}'.format(i))
 
-
-        else:
+        else:  # for regular (not high-res) buzzard (v1.6, v1.9.2, v2.0.0 etc)
             self._quantity_modifiers = {
                 'galaxy_id': 'truth/ID',
                 'redshift': (lambda zt, x, y, z, vx, vy, vz: zt + (x*vx+y*vy+z*vz)/np.sqrt(x*x+y*y+z*z)/_c,
@@ -175,42 +172,25 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'velocity_z': 'truth/VZ',
             }
 
-            if (self.version.split('_')[0] == '1.9.2') | (self.version.split('_')[0] == '2.0.0'):
+            for i, b in enumerate('grizY'):
+                self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
+                self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
+                self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
+                self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
 
-                for i, b in enumerate(['Z_vista', 'Y_vista', 'J_vista', 'H_vista', 'Ks_vista', 'u_lsst', 
+            if not self.version.startswith('1.6'):  # for v1.9.2 and above
+                for i, b in enumerate(['Z_vista', 'Y_vista', 'J_vista', 'H_vista', 'Ks_vista', 'u_lsst',
                                        'g_lsst', 'r_lsst', 'i_lsst', 'z_lsst', 'y_lsst', 'Y_wfirst',
                                        'J_wfirst', 'H_wfirst', 'K_wfirst']):
-
                     i += 6
-
                     self._quantity_modifiers['Mag_true_{}_z0'.format(b)] = (_abs_mask_func, 'auxmag/AMAG/{}'.format(i))
                     self._quantity_modifiers['mag_true_{}'.format(b)] = (_mask_func, 'auxmag/TMAG/{}'.format(i))
                     self._quantity_modifiers['mag_{}'.format(b)] = (_mask_func, 'auxmag/LMAG/{}'.format(i))
 
-            else:
-                for i, b in enumerate('ugrizyY'):
-                    if b == 'Y':
-                        i -= 1
-                    
-                    self._quantity_modifiers['Mag_true_{}_lsst_z0'.format(b)] = (_abs_mask_func, 'lsst/AMAG/{}'.format(i))
-                    self._quantity_modifiers['mag_true_{}_lsst'.format(b)] = (_mask_func, 'lsst/TMAG/{}'.format(i))
-
-                    if b != 'u':
-                        i -= 1
-                        self._quantity_modifiers['mag_{}_des'.format(b)] = (_mask_func, 'truth/OMAG/{}'.format(i))
-                        self._quantity_modifiers['magerr_{}_des'.format(b)] = (_mask_func, 'truth/OMAGERR/{}'.format(i))
-
-
-            for i, b in enumerate('ugrizyY'):
-                if b == 'Y':
-                    i -= 1
-                if b != 'Y':
-                    self._quantity_modifiers['mag_true_{}'.format(b)] = self._quantity_modifiers['mag_true_{}_lsst'.format(b)]
-                if b != 'u':
-                    i -= 1
-                    self._quantity_modifiers['Mag_true_{}_des_z01'.format(b)] = (_abs_mask_func, 'truth/AMAG/{}'.format(i))
-                    self._quantity_modifiers['mag_true_{}_des'.format(b)] = (_mask_func, 'truth/TMAG/{}'.format(i))
-
+        # for all, aliasing the lsst filters
+        for key in list(self._quantity_modifiers):
+            if key.startswith('mag_') and key.endswith('_lsst'):
+                self._quantity_modifiers[key[:-5]] = self._quantity_modifiers[key]
 
     def _get_healpix_pixels(self):
         path = self._catalog_path_template[self._default_subset]
