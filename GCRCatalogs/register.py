@@ -20,12 +20,19 @@ _PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
                    'catalog_root_dir', 'header_file', 'repo', 'table_dir')
 
 _DICT_LIST = ('catalogs')
+_DESC_SITE_ENV = 'DESC_GCR_SITE'
 
 def _get_site_info():
     '''
     Return a string which, when executing at a recognized site with 
     well-known name, will include the name for that site
     '''
+    # First look for well-known env variable
+    v = os.getenv(_DESC_SITE_ENV)
+    if v is not None:
+        warnings.warn('Site determined from env variable {}'.format(_DESC_SITE_ENV))
+        return v
+    
     return socket.getfqdn()
 
 def _get_default_rootdir():
