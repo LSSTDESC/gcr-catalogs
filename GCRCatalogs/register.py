@@ -19,7 +19,7 @@ _YAML_EXTENSIONS = ('.yaml', '.yml')
 _PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
                    'catalog_root_dir', 'header_file', 'repo', 'table_dir')
 
-_DICT_LIST = ('catalogs')
+_DICT_LIST = ('catalogs',)
 _DESC_SITE_ENV = 'DESC_GCR_SITE'
 
 def _get_site_info():
@@ -87,6 +87,9 @@ def load_yaml(yaml_file):
     return config
 
 def _resolve_dict(d):
+    """
+    input dictionary `d` will be modified in-place
+    """
     for (k,v) in d.items():
         if k in _PATH_LIKE_KEYS and isinstance(v, str):
             if not v.startswith(_ROOT_DIR_SIGNAL):
@@ -133,7 +136,6 @@ class ConfigRegister():
         self._configs_resolved = dict()
 
         for config_file in os.listdir(self._config_dir):
-            #print(config_file)                    ##  DEBUG
             config = Config(config_file, self._config_dir)
             if not config.ignore:
                 self._configs[config.name] = config
@@ -176,8 +178,6 @@ class ConfigRegister():
         # Finally resolve relative paths in the config
         config = _resolve_dict(config)
 
-        # temp for debugging: write out resolved config
-        print(yaml.dump(config))
         return config
 
     def get_resolved(self, name):

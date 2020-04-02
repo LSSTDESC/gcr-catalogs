@@ -40,5 +40,5 @@ setup(
         'focal_plane': ['scikit-image', 'pandas'],
         'full': ['h5py', 'sqlalchemy', 'pymssql<3.0', 'pandas', 'tables', 'scikit-image', 'healpy', 'pyarrow'],
     },
-    package_data={'GCRCatalogs': ['catalog_configs/*.yaml','site_config/*.yaml']},
+    package_data={'GCRCatalogs': ['catalog_configs/*.yaml', 'site_config/*.yaml']},
 )
