@@ -1,6 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: alphaq.AlphaQGalaxyCatalog
 
-filename: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/v4.4.full.all.hdf5
+filename: ^/descqa-catalog/v4.4.full.all.hdf5
 
 lightcone: true
 

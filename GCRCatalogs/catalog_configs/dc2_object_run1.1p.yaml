@@ -1,5 +1,7 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: dc2_object.DC2ObjectCatalog
-base_dir: /global/projecta/projectdirs/lsst/production/DC2_PhoSim/Run1.1p/dpdd/object_catalog
+base_dir: ^/production-DC2_PhoSim/Run1.1p/dpdd/object_catalog
 description: DC2 Run 1.1p Object Catalog
 creators: ['Michael Wood-Vasey']
 pixel_scale: 0.185

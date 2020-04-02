@@ -1,3 +1,5 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: composite.CompositeReader
 catalogs:
   - catalog_name: proto-dc2_v3.0_redmapper

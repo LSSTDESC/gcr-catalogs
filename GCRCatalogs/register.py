@@ -3,24 +3,77 @@ import importlib
 import warnings
 import yaml
 import requests
+import socket
 from GCR import BaseGenericCatalog
 
-
-__all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog']
+__all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog', 'get_root_dir', 'set_root_dir', 'reset_root_dir']
 
 _CONFIG_DIRNAME = 'catalog_configs'
 _GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
+# Substitute for the following string if it starts a value for a path-like
+# keyword
+_ROOT_DIR_SIGNAL = "^/"
 _YAML_EXTENSIONS = ('.yaml', '.yml')
 
+# Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
+_PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
+                   'catalog_root_dir', 'header_file', 'repo', 'table_dir')
+
+_DICT_LIST = ('catalogs',)
+_DESC_SITE_ENV = 'DESC_GCR_SITE'
+
+def _get_site_info():
+    '''
+    Return a string which, when executing at a recognized site with 
+    well-known name, will include the name for that site
+    '''
+    # First look for well-known env variable
+    v = os.getenv(_DESC_SITE_ENV)
+    if v is not None:
+        warnings.warn('Site determined from env variable {}'.format(_DESC_SITE_ENV))
+        return v
+    
+    return socket.getfqdn()
+
+def _get_default_rootdir():
+    with open(os.path.join(os.path.dirname(__file__),'site_config/site_rootdir.yaml')) as f:
+        d = yaml.safe_load(f)
+        site_info = _get_site_info()
+        for (k,v) in d.items():
+            if k in site_info:
+                return v
+        warnings.warn('No default root dir found')
+        return None
+
+_DEFAULT_ROOT_DIR = _get_default_rootdir()
+_ROOT_DIR = _DEFAULT_ROOT_DIR
+
+def get_root_dir():
+    return _ROOT_DIR
+
+def set_root_dir(path):
+    '''
+    If 'path' is acceptable, set root dir to it
+    '''
+    # os.listdir will throw exception if path is ill-formed or doesn't exist
+    try:
+        os.listdir(path)
+    except FileNotFoundError:
+        warnings.warn("root dir has been set to non-existent path '{}'".format(path))
+    except NotADirectoryError:
+        warnings.warn("root dir has been set to a regular file '{}'; should be directory".format(path))
+    _ROOT_DIR = path
+        
+def reset_root_dir():
+    _ROOT_DIR = _DEFAULT_ROOT_DIR
 
 def load_yaml_local(yaml_file):
     with open(yaml_file) as f:
         return yaml.safe_load(f)
 
-
 def load_yaml(yaml_file):
     """
-    Load *yaml_file*. Ruturn a dictionary.
+    Load *yaml_file*. Return a dictionary.
     """
     try:
         r = requests.get(yaml_file, stream=True)
@@ -32,6 +85,27 @@ def load_yaml(yaml_file):
         r.raw.decode_content = True
         config = yaml.safe_load(r.raw)
     return config
+
+def _resolve_dict(d):
+    """
+    input dictionary `d` will be modified in-place
+    """
+    for (k,v) in d.items():
+        if k in _PATH_LIKE_KEYS and isinstance(v, str):
+            if not v.startswith(_ROOT_DIR_SIGNAL):
+                continue
+            elif _ROOT_DIR is None:
+                warnings.warn('unresolvable reference to root dir in "{}"'.format(v))
+                continue
+            else:
+                d[k] = os.path.join(_ROOT_DIR, v[len(_ROOT_DIR_SIGNAL):])
+        elif k in _DICT_LIST:
+            # Confirm it really is a list of dicts here; then resolve
+            if isinstance(v, list):
+                for c in v:
+                    if isinstance(c, dict):
+                        _resolve_dict(c)
+    return d
 
 
 class Config():
@@ -54,8 +128,7 @@ class Config():
         if self._content is None:
             self._content = load_yaml_local(self.path)
         return self._content
-
-
+    
 class ConfigRegister():
     def __init__(self, config_dir):
         self._config_dir = config_dir
@@ -101,6 +174,9 @@ class ConfigRegister():
                     base_config.update(config)
 
                 return self.resolve_config(base_config, past_refs)
+
+        # Finally resolve relative paths in the config
+        config = _resolve_dict(config)
 
         return config
 

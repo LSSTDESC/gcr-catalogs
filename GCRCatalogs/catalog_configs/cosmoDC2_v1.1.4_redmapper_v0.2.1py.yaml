@@ -1,3 +1,5 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: redmapper.RedmapperCatalog
 
 catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CL/redmapper/cosmoDC2_v1.1.4

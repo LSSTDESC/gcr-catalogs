@@ -1,6 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
 subclass_name: redmapper.RedMapperLegacyCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CS/descqa/catalog/
+catalog_root_dir: ^/descqa-catalog/
 catalog_path_template:
     clusters : proto-dc2_v3.0_halos_lambda_chisq.fit
     members  : proto-dc2_v3.0_halos_lambda_chisq_members_00.fit
