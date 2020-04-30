@@ -67,10 +67,11 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        modifiers = {'ODDS':'ODDS', 'z_mode':'z_mode','z_median':'z_median',
-                     'z_mean':'z_mean','pdf':'pdf','ID':'galaxy_id',
-                     'z_mode_ml':'z_mode_ml',
-                     'z_mode_ml_red_chi2':'z_mode_ml_red_chi2'}
+        modifiers = {'photoz_ODDS':'ODDS', 'photoz_mode':'z_mode',
+                     'photoz_median':'z_median',
+                     'photoz_mean':'z_mean','photoz_pdf':'pdf','ID':'galaxy_id',
+                     'photoz_mode_ml':'z_mode_ml',
+                     'photoz_mode_ml_red_chi2':'z_mode_ml_red_chi2'}
         
         return modifiers
 
