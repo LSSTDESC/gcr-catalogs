@@ -14,9 +14,9 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
 
     Parameters
     ----------
-    base_dir          (str): Directory of data files being served, required
-    filename_pattern  (str): The optional regex pattern of served data files
-    use_cache        (bool): Cache read data in memory
+    file_dir          (str): Directory of data files being served, required
+    file_pattern      (str): The optional regex pattern of served data files
+    meta_path         (str): path to yaml entries for quantities
 
     Attributes
     ----------
@@ -27,10 +27,8 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
     """
     # pylint: disable=too-many-instance-attributes
 
-    #FILE_RE_PATTERN = r'photoz_pdf_Run\d\.[0-9a-z]+_tract_(\d{4})_patch_(\d)_(\d)_idx_(\d+).hdf5'
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'photoz_pdf_Run\d\.[0-9a-z]+_tract_\d+\.parquet$'
-    # SCHEMA_FILENAME = 'pz_parquet_schema.yaml'
     META_PATH = os.path.join(FILE_DIR,
                              'catalog_configs/_dc2_photoz_parquet.yaml')
 
@@ -67,12 +65,14 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        modifiers = {'photoz_ODDS':'ODDS', 'photoz_mode':'z_mode',
+        modifiers = {'photoz_ODDS':'ODDS',
+                     'photoz_mode':'z_mode',
                      'photoz_median':'z_median',
-                     'photoz_mean':'z_mean','photoz_pdf':'pdf','ID':'galaxy_id',
+                     'photoz_mean':'z_mean',
+                     'photoz_pdf':'pdf',
+                     'ID':'galaxy_id',
                      'photoz_mode_ml':'z_mode_ml',
                      'photoz_mode_ml_red_chi2':'z_mode_ml_red_chi2'}
-        
         return modifiers
 
     @property
