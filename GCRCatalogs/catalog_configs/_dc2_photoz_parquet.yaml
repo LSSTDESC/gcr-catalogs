@@ -1,0 +1,8 @@
+ID: ['object ID of galaxy, matches galaxy_id', 'none',false,false]
+photoz_ODDS: ['photoz quality parameter, integrated prob near z_mode', 'none', false, false]
+photoz_mean: ['mean of redshift PDF', 'none', false, false]
+photoz_mode: ['mode/peak value of redshift PDF', 'none', false, false]
+photoz_median: ['median value of redshift PDF', 'none', false, false]
+photoz_mode_ml: ['z_mode of PDF with no prior applied', 'none', false, false]
+photoz_mode_ml_red_chi2: ['reduced chi^2 at z_mode_ml, a high value may indicate poor fit of all templates', 'none', false, false]
+photoz_pdf: ['1D marginalized redshift posterior for each galaxy', 'none', false, false]

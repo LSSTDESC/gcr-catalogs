@@ -129,7 +129,7 @@ class ParquetFileWrapper():
     @property
     def columns(self):
         if self._columns is None:
-            self._columns = [col for col in self.handle.schema.names
+            self._columns = [col for col in self.handle.schema.to_arrow_schema().names
                              if re.match(r'__\w+__$', col) is None]
         return list(self._columns)
 
