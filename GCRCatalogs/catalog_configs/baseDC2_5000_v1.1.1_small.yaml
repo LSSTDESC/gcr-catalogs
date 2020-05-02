@@ -1,27 +1,3 @@
-#  Use ^/ to indicate file path relative to GCR root dir
-
-subclass_name: cosmodc2.BaseDC2GalaxyCatalog
-
-catalog_root_dir: /global/cfs/cdirs/lsst/catalogs/baseDC2_5000_v1.1.1
-catalog_filename_template: baseDC2_z_{}_{}_cutout_{}.hdf5
-
-cosmology:
-    H0: 71.0
-    Om0: 0.2648
-    Ob0: 0.0448
-    n_s: 0.963
-    sigma8: 0.8
-
-lightcone: true
-
-version: "1.1.1"
+based_on: baseDC2_5000_v1.1.1
 
 healpix_pixels: [9559,  9686,  9687,  9814,  9815,  9816,  9942,  9943, 10070, 10071, 10072, 10198, 10199, 10200, 10326, 10327, 10450]
-
-check_md5: false
-check_size: false
-
-creators: [ 'Danila Korytov', 'Andrew Hearin',  'Eve Kovacs', 'Katrin Heitmann', 'Joe Hollowed', 'Patricia Larsen']
-
-description: |
-    This is the baseline catalog characterizing the galaxy-halo connection for LSST-DESC skysim_5000
