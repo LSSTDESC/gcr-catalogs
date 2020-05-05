@@ -69,6 +69,7 @@ Confluence page (*DESC member only*).
    - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i dr3
    - `dc2_object_run2.2i_dr3_tract3830`: static object catalog for Run 2.2i dr3 (one tract only, for testing purpose / faster access)
    - `dc2_object_run2.2i_dr3_with_metacal`: static object catalog for Run 2.2i dr3 + metacal
+   - `dc2_object_run2.2i_dr3_with_photoz`: static object catalog for Run 2.2i dr3 + photo-z
    - `dc2_object_run2.1i_dr4`: static object catalog for Run 2.1i dr4
    - `dc2_object_run2.1i_dr4_tract3830`: static object catalog for Run 2.1i dr4 (one tract only, for testing purpose / faster access)
    - `dc2_object_run2.1i_dr1b`: static object catalog for Run 2.1i dr1b
