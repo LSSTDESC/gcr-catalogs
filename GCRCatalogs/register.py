@@ -9,7 +9,7 @@ import socket
 from GCR import BaseGenericCatalog
 from .utils import is_string_like
 
-__all__ = ["get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs", "has_catalog", "load_catalog"]
+__all__ = ["get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs", "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog"]
 
 
 _GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
