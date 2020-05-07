@@ -329,6 +329,8 @@ class ConfigManager(Mapping):
         include_default_only=False,
         include_pseudo=False,
         include_pseudo_only=False,
+        name_startswith=None,
+        name_contains=None,
         additional_conditions=None,
     ):
         if names_only and content_only:
@@ -362,6 +364,12 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
             conditions.append(lambda config: not config.is_pseudo)
+        if name_startswith:
+            name_startswith_lower = str(name_startswith).lower()
+            conditions.append(lambda config: config.name.startswith(name_startswith_lower))
+        if name_contains:
+            name_contains_lower = str(name_contains).lower()
+            conditions.append(lambda config: name_contains_lower in config.name)
         if additional_conditions:
             conditions.extend(additional_conditions)
 
