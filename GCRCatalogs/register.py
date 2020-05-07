@@ -1,79 +1,38 @@
 import os
 import importlib
 import warnings
+import copy
+from collections.abc import Mapping
 import yaml
 import requests
 import socket
 from GCR import BaseGenericCatalog
+from .utils import is_string_like
 
-__all__ = ['has_catalog', 'get_catalog_config', 'get_available_catalogs', 'load_catalog', 'get_root_dir', 'set_root_dir', 'reset_root_dir']
+__all__ = ["get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs", "has_catalog", "load_catalog"]
 
-_CONFIG_DIRNAME = 'catalog_configs'
-_GITHUB_URL = 'https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs'
-# Substitute for the following string if it starts a value for a path-like
-# keyword
-_ROOT_DIR_SIGNAL = "^/"
-_YAML_EXTENSIONS = ('.yaml', '.yml')
 
-# Keys appearing in yaml files whose values may be paths relative to _ROOT_DIR
-_PATH_LIKE_KEYS = ('filename', 'addon_filename', 'base_dir', 'root_dir',
-                   'catalog_root_dir', 'header_file', 'repo', 'table_dir')
+_GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
+_HERE = os.path.dirname(__file__)
+_CONFIG_DIRNAME = "catalog_configs"
+_CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
+_SITE_CONFIG_PATH = os.path.join(_HERE, "site_configs", "site_rootdir.yaml")
 
-_DICT_LIST = ('catalogs',)
-_DESC_SITE_ENV = 'DESC_GCR_SITE'
-
-def _get_site_info():
-    '''
-    Return a string which, when executing at a recognized site with 
-    well-known name, will include the name for that site
-    '''
-    # First look for well-known env variable
-    v = os.getenv(_DESC_SITE_ENV)
-    if v is not None:
-        warnings.warn('Site determined from env variable {}'.format(_DESC_SITE_ENV))
-        return v
-    
-    return socket.getfqdn()
-
-def _get_default_rootdir():
-    with open(os.path.join(os.path.dirname(__file__),'site_config/site_rootdir.yaml')) as f:
-        d = yaml.safe_load(f)
-        site_info = _get_site_info()
-        for (k,v) in d.items():
-            if k in site_info:
-                return v
-        warnings.warn('No default root dir found')
-        return None
-
-_DEFAULT_ROOT_DIR = _get_default_rootdir()
-_ROOT_DIR = _DEFAULT_ROOT_DIR
-
-def get_root_dir():
-    return _ROOT_DIR
-
-def set_root_dir(path):
-    '''
-    If 'path' is acceptable, set root dir to it
-    '''
-    # os.listdir will throw exception if path is ill-formed or doesn't exist
-    try:
-        os.listdir(path)
-    except FileNotFoundError:
-        warnings.warn("root dir has been set to non-existent path '{}'".format(path))
-    except NotADirectoryError:
-        warnings.warn("root dir has been set to a regular file '{}'; should be directory".format(path))
-    _ROOT_DIR = path
-        
-def reset_root_dir():
-    _ROOT_DIR = _DEFAULT_ROOT_DIR
 
 def load_yaml_local(yaml_file):
+    """
+    Loads a yaml file on disk at path *yaml_file*.
+    Returns a dictionary.
+    """
     with open(yaml_file) as f:
         return yaml.safe_load(f)
 
+
 def load_yaml(yaml_file):
     """
-    Load *yaml_file*. Return a dictionary.
+    Loads a yaml file either on disk at path *yaml_file*,
+    or from the URL *yaml_file*.
+    Returns a dictionary.
     """
     try:
         r = requests.get(yaml_file, stream=True)
@@ -81,172 +40,20 @@ def load_yaml(yaml_file):
         config = load_yaml_local(yaml_file)
     else:
         if r.status_code == 404:
-            raise requests.RequestException('404 Not Found!')
+            raise requests.RequestException("404 Not Found!")
         r.raw.decode_content = True
         config = yaml.safe_load(r.raw)
     return config
 
-def _resolve_dict(d):
-    """
-    input dictionary `d` will be modified in-place
-    """
-    for (k,v) in d.items():
-        if k in _PATH_LIKE_KEYS and isinstance(v, str):
-            if not v.startswith(_ROOT_DIR_SIGNAL):
-                continue
-            elif _ROOT_DIR is None:
-                warnings.warn('unresolvable reference to root dir in "{}"'.format(v))
-                continue
-            else:
-                d[k] = os.path.join(_ROOT_DIR, v[len(_ROOT_DIR_SIGNAL):])
-        elif k in _DICT_LIST:
-            # Confirm it really is a list of dicts here; then resolve
-            if isinstance(v, list):
-                for c in v:
-                    if isinstance(c, dict):
-                        _resolve_dict(c)
-    return d
-
-
-class Config():
-    def __init__(self, config_path, config_dir=''):
-        self.path = os.path.join(config_dir, config_path)
-        self.basename = os.path.basename(self.path)
-        self.rootname, self.ext = os.path.splitext(self.basename)
-        self.name = self.rootname.lower()
-        self._content = None
-
-    @property
-    def ignore(self):
-        return (
-            self.rootname.startswith('_') or
-            self.ext.lower() not in _YAML_EXTENSIONS
-        )
-
-    @property
-    def content(self):
-        if self._content is None:
-            self._content = load_yaml_local(self.path)
-        return self._content
-    
-class ConfigRegister():
-    def __init__(self, config_dir):
-        self._config_dir = config_dir
-        self._configs = dict()
-        self._configs_resolved = dict()
-
-        for config_file in os.listdir(self._config_dir):
-            config = Config(config_file, self._config_dir)
-            if not config.ignore:
-                self._configs[config.name] = config
-
-    @staticmethod
-    def normalize_name(name):
-        name = str(name).lower()
-        for extension in _YAML_EXTENSIONS:
-            if name.endswith(extension):
-                return name[:-len(extension)]
-        return name
-
-    def get_raw(self, name):
-        name = self.normalize_name(name)
-        if name not in self._configs:
-            raise KeyError('Catalog {} does not exist.'.format(name))
-        return self._configs[name].content
-
-    def resolve_config(self, config, past_refs=None):
-        for key in ('alias', 'based_on'):
-            if config.get(key):
-                base_name = self.normalize_name(config[key])
-                base_config = self.get_raw(base_name)
-
-                if past_refs is None:
-                    past_refs = [base_name]
-                elif base_name in past_refs:
-                    raise RecursionError('Recursive reference')
-                else:
-                    past_refs.append(base_name)
-
-                if key == 'based_on':
-                    config = config.copy()
-                    del config[key]
-                    base_config = base_config.copy()
-                    base_config.update(config)
-
-                return self.resolve_config(base_config, past_refs)
-
-        # Finally resolve relative paths in the config
-        config = _resolve_dict(config)
-
-        return config
-
-    def get_resolved(self, name):
-        name = self.normalize_name(name)
-        if name not in self._configs_resolved:
-            self._configs_resolved[name] = self.resolve_config(self.get_raw(name), [name])
-        config = self._configs_resolved[name]
-        if 'subclass_name' not in config:
-            raise ValueError('`subclass_name` is missing in the config of {}'
-                             'and its dependencies'.format(name))
-        return config
-
-    def online_alias_check(self, name):
-        config = self.get_raw(name)
-        if config.get('alias'):
-            name = self.normalize_name(name)
-            url = '/'.join((_GITHUB_URL, _CONFIG_DIRNAME, self._configs[name].basename))
-            try:
-                online_config = load_yaml(url)
-            except (requests.RequestException, yaml.error.YAMLError):
-                pass
-            else:
-                if config['alias'] != online_config.get('alias'):
-                    warnings.warn('`{}` is currently an alias of `{}`.'
-                    'Please be advised that it will soon change to point to an updated version `{}`.'
-                    'The updated version is already available in the master branch.'.format(
-                        name,
-                        config['alias'],
-                        online_config.get('alias'),
-                    ))
-
-    def __contains__(self, key):
-        return (self.normalize_name(key) in self._configs)
-
-    @property
-    def catalog_configs(self):
-        return {v.rootname: v.content for v in self._configs.values()}
-
-    @property
-    def default_catalog_configs(self):
-        return {
-            v.rootname: self.get_resolved(v.name) for v in self._configs.values()
-            if v.content.get('include_in_default_catalog_list')
-        }
-
-    @property
-    def catalog_list(self):
-        return sorted((v.rootname for v in self._configs.values()))
-
-    @property
-    def default_catalog_list(self):
-        return sorted((
-            v.rootname for v in self._configs.values()
-            if v.content.get('include_in_default_catalog_list')
-        ))
-
-    @property
-    def reader_list(self):
-        return sorted(set((self.get_resolved(k)['subclass_name'] for k in self._configs)))
-
 
 def import_subclass(subclass_path, package=None, required_base_class=None):
     """
-    Import and return a subclass.
-    *subclass_path* must be in the form of 'module.subclass'.
+    Imports and returns a subclass.
+    *subclass_path* must be in the form of module.subclass.
     """
-    module, _, subclass_name = subclass_path.rpartition('.')
-    if package and not module.startswith('.'):
-        module = '.' + module
+    module, _, subclass_name = subclass_path.rpartition(".")
+    if package and not module.startswith("."):
+        module = "." + module
     subclass = getattr(importlib.import_module(module, package), subclass_name)
     if required_base_class and not issubclass(subclass, required_base_class):
         raise ValueError("Provided class is not a subclass of *required_base_class*")
@@ -255,47 +62,392 @@ def import_subclass(subclass_path, package=None, required_base_class=None):
 
 def load_catalog_from_config_dict(catalog_config):
     """
-    Load a galaxy catalog using a config dictionary.
-
-    Parameters
-    ----------
-    catalog_config : dict
-        a dictionary of config options
-
-    Return
-    ------
-    galaxy_catalog : instance of a subclass of BaseGalaxyCatalog
-
-    See also
-    --------
-    load_catalog()
+    Loads and returns the catalog specified in *catalog_config*.
     """
-    return import_subclass(catalog_config['subclass_name'],
-                           __package__,
-                           BaseGenericCatalog)(**catalog_config)
+    return import_subclass(
+        catalog_config["subclass_name"], __package__, BaseGenericCatalog
+    )(**catalog_config)
 
 
-def get_available_catalogs(include_default_only=True, names_only=False):
-    """
-    Return available catalogs as a dictionary,
-    or a list (when *names_only* set to True).
+class RootDirManager:
+    _ROOT_DIR_SIGNAL = "^/"
+    _PATH_LIKE_KEYS = (
+        "filename",
+        "addon_filename",
+        "base_dir",
+        "root_dir",
+        "catalog_root_dir",
+        "header_file",
+        "repo",
+        "table_dir",
+    )
+    _DICT_LIST_KEYS = ("catalogs",)
+    _DESC_SITE_ENV = "DESC_GCR_SITE"
 
-    If *include_default_only* is set to False, return all catalogs.
-    If *names_only* is set to False, return catalog name and associated configs
-    """
-    if names_only:
+    def __init__(self, site_config_path=None):
+        self._site_config_path = site_config_path
+        self._default_root_dir = None
+        self._custom_root_dir = None
+        self._site_info = self._get_site_info()
+
+        if self._site_config_path:
+            site_config = load_yaml_local(self._site_config_path)
+            for k, v in site_config.items():
+                if k in self._site_info:
+                    self._default_root_dir = v
+                    break
+
+        if not self._default_root_dir:
+            warnings.warn("Default root dir has not been set!")
+
+    def _get_site_info(self):
+        """
+        Return a string which, when executing at a recognized site with
+        well-known name, will include the name for that site
+        """
+        # First look for custom env variable
+        v = os.getenv(self._DESC_SITE_ENV)
+        if v:
+            warnings.warn("Site determined from env variable {}".format(self._DESC_SITE_ENV))
+            return v
+        return socket.getfqdn()
+
+    @property
+    def root_dir(self):
+        return self._custom_root_dir or self._default_root_dir
+
+    @root_dir.setter
+    def root_dir(self, path):
+        """
+        If 'path' is acceptable, set root dir to it
+        """
+        # os.listdir will throw exception if path is ill-formed or doesn't exist
+        try:
+            os.listdir(path)
+        except FileNotFoundError:
+            warnings.warn("root dir has been set to non-existent path '{}'".format(path))
+        except NotADirectoryError:
+            warnings.warn("root dir has been set to a regular file '{}'; should be directory".format(path))
+        self._custom_root_dir = path
+
+    def reset_root_dir(self):
+        self._custom_root_dir = None
+
+    def resolve_root_dir(self, config_dict, config_name=None):
+        """
+        input dictionary `config_dict` will be modified in-place and returned
+        """
+        for k, v in config_dict.items():
+            if k in self._PATH_LIKE_KEYS and is_string_like(v) and v.startswith(self._ROOT_DIR_SIGNAL):
+                try:
+                    config_dict[k] = os.path.join(self.root_dir, v[len(self._ROOT_DIR_SIGNAL):])
+                except TypeError:
+                    warnings.warn("Root dir has not been set!")
+
+            elif k in self._DICT_LIST_KEYS and isinstance(v, list):
+                for c in v:
+                    if isinstance(c, dict):
+                        self.resolve_root_dir(c)
+
+        return config_dict
+
+
+class Config(Mapping):
+    _YAML_EXTENSIONS = (".yaml", ".yml")
+
+    def __init__(self, config_path, config_dir="", resolvers=None):
+        self.path = os.path.join(config_dir, config_path)
+        self.basename = os.path.basename(self.path)
+        self.rootname, self.ext = os.path.splitext(self.basename)
+        self.name = self.rootname.lower()
+
+        self._resolvers = None
+        self._content = None
+        self._resolved_content = None
+
+        if resolvers:
+            self.set_resolvers(*resolvers)
+
+    def set_resolvers(self, *resolvers):
+        if not all(map(callable, resolvers)):
+            raise ValueError("`resolvers` should be callable.")
+        self._resolvers = resolvers
+        self.reset_resolved_content()
+
+    @property
+    def ignore(self):
+        return self.rootname.startswith("_") or self.ext.lower() not in self._YAML_EXTENSIONS
+
+    @property
+    def content(self):
+        if self._content is None:
+            self._content = load_yaml_local(self.path)
+        return self._content
+
+    @property
+    def resolved_content(self):
+        if self._resolved_content is None:
+            content = self.content_copy
+            if self._resolvers:
+                for resolver in self._resolvers:
+                    content = resolver(content, self.name)
+            if "subclass_name" not in content:
+                raise ValueError(
+                    "`subclass_name` is missing in the config of {}"
+                    "and all of its references".format(self.name)
+                )
+            self._resolved_content = content
+        return self._resolved_content
+
+    def reset_resolved_content(self):
+        self._resolved_content = None
+
+    @property
+    def content_copy(self):
+        return copy.deepcopy(self.content)
+
+    @property
+    def resolved_content_copy(self):
+        return copy.deepcopy(self.resolved_content)
+
+    def __getitem__(self, key):
+        return self.content[key]
+
+    def __iter__(self):
+        return iter(self.content)
+
+    def __len__(self):
+        return len(self.content)
+
+    @property
+    def is_default(self):
+        return self.get("include_in_default_catalog_list")
+
+    @property
+    def is_pseudo(self):
+        return self.get("is_pseudo_entry")
+
+    @property
+    def is_alias(self):
+        return self.get("alias")
+
+    @staticmethod
+    def _has_reference_keys(d):
+        return d.get("alias") or d.get("based_on")
+
+    @property
+    def has_reference(self):
+        return self._has_reference_keys(self)
+
+    def load_catalog(self, config_overwrite=None):
+        self.online_alias_check()
+        if config_overwrite:
+            if self._has_reference_keys(config_overwrite):
+                raise ValueError("`config_overwrite` cannot specify `alias` or `based_on`!")
+        return load_catalog_from_config_dict(dict(self.resolved_content, **config_overwrite))
+
+    def online_alias_check(self):
+        if not self.is_alias:
+            return
+
+        url = "/".join((_GITHUB_URL, _CONFIG_DIRNAME, self.basename))
+        try:
+            online_config = load_yaml(url)
+        except (requests.RequestException, yaml.error.YAMLError):
+            return
+
+        if self["alias"] != online_config.get("alias"):
+            warnings.warn(
+                "`{}` is currently an alias of `{}`."
+                "Please be advised that it will soon change to point to an updated version `{}`."
+                "The updated version is already available in the master branch.".format(
+                    self.rootname, self["alias"], online_config.get("alias"),
+                )
+            )
+
+
+class ConfigManager(Mapping):
+
+    _YAML_EXTENSIONS = Config._YAML_EXTENSIONS
+
+    def __init__(self, config_dir):
+        self._config_dir = config_dir
+        self._configs = dict()
+        for config_file in sorted(os.listdir(self._config_dir)):
+            config = Config(config_file, self._config_dir)
+            if not config.ignore:
+                self._configs[config.name] = config
+
+    def normalize_name(self, name):
+        name = str(name).lower()
+        for extension in self._YAML_EXTENSIONS:
+            if name.endswith(extension):
+                return name[: -len(extension)]
+        return name
+
+    def __getitem__(self, key):
+        try:
+            return self._configs[self.normalize_name(key)]
+        except KeyError:
+            raise KeyError("Catalog `{}` does not exist.".format(key))
+
+    def __iter__(self):
+        return iter(self._configs)
+
+    def __len__(self):
+        return len(self._configs)
+
+    def resolve_reference(self, config_dict, config_name=None, past_refs=None):
+        if past_refs is None and config_name is not None:
+            past_refs = [config_name]
+
+        for key in ("alias", "based_on"):
+            if config_dict.get(key):
+                base_name = self.normalize_name(config_dict[key])
+                base_config_dict = self[base_name].content_copy
+
+                if past_refs is None:
+                    past_refs = [base_name]
+                elif base_name in past_refs:
+                    raise RecursionError("Recursive reference")
+                else:
+                    past_refs.append(base_name)
+
+                if key == "based_on":
+                    del config_dict[key]
+                    base_config_dict.update(config_dict)
+
+                return self.resolve_reference(base_config_dict, past_refs=past_refs)
+
+        return config_dict
+
+    def get_configs(
+        self,
+        names_only=False,
+        content_only=False,
+        resolve_content=False,
+        include_default_only=False,
+        include_pseudo=False,
+        include_pseudo_only=False,
+        additional_conditions=None,
+    ):
+        if names_only and content_only:
+            raise ValueError(
+                "Options `names_only` and `content_only` cannot both be set to True."
+            )
+        elif names_only:
+            return_type = list
+            get_content = lambda config: config.rootname  # noqa: E731
+            if resolve_content:
+                raise ValueError(
+                    "Options `names_only` and `resolve_content` cannot both be set to True."
+                )
+        elif content_only:
+            return_type = list
+            if resolve_content:
+                get_content = lambda config: config.resolved_content_copy  # noqa: E731
+            else:
+                get_content = lambda config: config.content_copy  # noqa: E731
+        else:
+            return_type = dict
+            if resolve_content:
+                get_content = lambda config: (config.rootname, config.resolved_content_copy)  # noqa: E731
+            else:
+                get_content = lambda config: (config.rootname, config.content_copy)  # noqa: E731
+
+        conditions = list()
         if include_default_only:
-            return _config_register.default_catalog_list
-        return _config_register.catalog_list
+            conditions.append(lambda config: config.is_default)
+        if include_pseudo_only:
+            conditions.append(lambda config: config.is_pseudo)
+        elif not include_pseudo:
+            conditions.append(lambda config: not config.is_pseudo)
+        if additional_conditions:
+            conditions.extend(additional_conditions)
 
-    if include_default_only:
-        return _config_register.default_catalog_configs
-    return _config_register.catalog_configs
+        def check_conditions(config):
+            return all((condition(config) for condition in conditions))
+
+        return return_type((get_content(v) for v in self.values() if check_conditions(v)))
+
+    @property
+    def catalog_configs(self):
+        return self.get_configs(resolve_content=True, include_pseudo=False)
+
+    @property
+    def default_catalog_configs(self):
+        return self.get_configs(resolve_content=True, include_default_only=True, include_pseudo=False)
+
+    @property
+    def catalog_list(self):
+        return self.get_configs(names_only=True, include_pseudo=False)
+
+    @property
+    def default_catalog_list(self):
+        return self.get_configs(names_only=True, include_default_only=True, include_pseudo=False)
+
+    @property
+    def reader_list(self):
+        configs = self.get_configs(content_only=True, resolve_content=True, include_pseudo=False)
+        return list(set((v["subclass_name"] for v in configs)))
+
+
+class ConfigRegister(RootDirManager, ConfigManager):
+    def __init__(self, config_dir, site_config_path=None):
+        ConfigManager.__init__(self, config_dir)
+        RootDirManager.__init__(self, site_config_path)
+        for v in self.values():
+            v.set_resolvers(self.resolve_reference, self.resolve_root_dir)
+
+    @property
+    def root_dir(self):
+        return super().root_dir
+
+    @root_dir.setter
+    def root_dir(self, path):
+        for v in self.values():
+            v.reset_resolved_content()
+        RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
+
+
+def get_root_dir():
+    """
+    Returns current root_dir.
+    """
+    return _config_register.root_dir
+
+
+def set_root_dir(path):
+    """
+    Sets runtime root_dir to *path*.
+    """
+    _config_register.root_dir = path
+
+
+def reset_root_dir():
+    """
+    Resets runtime root_dir to its default value.
+    """
+    _config_register.reset_root_dir()
+
+
+def get_available_catalogs(include_default_only=True, names_only=False, **kwargs):
+    """
+    Returns all available catalogs and their corresponding config files
+    as a dictionary (when *names_only* set to False),
+    or returns available catalog names as a list (when *names_only* set to True).
+
+    If *include_default_only* is set to False, the returned list/dict will
+    include catalogs that are not in the default listing.
+    """
+    return _config_register.get_configs(
+        names_only=names_only, include_default_only=include_default_only, **kwargs
+    )
 
 
 def get_reader_list():
     """
-    Returns a list of readers
+    Returns a list of all readers
     """
     return _config_register.reader_list
 
@@ -306,39 +458,36 @@ def get_catalog_config(catalog_name, raw_config=False):
     If *raw_config* set to `True`, do not resolve references (alias, based_on)
     """
     if raw_config:
-        return _config_register.get_raw(catalog_name)
-    return _config_register.get_resolved(catalog_name)
+        return _config_register[catalog_name].content_copy
+    return _config_register[catalog_name].resolved_content_copy
 
 
-def has_catalog(catalog_name):
+def has_catalog(catalog_name, include_pseudo=False):
     """
-    Check if *catalog_name* exists
+    Checks if *catalog_name* exists
     """
-    return catalog_name in _config_register
+    return catalog_name in _config_register and (
+        include_pseudo or not _config_register[catalog_name].is_pseudo
+    )
 
 
 def load_catalog(catalog_name, config_overwrite=None):
     """
-    Load a galaxy catalog as specified in one of the yaml file in catalog_configs.
+    Load a catalog as specified in the yaml file named *catalog_name*,
+    with any *config_overwrite* options overwrite the default.
 
     Parameters
     ----------
     catalog_name : str
-        name of the catalog (without '.yaml')
+        name of the catalog
     config_overwrite : dict, optional
         a dictionary of config options to overwrite
 
     Return
     ------
-    galaxy_catalog : instance of a subclass of BaseGalaxyCatalog
+    catalog : instance of a subclass of BaseGalaxyCatalog
     """
-    _config_register.online_alias_check(catalog_name)
-    config = _config_register.get_resolved(catalog_name)
-    if config_overwrite:
-        if any(key in config_overwrite for key in ('alias', 'based_on')):
-            raise ValueError('`config_overwrite` cannot specify `alias` or `based_on`!')
-        config = config.copy()
-        config.update(config_overwrite)
-    return load_catalog_from_config_dict(config)
+    _config_register[catalog_name].load_catalog(config_overwrite)
 
-_config_register = ConfigRegister(os.path.join(os.path.dirname(__file__), _CONFIG_DIRNAME))
+
+_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
