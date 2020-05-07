@@ -254,7 +254,10 @@ class Config(Mapping):
         if config_overwrite:
             if self._has_reference_keys(config_overwrite):
                 raise ValueError("`config_overwrite` cannot specify `alias` or `based_on`!")
-        return load_catalog_from_config_dict(dict(self._resolved_content, **config_overwrite))
+            config_dict = dict(self._resolved_content, **config_overwrite)
+        else:
+            config_dict = self._resolved_content
+        return load_catalog_from_config_dict(config_dict)
 
     def online_alias_check(self):
         if not self.is_alias:
