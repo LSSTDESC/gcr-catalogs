@@ -172,8 +172,8 @@ class Config(Mapping):
         self.name = self.rootname.lower()
 
         self._resolvers = None
-        self._content = None
-        self._resolved_content = None
+        self._content_ = None
+        self._resolved_content_ = None
 
         if resolvers:
             self.set_resolvers(*resolvers)
@@ -189,15 +189,15 @@ class Config(Mapping):
         return self.rootname.startswith("_") or self.ext.lower() not in self.YAML_EXTENSIONS
 
     @property
-    def content(self):
-        if self._content is None:
-            self._content = load_yaml_local(self.path)
-        return self._content
+    def _content(self):
+        if self._content_ is None:
+            self._content_ = load_yaml_local(self.path)
+        return self._content_
 
     @property
-    def resolved_content(self):
-        if self._resolved_content is None:
-            content = self.content_copy
+    def _resolved_content(self):
+        if self._resolved_content_ is None:
+            content = self.content
             if self._resolvers:
                 for resolver in self._resolvers:
                     content = resolver(content, self.name)
@@ -206,28 +206,28 @@ class Config(Mapping):
                     "`subclass_name` is missing in the config of {}"
                     "and all of its references".format(self.name)
                 )
-            self._resolved_content = content
-        return self._resolved_content
+            self._resolved_content_ = content
+        return self._resolved_content_
 
     def reset_resolved_content(self):
-        self._resolved_content = None
+        self._resolved_content_ = None
 
     @property
-    def content_copy(self):
-        return copy.deepcopy(self.content)
+    def content(self):
+        return copy.deepcopy(self._content)
 
     @property
-    def resolved_content_copy(self):
-        return copy.deepcopy(self.resolved_content)
+    def resolved_content(self):
+        return copy.deepcopy(self._resolved_content)
 
     def __getitem__(self, key):
-        return self.content[key]
+        return self._content[key]
 
     def __iter__(self):
-        return iter(self.content)
+        return iter(self._content)
 
     def __len__(self):
-        return len(self.content)
+        return len(self._content)
 
     @property
     def is_default(self):
@@ -254,7 +254,7 @@ class Config(Mapping):
         if config_overwrite:
             if self._has_reference_keys(config_overwrite):
                 raise ValueError("`config_overwrite` cannot specify `alias` or `based_on`!")
-        return load_catalog_from_config_dict(dict(self.resolved_content, **config_overwrite))
+        return load_catalog_from_config_dict(dict(self._resolved_content, **config_overwrite))
 
     def online_alias_check(self):
         if not self.is_alias:
@@ -314,7 +314,7 @@ class ConfigManager(Mapping):
         for key in ("alias", "based_on"):
             if config_dict.get(key):
                 base_name = self.normalize_name(config_dict[key])
-                base_config_dict = self[base_name].content_copy
+                base_config_dict = self[base_name].content
 
                 if past_refs is None:
                     past_refs = [base_name]
@@ -357,15 +357,15 @@ class ConfigManager(Mapping):
         elif content_only:
             return_type = list
             if resolve_content:
-                get_content = lambda config: config.resolved_content_copy  # noqa: E731
+                get_content = lambda config: config.resolved_content  # noqa: E731
             else:
-                get_content = lambda config: config.content_copy  # noqa: E731
+                get_content = lambda config: config.content  # noqa: E731
         else:
             return_type = dict
             if resolve_content:
-                get_content = lambda config: (config.rootname, config.resolved_content_copy)  # noqa: E731
+                get_content = lambda config: (config.rootname, config.resolved_content)  # noqa: E731
             else:
-                get_content = lambda config: (config.rootname, config.content_copy)  # noqa: E731
+                get_content = lambda config: (config.rootname, config.content)  # noqa: E731
 
         conditions = list()
         if include_default_only:
@@ -477,9 +477,8 @@ def get_catalog_config(catalog_name, raw_config=False):
     Returns the config dict of *catalog_name*.
     If *raw_config* set to `True`, do not resolve references (alias, based_on)
     """
-    if raw_config:
-        return _config_register[catalog_name].content_copy
-    return _config_register[catalog_name].resolved_content_copy
+    config = _config_register[catalog_name]
+    return config.content if raw_config else config.resolved_content
 
 
 def has_catalog(catalog_name, include_pseudo=False):
