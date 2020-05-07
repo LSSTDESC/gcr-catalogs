@@ -19,6 +19,8 @@ _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
 
 
+# yaml helper functions
+
 def load_yaml_local(yaml_file):
     """
     Loads a yaml file on disk at path *yaml_file*.
@@ -46,6 +48,8 @@ def load_yaml(yaml_file):
     return config
 
 
+# catalog loading helper functions
+
 def import_subclass(subclass_path, package=None, required_base_class=None):
     """
     Imports and returns a subclass.
@@ -68,6 +72,8 @@ def load_catalog_from_config_dict(catalog_config):
         catalog_config["subclass_name"], __package__, BaseGenericCatalog
     )(**catalog_config)
 
+
+# Classes
 
 class RootDirManager:
     _ROOT_DIR_SIGNAL = "^/"
@@ -280,7 +286,7 @@ class ConfigManager(Mapping):
 
     def normalize_name(self, name):
         name = str(name).lower()
-        for extension in self._YAML_EXTENSIONS:
+        for extension in self.YAML_EXTENSIONS:
             if name.endswith(extension):
                 return name[: -len(extension)]
         return name
@@ -417,6 +423,8 @@ class ConfigRegister(RootDirManager, ConfigManager):
             v.reset_resolved_content()
         RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
 
+
+# module-level functions that access/manipulate _config_register
 
 def get_root_dir():
     """
