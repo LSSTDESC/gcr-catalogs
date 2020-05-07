@@ -131,9 +131,13 @@ class RootDirManager:
         try:
             os.listdir(path)
         except FileNotFoundError:
-            warnings.warn("root dir has been set to non-existent path '{}'".format(path))
+            warnings.warn("root_dir has been set to non-existent path '{}'".format(path))
         except NotADirectoryError:
-            warnings.warn("root dir has been set to a regular file '{}'; should be directory".format(path))
+            warnings.warn("root_dir has been set to a regular file '{}'; should be directory".format(path))
+        except PermissionError:
+            warnings.warn("root_dir has been set to '{}' but you have no permission to access it".format(path))
+        except OSError as e:
+            warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
         self._custom_root_dir = path
 
     def reset_root_dir(self):
