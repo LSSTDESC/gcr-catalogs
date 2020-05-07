@@ -133,7 +133,7 @@ class RootDirManager:
     def reset_root_dir(self):
         self._custom_root_dir = None
 
-    def resolve_root_dir(self, config_dict, config_name=None):
+    def resolve_root_dir(self, config_dict, config_name=None):  # pylint: disable=unused-argument
         """
         input dictionary `config_dict` will be modified in-place and returned
         """
@@ -153,7 +153,7 @@ class RootDirManager:
 
 
 class Config(Mapping):
-    _YAML_EXTENSIONS = (".yaml", ".yml")
+    YAML_EXTENSIONS = (".yaml", ".yml")
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -176,7 +176,7 @@ class Config(Mapping):
 
     @property
     def ignore(self):
-        return self.rootname.startswith("_") or self.ext.lower() not in self._YAML_EXTENSIONS
+        return self.rootname.startswith("_") or self.ext.lower() not in self.YAML_EXTENSIONS
 
     @property
     def content(self):
@@ -268,7 +268,7 @@ class Config(Mapping):
 
 class ConfigManager(Mapping):
 
-    _YAML_EXTENSIONS = Config._YAML_EXTENSIONS
+    YAML_EXTENSIONS = Config.YAML_EXTENSIONS
 
     def __init__(self, config_dir):
         self._config_dir = config_dir
