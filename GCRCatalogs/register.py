@@ -143,16 +143,19 @@ class RootDirManager:
     def reset_root_dir(self):
         self._custom_root_dir = None
 
-    def resolve_root_dir(self, config_dict, config_name=None):  # pylint: disable=unused-argument
+    def resolve_root_dir(self, config_dict, config_name=None, record=None):  # pylint: disable=unused-argument
         """
         input dictionary `config_dict` will be modified in-place and returned
         """
         for k, v in config_dict.items():
-            if k in self._PATH_LIKE_KEYS and is_string_like(v) and v.startswith(self._ROOT_DIR_SIGNAL):
-                try:
-                    config_dict[k] = os.path.join(self.root_dir, v[len(self._ROOT_DIR_SIGNAL):])
-                except TypeError:
-                    warnings.warn("Root dir has not been set!")
+            if k in self._PATH_LIKE_KEYS and is_string_like(v):
+                if record is not None:
+                    record.append((config_name, v))
+                if v.startswith(self._ROOT_DIR_SIGNAL):
+                    try:
+                        config_dict[k] = os.path.join(self.root_dir, v[len(self._ROOT_DIR_SIGNAL):])
+                    except TypeError:
+                        warnings.warn("Root dir has not been set!")
 
             elif k in self._DICT_LIST_KEYS and isinstance(v, list):
                 for c in v:
@@ -310,6 +313,10 @@ class ConfigManager(Mapping):
     def __len__(self):
         return len(self._configs)
 
+    @property
+    def configs(self):
+        return self.values()
+
     def resolve_reference(self, config_dict, config_name=None, past_refs=None):
         if past_refs is None and config_name is not None:
             past_refs = [config_name]
@@ -389,7 +396,7 @@ class ConfigManager(Mapping):
         def check_conditions(config):
             return all((condition(config) for condition in conditions))
 
-        return return_type((get_content(v) for v in self.values() if check_conditions(v)))
+        return return_type((get_content(v) for v in self.configs if check_conditions(v)))
 
     @property
     def catalog_configs(self):
@@ -417,8 +424,8 @@ class ConfigRegister(RootDirManager, ConfigManager):
     def __init__(self, config_dir, site_config_path=None):
         ConfigManager.__init__(self, config_dir)
         RootDirManager.__init__(self, site_config_path)
-        for v in self.values():
-            v.set_resolvers(self.resolve_reference, self.resolve_root_dir)
+        for config in self.configs:
+            config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
 
     @property
     def root_dir(self):
@@ -426,9 +433,15 @@ class ConfigRegister(RootDirManager, ConfigManager):
 
     @root_dir.setter
     def root_dir(self, path):
-        for v in self.values():
-            v.reset_resolved_content()
+        for config in self.configs:
+            config.reset_resolved_content()
         RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
+
+    def record_all_paths(self):
+        record = list()
+        for config in self.configs:
+            self.resolve_root_dir(config.content, config.rootname, record)
+        return record
 
 
 # module-level functions that access/manipulate _config_register
