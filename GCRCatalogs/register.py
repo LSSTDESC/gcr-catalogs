@@ -16,7 +16,7 @@ _GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GC
 _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
-_SITE_CONFIG_PATH = os.path.join(_HERE, "site_configs", "site_rootdir.yaml")
+_SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
 
 
 def load_yaml_local(yaml_file):
