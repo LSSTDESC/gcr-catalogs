@@ -201,7 +201,7 @@ class Config(Mapping):
             if self._resolvers:
                 for resolver in self._resolvers:
                     content = resolver(content, self.name)
-            if "subclass_name" not in content:
+            if not self.is_pseudo and "subclass_name" not in content:
                 raise ValueError(
                     "`subclass_name` is missing in the config of {}"
                     "and all of its references".format(self.name)
