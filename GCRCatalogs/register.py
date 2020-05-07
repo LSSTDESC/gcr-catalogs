@@ -292,7 +292,7 @@ class ConfigManager(Mapping):
         name = str(name).lower()
         for extension in self.YAML_EXTENSIONS:
             if name.endswith(extension):
-                return name[: -len(extension)]
+                return name[:-len(extension)]
         return name
 
     def __getitem__(self, key):
@@ -319,7 +319,7 @@ class ConfigManager(Mapping):
                 if past_refs is None:
                     past_refs = [base_name]
                 elif base_name in past_refs:
-                    raise RecursionError("Recursive reference")
+                    raise RecursionError("Recursive reference (alias or based_on) of `{}`".format(base_name))
                 else:
                     past_refs.append(base_name)
 
