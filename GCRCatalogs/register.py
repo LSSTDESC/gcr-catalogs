@@ -463,6 +463,8 @@ def get_available_catalogs(include_default_only=True, names_only=False, **kwargs
     If *include_default_only* is set to False, the returned list/dict will
     include catalogs that are not in the default listing.
     """
+    kwargs.setdefault("resolve_content", True)
+    kwargs.setdefault("include_pseudo", False)
     return _config_register.get_configs(
         names_only=names_only, include_default_only=include_default_only, **kwargs
     )
