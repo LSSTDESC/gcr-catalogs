@@ -160,7 +160,7 @@ class RootDirManager:
             elif k in self._DICT_LIST_KEYS and isinstance(v, list):
                 for c in v:
                     if isinstance(c, dict):
-                        self.resolve_root_dir(c)
+                        self.resolve_root_dir(c, config_name, record)
 
         return config_dict
 
