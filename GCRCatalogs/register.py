@@ -507,7 +507,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     ------
     catalog : instance of a subclass of BaseGalaxyCatalog
     """
-    _config_register[catalog_name].load_catalog(config_overwrite)
+    return _config_register[catalog_name].load_catalog(config_overwrite)
 
 
 _config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
