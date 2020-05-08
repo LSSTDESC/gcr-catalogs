@@ -470,10 +470,13 @@ class ConfigRegister(RootDirManager, ConfigManager):
             config.reset_resolved_content()
         RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
 
-    def record_all_paths(self):
+    def retrieve_paths(self, **kwargs):
+        kwargs["names_only"] = False
+        kwargs["content_only"] = False
+        kwargs["resolve_content"] = False
         record = list()
-        for config in self.configs:
-            self.resolve_root_dir(config.content, config.rootname, record)
+        for config_name, config_dict in self.get_configs(**kwargs).items():
+            self.resolve_root_dir(config_dict, config_name, record)
         return record
 
 
