@@ -69,7 +69,7 @@ def load_catalog_from_config_dict(catalog_config):
     Loads and returns the catalog specified in *catalog_config*.
     """
     return import_subclass(
-        catalog_config["subclass_name"], __package__, BaseGenericCatalog
+        catalog_config[Config.READER_KEY], __package__, BaseGenericCatalog
     )(**catalog_config)
 
 
@@ -143,9 +143,22 @@ class RootDirManager:
     def reset_root_dir(self):
         self._custom_root_dir = None
 
-    def resolve_root_dir(self, config_dict, config_name=None, record=None):  # pylint: disable=unused-argument
+    def resolve_root_dir(self, config_dict, config_name=None, record=None):
         """
-        input dictionary `config_dict` will be modified in-place and returned
+        This function is a "resolver" function that is used to resolve config files.
+        It should be supplied to `Config.set_resolvers`.
+
+        *config_dict* is the input config dictionary and will be modified in-place, and also returned.
+
+        *config_name* is the input catalog name (str).
+        It has not specific use here other than to satisty the required call signature.
+
+        *record* is an optional argument that is not used by `Config.set_resolvers`.
+        It is used by `ConfigRegister.record_all_paths`.
+        When *record* is set to a list, this function will append all paths it finds to *record*.
+        This is useful to list all file paths in the configs.
+        (Note that when *record* is set, *config_name* will be used to identify
+         which config the corresponding path is found in.)
         """
         for k, v in config_dict.items():
             if k in self._PATH_LIKE_KEYS and is_string_like(v):
@@ -167,6 +180,11 @@ class RootDirManager:
 
 class Config(Mapping):
     YAML_EXTENSIONS = (".yaml", ".yml")
+    ALIAS_KEY = "alias"
+    REFERENCE_KEYS = (ALIAS_KEY, "based_on")
+    PSEUDO_KEY = "is_pseudo_entry"
+    DEFAULT_LISTING_KEY = "include_in_default_catalog_list"
+    READER_KEY = "subclass_name"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -182,6 +200,10 @@ class Config(Mapping):
             self.set_resolvers(*resolvers)
 
     def set_resolvers(self, *resolvers):
+        """
+        Each resolver will be called with two arguments: `resolver(config_dict, config_name)`
+        and it should return a config dictionary
+        """
         if not all(map(callable, resolvers)):
             raise ValueError("`resolvers` should be callable.")
         self._resolvers = resolvers
@@ -204,11 +226,10 @@ class Config(Mapping):
             if self._resolvers:
                 for resolver in self._resolvers:
                     content = resolver(content, self.name)
-            if not self.is_pseudo and "subclass_name" not in content:
-                raise ValueError(
-                    "`subclass_name` is missing in the config of {}"
-                    "and all of its references".format(self.name)
-                )
+            if self.has_reference:
+                raise ValueError("Fail to resolve references for config `{}`!".format(self.rootname))
+            elif not self.is_valid:
+                raise ValueError("`{}` is missing in config `{}` and its references!".format(self.READER_KEY, self.rootname))
             self._resolved_content_ = content
         return self._resolved_content_
 
@@ -233,30 +254,30 @@ class Config(Mapping):
         return len(self._content)
 
     @property
+    def is_valid(self):
+        return self.get(self.READER_KEY) or self.is_pseudo or self.has_reference
+
+    @property
     def is_default(self):
-        return self.get("include_in_default_catalog_list")
+        return self.get(self.DEFAULT_LISTING_KEY)
 
     @property
     def is_pseudo(self):
-        return self.get("is_pseudo_entry")
+        return self.get(self.PSEUDO_KEY)
 
     @property
     def is_alias(self):
-        return self.get("alias")
-
-    @staticmethod
-    def _has_reference_keys(d):
-        return d.get("alias") or d.get("based_on")
+        return self.get(self.ALIAS_KEY)
 
     @property
     def has_reference(self):
-        return self._has_reference_keys(self)
+        return any(map(self.get, self.REFERENCE_KEYS))
 
     def load_catalog(self, config_overwrite=None):
         self.online_alias_check()
         if config_overwrite:
-            if self._has_reference_keys(config_overwrite):
-                raise ValueError("`config_overwrite` cannot specify `alias` or `based_on`!")
+            if any(map(config_overwrite.get, self.REFERENCE_KEYS)):
+                raise ValueError("`config_overwrite` cannot specify " + " or ".join(self.REFERENCE_KEYS))
             config_dict = dict(self._resolved_content, **config_overwrite)
         else:
             config_dict = self._resolved_content
@@ -272,19 +293,17 @@ class Config(Mapping):
         except (requests.RequestException, yaml.error.YAMLError):
             return
 
-        if self["alias"] != online_config.get("alias"):
+        if self[self.ALIAS_KEY] != online_config.get(self.ALIAS_KEY):
             warnings.warn(
                 "`{}` is currently an alias of `{}`."
                 "Please be advised that it will soon change to point to an updated version `{}`."
                 "The updated version is already available in the master branch.".format(
-                    self.rootname, self["alias"], online_config.get("alias"),
+                    self.rootname, self[self.ALIAS_KEY], online_config.get(self.ALIAS_KEY),
                 )
             )
 
 
 class ConfigManager(Mapping):
-
-    YAML_EXTENSIONS = Config.YAML_EXTENSIONS
 
     def __init__(self, config_dir):
         self._config_dir = config_dir
@@ -296,7 +315,7 @@ class ConfigManager(Mapping):
 
     def normalize_name(self, name):
         name = str(name).lower()
-        for extension in self.YAML_EXTENSIONS:
+        for extension in Config.YAML_EXTENSIONS:
             if name.endswith(extension):
                 return name[:-len(extension)]
         return name
@@ -318,10 +337,21 @@ class ConfigManager(Mapping):
         return self.values()
 
     def resolve_reference(self, config_dict, config_name=None, past_refs=None):
+        """
+        This function is a "resolver" function that is used to resolve config files.
+        It should be supplied to `Config.set_resolvers`.
+
+        *config_dict* is the input config dictionary and may be modified in-place, and will be returned.
+
+        *config_name* is the input catalog name (str).
+        It is used to detect recursive reference, and also to satisty the required call signature.
+
+        *past_refs* is an optional argument for this function's internal use to detect recursive reference,
+        """
         if past_refs is None and config_name is not None:
             past_refs = [config_name]
 
-        for key in ("alias", "based_on"):
+        for key in Config.REFERENCE_KEYS:
             if config_dict.get(key):
                 base_name = self.normalize_name(config_dict[key])
                 base_config_dict = self[base_name].content
@@ -329,11 +359,11 @@ class ConfigManager(Mapping):
                 if past_refs is None:
                     past_refs = [base_name]
                 elif base_name in past_refs:
-                    raise RecursionError("Recursive reference (alias or based_on) of `{}`".format(base_name))
+                    raise RecursionError("Recursive reference to `{}` in config file `{}`".format(base_name, config_name))
                 else:
                     past_refs.append(base_name)
 
-                if key == "based_on":
+                if key != Config.ALIAS_KEY:
                     del config_dict[key]
                     base_config_dict.update(config_dict)
 
@@ -417,7 +447,7 @@ class ConfigManager(Mapping):
     @property
     def reader_list(self):
         configs = self.get_configs(content_only=True, resolve_content=True, include_pseudo=False)
-        return list(set((v["subclass_name"] for v in configs)))
+        return list(set((v[Config.READER_KEY] for v in configs)))
 
 
 class ConfigRegister(RootDirManager, ConfigManager):
