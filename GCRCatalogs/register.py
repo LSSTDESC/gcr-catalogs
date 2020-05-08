@@ -226,9 +226,9 @@ class Config(Mapping):
             if self._resolvers:
                 for resolver in self._resolvers:
                     content = resolver(content, self.name)
-            if self.has_reference:
+            if any(map(content.get, self.REFERENCE_KEYS)):
                 raise ValueError("Fail to resolve references for config `{}`!".format(self.rootname))
-            elif not self.is_valid:
+            elif not (content.get(self.READER_KEY) or self.is_pseudo):
                 raise ValueError("`{}` is missing in config `{}` and its references!".format(self.READER_KEY, self.rootname))
             self._resolved_content_ = content
         return self._resolved_content_
