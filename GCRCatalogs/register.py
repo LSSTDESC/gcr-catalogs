@@ -507,21 +507,21 @@ def reset_root_dir():
 
 def get_available_catalogs(
     include_default_only=True,
-    names_only=True,
+    names_only=False,
     name_startswith=None,
     name_contains=None,
     **kwargs
 ):
     """
-    Returns a list of all available catalogs.
+    Returns a dictionary of all available catalogs and their corresponding configs.
 
     Parameters
     ----------
     include_default_only: bool, optional (default: True)
         When set to False, returned list will include catalogs that are not in the default listing
         (i.e., those may not be suitable for general comsumption)
-    names_only: bool, optional (default: True)
-        When set to False, ruturns a dictionary where keys are catalog names and values are corresponding configs.
+    names_only: bool, optional (default: False)
+        When set to True, ruturns just a list of catalog names.
     name_startswith: str, optional (default: None)
         If set, only return catalogs whose name starts with *name_startswith*
     name_contains: str, optional (default: None)
