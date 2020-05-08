@@ -497,20 +497,36 @@ def reset_root_dir():
     _config_register.reset_root_dir()
 
 
-def get_available_catalogs(include_default_only=True, names_only=False, **kwargs):
+def get_available_catalogs(
+    include_default_only=True,
+    names_only=True,
+    name_startswith=None,
+    name_contains=None,
+    **kwargs
+):
     """
-    Returns all available catalogs and their corresponding config files
-    as a dictionary (when *names_only* set to False),
-    or returns available catalog names as a list (when *names_only* set to True).
+    Returns a list of all available catalogs.
 
-    If *include_default_only* is set to False, the returned list/dict will
-    include catalogs that are not in the default listing.
+    Parameters
+    ----------
+    include_default_only: bool, optional (default: True)
+        When set to False, returned list will include catalogs that are not in the default listing
+        (i.e., those may not be suitable for general comsumption)
+    names_only: bool, optional (default: True)
+        When set to False, ruturns a dictionary where keys are catalog names and values are corresponding configs.
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains with *name_contains*
     """
-    if not names_only:
-        kwargs.setdefault("resolve_content", True)
-    kwargs.setdefault("include_pseudo", False)
+    if "resolve_content" not in kwargs:
+        kwargs["resolve_content"] = (not names_only)
     return _config_register.get_configs(
-        names_only=names_only, include_default_only=include_default_only, **kwargs
+        names_only=names_only,
+        include_default_only=include_default_only,
+        name_startswith=name_startswith,
+        name_contains=name_contains,
+        **kwargs
     )
 
 
