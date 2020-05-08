@@ -162,13 +162,16 @@ class RootDirManager:
         """
         for k, v in config_dict.items():
             if k in self._PATH_LIKE_KEYS and is_string_like(v):
-                if record is not None:
-                    record.append((config_name, v))
-                if v.startswith(self._ROOT_DIR_SIGNAL):
+                orig_path = resolved_path = v
+                if orig_path.startswith(self._ROOT_DIR_SIGNAL):
                     try:
-                        config_dict[k] = os.path.join(self.root_dir, v[len(self._ROOT_DIR_SIGNAL):])
+                        resolved_path = os.path.join(self.root_dir, orig_path[len(self._ROOT_DIR_SIGNAL):])
                     except TypeError:
                         warnings.warn("Root dir has not been set!")
+                    else:
+                        config_dict[k] = resolved_path
+                if record is not None:
+                    record.append((config_name, orig_path, resolved_path))
 
             elif k in self._DICT_LIST_KEYS and isinstance(v, list):
                 for c in v:
