@@ -9,7 +9,9 @@ import socket
 from GCR import BaseGenericCatalog
 from .utils import is_string_like
 
-__all__ = ["get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs", "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog"]
+__all__ = [
+    "get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs",
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths"]
 
 
 _GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
@@ -578,6 +580,25 @@ def load_catalog(catalog_name, config_overwrite=None):
     catalog : instance of a subclass of BaseGalaxyCatalog
     """
     return _config_register[catalog_name].load_catalog(config_overwrite)
+
+
+def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
+    """
+    Retrieve all paths that are specificed in the configs files.
+
+    Parameters
+    ----------
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains with *name_contains*
+
+    Return
+    ------
+    A list of tuples.
+    The format would be [(catalog_name, original_path, resolved_path), ...]
+    """
+    return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
 
 
 _config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
