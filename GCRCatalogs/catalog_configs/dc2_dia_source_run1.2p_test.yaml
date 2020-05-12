@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_dia_source.DC2DiaSourceCatalog
-base_dir: ^/production-DC2_PhoSim/Run1.2p/dpdd/dia_source_catalog_test
+base_dir: ^/DC2-prod/Run1.2p/dpdd/dia_source_catalog_test
 schema_filename: schema.yaml
 filename_pattern: 'dia_src_visit_\d+\.parquet$'
 description: DC2 Run 1.2p DIA Source Catalog test patch

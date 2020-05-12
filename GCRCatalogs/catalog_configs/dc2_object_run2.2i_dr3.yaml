@@ -1,5 +1,5 @@
 subclass_name: dc2_object.DC2ObjectParquetCatalog
-base_dir: /global/cfs/cdirs/lsst/production/DC2_ImSim/Run2.2i/dpdd/Run2.2i-dr3/object_table_summary
+base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr3/object_table_summary
 filename_pattern: 'object_tract_\d+\.parquet$'
 description: DC2 Run 2.2i DR3 Object Table
 creators: ['DESC DC2 Team']

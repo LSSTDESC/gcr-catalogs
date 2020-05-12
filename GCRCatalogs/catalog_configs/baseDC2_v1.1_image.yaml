@@ -2,7 +2,7 @@
 
 subclass_name: cosmodc2.BaseDC2GalaxyCatalog
 
-catalog_root_dir: ^/cosmoDC2/baseDC2_v1.1
+catalog_root_dir: ^/extragalactic/cosmoDC2/baseDC2_v1.1
 catalog_filename_template: baseDC2_z_{}_{}_cutout_{}.hdf5
 
 cosmology:

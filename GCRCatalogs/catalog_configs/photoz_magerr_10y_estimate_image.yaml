@@ -2,7 +2,7 @@
 
 subclass_name: photoz_magerr.PZMagErrCatalog
 catalog_name: photoz_magerr_10y_estimate_image
-base_dir: ^/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates
+base_dir: ^/extragalactic/cosmoDC2/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates
 creators: ['Sam Schmidt']
 description:
      This is a catalog of CosmoDC2v1.1.4_image extragalactic truth objects with estimated 10 year depth flux errors included

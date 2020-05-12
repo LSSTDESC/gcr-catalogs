@@ -1,6 +1,6 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: photoz.PhotoZCatalog
-base_dir: ^/PhotoZDC2/run1.2i/TRACTHDF5
+base_dir: ^DC2-prod/Run1.2i/addons/PhotoZDC2/TRACTHDF5
 description: photo-z for DC2 Run 1.2i Object Catalog
 creators: ['Sam Schmidt']

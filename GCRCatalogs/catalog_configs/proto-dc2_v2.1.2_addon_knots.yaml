@@ -6,5 +6,5 @@ catalogs:
   - catalog_name: knots
     matching_method: MATCHING_FORMAT
     subclass_name: alphaq_addon.AlphaQAddonCatalog
-    addon_filename: ^/descqa-catalog/protoDC2_knots_v2.1.2.hdf5
+    addon_filename: ^/extragalactic/protoDC2/protoDC2_knots_v2.1.2.hdf5
     addon_group: knots
