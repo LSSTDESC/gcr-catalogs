@@ -2,7 +2,7 @@
 
 subclass_name: cosmodc2.BaseDC2GalaxyCatalog
 
-catalog_root_dir: /global/cfs/cdirs/lsst/shared/xgal/skysim/base5000_v1.1.1
+catalog_root_dir: ^/xgal/skysim/base5000_v1.1.1
 catalog_filename_template: base5000_z_{}_{}_cutout_{}.hdf5
 
 cosmology:
