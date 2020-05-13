@@ -2,7 +2,7 @@
 
 subclass_name: buzzard.BuzzardGalaxyCatalog
 
-catalog_root_dir: ^/Buzzard/Buzzard-5/addgalspostprocess
+catalog_root_dir: ^/external/buzzard/Buzzard-5/addgalspostprocess
 catalog_path_template:
     truth: truth_v1.6/Chinchilla-5_lensed.{}.fits
 

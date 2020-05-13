@@ -2,7 +2,7 @@
 
 subclass_name: agn.AGNCatalog
 
-base_dir: ^/SSim-DC2/cosmoDC2_v1.1.4
+base_dir: ^/xgal/cosmoDC2/addons
 filename: agn_mean_mags.h5
 
 sky_area: 439.78987

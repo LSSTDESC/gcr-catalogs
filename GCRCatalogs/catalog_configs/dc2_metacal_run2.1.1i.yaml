@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_metacal.DC2MetacalCatalog
-base_dir: ^/production-DC2_ImSim/Run2.1.1i/dpdd/calexp-v1:coadd-v1/metacal_table_summary/final
+base_dir: ^/DC2-prod/Run2.1.1i/dpdd/calexp-v1:coadd-v1/metacal_table_summary/final
 filename_pattern: 'metacal_tract_\d+\.parquet$'
 description: DC2 Run 2.1.1i Metacal Table
 creators: ['Johann Cohen-Tanugi']

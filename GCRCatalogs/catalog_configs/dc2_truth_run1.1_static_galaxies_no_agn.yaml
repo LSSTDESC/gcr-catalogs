@@ -2,7 +2,7 @@
 
 subclass_name: dc2_truth.DC2TruthCatalogReader
 
-filename: ^/SSim-DC2/reference_catalogs/proto_dc2_truth_star_gal_180720.db
+filename: ^/DC2-prod/Run1.1/truth/proto_dc2_truth_star_gal_180720.db
 
 md5: a8f0e1d656d44eb3c718be1a98e2a0ae
 

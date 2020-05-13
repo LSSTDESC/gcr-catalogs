@@ -13,7 +13,7 @@ catalogs:
                  10194, 10195, 10196, 10197, 10198, 10199, 10200, 10201, 10202, 10321, 10322, 10323, 10324, 10325, 10326, 10327, 10328, 10329, 10444, 10445, 10446, 10447, 10448, 10449, 10450,
                  10451, 10452]
     subclass_name: cosmodc2.CosmoDC2AddonCatalog
-    catalog_root_dir: ^/cosmoDC2/cosmoDC2_v1.0.0_knots_addon
+    catalog_root_dir: ^/xgal/cosmoDC2/cosmoDC2_v1.0.0_knots_addon
     catalog_filename_template: z_{}_{}.knots.healpix_{}.hdf5
     addon_group: knots
     check_cosmology: false

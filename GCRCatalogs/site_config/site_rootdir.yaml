@@ -1,2 +1,2 @@
-nersc: '/global/projecta/projectdirs/lsst/groups/CI/gcr_rootdir_test'
+nersc: '/global/cfs/cdirs/lsst/shared'
 in2p3: '/sps/lsst/data/desc/gcr_rootdir'

@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_source.DC2SourceCatalog
-base_dir: ^/production-DC2_ImSim/Run1.2i/dpdd/source_catalog
+base_dir: ^/DC2-proc/Run1.2i/dpdd/source_catalog
 schema_filename: schema.yaml
 filename_pattern: 'src_visit_\d+\.parquet$'
 description: DC2 Run 1.2i Source Catalog
