@@ -7,4 +7,4 @@ catalogs:
   - catalog_name: tidal
     matching_method: galaxy_id
     subclass_name: alphaq_addon.AlphaQTidalCatalog
-    filename: ^/extragalactic/protoDC2/tidal_247_protoDC2_v2.1.hdf5
+    filename: ^/xgal/protoDC2/tidal_247_protoDC2_v2.1.hdf5

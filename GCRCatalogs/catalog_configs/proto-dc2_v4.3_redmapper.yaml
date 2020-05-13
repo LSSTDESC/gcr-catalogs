@@ -2,7 +2,7 @@
 
 subclass_name: redmapper.RedMapperLegacyCatalog
 
-catalog_root_dir: ^/extragalactic/protoDC2/
+catalog_root_dir: ^/xgal/protoDC2/
 catalog_path_template:
     clusters : proto-dc2_v4.3_test_halos_lambda_chisq.fit
     members  : proto-dc2_v4.3_test_halos_lambda_chisq_members_00.fit

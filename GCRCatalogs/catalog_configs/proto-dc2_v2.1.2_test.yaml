@@ -2,7 +2,7 @@
 
 subclass_name: alphaq.AlphaQGalaxyCatalog
 
-filename: ^/extragalactic/protoDC2/ANL_AlphaQ_v2.1.2.hdf5
+filename: ^/xgal/protoDC2/ANL_AlphaQ_v2.1.2.hdf5
 
 lightcone: true
 

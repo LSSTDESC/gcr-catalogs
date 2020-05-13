@@ -2,7 +2,7 @@
 
 subclass_name: dc2_truth.DC2TruthCatalogReader
 
-filename: ^/SSim-DC2/Run1.2/run1p2_static_galaxy_truth_190123.db
+filename: ^/DC2-prod/Run1.2/truth/run1p2_static_galaxy_truth_190123.db
 
 description: |
     Truth catalog for Run 1.2. Static objects (galaxies only).

@@ -7,6 +7,6 @@ catalogs:
   - catalog_name: photoz_magerr_10y_estimate_small
     matching_method: MATCHING_FORMAT
     subclass_name: photoz_magerr.PZMagErrCatalog
-    base_dir: ^/extragalactic/cosmoDC2/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates
+    base_dir: ^/xgal/cosmoDC2/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates
     creators: ['Sam Schmidt']
     healpix_pixels: [9559,  9686,  9687,  9814,  9815,  9816,  9942,  9943, 10070, 10071, 10072, 10198, 10199, 10200, 10326, 10327, 10450]

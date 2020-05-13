@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_matched_table.DC2MatchedTable
-table_dir: ^/SSim-DC2/
+table_dir: ^/DC2-prod/Run2.1i/addons
 table_filename_template: matched_ids_run{}_{}_{{}}.fits.gz
 tracts: [3830]
 data_release: dr1b_dpdd

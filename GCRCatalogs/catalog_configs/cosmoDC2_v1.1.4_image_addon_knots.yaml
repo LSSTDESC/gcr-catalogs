@@ -7,7 +7,7 @@ catalogs:
   - catalog_name: knots
     matching_method: MATCHING_FORMAT
     subclass_name: cosmodc2.CosmoDC2AddonCatalog
-    catalog_root_dir: ^/extragalactic/cosmoDC2/cosmoDC2_v1.1.4_knots_addon
+    catalog_root_dir: ^/xgal/cosmoDC2/cosmoDC2_v1.1.4_knots_addon
     catalog_filename_template: z_{}_{}.knots.healpix_{}.hdf5
     addon_group: knots
     check_cosmology: false

@@ -6,12 +6,12 @@ catalogs:
   - catalog_name: extragalactic
     matching_method: galaxy_id
     subclass_name: alphaq.AlphaQGalaxyCatalog
-    filename: ^/extragalactic/protoDC2/ANL_AlphaQ_v2.1.2.hdf5
+    filename: ^/xgal/protoDC2/ANL_AlphaQ_v2.1.2.hdf5
     version: 2.1.2
   - catalog_name: truth
     matching_method: object_id
     subclass_name: dc2_truth.DC2TruthCatalogReader
-    filename: ^/SSim-DC2/reference_catalogs/proto_dc2_truth_star_gal_180720.db
+    filename: ^/DC-prod/Run1.1/truth/proto_dc2_truth_star_gal_180720.db
     base_filters:
         - sprinkled == 0
         - star == 0

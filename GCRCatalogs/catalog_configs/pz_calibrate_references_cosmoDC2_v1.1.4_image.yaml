@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: photoz_calibrate.PZCalibrateCatalog
-base_dir: ^/extragalactice/cosmoDC2/PhotoZDC2/COSMODC2v1.1.4/PZCalibrate_image
+base_dir: ^/extragalactice/cosmoDC2/addons/photoz_v1.1.4/PZCalibrate_image
 description: A catalog of booleans for selecting reference redshifts for use in cross-correlation redshifts (PZCalibrate).
 creators: ['Christopher B. Morrison']
 healpix_pixels: [8786, 8787, 8788, 8789, 8790, 8791, 8792, 8793, 8794, 8913, 8914, 8915, 8916, 8917, 8918, 8919, 8920, 8921, 9042, 9043, 9044, 9045, 9046, 9047, 9048, 9049,

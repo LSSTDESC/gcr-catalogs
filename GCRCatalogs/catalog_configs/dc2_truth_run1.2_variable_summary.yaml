@@ -2,7 +2,7 @@
 
 subclass_name: dc2_truth.DC2TruthLCSummaryReader
 
-filename: ^/SSim-DC2/Run1.2/run1p2_light_curve_reference_190311.h5
+filename: ^/DC2-prod/Run1.2/truth/run1p2_light_curve_reference_190311.h5
 
 description: |
     Truth catalog for Run 1.2, summary table for variable objects.

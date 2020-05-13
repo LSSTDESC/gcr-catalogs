@@ -2,7 +2,7 @@
 
 subclass_name: cosmodc2.BaseDC2SnapshotGalaxyCatalog
 
-catalog_root_dir: ^/extragalactic/cosmoDC2/baseDC2_snapshots_v0.1/STEP247
+catalog_root_dir: ^/xgal/cosmoDC2/baseDC2_snapshots_v0.1/STEP247
 catalog_filename_template: baseDC2_Step247_z1.006_#{}.hdf5
 
 cosmology:
