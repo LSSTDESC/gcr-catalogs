@@ -190,6 +190,7 @@ class Config(Mapping):
     PSEUDO_KEY = "is_pseudo_entry"
     DEFAULT_LISTING_KEY = "include_in_default_catalog_list"
     READER_KEY = "subclass_name"
+    DEPRECATED_KEY = "deprecated"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -264,7 +265,7 @@ class Config(Mapping):
 
     @property
     def is_default(self):
-        return self.get(self.DEFAULT_LISTING_KEY)
+        return self.get(self.DEFAULT_LISTING_KEY) and not self.is_deprecated and not self.is_pseudo
 
     @property
     def is_pseudo(self):
@@ -275,10 +276,24 @@ class Config(Mapping):
         return self.get(self.ALIAS_KEY)
 
     @property
+    def is_deprecated(self):
+        return self.get(self.DEPRECATED_KEY)
+
+    @property
     def has_reference(self):
         return any(map(self.get, self.REFERENCE_KEYS))
 
     def load_catalog(self, config_overwrite=None):
+        if self.is_deprecated:
+            deprecation_msg = self[self.DEPRECATED_KEY]
+            if not is_string_like(deprecation_msg):
+                deprecation_msg = ""
+            warnings.warn(
+                "`{}` is now deprecated and no longer supported. It may be removed in the future.\n{}".format(
+                    self.rootname, deprecation_msg
+                ),
+                DeprecationWarning,
+            )
         self.online_alias_check()
         if config_overwrite:
             if any(map(config_overwrite.get, self.REFERENCE_KEYS)):
