@@ -11,7 +11,7 @@ catalogs:
   - catalog_name: truth
     matching_method: object_id
     subclass_name: dc2_truth.DC2TruthCatalogReader
-    filename: ^/DC-prod/Run1.1/truth/proto_dc2_truth_star_gal_180720.db
+    filename: ^/DC2-prod/Run1.1/truth/proto_dc2_truth_star_gal_180720.db
     base_filters:
         - sprinkled == 0
         - star == 0
