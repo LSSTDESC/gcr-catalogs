@@ -619,10 +619,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def close_all_file_handles(self):
         """Clear all cached file handles"""
 
-        for fh in self._file_handles.values():
-            fh.close()
-
-        self._file_handles.clear()
+        if isinstance(getattr(self, "_file_handles", None), dict):
+            for fh in self._file_handles.values():
+                fh.close()
+            self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
@@ -663,23 +663,16 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
 
         self.FILE_PATTERN = r'object_tract_\d+\.parquet$'
         self.META_PATH = META_PATH
+        self._default_pixel_scale = 0.2
+        self.pixel_scale = float(kwargs.get('pixel_scale', self._default_pixel_scale))
 
-        # hack to skip the call of `_generate_modifiers` in the base class
-        # TODO: fix this some day
-        super()._subclass_init(**dict(kwargs, is_dpdd=True))
+        super()._subclass_init(**kwargs)
 
-        self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
-
-        if kwargs.get('is_dpdd'):
-            self._quantity_modifiers = {col: None for col in self._columns}
-        else:
-            bands = [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
-
-            self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands)
+    def _detect_available_bands(self):
+        return [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands='ugrizy', pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -690,8 +683,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        FLUX = 'instFlux'
-        ERR = 'Err'
+        FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
             'objectId': 'id',

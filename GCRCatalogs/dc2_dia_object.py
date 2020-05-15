@@ -36,8 +36,11 @@ class DC2DiaObjectCatalog(DC2DMTractCatalog):
     FILE_PATTERN = r'dia_object_tract_\d+\.parquet$'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_object_meta.yaml')
 
+    def _detect_available_bands(self):
+        return [col.partition('_')[2] for col in self._columns if col.startswith('psFluxMean_')]
+
     @staticmethod
-    def _generate_modifiers(dm_schema_version=4, bands='ugrizy'):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands='ugrizy', **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
