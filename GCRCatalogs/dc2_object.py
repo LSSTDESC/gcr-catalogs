@@ -619,10 +619,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def close_all_file_handles(self):
         """Clear all cached file handles"""
 
-        for fh in self._file_handles.values():
-            fh.close()
-
-        self._file_handles.clear()
+        if isinstance(getattr(self, "_file_handles", None), dict):
+            for fh in self._file_handles.values():
+                fh.close()
+            self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
