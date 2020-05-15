@@ -38,9 +38,6 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
         """
         Wraps default init method to apply various corrections to the catalog.
         """
-        # Default values of reader parameters
-        self._bands = kwargs.get('bands', 'riz') # default to 'riz' if 'bands' not exist
-
         self._flux_scaling = 1.0
         if kwargs.get('apply_metacal_test3_fix'):
             # In Run 1.2i metacal_test3, the fluxes returned by metacal are not
@@ -50,12 +47,14 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
 
         super(DC2MetacalCatalog, self)._subclass_init(**kwargs)
 
+    def _detect_available_bands(self):
+        return list(set((col.split('_')[3] for col in self._columns if col.startswith('mcal_gauss_flux_'))))
 
-    def _generate_modifiers(self, dm_schema_version=3):
+    def _generate_modifiers(self, bands="riz", **kwargs):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
-            dm_schema_version (int): DM schema version (1, 2, or 3)
+            bands (str or list): list of filter names
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
@@ -64,8 +63,8 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
         modifiers = {
             'mcal_psf_g1': 'mcal_psf_g1_mean',
             'mcal_psf_g2': 'mcal_psf_g2_mean',
-            'mcal_T_psf' : 'mcal_psf_T_mean',
-            'mcal_flags' : 'mcal_flags'
+            'mcal_T_psf':  'mcal_psf_T_mean',
+            'mcal_flags':  'mcal_flags',
         }
 
         # newer metacal catalogs no longer have the id column
@@ -83,7 +82,7 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
             modifiers['mcal_s2n{}'.format(variant)] = 'mcal_gauss_s2n{}'.format(variant)
 
             # Adds band dependent info and their variants
-            for band in self._bands:
+            for band in bands:
                 modifiers['mcal_flux_{}{}'.format(band, variant)] = (
                     lambda x: x * self._flux_scaling,
                     'mcal_gauss_flux_{}{}'.format(band, variant)
@@ -97,7 +96,7 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
                     'mcal_gauss_flux_{}{}'.format(band, variant),
                 )
                 modifiers['mcal_mag_err_{}{}'.format(band, variant)] = (
-                    lambda flux, err: (2.5 * err ) / (flux * np.log(10)),
+                    lambda flux, err: (2.5 * err) / (flux * np.log(10)),
                     'mcal_gauss_flux_{}{}'.format(band, variant),
                     'mcal_gauss_flux_err_{}{}'.format(band, variant),
                 )

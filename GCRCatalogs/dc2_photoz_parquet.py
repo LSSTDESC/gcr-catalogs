@@ -38,7 +38,7 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
         'step': 0.01,
         'decimals_to_round': 3,
     }
-    
+
     def _subclass_init(self, **kwargs):
         """
         Wraps default init method to apply various corrections to the catalog.
@@ -51,28 +51,27 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
                                                    self._pdf_bin_info['step'],
         ), self._pdf_bin_info['decimals_to_round'])
         self._n_pdf_bins = len(self._pdf_bin_centers)
-            
+
         super(DC2PhotozCatalog, self)._subclass_init(**kwargs)
 
-
-    def _generate_modifiers(self, dm_schema_version=3):
+    @staticmethod
+    def _generate_modifiers(**kwargs):
         """Creates a dictionary relating native and homogenized column names
-
-        Args:
-            dm_schema_version (int): DM schema version (1, 2, or 3)
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        modifiers = {'photoz_ODDS':'ODDS',
-                     'photoz_mode':'z_mode',
-                     'photoz_median':'z_median',
-                     'photoz_mean':'z_mean',
-                     'photoz_pdf':'pdf',
-                     'ID':'galaxy_id',
-                     'photoz_mode_ml':'z_mode_ml',
-                     'photoz_mode_ml_red_chi2':'z_mode_ml_red_chi2'}
+        modifiers = {
+            'photoz_ODDS': 'ODDS',
+            'photoz_mode': 'z_mode',
+            'photoz_median': 'z_median',
+            'photoz_mean': 'z_mean',
+            'photoz_pdf': 'pdf',
+            'ID': 'galaxy_id',
+            'photoz_mode_ml': 'z_mode_ml',
+            'photoz_mode_ml_red_chi2': 'z_mode_ml_red_chi2',
+        }
         return modifiers
 
     @property
@@ -82,4 +81,3 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
     @property
     def n_pdf_bins(self):
         return self._n_pdf_bins
-    

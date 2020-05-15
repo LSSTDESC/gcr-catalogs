@@ -152,6 +152,7 @@ class DC2DMCatalog(BaseGenericCatalog):
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'.+\.parquet$'
     META_PATH = None
+    _default_pixel_scale = None
 
     def _subclass_init(self, **kwargs):
         self.base_dir = kwargs['base_dir']
@@ -169,24 +170,43 @@ class DC2DMCatalog(BaseGenericCatalog):
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
-            if any(col.endswith('_fluxSigma') for col in self._columns):
-                dm_schema_version = 1
-            elif any(col.endswith('_fluxErr') for col in self._columns):
-                dm_schema_version = 2
-            else:
-                dm_schema_version = 3
-            self._quantity_modifiers = self._generate_modifiers(dm_schema_version)
+            quantity_modifiers_kwargs = dict()
+
+            dm_schema_version = kwargs.get("dm_schema_version") or self._detect_dm_schema_version()
+            quantity_modifiers_kwargs["dm_schema_version"] = dm_schema_version
+
+            bands = kwargs.get("bands") or self._detect_available_bands()
+            if bands:
+                quantity_modifiers_kwargs["bands"] = list(bands)
+
+            pixel_scale = kwargs.get("pixel_scale") or self._default_pixel_scale
+            if pixel_scale:
+                quantity_modifiers_kwargs["pixel_scale"] = float(pixel_scale)
+
+            self._quantity_modifiers = self._generate_modifiers(**quantity_modifiers_kwargs)
 
         if self.META_PATH:
             self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
         self._len = None
 
-    @staticmethod
-    def _generate_modifiers(dm_schema_version=3): # pylint: disable=unused-argument
-        """Creates a dictionary relating native and homogenized column names
+    def _detect_dm_schema_version(self):
+        if any(col.endswith('_fluxSigma') for col in self._columns):
+            return 1
+        if any(col.endswith('_fluxErr') for col in self._columns):
+            return 2
+        if any(col == 'base_Blendedness_abs_instFlux' for col in self._columns):
+            return 3
+        return 4
 
-        Args:
-            dm_schema_version (int): DM schema version (1, 2, or 3)
+    def _detect_available_bands(self):
+        """
+        To be implemented by subclass. Should return a list of available filter names or None.
+        """
+        return
+
+    @staticmethod
+    def _generate_modifiers(**kwargs):  # pylint: disable=unused-argument
+        """Creates a dictionary relating native and homogenized column names
 
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
