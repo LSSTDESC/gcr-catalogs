@@ -306,11 +306,11 @@ class DC2DMTractCatalog(DC2DMCatalog):
 
     def _subclass_init(self, **kwargs):
         self._tracts = None
-        if 'tract' in kwargs and 'tracts' in kwargs:
+        if kwargs.get('tract') is not None and kwargs.get('tracts') is not None:
             raise ValueError('Conflict options (tract and tracts) defined')
-        if 'tract' in kwargs:
+        if kwargs.get('tract') is not None:
             self._tracts = [int(kwargs['tract'])]
-        if 'tracts' in kwargs:
+        if kwargs.get('tracts') is not None:
             self._tracts = [int(t) for t in kwargs['tracts']]
         super()._subclass_init(**kwargs)
 
@@ -345,11 +345,11 @@ class DC2DMVisitCatalog(DC2DMCatalog):
 
     def _subclass_init(self, **kwargs):
         self._visits = None
-        if 'visit' in kwargs and 'visits' in kwargs:
+        if kwargs.get('visit') is not None and kwargs.get('visits') is not None:
             raise ValueError('Conflict options (visit and visits) defined')
-        if 'visit' in kwargs:
+        if kwargs.get('visit') is not None:
             self._visits = [int(kwargs['visit'])]
-        if 'visits' in kwargs:
+        if kwargs.get('visits') is not None:
             self._visits = [int(t) for t in kwargs['visits']]
         super()._subclass_init(**kwargs)
 
