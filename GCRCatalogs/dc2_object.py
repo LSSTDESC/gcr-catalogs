@@ -290,6 +290,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             # and just rely on that versioning.
             has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
             has_modelfit_flux = any('_modelfit_CModel_' in col for col in self._schema)
+            has_modelfit_flag = any(col.endswith('_modelfit_CModel_flag') in col for col in self._schema)
+
             if not (has_modelfit_mag or has_modelfit_flux):
                 warnings.warn("No modelfit infomation is available in the columns.")
 
@@ -305,7 +307,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
             self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands, has_modelfit_mag, has_modelfit_flux, dm_schema_version)
+                self.pixel_scale, bands, has_modelfit_mag, has_modelfit_flux, has_modelfit_flag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
@@ -315,7 +317,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _generate_modifiers(pixel_scale=0.2, bands='ugrizy',
-                            has_modelfit_mag=True, has_modelfit_flux=True, dm_schema_version=4):
+                            has_modelfit_mag=True, has_modelfit_flux=True, has_modelfit_flag=True,
+                            dm_schema_version=4):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -401,7 +404,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                                                            '{}_modelfit_CModel_{}'.format(band, FLUX))
                 modifiers['cModelFluxErr_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                               '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
-                modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
+                if has_modelfit_flag:
+                    modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
 
                 if not has_modelfit_mag:
                     modifiers['mag_{}_cModel'.format(band)] = (convert_dm_ref_zp_flux_to_mag,
