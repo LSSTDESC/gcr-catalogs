@@ -1,6 +1,6 @@
 subclass_name: buzzard.BuzzardGalaxyCatalog
 
-catalog_root_dir: /global/cfs/cdirs/lsst/shared/external/buzzard/Buzzard-4/v2.0.0/
+catalog_root_dir: ^/external/buzzard/Buzzard-4/v2.0.0/
 catalog_path_template:
     truth: truth/Chinchilla-4_cam_rs_scat_shift_lensed.{}.fits
     auxmag : surveymags/Chinchilla-4-v2.0-auxmag.{}.fits
