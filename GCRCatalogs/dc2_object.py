@@ -290,7 +290,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             # and just rely on that versioning.
             has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
             has_modelfit_flux = any('_modelfit_CModel_' in col for col in self._schema)
-            has_modelfit_flag = any(col.endswith('_modelfit_CModel_flag') in col for col in self._schema)
+            has_modelfit_flag = any(col.endswith('_modelfit_CModel_flag') for col in self._schema)
 
             if not (has_modelfit_mag or has_modelfit_flux):
                 warnings.warn("No modelfit infomation is available in the columns.")
