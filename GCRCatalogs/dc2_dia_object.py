@@ -105,8 +105,8 @@ class DC2DiaObjectCatalog(DC2DMTractCatalog):
             modifiers[f'magMean_{band}'] = (convert_nanoJansky_to_mag,
                                             f'psFluxMean_{band}')
             modifiers[f'magMeanErr_{band}'] = (convert_flux_err_to_mag_err,
-                                               'psFluxMean_{band}',
-                                               'psFluxMeanErr_{band}')
+                                               f'psFluxMean_{band}',
+                                               f'psFluxMeanErr_{band}')
             modifiers[f'magMeanStd_{band}'] = (convert_flux_err_to_mag_err,
                                                f'psFluxMean_{band}',
                                                f'psFluxSigma_{band}')
