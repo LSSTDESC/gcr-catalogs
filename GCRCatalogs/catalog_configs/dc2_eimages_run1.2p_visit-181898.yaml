@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: eimage.EImageReader
-root_dir: ^/production-DC2_PhoSim/Run1.2p/eimages/DC2-R1-2p-WFD-r/output/000008
+root_dir: ^/DC2-prod/Run1.2p/eimages/DC2-R1-2p-WFD-r/output/000008
 visits: 181898
 default_rebinning: 16
 description: phoSim e-images for Run 1.2p (visit 181898)

@@ -289,6 +289,11 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             # A future improvement will be to explicitly store version information in the datasets
             # and just rely on that versioning.
             has_modelfit_mag = any(col.endswith('_modelfit_mag') for col in self._schema)
+            has_modelfit_flux = any('_modelfit_CModel_' in col for col in self._schema)
+            has_modelfit_flag = any(col.endswith('_modelfit_CModel_flag') for col in self._schema)
+
+            if not (has_modelfit_mag or has_modelfit_flux):
+                warnings.warn("No modelfit infomation is available in the columns.")
 
             if any(col.endswith('_fluxSigma') for col in self._schema):
                 dm_schema_version = 1
@@ -302,7 +307,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             bands = [col[0] for col in self._schema if len(col) == 5 and col.endswith('_mag')]
 
             self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands, has_modelfit_mag, dm_schema_version)
+                self.pixel_scale, bands, has_modelfit_mag, has_modelfit_flux, has_modelfit_flag, dm_schema_version)
 
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
@@ -312,7 +317,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
     @staticmethod
     def _generate_modifiers(pixel_scale=0.2, bands='ugrizy',
-                            has_modelfit_mag=True, dm_schema_version=4):
+                            has_modelfit_mag=True, has_modelfit_flux=True, has_modelfit_flag=True,
+                            dm_schema_version=4):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -380,12 +386,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
-            modifiers['cModelFlux_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
-                                                       '{}_modelfit_CModel_{}'.format(band, FLUX))
-            modifiers['cModelFluxErr_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
-                                                          '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
-            modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
-
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
@@ -397,23 +397,32 @@ class DC2ObjectCatalog(BaseGenericCatalog):
                 '{}_base_SdssShape_psf_xy'.format(band),
             )
 
-            modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
-            modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
-            modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
-
-            if not has_modelfit_mag:
+            if has_modelfit_flux:
                 # The zp=27.0 is based on the default calibration for the coadds
                 # as specified in the DM code.  It's correct for Run 1.1p.
-                modifiers['mag_{}_cModel'.format(band)] = (convert_dm_ref_zp_flux_to_mag,
+                modifiers['cModelFlux_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                            '{}_modelfit_CModel_{}'.format(band, FLUX))
-                modifiers['magerr_{}_cModel'.format(band)] = (convert_flux_err_to_mag_err,
-                                                              '{}_modelfit_CModel_{}'.format(band, FLUX),
+                modifiers['cModelFluxErr_{}'.format(band)] = (convert_dm_ref_zp_flux_to_nanoJansky,
                                                               '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
-                modifiers['snr_{}_cModel'.format(band)] = (
-                    np.divide,
-                    '{}_modelfit_CModel_{}'.format(band, FLUX),
-                    '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
-                )
+                if has_modelfit_flag:
+                    modifiers['cModelFlux_flag_{}'.format(band)] = '{}_modelfit_CModel_flag'.format(band)
+
+                if not has_modelfit_mag:
+                    modifiers['mag_{}_cModel'.format(band)] = (convert_dm_ref_zp_flux_to_mag,
+                                                               '{}_modelfit_CModel_{}'.format(band, FLUX))
+                    modifiers['magerr_{}_cModel'.format(band)] = (convert_flux_err_to_mag_err,
+                                                                  '{}_modelfit_CModel_{}'.format(band, FLUX),
+                                                                  '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR))
+                    modifiers['snr_{}_cModel'.format(band)] = (
+                        np.divide,
+                        '{}_modelfit_CModel_{}'.format(band, FLUX),
+                        '{}_modelfit_CModel_{}{}'.format(band, FLUX, ERR),
+                    )
+
+            if has_modelfit_mag:
+                modifiers['mag_{}_cModel'.format(band)] = '{}_modelfit_mag'.format(band)
+                modifiers['magerr_{}_cModel'.format(band)] = '{}_modelfit_mag_err'.format(band)
+                modifiers['snr_{}_cModel'.format(band)] = '{}_modelfit_SNR'.format(band)
 
         return modifiers
 
@@ -619,10 +628,10 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def close_all_file_handles(self):
         """Clear all cached file handles"""
 
-        for fh in self._file_handles.values():
-            fh.close()
-
-        self._file_handles.clear()
+        if isinstance(getattr(self, "_file_handles", None), dict):
+            for fh in self._file_handles.values():
+                fh.close()
+            self._file_handles.clear()
 
     def _generate_native_quantity_list(self):
         """Return a set of native quantity names as strings"""
@@ -663,23 +672,16 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
 
         self.FILE_PATTERN = r'object_tract_\d+\.parquet$'
         self.META_PATH = META_PATH
+        self._default_pixel_scale = 0.2
+        self.pixel_scale = float(kwargs.get('pixel_scale', self._default_pixel_scale))
 
-        # hack to skip the call of `_generate_modifiers` in the base class
-        # TODO: fix this some day
-        super()._subclass_init(**dict(kwargs, is_dpdd=True))
+        super()._subclass_init(**kwargs)
 
-        self.pixel_scale = float(kwargs.get('pixel_scale', 0.2))
-
-        if kwargs.get('is_dpdd'):
-            self._quantity_modifiers = {col: None for col in self._columns}
-        else:
-            bands = [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
-
-            self._quantity_modifiers = self._generate_modifiers(
-                self.pixel_scale, bands)
+    def _detect_available_bands(self):
+        return [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
 
     @staticmethod
-    def _generate_modifiers(pixel_scale=0.2, bands='ugrizy'):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands='ugrizy', pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -690,8 +692,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
-        FLUX = 'instFlux'
-        ERR = 'Err'
+        FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
+        ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
         modifiers = {
             'objectId': 'id',

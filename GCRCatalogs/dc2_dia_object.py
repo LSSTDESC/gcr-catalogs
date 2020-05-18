@@ -36,8 +36,11 @@ class DC2DiaObjectCatalog(DC2DMTractCatalog):
     FILE_PATTERN = r'dia_object_tract_\d+\.parquet$'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_object_meta.yaml')
 
+    def _detect_available_bands(self):
+        return [col.partition('_')[2] for col in self._columns if col.startswith('psFluxMean_')]
+
     @staticmethod
-    def _generate_modifiers(dm_schema_version=4, bands='ugrizy'):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands='ugrizy', **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -67,26 +70,26 @@ class DC2DiaObjectCatalog(DC2DMTractCatalog):
             'diaObjectId': 'diaObjectId',
             'ra': (np.rad2deg, 'coord_ra'),
             'dec': (np.rad2deg, 'coord_dec'),
-#            'radecCov':  # A covariance matrix for the uncertainty in ra, dec
-#            'radecTai': 'dateobs'?  # I don't know what this is called
-#            'pm':
-#            'pmParallaxCov':
-#            'pmParallaxLnl':
-#            'pmParallaxChi2':
-#            'pmParallaxNdata':
-#            'totFluxMean': 'ip_diffim_forced_PsfFlux_instFlux',
-#            'totFluxMeanErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
-#            'totFluxSigma': 'ip_diffim_forced_PsfFlux_instFluxErr',
-#            'lcPeriodic'
-#            'lcNonPeriodic'
-#  These are possible to calculate if you require the Object Table
-#            'nearbyObj':
-#            'nearbyObjDist':
-#            'nearbyObjLnP':
+            # 'radecCov': '',  # A covariance matrix for the uncertainty in ra, dec
+            # 'radecTai': 'dateobs',  # I don't know what this is called
+            # 'pm': '',
+            # 'pmParallaxCov': '',
+            # 'pmParallaxLnl': '',
+            # 'pmParallaxChi2': '',
+            # 'pmParallaxNdata': '',
+            # 'totFluxMean': 'ip_diffim_forced_PsfFlux_instFlux',
+            # 'totFluxMeanErr': 'ip_diffim_forced_PsfFlux_instFluxErr',
+            # 'totFluxSigma': 'ip_diffim_forced_PsfFlux_instFluxErr',
+            # 'lcPeriodic': '',
+            # 'lcNonPeriodic': '',
+            # # These are possible to calculate if you require the Object Table
+            # 'nearbyObj': '',
+            # 'nearbyObjDist': '',
+            # 'nearbyObjLnP': '',
         }
 
-        modifiers['good'] = (create_basic_flag_mask,)
-        modifiers['clean'] = modifiers['good']
+        # modifiers['good'] = (create_basic_flag_mask, )
+        # modifiers['clean'] = modifiers['good']
 
         multiband_columns_to_copy = [
             'psFluxMean', 'psFluxMeanErr',
@@ -97,13 +100,12 @@ class DC2DiaObjectCatalog(DC2DMTractCatalog):
                 col_name = f'{base_col}_{band}'
                 modifiers[col_name] = col_name
 
-        # Create new convenience magnitude columns based on flux values
-        for band in bands:
+            # Create new convenience magnitude columns based on flux values
             modifiers[f'magMean_{band}'] = (convert_nanoJansky_to_mag,
                                             f'psFluxMean_{band}')
             modifiers[f'magMeanErr_{band}'] = (convert_flux_err_to_mag_err,
-                                               'psFluxMean_{band}',
-                                               'psFluxMeanErr_{band}')
+                                               f'psFluxMean_{band}',
+                                               f'psFluxMeanErr_{band}')
             modifiers[f'magMeanStd_{band}'] = (convert_flux_err_to_mag_err,
                                                f'psFluxMean_{band}',
                                                f'psFluxSigma_{band}')

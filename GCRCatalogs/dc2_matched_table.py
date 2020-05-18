@@ -122,7 +122,6 @@ class DC2MatchedTable(BaseGenericCatalog):
                 colnames = cols
         return colnames
 
-
     def _generate_native_quantity_list(self):
         return self._column_names
 

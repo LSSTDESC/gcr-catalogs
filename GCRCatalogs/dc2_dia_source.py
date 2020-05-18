@@ -35,7 +35,7 @@ class DC2DiaSourceCatalog(DC2DMVisitCatalog):
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_dia_source_meta.yaml')
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3):
+    def _generate_modifiers(dm_schema_version=3, **kwargs):
         """Creates a dictionary relating native and homogenized column names
 
         Args:

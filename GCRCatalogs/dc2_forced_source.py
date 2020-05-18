@@ -33,7 +33,7 @@ class DC2ForcedSourceCatalog(DC2DMVisitCatalog):
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_forced_source_meta.yaml')
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=3):
+    def _generate_modifiers(dm_schema_version=3, **kwargs):
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -42,9 +42,6 @@ class DC2ForcedSourceCatalog(DC2DMVisitCatalog):
         Returns:
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
-
-        if dm_schema_version not in (1, 2, 3):
-            raise ValueError('Only supports dm_schema_version == 1, 2, or 3')
 
         flux_name = 'flux' if dm_schema_version <= 2 else 'instFlux'
         flux_err_name = 'Sigma' if dm_schema_version <= 1 else 'Err'

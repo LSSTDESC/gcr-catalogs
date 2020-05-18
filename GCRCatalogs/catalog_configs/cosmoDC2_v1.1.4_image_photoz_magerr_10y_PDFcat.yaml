@@ -2,7 +2,7 @@
 
 subclass_name: photoz_magerr.PZMagErrPDFsCatalog
 catalog_name: photoz_magerr_10y_estimate_image_PDFs
-base_dir: ^/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates/pipelinedir/outputs
+base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/IMAGE/10_year_error_estimates/pipelinedir/outputs
 filename_pattern:  'photoz_pdf_z_(\d)\S+healpix_(\d+).hdf5'
 filename_glob_pattern:  'photoz_pdf_z_*.hdf5'
 creators: ['Sam Schmidt']

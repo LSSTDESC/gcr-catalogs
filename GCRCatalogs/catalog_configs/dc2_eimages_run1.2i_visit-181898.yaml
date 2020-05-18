@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: eimage.EImageReader
-root_dir: ^/production-DC2_ImSim/Run1.2i/eimages/DC2-R1-2p-WFD-r
+root_dir: ^/DC2-prod/Run1.2i/eimages/DC2-R1-2p-WFD-r
 dirpath_contain: 000008_batch
 visits: 181898
 default_rebinning: 16
