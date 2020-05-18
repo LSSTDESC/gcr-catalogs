@@ -1,8 +1,0 @@
-#  Use ^/ to indicate file path relative to GCR root dir
-
-subclass_name: dc2_object.DC2ObjectCatalog
-base_dir: ^/external/hsc/pdr1
-description: XMM field of the HSC PDR1
-creators: ['Hyper Suprime-Cam (HSC) collaboration']
-pixel_scale: 0.168
-include_in_default_catalog_list: true

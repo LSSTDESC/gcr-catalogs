@@ -116,10 +116,6 @@ Confluence page (*DESC member only*).
    - `dc2_instance_example1`: an example instance catalog
    - `dc2_instance_example2`: another example instance catalog
 
--  **HSC Coadd Catalog for PDR1 XMM field** \
-   *by the Hyper Suprime-Cam (HSC) Collaboration*
-   - `hsc-pdr1-xmm`
-
 -  **DC2 e-images** \
    *by LSST DESC*
    - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i

@@ -266,7 +266,7 @@ class InstanceCatalog(BaseGenericCatalog):
         return native_quantities
 
     def _pd_read_table(self, obj_type, **kwargs):
-        return pd.read_table(
+        return pd.read_csv(
             self._object_files[obj_type],
             delim_whitespace=True,
             names=[c[0] for c in self._col_names[obj_type]],
