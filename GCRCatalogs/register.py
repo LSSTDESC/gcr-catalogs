@@ -95,7 +95,7 @@ class RootDirManager:
        Default root dir has not been set; catalogs may not be found.
        To set root dir by site 
             $ export {}='sitename'
-       or, from within Python,
+       or, from within Python and after you import GCRCatalogs,
             GCRCatalogs.set_root_dir_by_site('sitename')
        where sitename is one of ({})
 
