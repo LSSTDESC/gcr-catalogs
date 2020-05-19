@@ -111,10 +111,8 @@ class RootDirManager:
         self._site_info = self._get_site_info()
 
         if self._site_config_path:
-            site_config = load_yaml_local(self._site_config_path)
-            self._site_config = site_config
-            self._site_list = list(site_config.keys())
-            for k, v in site_config.items():
+            self._site_config = load_yaml_local(self._site_config_path)
+            for k, v in self._site_config.items():
                 if k in self._site_info:
                     self._default_root_dir = v
                     break
