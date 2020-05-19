@@ -11,7 +11,7 @@ from .utils import is_string_like
 
 __all__ = [
     "get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
 
 
 _GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
@@ -91,22 +91,39 @@ class RootDirManager:
     )
     _DICT_LIST_KEYS = ("catalogs",)
     _DESC_SITE_ENV = "DESC_GCR_SITE"
+    _NO_DEFAULT_ROOT_WARN = """
+       Default root dir has not been set; catalogs may not be found.
+       To set root dir by site 
+            $ export {}='sitename'
+       or, from within Python,
+            GCRCatalogs.set_root_dir_by_site('sitename')
+       where sitename is one of ({})
+
+       If standard site values for root dir are not appropriate, use
+            GCRCatalogs.set_root_dir('my_root_dir')
+    """
 
     def __init__(self, site_config_path=None):
         self._site_config_path = site_config_path
         self._default_root_dir = None
         self._custom_root_dir = None
+        self._site_list = []
+        self._site_config = {}
         self._site_info = self._get_site_info()
 
         if self._site_config_path:
             site_config = load_yaml_local(self._site_config_path)
+            self._site_config = site_config
+            self._site_list = list(site_config.keys())
             for k, v in site_config.items():
                 if k in self._site_info:
                     self._default_root_dir = v
                     break
 
         if not self._default_root_dir:
-            warnings.warn("Default root dir has not been set!")
+            site_string = ' '.join(self._site_list)
+            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
+            #warnings.warn("Default root dir has not been set!")
 
     def _get_site_info(self):
         """
@@ -141,6 +158,17 @@ class RootDirManager:
         except OSError as e:
             warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
         self._custom_root_dir = path
+
+    def set_root_dir_by_site(self, site):
+        """
+        If *site* is a recognized site, set root_dir to corresponding value
+        """
+        if site in self._site_list:
+            self.root_dir = self._site_config[site]
+        else:
+            site_string = ' '.join(_config_register._site_list)
+            warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
+        
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -512,6 +540,17 @@ def set_root_dir(path):
     """
     _config_register.root_dir = path
 
+def set_root_dir_by_site(site):
+    """
+    Sets runtime root_dir to path corresponding to *site*.
+    """
+    _config_register.set_root_dir_by_site(site)
+
+def get_site_list():
+    """
+    Return list of recognized sites
+    """
+    return _config_register._site_list
 
 def reset_root_dir():
     """
