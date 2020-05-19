@@ -93,21 +93,20 @@ class RootDirManager:
     _DESC_SITE_ENV = "DESC_GCR_SITE"
     _NO_DEFAULT_ROOT_WARN = """
        Default root dir has not been set; catalogs may not be found.
-       To set root dir by site 
+       You can specify the site as an environment variable before you import GCRCatalogs,
             $ export {}='sitename'
        or, from within Python and after you import GCRCatalogs,
             GCRCatalogs.set_root_dir_by_site('sitename')
        where sitename is one of ({})
 
-       If standard site values for root dir are not appropriate, use
-            GCRCatalogs.set_root_dir('my_root_dir')
+       If you want to use a non-standard root dir, use
+            GCRCatalogs.set_root_dir('/path/to/your/root_dir')
     """
 
     def __init__(self, site_config_path=None):
         self._site_config_path = site_config_path
         self._default_root_dir = None
         self._custom_root_dir = None
-        self._site_list = []
         self._site_config = {}
         self._site_info = self._get_site_info()
 
