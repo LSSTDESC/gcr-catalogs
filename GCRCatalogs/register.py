@@ -158,6 +158,10 @@ class RootDirManager:
             warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
         self._custom_root_dir = path
 
+    @property
+    def site_list(self):
+        return list(self._site_config)
+
     def set_root_dir_by_site(self, site):
         """
         If *site* is a recognized site, set root_dir to corresponding value
