@@ -123,7 +123,6 @@ class RootDirManager:
         if not self._default_root_dir:
             site_string = ' '.join(self._site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
-            #warnings.warn("Default root dir has not been set!")
 
     def _get_site_info(self):
         """
