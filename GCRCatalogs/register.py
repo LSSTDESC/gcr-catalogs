@@ -163,9 +163,9 @@ class RootDirManager:
         """
         If *site* is a recognized site, set root_dir to corresponding value
         """
-        if site in self._site_list:
+        try:
             self.root_dir = self._site_config[site]
-        else:
+        except KeyError:
             site_string = ' '.join(_config_register._site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
         
