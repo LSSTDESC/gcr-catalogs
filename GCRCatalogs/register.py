@@ -120,7 +120,7 @@ class RootDirManager:
                     break
 
         if not self._default_root_dir:
-            site_string = ' '.join(self._site_list)
+            site_string = ' '.join(self.site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
 
     def _get_site_info(self):
@@ -168,7 +168,7 @@ class RootDirManager:
         try:
             self.root_dir = self._site_config[site]
         except KeyError:
-            site_string = ' '.join(_config_register._site_list)
+            site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
         
 
@@ -552,7 +552,7 @@ def get_site_list():
     """
     Return list of recognized sites
     """
-    return _config_register._site_list
+    return _config_register.site_list
 
 def reset_root_dir():
     """
