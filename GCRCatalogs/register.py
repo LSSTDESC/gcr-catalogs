@@ -168,7 +168,6 @@ class RootDirManager:
         except KeyError:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
-        
 
     def reset_root_dir(self):
         self._custom_root_dir = None
