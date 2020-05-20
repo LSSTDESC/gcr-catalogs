@@ -128,8 +128,13 @@ class RootDirManager:
         """
         site_from_env = os.getenv(self._DESC_SITE_ENV)
         site_from_socket = socket.getfqdn()
-        if site_from_env and site_from_socket and site_from_env not in site_from_socket:
-            warnings.warn("Site determined from env variable {} = {}".format(self._DESC_SITE_ENV, site_from_env))
+        if site_from_env:
+            if site_from_socket and site_from_env not in site_from_socket and not (
+                site_from_env == "nersc" and site_from_socket.startswith("nid")
+            ):
+                warnings.warn("Site determined from env variable {} = {}, which differs from node name {}".format(
+                    self._DESC_SITE_ENV, site_from_env, site_from_socket
+                ))
             return site_from_env
         return site_from_socket
 
