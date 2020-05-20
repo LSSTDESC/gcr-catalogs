@@ -15,7 +15,7 @@ cosmology:
 halo_mass_def: vir
 lightcone: true
 sky_area : 10313.24
-version: '2.0.0_3'
+version: '2.0.0_4'
 
 creators: ['Joe DeRose', 'Risa Wechsler', 'Eli Rykoff', 'Matt Becker']
 description: |
