@@ -126,12 +126,17 @@ class RootDirManager:
         Return a string which, when executing at a recognized site with
         well-known name, will include the name for that site
         """
-        # First look for custom env variable
-        v = os.getenv(self._DESC_SITE_ENV)
-        if v:
-            warnings.warn("Site determined from env variable {}".format(self._DESC_SITE_ENV))
-            return v
-        return socket.getfqdn()
+        site_from_env = os.getenv(self._DESC_SITE_ENV)
+        site_from_socket = socket.getfqdn()
+        if site_from_env:
+            if site_from_socket and site_from_env not in site_from_socket and not (
+                site_from_env == "nersc" and site_from_socket.startswith("nid")
+            ):
+                warnings.warn("Site determined from env variable {} = {}, which differs from node name {}".format(
+                    self._DESC_SITE_ENV, site_from_env, site_from_socket
+                ))
+            return site_from_env
+        return site_from_socket
 
     @property
     def root_dir(self):
