@@ -2,7 +2,7 @@
 
 subclass_name: redmapper.RedmapperCatalog
 
-catalog_root_dir: /global/projecta/projectdirs/lsst/groups/CL/redmapper/cosmoDC2_v1.1.4
+catalog_root_dir: ^/xgal/cosmoDC2/addons/redmapper_v1.1.4
 catalog_path_template:
   clusters: cosmoDC2_v1.1.4_run_redmapper_v0.2.1py_lgt20_catalog.fit
   members: cosmoDC2_v1.1.4_run_redmapper_v0.2.1py_lgt20_catalog_members.fit
