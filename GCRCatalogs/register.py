@@ -14,7 +14,9 @@ __all__ = [
     "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
 
 
-_GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
+_GITHUB_REPO = "LSSTDESC/gcr-catalogs"
+_GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
+_GITHUB_ISSUE_URL = f"https://github.com/{_GITHUB_REPO}/issues"
 _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
@@ -318,12 +320,13 @@ class Config(Mapping):
     def load_catalog(self, config_overwrite=None):
         if self.is_deprecated:
             deprecation_msg = self[self.DEPRECATED_KEY]
-            if not is_string_like(deprecation_msg):
+            if is_string_like(deprecation_msg):
+                deprecation_msg = deprecation_msg.strip() + "\n"
+            else:
                 deprecation_msg = ""
             warnings.warn(
-                "`{}` is now deprecated and no longer supported. It may be removed in the future.\n{}".format(
-                    self.rootname, deprecation_msg
-                ),
+                f"`{self.rootname}` has been deprecated and may be removed in the future.\n{deprecation_msg}"
+                f"If your analysis requires this specific catalog, please open an issue at {_GITHUB_ISSUE_URL}",
                 DeprecationWarning,
             )
         self.online_alias_check()
