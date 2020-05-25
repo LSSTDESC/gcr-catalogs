@@ -22,3 +22,5 @@ description: |
     cluster catalog and member catalog from the redMaPPer cluster finder run on proto-dc2. Red
     sequence was fit in the standard way, but centers are on halo centers, i.e. a real halo finding
     run was not done.
+
+deprecated: true
