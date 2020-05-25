@@ -7,3 +7,4 @@ catalogs:
     matching_method: MATCHING_FORMAT
   - catalog_name: photoz_dc2_object_run1.2p_v3
     matching_method: MATCHING_FORMAT
+deprecated: true
