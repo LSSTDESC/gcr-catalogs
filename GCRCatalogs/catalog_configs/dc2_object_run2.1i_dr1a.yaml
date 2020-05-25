@@ -6,3 +6,4 @@ filename_pattern: 'object_tract_\d+\.parquet$'
 description: DC2 Run 2.1i DR1a Object Table
 creators: ['DESC DC2 Team']
 pixel_scale: 0.2
+deprecated: Use dc2_object_run2.1i or dc2_object_run2.2i instead.

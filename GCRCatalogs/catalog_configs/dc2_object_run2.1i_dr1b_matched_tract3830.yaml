@@ -13,3 +13,4 @@ match_flag: 'is_matched'
 is_star: 'is_star'
 creator: 'Javier Sanchez'
 description: 'This is the table of matches between the object catalog and the extragalactic catalog'
+deprecated: true

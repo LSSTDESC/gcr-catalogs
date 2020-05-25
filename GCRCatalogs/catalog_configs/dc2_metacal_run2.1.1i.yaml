@@ -7,3 +7,4 @@ description: DC2 Run 2.1.1i Metacal Table
 creators: ['Johann Cohen-Tanugi']
 bands: 'griz'
 apply_metacal_test3_fix: true
+deprecated: Use dc2_metacal_run2.2i_dr3 instead

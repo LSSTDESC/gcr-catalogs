@@ -7,3 +7,4 @@ catalogs:
     matching_method: MATCHING_FORMAT
   - catalog_name: photoz_dc2_object_run1.2i
     matching_method: MATCHING_FORMAT
+include_in_default_catalog_list: true
