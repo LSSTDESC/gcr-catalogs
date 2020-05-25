@@ -32,7 +32,7 @@ GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True)
 GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_contains="object")
 
 # List all catalogs whose names start with the word "buzzard"
-GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_contains="buzzard")
+GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_startswith="buzzard")
 ```
 
 (*Note*: remove `False` in the above line to only see recommended catalogs.)
