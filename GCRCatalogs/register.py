@@ -550,17 +550,20 @@ def set_root_dir(path):
     """
     _config_register.root_dir = path
 
+
 def set_root_dir_by_site(site):
     """
     Sets runtime root_dir to path corresponding to *site*.
     """
     _config_register.set_root_dir_by_site(site)
 
+
 def get_site_list():
     """
     Return list of recognized sites
     """
     return _config_register.site_list
+
 
 def reset_root_dir():
     """
