@@ -432,6 +432,7 @@ class ConfigManager(Mapping):
         content_only=False,
         resolve_content=False,
         include_default_only=False,
+        include_deprecated=False,
         include_pseudo=False,
         include_pseudo_only=False,
         name_startswith=None,
@@ -465,6 +466,8 @@ class ConfigManager(Mapping):
         conditions = list()
         if include_default_only:
             conditions.append(lambda config: config.is_default)
+        if not include_deprecated:
+            conditions.append(lambda config: not config.is_deprecated)
         if include_pseudo_only:
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
