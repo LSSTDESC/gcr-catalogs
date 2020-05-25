@@ -8,4 +8,5 @@ description: DC2 Run 2.1i coadd-v1b Metacal Catalog (griz)
 creators: ['Francois Lanusse', 'Johann Cohen-Tanugi']
 bands: 'griz'
 apply_metacal_test3_fix: true
+addon_for: dc2_object_run2.1i_dr1b
 deprecated: Use dc2_metacal_run2.2i_dr3 instead

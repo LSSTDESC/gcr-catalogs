@@ -13,4 +13,5 @@ match_flag: 'is_matched'
 is_star: 'is_star'
 creator: 'Javier Sanchez'
 description: 'This is the table of matches between the object catalog and the extragalactic catalog'
+addon_for: dc2_object_run2.1i_dr1_tract3830
 deprecated: true
