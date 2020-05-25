@@ -225,6 +225,7 @@ class Config(Mapping):
     DEFAULT_LISTING_KEY = "include_in_default_catalog_list"
     READER_KEY = "subclass_name"
     DEPRECATED_KEY = "deprecated"
+    ADDON_KEY = "addon_for"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -312,6 +313,10 @@ class Config(Mapping):
     @property
     def is_deprecated(self):
         return self.get(self.DEPRECATED_KEY)
+
+    @property
+    def is_addon(self):
+        return self.get(self.ADDON_KEY)
 
     @property
     def has_reference(self):
