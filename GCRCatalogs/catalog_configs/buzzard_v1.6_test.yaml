@@ -25,3 +25,5 @@ description: |
     This is a smaller version of the Buzzard galaxy catalog v1.6 (realization 0),
     with only one healpixal, for testing purpose.
     Read more at https://confluence.slac.stanford.edu/x/4o2bDQ
+
+deprecated: Use buzzard_v2.0.0_* instead.

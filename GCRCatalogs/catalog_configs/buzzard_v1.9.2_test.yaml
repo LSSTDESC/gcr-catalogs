@@ -28,3 +28,4 @@ description: |
     Read more at https://confluence.slac.stanford.edu/x/4o2bDQ
 subclass_name: buzzard.BuzzardGalaxyCatalog
 
+deprecated: Use buzzard_v2.0.0_* instead.
