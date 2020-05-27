@@ -6,8 +6,10 @@ If you are writing a new reader, please see this [guide](https://github.com/yyma
 for an overview and an example of a minimal reader.
 The guide will explain that your reader must be a subclass of the `BaseGenericCatalog` parent class
 and that you will need to supply a minimum of 3 methods to specify how to read in the underlying file.
+
 You can also supply a translation dictionary between the native quantities in your
 catalog and the quantities that are presented to the user via the `GCRCatalogs` interface.
+
 You may want to look at existing readers in this repository as additional examples.
 
 ## Preparing a catalog config
@@ -26,29 +28,51 @@ All keywords in the yaml config file will be passed to the reader class.
 
 Below is a list of required, recommended, or reserved keywords that may appear in a yaml config file.
 
+### Required keywords
+
 ```yaml
-# Required keywords
-subclass_name: <reader_module_name>.<ReaderClassName>  # Indicate which reader to use.
-
-# Recommended keywords
-creators: ["Creator Name 1", "Creator Name 2", "Creator Name 3"]
-description: "A short, human-readable description of this specific catalog."
-
-# Reserved keyword
-alias: another_catalog_name  # When set, this yaml file will act as an alias to another_catalog_name.
-                             # All other keywords in this config will be ignored.
-based_on: another_catalog_name  # When set, this yaml file will inherit the config content of another_catalog_name.
-                                # All other keywords in this config will overwrite the inherited content.
-include_in_default_catalog_list: true  # When set, this catalog will show up in the "recommended" catalog list.
-                                       # Only catalogs that are intended for general comsuption should set this keyword.
-addon_for: another_catalog_name  # Set this keyword to indicate that this catalog is intended to be used ONLY as
-                                 # an addon catalog for another_catalog_name, and is not for standalone use.
-                                 # Note that setting this keyword does not prohibit users from load this catalog.
-deprecated: "A short deprecation message."  # Set this keyword if this catalog has been deprecated and should
-                                            # no longer be used.
-                                            # Setting this keyword does not prohibit users from load this catalog.
-is_pseudo_entry: true  # Set if this config is an pseudo entry and should be ignored by the register.
+subclass_name: <reader_module_name>.<ReaderClassName>
 ```
+
+`subclass_name` should always be set to indicate the reader, _except_ when the following keywords are present:
+
+- `alias`, `is_pseudo_entry`: `subclass_name` will be ignored
+- `based_on`:  `subclass_name` is not required but will be used if supplied.
+
+See the "Reserved Keywords" section below for more information on these keywords.
+
+### Recommended keywords
+
+```yaml
+creators: "Creator Name 1", "Creator Name 2", "Creator Name 3"
+description: "A short, human-readable description of this specific catalog."
+```
+
+These keywords are for documentation purpose. They should be self-explanatory.
+
+### Reserved keywords
+
+```yaml
+alias: another_catalog_name
+based_on: another_catalog_name
+
+include_in_default_catalog_list: true
+addon_for: another_catalog_name
+deprecated: "A short deprecation message."
+is_pseudo_entry: true
+```
+
+The first two keywords allow you to reference another catalog:
+
+- When `alias` is set, this yaml file will act as an alias to `another_catalog_name`, and all other keywords in this config will be ignored.
+- When `based_on` is set, this yaml file will inherit the config content of `another_catalog_name`. All other keywords present in this config will _overwrite_ the inherited content.
+
+The rest are mainly for documentation/informational purpose:
+
+- `include_in_default_catalog_list` should _only_ be set to indicate the catalog is recommended for general comsuption. Catalogs with this keyword will show up in the recommended catalog list.
+- `addon_for` should _only_ be set to indicate that the catalog is intended to be used _only_ as an addon catalog for `another_catalog_name`, and is not for standalone use. Note that setting this keyword does not prohibit users from loading this catalog.
+- `deprecated` should _only_ be set to indicate that the catalog has been deprecated and should no longer be used. Deprecation message can include alternative catalogs that the users may use. Note that setting this keyword does not prohibit users from loading this catalog.
+- `is_pseudo_entry` should _only_ be set to indicate that the config is a pseudo entry (i.e., not intended to be loaded via GCR; no reader required). Pseudo entries will by default be ignored by the register.
 
 ## GitHub workflow
 
