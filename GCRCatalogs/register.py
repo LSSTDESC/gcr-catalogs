@@ -323,6 +323,11 @@ class Config(Mapping):
         return any(map(self.get, self.REFERENCE_KEYS))
 
     def load_catalog(self, config_overwrite=None):
+        if self.is_pseudo:
+            raise RuntimeError(
+                "This is a pseudo entry that does not have an associated reader and cannot be loaded."
+                f"Use GCRCatalogs.get_catalog_config({self.rootname}) to see the content of this config file."
+            )
         if self.is_deprecated:
             deprecation_msg = self[self.DEPRECATED_KEY]
             if is_string_like(deprecation_msg):
