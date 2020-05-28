@@ -1,8 +1,8 @@
 # Schema of GCR Catalogs as used in LSST DESC
 
-## Extragalatic Catalogs
+## Extragalactic Catalogs
 
-### Metadata for Extragalatic Catalogs
+### Metadata for Extragalactic Catalogs
 
 Attribute name | Type | Definition
 --- | --- | ---
@@ -11,9 +11,9 @@ Attribute name | Type | Definition
 `halo_mass_def` | `str` | halo mass definition, e.g., `vir`, `200m`, `200c`
 `lightcone` | `bool` | whether or not the catalog is a light cone catalog
 
-### Schema for Extragalatic Catalogs
+### Schema for Extragalactic Catalogs
 
-Columns names in extragalatic catalogs generally follow these rules:
+Columns names in extragalactic catalogs generally follow these rules:
 
 - Label names are generally in `lowercase_separated_by_underscores` format, except in a few cases an upper case letter is needed (e.g., `Mag_true_Y_lsst_z0`).
 - Label names generally start with the name of the physical quantity, and are followed by specifications (i.e., use `size_disk_true` not `true_disk_size`). Some exceptions are `galaxy_id`, `halo_id`, `halo_mass`.
@@ -100,9 +100,9 @@ The schema for DC2 DPDD-like Catalogs (such as Object, Source, and Force Source 
 generally follow these rules:
 
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
-- For quantities that are defined in the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
+- For quantities that are defined in the above "Schema for Extragalactic Catalogs", we follow Extragalactic Catalogs' naming scheme ('GCRbase' below).
 - For quantities that are defined in both, we provide aliases so both naming schemes would work.
-- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
+- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalactic Catalogs' naming style.
 
 In the tables below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD. Note that
 
