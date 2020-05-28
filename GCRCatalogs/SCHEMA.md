@@ -96,7 +96,8 @@ Quantity Label | Unit | Definition
 
 ## DC2 DPDD-like Catalogs
 
-The schema for DC2 DPDD-like Catalogs, such as Object, Source, and Force Source Catalogs, generally follow these rules:
+The schema for DC2 DPDD-like Catalogs (such as Object, Source, and Force Source Catalogs, as defined in [LDM-153](https://ls.st/LDM-153)),
+generally follow these rules:
 
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
 - For quantities that are defined in the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
