@@ -517,7 +517,8 @@ class ConfigManager(Mapping):
 
     @property
     def reader_list(self):
-        configs = self.get_configs(content_only=True, resolve_content=True, include_pseudo=False)
+        configs = self.get_configs(content_only=True, resolve_content=True, include_addons=True,
+                                   include_deprecated=True, include_pseudo=False)
         return list(set((v[Config.READER_KEY] for v in configs)))
 
 
