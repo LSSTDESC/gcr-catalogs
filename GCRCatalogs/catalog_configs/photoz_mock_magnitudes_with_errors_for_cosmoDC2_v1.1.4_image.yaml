@@ -1,13 +1,11 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
-subclass_name: photoz_magerr.PZMagErrPDFsCatalog
-catalog_name: photoz_magerr_10y_estimate_image_PDFs
-base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/IMAGE/10_year_error_estimates/pipelinedir/outputs
-filename_pattern:  'photoz_pdf_z_(\d)\S+healpix_(\d+).hdf5'
-filename_glob_pattern:  'photoz_pdf_z_*.hdf5'
+subclass_name: photoz_magerr.PZMagErrCatalog
+catalog_name: photoz_mock_magnitudes_with_errors_for_cosmoDC2_v1.1.4_image
+base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/IMAGE/10_year_error_estimates
 creators: ['Sam Schmidt']
 description:
-     A catalog of photoz PDFs/point estimates for the subset of galaxies in catalog photoz_magerr_10y_with_pdfs with i mag leq 26.5
+     This is a catalog of CosmoDC2v1.1.4_image extragalactic truth objects with estimated 10 year depth flux errors estimated from the model of Ivezic et al. 2019 included.  Flux errors are computed given the expected number of 10-year depth visits, Gaussian uncertainties are added to the true fluxes and converted back to magnitudes.  For negative fluxes resulting from this procedure, a magnitude of "99" is reported, and the error column stores the 1-sigma point source magnitude for an object at the given depth.
 include_in_default_catalog_list: false
 healpix_pixels: [8786, 8787, 8788, 8789, 8790, 8791, 8792, 8793, 8794, 8913, 8914, 8915, 8916, 8917, 8918, 8919, 8920, 8921, 9042, 9043, 9044, 9045, 9046, 9047, 9048, 9049,
                  9050, 9169, 9170, 9171, 9172, 9173, 9174, 9175, 9176, 9177, 9178, 9298, 9299, 9300, 9301, 9302, 9303, 9304, 9305, 9306, 9425, 9426, 9427, 9428, 9429, 9430,

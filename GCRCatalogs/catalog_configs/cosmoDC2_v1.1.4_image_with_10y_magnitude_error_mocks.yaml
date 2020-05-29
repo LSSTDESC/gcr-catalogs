@@ -4,7 +4,7 @@ subclass_name: composite.CompositeReader
 only_use_master_attr: true
 catalogs:
   - catalog_name: cosmoDC2_v1.1.4_image
-  - catalog_name: photoz_magerr_10y_estimate_image
+  - catalog_name: photoz_mock_magnitudes_with_errors_for_cosmoDC2_v1.1.4_image
     matching_method: MATCHING_FORMAT
     subclass_name: photoz_magerr.PZMagErrCatalog
     base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/IMAGE/10_year_error_estimates
@@ -19,7 +19,8 @@ catalogs:
 description: |
     Composite catalog that matches the cosmoDC2_v1.1.4_image and a catalog
     containing "observed" magnitudes and errors where uncertainties have been
-    added to the fluxes following the model presented in Ivezić et al. 2019.
+    added to the fluxes following the model presented in Ivezic et al. 2019
+    and assuming 10 year depth for number of visits.
     NOTE: this catalog does not contain the actual photometric redshifts, just
     the photometry. Non-detections are identified as a value of 99 for scatmag
     with scaterr having the value of the 1 sigma detection limit.

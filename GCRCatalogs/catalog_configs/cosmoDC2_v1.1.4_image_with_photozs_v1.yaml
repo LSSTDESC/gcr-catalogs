@@ -12,7 +12,7 @@ description: |
 
      Data used for training BPZ is representative down to scatmag_i < 25.
 catalogs:
-  - catalog_name: photoz_magerr_10y_estimate_image
-    matching_method: baseDC2/galaxy_id
-  - catalog_name: cosmoDC2_v1.1.4_image_photoz_magerr_10y_PDFcat
+  - catalog_name: cosmoDC2_v1.1.4_image
+    matching_method: galaxy_id
+  - catalog_name: photoz_pdfs_v1_for_cosmoDC2_v1.1.4_image
     matching_method: galaxy_id
