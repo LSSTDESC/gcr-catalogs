@@ -18,3 +18,5 @@ description: |
     Reported AGN magnitudes are the baseline magnitudes on top of which the
     variability model is layered.  This truth information was generated with
     version 2.1.2 of the proto-DC2 extragalactic catalog.
+
+deprecated: Use dc2_truth_run1.2_galaxies instead.

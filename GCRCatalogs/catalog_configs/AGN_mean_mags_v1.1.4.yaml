@@ -17,3 +17,5 @@ cosmology:
 creators: ['Scott Daniel']
 description: |
   AGN mean magnitudes added to instance catalogs for image simulation run on cosmoDC2 v1.1.4.
+
+addon_for: cosmoDC2_v1.1.4_image

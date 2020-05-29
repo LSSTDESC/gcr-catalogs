@@ -7,4 +7,3 @@ catalogs:
   - catalog_name: photoz_run2.2i_dr3
     filename_pattern: 'photoz_pdf_Run2.2i_tract_\d+\.parquet$'
     matching_method: MATCHING_FORMAT
-include_in_default_catalog_list: true

@@ -16,11 +16,25 @@ and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
 ## Available Catalogs
 
-You can always run the following code to see the up-to-date list of all available catalogs:
+Below is a list of most-used catalogs. To find a complete, most up-to-date list of all available catalogs,
+run the following code:
+
 ```python
 import GCRCatalogs
-sorted(GCRCatalogs.get_available_catalogs(False))
+
+# List all catalogs that are recommended for general comsumption
+GCRCatalogs.get_available_catalogs(names_only=True)
+
+# List all catalogs, including those may not be intended for general comsumption
+GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True)
+
+# List all catalogs whose names contain the word "object"
+GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_contains="object")
+
+# List all catalogs whose names start with the word "buzzard"
+GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_startswith="buzzard")
 ```
+
 (*Note*: remove `False` in the above line to only see recommended catalogs.)
 
 Each catalog is specified by a YAML config file,
@@ -33,49 +47,32 @@ Confluence page (*DESC member only*).
 
 -  **"cosmoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen, Eli Rykoff et al.*
-   - `cosmoDC2_v1.0`: full cosmoDC2 catalog (v1.0)
-   - `cosmoDC2_v1.0_image`: same as `cosmoDC2_v1.0` but with only the sky area that is needed for image simulation (Run 2.0)
-   - `cosmoDC2_v1.0_small`: 26 contiguous healpixels of `cosmoDC2_v1.0` for testing purpose
-   - `cosmoDC2_v1.1.4_image`: same as `cosmoDC2_v1.0_image` but with cosmoDC2 v1.1.4 for Run 2.1
+   - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
    - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
    - `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image`.
+   - `photoz_magerr_10y_with_pdfs`: photo-z for cosmoDC2 v1.1.4 (by Sam Schmidt)
 
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
    - `protoDC2`: full catalog
    - `protoDC2_test`: same as `protoDC2` but this one skips time-consuming md5 check
-   - `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog. You can run
-     ```python
-     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('proto-dc2_')))
-     ```
-     to see all available versions.
+   - `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog
 
 -  **"Buzzard" Extragalactic Catalogs** \
    *by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
    - `buzzard`: full catalog, DES Y3 area
    - `buzzard_test`: same as `buzzard` but a small subset for testing purpose / faster access
    - `buzzard_high-res`: higher resolution, smaller sky area
-   - `buzzard_v1.9.2_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
-   - `buzzard_v1.6_x`: different realizations of an older version of `buzzard`.
-     You can run
-     ```python
-     sorted((name for name in GCRCatalogs.get_available_catalogs(False) if name.startswith('buzzard_v1.6')))
-     ```
-     to see all available versions.
-
+   - `buzzard_v2.0.0_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by the DC2 Team*
-   - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i dr3
-   - `dc2_object_run2.2i_dr3_tract3830`: static object catalog for Run 2.2i dr3 (one tract only, for testing purpose / faster access)
-   - `dc2_object_run2.2i_dr3_with_metacal`: static object catalog for Run 2.2i dr3 + metacal
-   - `dc2_object_run2.2i_dr3_with_photoz`: static object catalog for Run 2.2i dr3 + photo-z
-   - `dc2_object_run2.1i_dr4`: static object catalog for Run 2.1i dr4
-   - `dc2_object_run2.1i_dr4_tract3830`: static object catalog for Run 2.1i dr4 (one tract only, for testing purpose / faster access)
-   - `dc2_object_run2.1i_dr1b`: static object catalog for Run 2.1i dr1b
-   - `dc2_object_run2.1i_dr1b_tract3830`: static object catalog for Run 2.1i dr1b (one tract only, for testing purpose / faster access)
-   - `dc2_object_run2.1i_dr1b_with_metacal_griz`: static object catalog for Run 2.1i dr1b + metacal
-   - `dc2_object_run2.1i_dr1b_with_photoz_tract3830`: static object catalog for Run 2.1i dr1b + photoz (tract 3830; full version also exists, but is slow)
+   - `dc2_object_run2.2i`: static object catalog for Run 2.2i (current version = DR3)
+   - `dc2_object_run2.2i_tract3830`: same as `dc2_object_run2.2i` but with one tract only, for testing purpose / faster access
+   - `dc2_object_run2.2i_with_metacal`: `dc2_object_run2.2i` + metacal
+   - `dc2_object_run2.2i_with_photoz`: `dc2_object_run2.2i` + photo-z
+   - `dc2_object_run2.1i`: static object catalog for Run 2.1i (current version = DR4)
+   - `dc2_object_run2.1i_tract3830`: same as `dc2_object_run2.2i` but with one tract only, for testing purpose / faster access
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
@@ -83,9 +80,6 @@ Confluence page (*DESC member only*).
    - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
    - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
-   - `dc2_object_run1.2p_v3_with_photoz`: same as `dc2_object_run1.2p_v3` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
-   - `dc2_object_run1.1p`: static object catalog for Run 1.1p (with DPDD and all native columns)
-   - `dc2_object_run1.1p_tract4850`: same as `dc2_object_run1.1p` but has only one tract (4850) for testing purpose / faster access
 
 -  **DC2 "Source Catalogs"** \
    *by LSST DESC, compiled by Michael Wood-Vasey*
@@ -104,17 +98,6 @@ Confluence page (*DESC member only*).
    - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
    - `dc2_truth_run1.2_variable_lightcurve`: light curves of variable objects in the truth catalog for Run 1.2
    - `dc2_truth_run1.2_variable_summary`: summary table of variable objects in the truth catalog for Run 1.2
-   - `dc2_truth_run1.1_static`: truth catalog for Run 1.1 (static objects only, corresponds to `proto-dc2_v2.1.2`)
-
--  **DC2 "Reference Catalogs"** \
-   *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_reference_run1.2`: reference catalog for Run 1.2 (corresponds to `proto-dc2_v3.0`)
-   - `dc2_reference_run1.1`: reference catalog for Run 1.1 (corresponds to `proto-dc2_v2.1.2`)
-
--  **DC2 "Instance Catalogs"** \
-   *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_instance_example1`: an example instance catalog
-   - `dc2_instance_example2`: another example instance catalog
 
 -  **DC2 e-images** \
    *by LSST DESC*

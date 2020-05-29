@@ -9,4 +9,3 @@ catalogs:
     # excluding some tracts due to missing patches in metacal catalog (as of March 11, 2020)
     filename_pattern: 'metacal_tract_(?!3079|4034|4232|4636|5066|5073)\d+\.parquet$'
     matching_method: MATCHING_FORMAT
-include_in_default_catalog_list: true

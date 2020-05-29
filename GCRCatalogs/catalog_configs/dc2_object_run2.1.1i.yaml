@@ -7,3 +7,4 @@ description: DC2 Run 2.1.1i Object Table
 creators: ['DESC DC2 Team']
 pixel_scale: 0.2
 include_in_default_catalog_list: true
+deprecated: Use dc2_object_run2.2i instead.

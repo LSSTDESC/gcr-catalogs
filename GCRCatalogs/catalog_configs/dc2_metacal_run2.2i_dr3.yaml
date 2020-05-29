@@ -5,3 +5,4 @@ bands: 'griz'
 apply_metacal_test3_fix: true
 description: DC2 Run 2.2i DR3 Metacal Table
 creators: ['DESC DC2 Team']
+addon_for: dc2_object_run2.2i_dr3

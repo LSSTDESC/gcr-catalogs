@@ -7,3 +7,4 @@ filename_pattern: 'object_tract_\d+\.hdf5$'
 description: DC2 Run 1.2i Object Catalog - Prototype Processing
 creators: ['Michael Wood-Vasey']
 pixel_scale: 0.2
+deprecated: Use dc2_object_run1.2i_all_columns (most compatible) or dc2_object_run2.2i (latest) instead.
