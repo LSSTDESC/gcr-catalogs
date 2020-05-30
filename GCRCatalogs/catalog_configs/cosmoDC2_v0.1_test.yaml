@@ -27,3 +27,4 @@ creators: [ 'Andrew Benson', 'Andrew Hearin', 'Katrin Heitmann', 'Danila Korytov
 description: |
     This is a test-sized version (54 sq. deg.) of the extra-galactic catalog for the LSST-DESC data challenge DC2.
 
+deprecated: Use cosmoDC2_v1.0 (most compatible) or cosmoDC2 (latest) instead.

@@ -25,3 +25,5 @@ description: |
     This is a 10,000-square-degree catalog created with the ADDGALS algorithm.
     It has galaxies down to r~26.5 magnitudes fainter than projected DES Y5 magnitude limits.
     Read more at https://confluence.slac.stanford.edu/x/4o2bDQ
+
+deprecated: Use buzzard_v2.0.0_* instead.

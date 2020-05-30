@@ -6,3 +6,4 @@ filename_pattern: '(?:merged|object)_tract_4850\.hdf5$'
 description: DC2 Run 1.1p Object Catalog
 creators: ['Michael Wood-Vasey']
 pixel_scale: 0.185
+deprecated: Use dc2_object_run1.2p (most compatible) or dc2_object_run2.2i (latest) instead.

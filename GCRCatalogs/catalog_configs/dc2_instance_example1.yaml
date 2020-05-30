@@ -3,3 +3,4 @@
 subclass_name: instance_catalog.InstanceCatalog
 header_file: ^/DC2-prod/Run1.1/instance_example/phosim_cat_2145656.txt
 description: Example Instance Catalogs for DC2
+deprecated: Use truth catalogs or protoDC2 instead.

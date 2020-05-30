@@ -20,3 +20,5 @@ creators: ['Eli Rykoff']
 description: |
   Cluster and member catalogs computed from the redMaPPer cluster finder
   (v0.2.1py) run on cosmoDC2 v1.1.4.
+
+include_in_default_catalog_list: true

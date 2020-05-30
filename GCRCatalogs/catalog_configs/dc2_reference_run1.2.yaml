@@ -3,3 +3,4 @@
 subclass_name: reference_catalog.ReferenceCatalogReader
 filename: ^/DC2-prod/Run1.2/ref/dc2_reference_catalog_dc2v3_fov4.txt
 description: DC2 Reference Catalog Run 1.2 (corresponding to proto-dc2_v3.0)
+deprecated: Use truth catalogs or protoDC2 instead.

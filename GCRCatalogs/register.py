@@ -14,7 +14,9 @@ __all__ = [
     "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
 
 
-_GITHUB_URL = "https://raw.githubusercontent.com/LSSTDESC/gcr-catalogs/master/GCRCatalogs"
+_GITHUB_REPO = "LSSTDESC/gcr-catalogs"
+_GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
+_GITHUB_ISSUE_URL = f"https://github.com/{_GITHUB_REPO}/issues"
 _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
@@ -223,6 +225,7 @@ class Config(Mapping):
     DEFAULT_LISTING_KEY = "include_in_default_catalog_list"
     READER_KEY = "subclass_name"
     DEPRECATED_KEY = "deprecated"
+    ADDON_KEY = "addon_for"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -312,18 +315,28 @@ class Config(Mapping):
         return self.get(self.DEPRECATED_KEY)
 
     @property
+    def is_addon(self):
+        return self.get(self.ADDON_KEY)
+
+    @property
     def has_reference(self):
         return any(map(self.get, self.REFERENCE_KEYS))
 
     def load_catalog(self, config_overwrite=None):
+        if self.is_pseudo:
+            raise RuntimeError(
+                "This is a pseudo entry that does not have an associated reader and cannot be loaded."
+                f"Use GCRCatalogs.get_catalog_config({self.rootname}) to see the content of this config file."
+            )
         if self.is_deprecated:
             deprecation_msg = self[self.DEPRECATED_KEY]
-            if not is_string_like(deprecation_msg):
+            if is_string_like(deprecation_msg):
+                deprecation_msg = deprecation_msg.strip() + "\n"
+            else:
                 deprecation_msg = ""
             warnings.warn(
-                "`{}` is now deprecated and no longer supported. It may be removed in the future.\n{}".format(
-                    self.rootname, deprecation_msg
-                ),
+                f"`{self.rootname}` has been deprecated and may be removed in the future.\n{deprecation_msg}"
+                f"If your analysis requires this specific catalog, please open an issue at {_GITHUB_ISSUE_URL}",
                 DeprecationWarning,
             )
         self.online_alias_check()
@@ -429,6 +442,8 @@ class ConfigManager(Mapping):
         content_only=False,
         resolve_content=False,
         include_default_only=False,
+        include_addons=False,
+        include_deprecated=False,
         include_pseudo=False,
         include_pseudo_only=False,
         name_startswith=None,
@@ -462,6 +477,10 @@ class ConfigManager(Mapping):
         conditions = list()
         if include_default_only:
             conditions.append(lambda config: config.is_default)
+        if not include_addons:
+            conditions.append(lambda config: not config.is_addon)
+        if not include_deprecated:
+            conditions.append(lambda config: not config.is_deprecated)
         if include_pseudo_only:
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
@@ -498,7 +517,8 @@ class ConfigManager(Mapping):
 
     @property
     def reader_list(self):
-        configs = self.get_configs(content_only=True, resolve_content=True, include_pseudo=False)
+        configs = self.get_configs(content_only=True, resolve_content=True, include_addons=True,
+                                   include_deprecated=True, include_pseudo=False)
         return list(set((v[Config.READER_KEY] for v in configs)))
 
 
@@ -544,17 +564,20 @@ def set_root_dir(path):
     """
     _config_register.root_dir = path
 
+
 def set_root_dir_by_site(site):
     """
     Sets runtime root_dir to path corresponding to *site*.
     """
     _config_register.set_root_dir_by_site(site)
 
+
 def get_site_list():
     """
     Return list of recognized sites
     """
     return _config_register.site_list
+
 
 def reset_root_dir():
     """

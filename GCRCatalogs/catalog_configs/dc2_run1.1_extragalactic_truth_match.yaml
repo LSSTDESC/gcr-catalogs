@@ -16,3 +16,4 @@ catalogs:
         - sprinkled == 0
         - star == 0
         - agn == 0
+deprecated: Use dc2_run1.2_extragalactic_truth_match instead.

@@ -7,3 +7,5 @@ catalogs:
     members_only: true
   - catalog_name: proto-dc2_v4.3_test
     matching_method: galaxy_id
+
+deprecated: true
