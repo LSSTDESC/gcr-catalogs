@@ -1,8 +1,0 @@
-#  Use ^/ to indicate file path relative to GCR root dir
-
-subclass_name: composite.CompositeReader
-only_use_master_attr: true
-catalogs:
-  - catalog_name: cosmoDC2_v1.1.4_small
-  - catalog_name: pz_calibrate_references_cosmoDC2_v1.1.4_small
-    matching_method: MATCHING_FORMAT

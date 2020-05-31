@@ -41,7 +41,13 @@ class PZMagErrCatalog(BaseGenericCatalog):
             self._healpix_files[key] = os.path.join(self.base_dir, f)
 
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
-        
+        self._quantity_modifiers = {
+            'redshift': 'redshift',
+            'galaxy_id': 'baseDC2/galaxy_id'
+        }
+        for band in ['u','g','r','i','z','y']:
+            self._quantity_modifiers['mag_%s_photoz'%band] = 'scatmag_%s'%band
+            self._quantity_modifiers['mag_err_%s_photoz'%band] = 'scaterr_%s'%band
         self._info_dict = {}
         self._info_dict['galaxy_id']={'units':'unitless',
                                  'description': 'ID of galaxy matching the entry '

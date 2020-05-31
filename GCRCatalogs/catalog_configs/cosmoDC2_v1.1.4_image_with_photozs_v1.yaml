@@ -4,7 +4,8 @@ subclass_name: composite.CompositeReader
 only_use_master_attr: true
 description: |
      Composite catalog that matches the "observed" photometry catalog for
-     cosmoDC2_v1.1.4_image (see column directly above) with photometric
+     cosmoDC2_v1.1.4_image (with names "scatmag_[band]" and "scaterr_[band]")
+     with both the base cosmoDC2_v1.1.4_image catalog and the photometric
      redshift estimates. Caveat: only a subset of the objects, those with
      scatmag_i<26.5, have photometric redshift estimates. The composite catalog
      will return masked arrays that must have the mask applied if you wish to
@@ -12,7 +13,9 @@ description: |
 
      Data used for training BPZ is representative down to scatmag_i < 25.
 catalogs:
-  - catalog_name: photoz_magerr_10y_estimate_image
-    matching_method: baseDC2/galaxy_id
-  - catalog_name: cosmoDC2_v1.1.4_image_photoz_magerr_10y_PDFcat
+  - catalog_name: cosmoDC2_v1.1.4_image
+    matching_method: galaxy_id
+  - catalog_name: photoz_mock_magnitudes_with_errors_for_cosmoDC2_v1.1.4_image
+    matching_method: MATCHING_FORMAT
+  - catalog_name: photoz_pdfs_v1_for_cosmoDC2_v1.1.4_image
     matching_method: galaxy_id

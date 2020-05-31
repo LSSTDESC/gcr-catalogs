@@ -63,7 +63,7 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
         """
 
         modifiers = {
-            'photoz_ODDS': 'ODDS',
+            'photoz_odds': 'ODDS',
             'photoz_mode': 'z_mode',
             'photoz_median': 'z_median',
             'photoz_mean': 'z_mean',
@@ -75,7 +75,7 @@ class DC2PhotozCatalog(DC2DMTractCatalog):
         return modifiers
 
     @property
-    def pdf_bins(self):
+    def photoz_pdf_bin_centers(self):
         return self._pdf_bin_centers
 
     @property
