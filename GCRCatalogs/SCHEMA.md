@@ -115,6 +115,9 @@ In the tables below we list the name of the quantity, its units and definition a
 ### Schema for DC2 Object Catalogs
 
 Object Catalog contains information about static astronomical objects measured on a stacked (coadd) image.
+The photometry in the Object Catalog is measured with the forced photometry method, i.e.,
+it is consistently measured across multiple bands using a fixed position,
+which is determined from the reference filter for each source (the filter that best measures the source).
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
