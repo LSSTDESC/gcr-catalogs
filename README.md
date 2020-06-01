@@ -51,7 +51,7 @@ Confluence page (*DESC member only*).
    - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
    - `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image`.
    - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
-   - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that indetify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
+   - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
 -  **"protoDC2" Extragalactic Catalogs** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
