@@ -1,0 +1,7 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
+base_dir: ^/DC2-prod/Run2.2i/truth/startruth
+filename_pattern: 'star_truth_summary.parquet$'
+description: DC2 Run 2.2i  Summary truth table for stars
+creators: ['Joanne Bogart']
