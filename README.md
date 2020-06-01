@@ -67,12 +67,10 @@ Confluence page (*DESC member only*).
 
 -  **DC2 "Object Catalogs"** \
    *by LSST DESC, compiled by the DC2 Team*
-   - `dc2_object_run2.2i`: static object catalog for Run 2.2i (current version = DR3)
+   - `dc2_object_run2.2i`: static object catalog for Run 2.2i (current data release = DR3)
    - `dc2_object_run2.2i_tract3830`: same as `dc2_object_run2.2i` but with one tract only, for testing purpose / faster access
    - `dc2_object_run2.2i_with_metacal`: `dc2_object_run2.2i` + metacal
    - `dc2_object_run2.2i_with_photoz`: `dc2_object_run2.2i` + photo-z
-   - `dc2_object_run2.1i`: static object catalog for Run 2.1i (current version = DR4)
-   - `dc2_object_run2.1i_tract3830`: same as `dc2_object_run2.2i` but with one tract only, for testing purpose / faster access
    - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
    - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
    - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
