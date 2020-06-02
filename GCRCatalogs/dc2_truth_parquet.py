@@ -153,7 +153,7 @@ class ParquetFileWrapper():
         return dict(self._schema)
     
 class DC2TruthParquetCatalog(BaseGenericCatalog):
-    """
+    r"""
        DC2 Truth (parquet) Catalog reader
 
        Presents tables exactly as they are defined in the files (no aliases, 
