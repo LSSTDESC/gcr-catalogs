@@ -88,6 +88,10 @@ class ParquetFileWrapper():
             self._handle = pq.ParquetFile(self.path)
         return self._handle
 
+    @property
+    def num_row_groups(self):
+        return self._handle.metadata.num_row_groups
+
     def close(self):
         self._handle = None
 
@@ -102,6 +106,13 @@ class ParquetFileWrapper():
         if as_dict:
             return {c: d[c].values for c in columns}
         return d
+
+    def read_columns_row_group(self, columns, as_dict=False):
+        d = self.handle.read_row_group(self._row_group, columns=columns).to_pandas()
+        if as_dict:
+            return {c: d[c].values for c in columns}
+        return d
+        
 
     @property
     def info(self):
@@ -211,14 +222,17 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         Overloading this so that we can query the database backend
         for multiple columns at once
         """
-        return native_quantity_getter.read_columns(list(native_quantities_needed), as_dict=True)
+        #return native_quantity_getter.read_columns(list(native_quantities_needed), as_dict=True)
+        return native_quantity_getter.read_columns_row_group(list(native_quantities_needed), as_dict=True)
 
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             if (native_filters is not None and
                     not native_filters.check_scalar(dataset.info)):
                 continue
-            yield dataset
+            for i in range(dataset.num_row_groups):
+                dataset._row_group = i
+                yield dataset
 
 
     
