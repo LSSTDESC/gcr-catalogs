@@ -16,7 +16,7 @@ from .utils import first
 __all__ = ['DC2TruthParquetCatalog']
 
 class ParsePathInfo():
-    _group_pat = '\{[a-zA-Z_][a-zA-Z0-9_]*\}'
+    _group_pat = r'\{[a-zA-Z_][a-zA-Z0-9_]*\}'
     _known_ints = ('tract', 'visit', 'healpix')
     #_path_key = 'PATH'
 
@@ -40,9 +40,9 @@ class ParsePathInfo():
             gname = g[1:-1]
             self._gnames.append(gname)
             if gname in self._known_ints:
-                base_pat = base_pat.replace(g, f'(?P<{gname}>\d+)')
+                base_pat = base_pat.replace(g, fr'(?P<{gname}>\d+)')
             else:
-                base_pat = base_pat.replace(g, f'(?P<{gname}>\w+)')            
+                base_pat = base_pat.replace(g, fr'(?P<{gname}>\w+)')            
             
             # replace with specification of group
         self.pattern = re.compile(base_pat)
@@ -81,6 +81,7 @@ class ParquetFileWrapper():
         self._columns = None
         self._info = info or dict()
         self._schema = None
+        self._row_group = 0
 
     @property
     def handle(self):
@@ -91,6 +92,14 @@ class ParquetFileWrapper():
     @property
     def num_row_groups(self):
         return self._handle.metadata.num_row_groups
+
+    @property
+    def row_group(self):
+        return self._row_group
+
+    @row_group.setter
+    def row_group(self, grp):
+        self._row_group = grp
 
     def close(self):
         self._handle = None
@@ -231,7 +240,7 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
                     not native_filters.check_scalar(dataset.info)):
                 continue
             for i in range(dataset.num_row_groups):
-                dataset._row_group = i
+                dataset.row_group = i
                 yield dataset
 
 
