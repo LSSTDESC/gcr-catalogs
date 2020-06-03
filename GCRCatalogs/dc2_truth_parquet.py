@@ -44,7 +44,6 @@ class ParsePathInfo():
             else:
                 base_pat = base_pat.replace(g, fr'(?P<{gname}>\w+)')            
             
-            # replace with specification of group
         self.pattern = re.compile(base_pat)
 
     @property
@@ -59,11 +58,11 @@ class ParsePathInfo():
     def file_info(self, path):
         """
         If path matches pattern, return a dict
-        * always has a key FULL_MATCH with value = path
-          OR  maybe just return { } if there are no groups to match
         * for each named group, add entry to dict with key = group name
           and value = matched string
-        otherwise return None
+        * return { } if there are no groups to match
+
+        otherwise (no match) return None
         """
         m = self.pattern.match(path)
         if not m: return None
@@ -143,6 +142,7 @@ class ParquetFileWrapper():
     def native_schema(self):
         if self._schema is None:
             self._schema = {}
+            self.handle           # in case it hasn't been initialized yet
             arrow_schema = self._handle.schema.to_arrow_schema()
             for i in range(len(arrow_schema.names)):
                 tp = str(arrow_schema[i].type)
@@ -150,7 +150,8 @@ class ParquetFileWrapper():
                 else:
                     if tp == 'double': tp = 'float42'
                 self._schema[arrow_schema.names[i]] = {'dtype' : tp}
-        return dict(self._schema)
+        
+        return self._schema
     
 class DC2TruthParquetCatalog(BaseGenericCatalog):
     r"""
@@ -205,6 +206,7 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         """
         datasets = list()
         for fname in sorted(os.listdir(self.base_dir)):
+            print(f'Processing data file {fname}')                  ### debug
             info_dict = self.path_parser.file_info(fname)
             if info_dict == None:
                 continue
@@ -218,7 +220,9 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         schema = {}
 
         for dataset in datasets:
-            schema.update(dataset.native_schema)
+            print('Path : ', dataset.path)             ### debug
+            x = dataset.native_schema
+            schema.update(x)
 
         return schema
 
