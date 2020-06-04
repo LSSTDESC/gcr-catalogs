@@ -69,7 +69,13 @@ class ParsePathInfo():
 
         d = m.groupdict()
         if d == None : d = {}
-        #d[_path_key] = path
+
+        for (k, v) in d.items():
+            try:
+                castv = int(v)
+                d[k] = castv
+            except ValueError:
+                pass
         return d
 
 #from .dc2_dm_catalog import ParquetFileWrapper
@@ -90,7 +96,7 @@ class ParquetFileWrapper():
 
     @property
     def num_row_groups(self):
-        return self._handle.metadata.num_row_groups
+        return self.handle.metadata.num_row_groups
 
     @property
     def row_group(self):
@@ -142,8 +148,7 @@ class ParquetFileWrapper():
     def native_schema(self):
         if self._schema is None:
             self._schema = {}
-            self.handle           # in case it hasn't been initialized yet
-            arrow_schema = self._handle.schema.to_arrow_schema()
+            arrow_schema = self.handle.schema.to_arrow_schema()
             for i in range(len(arrow_schema.names)):
                 tp = str(arrow_schema[i].type)
                 if tp == 'float': tp = 'float32'
@@ -212,7 +217,6 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
                 continue
             datasets.append(ParquetFileWrapper(os.path.join(self.base_dir, fname),
                                                info=info_dict))
-
         return datasets
 
     @staticmethod
@@ -220,7 +224,6 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         schema = {}
 
         for dataset in datasets:
-            print('Path : ', dataset.path)             ### debug
             x = dataset.native_schema
             schema.update(x)
 
