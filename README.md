@@ -80,7 +80,6 @@ Confluence page (*DESC member only*).
 #### Run 2.2 Object Catalogs
 
 - `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6
-- `dc2_object_run2.2i_dr6_tract3830`: same as `dc2_object_run2.2i_dr6` but with one tract only, for testing purpose / faster access
 - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
 - `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
 - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
