@@ -213,10 +213,15 @@ Scroll down to see the example notebooks and more advanced usages.
 import GCRCatalogs
 
 # see all available catalogs
-print(sorted(GCRCatalogs.get_available_catalogs(False)))
+print(GCRCatalogs.get_available_catalogs(names_only=True))
 
-# load a calalog
+# load a catalog
 catalog = GCRCatalogs.load_catalog('protoDC2')
+
+# load a catalog with runtime custom options
+# (one needs to check catalog configs to know the keywords)
+catalog = GCRCatalogs.load_catalog('cosmoDC2_v1.1.4_image', config_overwrite={'healpix_pixels': [8786, 8787, 8788]})
+catalog = GCRCatalogs.load_catalog('dc2_object_run2.2i_dr6', config_overwrite={'tracts': [3638, 3639, 3640])
 
 # see all available quantities
 print(sorted(catalog.list_all_quantities()))
