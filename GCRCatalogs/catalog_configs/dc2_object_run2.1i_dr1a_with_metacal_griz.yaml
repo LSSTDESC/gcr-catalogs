@@ -7,4 +7,4 @@ catalogs:
     matching_method: id
   - catalog_name: dc2_metacal_griz_run2.1i_dr1a
     matching_method: id
-deprecated: Use dc2_object_run2.2i_with_metacal instead.
+deprecated: Use dc2_object_run2.2i_dr3_with_metacal instead.
