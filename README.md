@@ -13,7 +13,6 @@ validation framework, and the concept and description of this reader interface
 can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3)
 and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
-
 ## Available Catalogs
 
 Below is a list of most-used catalogs. To find a complete, most up-to-date list of all available catalogs,
@@ -45,65 +44,80 @@ products of DESC Data Challenge 2 at the
 ["DC2 Data Product Overview"](https://confluence.slac.stanford.edu/x/oJgHDg)
 Confluence page (*DESC member only*).
 
--  **"cosmoDC2" Extragalactic Catalogs and add-ons** \
-   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen, Eli Rykoff et al.*
-   - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
-   - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
-   - `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image`.
-   - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
-   - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
+### Extragalactic Catalogs and Add-ons
 
--  **"protoDC2" Extragalactic Catalogs** \
-   *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
-   - `protoDC2`: full catalog
-   - `protoDC2_test`: same as `protoDC2` but this one skips time-consuming md5 check
-   - `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog
+#### cosmoDC2
 
--  **"Buzzard" Extragalactic Catalogs** \
-   *by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
-   - `buzzard`: full catalog, DES Y3 area
-   - `buzzard_test`: same as `buzzard` but a small subset for testing purpose / faster access
-   - `buzzard_high-res`: higher resolution, smaller sky area
-   - `buzzard_v2.0.0_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
+*by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
 
--  **DC2 "Object Catalogs"** \
-   *by LSST DESC, compiled by the DC2 Team*
-   - `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6
-   - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
-   - `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
-   - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
-   - `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
-   - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
-   - `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
-   - `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
-   - `dc2_object_run1.2i_tract4850`, `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract for testing purpose / faster access
-   - `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
-   - `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
-   - `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
+- `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
+- `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
+- `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
+- `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
--  **DC2 "Source Catalogs"** \
-   *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_source_run1.2i`: Source Table catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+#### protoDC2
 
--  **DC2 "Forced Source Catalogs"** \
-   *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_forced_source_run1.2p`: Forced Source Table catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).  This is the forced-position photometry based on the positions in the Object Table.
+*by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
 
--  **DC2 "DIA Source Test Catalogs"** \
-   *by LSST DESC, compiled by Michael Wood-Vasey*
-   - `dc2_dia_source_run1.2p_test`: DIASource Table catalog for a test DIA processing of Tract+Paptch 4849+6,6 for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).
+- `protoDC2`: full catalog
+- `protoDC2_test`: same as `protoDC2` but this one skips time-consuming md5 check
+- `proto-dc2_vX.X_test.yaml`: some other versions of the protoDC2 catalog
 
--  **DC2 "Truth Catalogs"** \
-   *by LSST DESC, compiled by Scott Daniel*
-   - `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
-   - `dc2_truth_run1.2_variable_lightcurve`: light curves of variable objects in the truth catalog for Run 1.2
-   - `dc2_truth_run1.2_variable_summary`: summary table of variable objects in the truth catalog for Run 1.2
+#### Buzzard
 
--  **DC2 e-images** \
-   *by LSST DESC*
-   - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
-   - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
+*by Joe DeRose, Risa Wechsler, Eli Rykoff et al.*
 
+- `buzzard`: full catalog, DES Y3 area
+- `buzzard_test`: same as `buzzard` but a small subset for testing purpose / faster access
+- `buzzard_high-res`: higher resolution, smaller sky area
+- `buzzard_v2.0.0_x`: different realizations of the version of the `buzzard` catalog documented in [arXiv:1901.02401](https://arxiv.org/abs/1901.02401).
+
+### DC2 Runs Data Products and Add-ons
+
+*by LSST DESC, compiled by the DC2 Team*
+
+#### Run 2.2 Object Catalogs
+
+- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6
+- `dc2_object_run2.2i_dr6_tract3830`: same as `dc2_object_run2.2i_dr6` but with one tract only, for testing purpose / faster access
+- `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
+- `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
+- `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
+- `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
+
+#### Run 1.2 Object Catalogs
+
+- `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+- `dc2_object_run1.2i_with_photoz`: same as `dc2_object_run1.2i` but with photo-z's (columns that start with `photoz_`). Photo-z provided by Sam Schmidt.
+- `dc2_object_run1.2i_all_columns`: static object catalog for Run 1.2i (with DPDD and all native columns, slower to access)
+- `dc2_object_run1.2i_tract4850`, `dc2_object_run1.2i_tract5063`: same as `dc2_object_run1.2i_all_columns` but only has one tract for testing purpose / faster access
+- `dc2_object_run1.2p`: static object catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns)
+- `dc2_object_run1.2p_all_columns`: static object catalog for Run 1.2p (with DPDD and all native columns, slower to access)
+- `dc2_object_run1.2p_tract4850`: same as `dc2_object_run1.2p_all_columns` but only has one tract (4850)for testing purpose / faster access
+
+#### Run 1.2 Truth Catalogs
+
+- `dc2_truth_run1.2_static`: truth catalog for Run 1.2 (static objects only, corresponds to `proto-dc2_v3.0`)
+- `dc2_truth_run1.2_variable_lightcurve`: light curves of variable objects in the truth catalog for Run 1.2
+- `dc2_truth_run1.2_variable_summary`: summary table of variable objects in the truth catalog for Run 1.2
+
+#### Run 1.2 DIA Source Catalogs
+
+- `dc2_dia_source_run1.2p_test`: DIASource Table catalog for a test DIA processing of Tract+Paptch 4849+6,6 for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).
+
+#### Run 1.2 Forced Source Catalogs
+
+- `dc2_forced_source_run1.2p`: Forced Source Table catalog for Run 1.2p (with only DPDD columns and native columns needed for the DPDD columns).  This is the forced-position photometry based on the positions in the Object Table.
+
+#### Run 1.2 Source Catalogs
+
+- `dc2_source_run1.2i`: Source Table catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
+
+#### Run 1.2 e-images
+
+- `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
+- `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
 ## Use GCRCatalogs at NERSC
 
@@ -114,7 +128,7 @@ You can find instructions about getting NERSC account and joining `lsst` group
 at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 (*DESC members only*).
 
-### With Jupyter notebooks:
+### With Jupyter notebooks
 
 It is recommended that you first install DESC-specific kernels for your
 NERSC jupyter environment (*you only need to do this once*).
@@ -143,7 +157,7 @@ import sys
 sys.path.insert(0, '/global/common/software/lsst/common/miniconda/current/lib/python3.6/site-packages')
 ```
 
-### In a terminal or in a Python script:
+### In a terminal or in a Python script
 
 You can activate DESC Python environment by running the following line on NERSC
 (needs to be in `bash` or `zsh`):
