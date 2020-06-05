@@ -2,8 +2,7 @@ subclass_name: composite.CompositeReader
 description: DC2 Run 2.2i DR3 Object Catalog with metacal
 catalogs:
   - catalog_name: dc2_object_run2.2i_dr3
-    filename_pattern: 'object_tract_\d+\.parquet$'
     matching_method: MATCHING_FORMAT
   - catalog_name: photoz_run2.2i_dr3
-    filename_pattern: 'photoz_pdf_Run2.2i_tract_\d+\.parquet$'
     matching_method: MATCHING_FORMAT
+include_in_default_catalog_list: true
