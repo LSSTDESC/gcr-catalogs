@@ -211,7 +211,6 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         """
         datasets = list()
         for fname in sorted(os.listdir(self.base_dir)):
-            print(f'Processing data file {fname}')                  ### debug
             info_dict = self.path_parser.file_info(fname)
             if info_dict == None:
                 continue
