@@ -7,4 +7,4 @@ filename_pattern: 'trim_merged_tract_\d+\.hdf5$'
 description: DC2 Run 1.2p Object Catalog DPDD-columns (with only DPDD columns and native columns needed for the DPDD columns)
 creators: ['Stephane Plaszczynski']
 pixel_scale: 0.185
-deprecated: Use dc2_object_run1.2p (most compatible) or dc2_object_run2.2i (latest) instead.
+deprecated: Use dc2_object_run1.2p (most compatible) or dc2_object_run2.2i* (latest) instead.
