@@ -157,8 +157,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 
 Source Catalog contains information about high signal-to-noise detections on single frame images,
 
-Forced Source Catalog contains photometry measurements about low signal-to-noise detections done on individual
-exposures in each place where an object was detected on a stacked image.
+Forced Source Catalog contains fixed-position photometry measurements performed on individual 
+exposures based on the positions from objects in the Object Catalog.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
