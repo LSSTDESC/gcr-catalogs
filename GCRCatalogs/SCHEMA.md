@@ -1,6 +1,8 @@
 # Schema of GCR Catalogs as used in LSST DESC
 
-## Metadata
+## Extragalactic Catalogs
+
+### Metadata for Extragalactic Catalogs
 
 Attribute name | Type | Definition
 --- | --- | ---
@@ -9,15 +11,15 @@ Attribute name | Type | Definition
 `halo_mass_def` | `str` | halo mass definition, e.g., `vir`, `200m`, `200c`
 `lightcone` | `bool` | whether or not the catalog is a light cone catalog
 
-## Schema
+### Schema for Extragalactic Catalogs
+
+Columns names in extragalactic catalogs generally follow these rules:
 
 - Label names are generally in `lowercase_separated_by_underscores` format, except in a few cases an upper case letter is needed (e.g., `Mag_true_Y_lsst_z0`).
 - Label names generally start with the name of the physical quantity, and are followed by specifications (i.e., use `size_disk_true` not `true_disk_size`). Some exceptions are `galaxy_id`, `halo_id`, `halo_mass`.
 - A quantity with `_true` usually means before the lensing effect is taken into account.
 - Not all quantities listed below are available in all catalogs. Use `list_all_quantities()` to find available quantities.
 - In addition to the quantities listed below, there are also *native quantities*, which are quantities whose label names and/or units have not been homogenized and may change in the future. Nevertheless, one can still access native quantities via GCRCatalogs. Use `list_all_native_quantities()` to find available native quantities.
-
-### Schema for Extragalatic Catalogs
 
 Quantity Label | Unit | Definition
 --- | --- | ---
@@ -92,23 +94,30 @@ Quantity Label | Unit | Definition
 `sed_<start>_<width>_disk_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for disk
 `sed_<start>_<width>_bulge_no_host_extinction` | 4.4659e13 W/Hz | same as `sed_<start>_<width>_no_host_extinction` but for bulge
 
+## DC2 DPDD-like Catalogs
 
-## Schema for DC2 Coadd Catalogs
-
-The schema for DC2 Coadd Catalogs follow the following rules:
+The schema for DC2 DPDD-like Catalogs (such as Object, Source, and Force Source Catalogs, as defined in [LDM-153](https://ls.st/LDM-153)),
+generally follow these rules:
 
 - For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
-- For quantities that are defined the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
+- For quantities that are defined in the above "Schema for Extragalactic Catalogs", we follow Extragalactic Catalogs' naming scheme ('GCRbase' below).
 - For quantities that are defined in both, we provide aliases so both naming schemes would work.
-- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
+- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalactic Catalogs' naming style.
 
-For quantities that are not yet documented in the table above, we document them below:
-- In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
+In the tables below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD. Note that
+
 - Items marked with 'xx' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
-   * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
-   * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
-   * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
+  * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
+  * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
+  * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
 - Quantities named with `x` or `y` are in the local coordinate system of the tract+patch.
+
+### Schema for DC2 Object Catalogs
+
+Object Catalog contains information about static astronomical objects measured on a stacked (coadd) image.
+The photometry in the Object Catalog is measured with the forced photometry method, i.e.,
+it is consistently measured across multiple bands using a fixed position,
+which is determined from the reference filter for each source (the filter that best measures the source).
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
@@ -144,22 +153,12 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 
-## Schema for DC2 Source Catalogs
+### Schema for DC2 Source and Forced Source Catalogs
 
-The schema for DC2 Schema Catalogs follow the following rules:
+Source Catalog contains information about high signal-to-noise detections on single frame images,
 
-- For quantities that are defined in [LSST DPDD](https://lse-163.lsst.io/dpdd.pdf), we follow DPDD's naming scheme.
-- For quantities that are defined in the above "Schema for Extragalatic Catalogs", we follow Extragalatic Catalogs' naming scheme ('GCRbase' below).
-- For quantities that are defined in both, we provide aliases so both naming schemes would work.
-- For quantities that are defined in neither and are newly defined for the coadd catalogs, we generally follow Extragalatic Catalogs' naming style.
-
-For quantities that are not yet documented in the table above, we document them below:
-- In the table below we list the name of the quantity, its units and definition and whether the name is defined in the GCRbase or DPDD.
-- Items marked with 'xx' are not exactly defined in the DPDD, but their name is taken from a related column in a different table.  E.g.
-   * there is no `x`, `y` in the DPDD Object table, but these are called `x`, '`y` in the DPDD Source table.  We don't have `xyCov` so we separately list `xErr` and `yErr`.
-   * `radec` is a pair in the DPDD, but we separate out into `ra`, `dec` here.
-   * The DPDD says `psCov`, but we only have the diagonal terms, so we call it `psErr`.
-- Quantities named with `x` or `y` are in the local coordinate system of the tract+patch.
+Forced Source Catalog contains fixed-position photometry measurements performed on individual 
+exposures based on the positions from objects in the Object Catalog.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
@@ -184,7 +183,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `I_flag` | - | Flag for issues with `Ixx`, `Ixx`, and `Ixx.` |   | x |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
-## Schema for DC2 truth catalogs
+
+## DC2 Run 1.x truth catalogs
 
 DC2 truth catalogs correspond to catalogs such that `dc2_truth_run1.1_static` or `dc2_truth_run1.2_static`. Definition of quantities can be accessed using `get_quantity_info`:
 
