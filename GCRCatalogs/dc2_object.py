@@ -773,8 +773,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
 
             modifiers[f'psf_fwhm_{band}'] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
-                f'{band}_base_SdssShape_xx',
-                f'{band}_base_SdssShape_yy',
-                f'{band}_base_SdssShape_xy')
+                f'{band}_base_SdssShape_psf_xx',
+                f'{band}_base_SdssShape_psf_yy',
+                f'{band}_base_SdssShape_psf_xy')
 
         return modifiers
