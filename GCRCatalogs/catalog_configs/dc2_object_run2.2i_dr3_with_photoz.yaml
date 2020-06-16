@@ -3,6 +3,6 @@ description: DC2 Run 2.2i DR3 Object Catalog with metacal
 catalogs:
   - catalog_name: dc2_object_run2.2i_dr3
     matching_method: MATCHING_FORMAT
-  - catalog_name: photoz_run2.2i_dr3
+  - catalog_name: photoz_dc2_object_run2.2i_dr3
     matching_method: MATCHING_FORMAT
 include_in_default_catalog_list: true
