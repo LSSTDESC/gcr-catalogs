@@ -23,4 +23,3 @@ catalogs:
          3825, 3837,
          4022, 4035, 4236, 4429, 4440, 4441, 4648, 4860,
          5071, 5073]
-include_in_default_catalog_list: true
