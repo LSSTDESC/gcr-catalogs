@@ -41,7 +41,7 @@ class PathInfoParser():
             if gname in self._known_ints:
                 base_pat = base_pat.replace(g, fr'(?P<{gname}>\d+)')
             else:
-                base_pat = base_pat.replace(g, fr'(?P<{gname}>\w+)')            
+                base_pat = base_pat.replace(g, fr'(?P<{gname}>\w+)')
             
         self.pattern = re.compile(base_pat)
 
@@ -66,15 +66,15 @@ class PathInfoParser():
         m = self.pattern.match(path)
         if not m: return None
 
-        d = m.groupdict()
-        if d == None : d = {}
+        d = m.groupdict() or {}
 
         for (k, v) in d.items():
             try:
                 castv = int(v)
-                d[k] = castv
             except ValueError:
                 pass
+            else:
+                d[k] = castv
         return d
 
     
