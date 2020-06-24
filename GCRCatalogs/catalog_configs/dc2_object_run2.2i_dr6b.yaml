@@ -1,0 +1,3 @@
+based_on: dc2_object_run2.2i_dr6
+base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6b/object_table_summary
+description: DC2 Run 2.2i DR6b Object Table
