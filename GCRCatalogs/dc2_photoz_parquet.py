@@ -150,15 +150,28 @@ class DC2PhotozGalaxyCatalog(BaseGenericCatalog):
         return native_quantity_getter.read_columns(list(native_quantities_needed), as_dict=True)
 
     
-    @staticmethod
-    def _extract_dataset_info(filename): # pylint: disable=unused-argument
+    def _extract_dataset_info(self, filename):
         """
         Should return a dict that contains infomation of each dataset
         that is parsed from the filename
         Should return None if no infomation need to be stored
         Should return False if this dataset needs to be skipped
+        Parameters:
+        ----------
+        filename (str)
+          the filename of the chunk of data
+        Returns:
+        -------
+        data_info: (dict)
+          a dictionary of file attributes, in this case zlo, zhi, and 
+          healpix_pixel
         """
-
+        fname_pattern = self.healpix_pattern.format(r'(\d)', r'(\d)', r'(\d+)')
+        mat = re.match(fname_pattern, filename)
+        zlo_x, zhi_x, hpx_x = tuple(map(int, mat.groups()))
+        data_info = {'zlo':zlo_x, 'zhi':zhi_x, 'healpix_pixel':hpx_x}
+        return data_info
+        
     @staticmethod
     def _sort_datasets(datasets):
         return datasets
