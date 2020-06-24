@@ -17,7 +17,6 @@ __all__ = ['DC2TruthParquetCatalog']
 class PathInfoParser():
     _group_pat = r'\{[a-zA-Z_][a-zA-Z0-9_]*\}'
     _known_ints = ('tract', 'visit', 'healpix')
-    #_path_key = 'PATH'
 
     def __init__(self, base_template):
         '''
@@ -121,7 +120,6 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
 
         self._quantity_modifiers = {col: None for col in self._columns}
         
-        self._schema = self._generate_schema_from_datafiles(self._datasets)
         self._native_filter_quantities = set(self.path_parser.group_names)
    
     def _generate_datasets(self):
@@ -141,18 +139,8 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
                                                info=info_dict))
         return datasets
 
-    @staticmethod
-    def _generate_schema_from_datafiles(datasets):
-        schema = {}
-
-        for dataset in datasets:
-            x = dataset.native_schema
-            schema.update(x)
-
-        return schema
-
     def _generate_native_quantity_list(self):
-        return set(self._schema.keys()).union(self._native_filter_quantities)
+        return self._columns
 
     @staticmethod
     def _obtain_native_data_dict(native_quantities_needed,
@@ -169,5 +157,12 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
                     not native_filters.check_scalar(dataset.info)):
                 continue
             for i in range(dataset.num_row_groups):
-                dataset.row_group = i
+                dataset.current_row_group = i
                 yield dataset
+
+    def close_all_file_handles(self):
+        """Clear all cached file handles"""
+        for dataset in self._datasets:
+            dataset.close()
+
+                
