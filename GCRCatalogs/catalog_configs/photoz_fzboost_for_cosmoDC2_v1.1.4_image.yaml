@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_photoz_parquet.DC2PhotozGalaxyCatalog
-base_dir: /global/cscratch1/sd/schmidt9/CosmoDC2v114_image/FlexZPipe/outputs
+base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/FlexZBoost
 catalog_root_dir: /global/cscratch1/sd/schmidt9/CosmoDC2v114_image/FlexZPipe/outputs
 healpix_pattern: fzboost_photoz_pdf_z_{}_{}.step_all.healpix_{}.parquet
 catalog_filename_template: fzboost_photoz_pdf_z_\d\_\d\.step_all.healpix_\d+\.parquet
