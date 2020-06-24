@@ -1,4 +1,5 @@
 import re
+import warnings
 
 __all__ = ['PathInfoParser']
 
