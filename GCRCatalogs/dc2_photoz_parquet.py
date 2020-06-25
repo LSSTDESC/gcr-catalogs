@@ -37,8 +37,25 @@ class DC2PhotozGalaxyCatalog(BaseGenericCatalog):
     META_PATH = os.path.join(FILE_DIR,
                              'catalog_configs/_dc2_photoz_parquet.yaml')
     
+    # FlexZBoost has slightly different binning than BPZ
+    _PDF_BIN_INFO = {
+        'start': 0.0,
+        'stop': 3.0,
+        'nbins': 301,
+        'decimals_to_round': 3,
+    }
+
+
     def _subclass_init(self, catalog_root_dir, catalog_filename_template, healpix_pattern, **kwargs):
         # pylint: disable=W0221
+        # grab bin info as kwarg, or default to FlexZBoost xgal values.
+        self._pdf_bin_info = kwargs.get('pdf_bin_info', self._PDF_BIN_INFO)
+        self._pdf_bin_centers = np.round(np.linspace(self._pdf_bin_info['start'],
+                                                   self._pdf_bin_info['stop'],
+                                                   self._pdf_bin_info['nbins'],
+        ), self._pdf_bin_info['decimals_to_round'])
+        self._n_pdf_bins = len(self._pdf_bin_centers)
+        
         if not os.path.isdir(catalog_root_dir):
             raise ValueError('Catalog directory {} does not exist'.format(catalog_root_dir))
 
@@ -204,6 +221,13 @@ class DC2PhotozGalaxyCatalog(BaseGenericCatalog):
                 continue
             yield dataset
 
+    @property
+    def photoz_pdf_bin_centers(self):
+        return self._pdf_bin_centers
+
+    @property
+    def n_pdf_bins(self):
+        return self._n_pdf_bins
 
 
 class DC2PhotozCatalog(DC2DMTractCatalog):
