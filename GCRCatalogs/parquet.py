@@ -30,7 +30,7 @@ class ParquetFileWrapper():
         self._handle = None
         self._columns = None
         self._info = info or dict()
-        self._row_group = 0
+        self._row_group = 0  # store the current row group index
 
     @property
     def handle(self):
@@ -48,7 +48,7 @@ class ParquetFileWrapper():
 
     @current_row_group.setter
     def current_row_group(self, grp):
-        self._row_group = grp
+        self._row_group = int(grp)
 
     def close(self):
         self._handle = None
@@ -92,7 +92,7 @@ class ParquetFileWrapper():
         -------
         dict or dataframe   See as_dict parameter above
         '''
-        d = self.handle.read_row_group(self._row_group, columns=columns).to_pandas()
+        d = self.handle.read_row_group(self.current_row_group, columns=columns).to_pandas()
         if as_dict:
             return {c: d[c].values for c in columns}
         return d
@@ -113,4 +113,3 @@ class ParquetFileWrapper():
             self._columns = [col for col in self.handle.schema.to_arrow_schema().names
                              if re.match(r'__\w+__$', col) is None]
         return list(self._columns)
-
