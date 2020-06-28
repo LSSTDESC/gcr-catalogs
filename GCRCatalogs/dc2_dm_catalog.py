@@ -255,17 +255,15 @@ class DC2DMCatalog(BaseGenericCatalog):
         Overloading this so that we can query the database backend
         for multiple columns at once
         """
-        return native_quantity_getter.read_columns_row_group(list(native_quantities_needed),
-                                                             as_dict=True)
+        return native_quantity_getter.read_columns(list(native_quantities_needed),
+                                                   as_dict=True)
 
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             if (native_filters is not None and
                     not native_filters.check_scalar(dataset.info)):
                 continue
-            for i in range(dataset.num_row_groups):
-                dataset.current_row_group = i
-                yield dataset
+            yield dataset
 
     def __len__(self):
         if self._len is None:
