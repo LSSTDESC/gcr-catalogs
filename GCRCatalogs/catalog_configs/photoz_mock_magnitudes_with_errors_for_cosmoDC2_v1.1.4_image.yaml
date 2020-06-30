@@ -2,7 +2,7 @@
 
 subclass_name: photoz_magerr.PZMagErrCatalog
 catalog_name: photoz_mock_magnitudes_with_errors_for_cosmoDC2_v1.1.4_image
-base_dir: /global/cfs/cdirs/lsst/groups/PZ/PhotoZDC2/COSMODC2v1.1.4/IMAGE/10_year_error_estimates
+base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/IMAGE/10_year_error_estimates
 filename_pattern: 'z_(\d)\S+withmask.healpix_(\d+)_magwerr\.h5'
 creators: ['Sam Schmidt']
 description:
