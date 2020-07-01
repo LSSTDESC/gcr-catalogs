@@ -9,11 +9,11 @@ description: |
      will return masked arrays that must have the mask applied if you wish to
      properly extract both magnitudes and photometric redshifts simultaneously.
 
-     Data used for training BPZ is representative down to scatmag_i < 25.
+     Data used for training FlexZBoost is representative down to scatmag_i < 25.
 catalogs:
   - catalog_name: cosmoDC2_v1.1.4_image
-    matching_method: galaxy_id
+    matching_method: MATCHING_FORMAT
   - catalog_name: photoz_mock_magnitudes_with_errors_for_cosmoDC2_v1.1.4_image
     matching_method: MATCHING_FORMAT
   - catalog_name: photoz_fzboost_for_cosmoDC2_v1.1.4_image
-    matching_method: galaxy_id
+    matching_method: MATCHING_FORMAT
