@@ -45,6 +45,7 @@ products of DESC Data Challenge 2 at the
 Confluence page (*DESC member only*).
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 -  **"cosmoDC2" Extragalactic Catalogs and add-ons** \
    *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen, Eli Rykoff et al.*
    - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
@@ -103,6 +104,8 @@ Confluence page (*DESC member only*).
    - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
    - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 =======
+=======
+>>>>>>> b58f99bb732dbccc25bb5e938540acb3ca77c79f
 ### Extragalactic Catalogs and Add-ons
 
 #### cosmoDC2
@@ -111,7 +114,7 @@ Confluence page (*DESC member only*).
 
 - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
 - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
-- `cosmoDC2_v1.1.4_redmapper_v0.2.1py`: Redmapper catalog (v0.2.1) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_redmapper_v0.5.7`: Redmapper catalog (v0.5.7) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
 - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
@@ -137,7 +140,10 @@ Confluence page (*DESC member only*).
 *by LSST DESC, compiled by the DC2 Team*
 
 #### Run 2.2 Object Catalogs
+<<<<<<< HEAD
 >>>>>>> 6ea2ab6252b0f2a267b485126f6b6ef2913c2605
+=======
+>>>>>>> b58f99bb732dbccc25bb5e938540acb3ca77c79f
 
 - `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6
 - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
