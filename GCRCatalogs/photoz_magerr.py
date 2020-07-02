@@ -17,7 +17,7 @@ from .utils import first
 
 __all__ = ['PZMagErrCatalog', 'PZMagErrPDFsCatalog']
 
-FILE_PATTERN = r'z_(\d)\S+healpix_(\d+)_magwerr\.h5$'
+FILE_PATTERN = r'z_(\d)\S+withmask.healpix_(\d+)_magwerr\.h5$'
 FILE_PATTERN_PDF = r'photoz_pdf_z_(\d)\S+healpix_(\d+).hdf5'
 FILE_GLOB_PATTERN_PDF = 'photoz_pdf_z_*.hdf5'
 
@@ -43,7 +43,8 @@ class PZMagErrCatalog(BaseGenericCatalog):
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
         self._quantity_modifiers = {
             'redshift': 'redshift',
-            'galaxy_id': 'baseDC2/galaxy_id'
+            'galaxy_id': 'baseDC2/galaxy_id',
+            'photoz_mask': 'photoz_mask'
         }
         for band in ['u','g','r','i','z','y']:
             self._quantity_modifiers['mag_%s_photoz'%band] = 'scatmag_%s'%band
@@ -88,6 +89,11 @@ class PZMagErrCatalog(BaseGenericCatalog):
                                         'compact, single peaked posterior, while'
                                         ' low ODDS values could indicate multiple'
                                         ' peaks or a broad posterior'}
+        self._info_dict['photoz_mask']={'units':'unitless',
+                                        'description':'photoz_mask is a boolean'
+                                        ' mask to match the arrays of the set of'
+                                        ' magnitudes and errors to the subset '
+                                        'with i<26.5 that have photozs computed'}
 
     def _get_quantity_info_dict(self, quantity, default=None):
         return self._info_dict.get(quantity,default)
