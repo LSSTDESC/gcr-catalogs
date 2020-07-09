@@ -127,7 +127,7 @@ class DC2PhotozGalaxyCatalog(CosmoDC2ParentClass,DC2PhotozMixin):
         """
         fname_pattern = self.healpix_pattern.format(r'(\d)', r'(\d)', r'(\d+)')
         mat = re.match(fname_pattern, filename)
-        zlo_x, zhi_x, hpx_x = tuple(map(int, mat.groups()))
+        zlo_x, _, hpx_x = tuple(map(int, mat.groups()))
         data_info = {'zlo':zlo_x, 'healpix_pixel':hpx_x}
         return data_info
 
