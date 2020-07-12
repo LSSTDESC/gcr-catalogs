@@ -8,7 +8,7 @@ import warnings
 import numpy as np
 from .dc2_dm_catalog import DC2DMCatalog, DC2DMTractCatalog
 
-__all__ = ['DC2PhotozMixin', 'DC2PhotozGalaxyCatalog', 'DC2PhotozCatalog']
+__all__ = ['DC2PhotozMixin', 'CosmoDC2Parquet', 'DC2PhotozGalaxyCatalog', 'DC2PhotozCatalog']
 
 
 class DC2PhotozMixin:
@@ -56,31 +56,6 @@ class DC2PhotozMixin:
         return self._n_pdf_bins
 
 
-class DC2PhotozCatalog(DC2PhotozMixin, DC2DMTractCatalog):
-    r"""DC2 Parquet Photoz Catalog reader
-
-    Parameters
-    ----------
-    file_dir          (str): Directory of data files being served, required
-    file_pattern      (str): The optional regex pattern of served data files
-    meta_path         (str): path to yaml entries for quantities
-
-    Attributes
-    ----------
-    base_dir          (str): The directory of data files being served
-
-    Notes
-    -----
-    """
-    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
-    FILE_PATTERN = r'photoz_pdf_Run\d\.[0-9a-z]+_tract_\d+\.parquet$'
-    META_PATH = os.path.join(FILE_DIR, 'catalog_configs', '_dc2_photoz_parquet.yaml')
-
-    def _subclass_init(self, **kwargs):
-        super(DC2PhotozCatalog, self)._subclass_init(**kwargs)
-        self._process_pdf_bins(kwargs.get("pdf_bin_info"))
-
-
 class CosmoDC2Parquet(DC2DMCatalog):
 
     _native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
@@ -116,21 +91,15 @@ class CosmoDC2Parquet(DC2DMCatalog):
 
 
 class DC2PhotozGalaxyCatalog(DC2PhotozMixin, CosmoDC2Parquet):
-    r"""
-    catalog reader class for cosmoDC2 galaxy catalogs
+    """Parquet Photoz Catalog reader (for cosmoDC2 galaxy catalog)
 
     Parameters
     ----------
-    catalog_root_dir           (str): Directory of data files being served
-                                      required
-    catalog_filename_template  (str): regex pattern of served data files,
-                                      should match pattern used in main
-                                      galaxy catalog
-    healpix_pattern            (str): should match regex pattern, but with {}
-                                      because this pattern is used in
-                                      CosmoDC2ParentClass
+    base_dir          (str): The directory of data files being served
+    file_pattern      (str): The optional regex pattern of served data files
+    meta_path         (str): path to yaml entries for quantities
+    healpix_pixels   (list): List of tracts (integer)
     """
-
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'fzboost_photoz_pdf_z_(\d)_(\d).step_all.healpix_(\d+).parquet'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs', '_dc2_photoz_parquet.yaml')
@@ -145,4 +114,23 @@ class DC2PhotozGalaxyCatalog(DC2PhotozMixin, CosmoDC2Parquet):
 
     def _subclass_init(self, **kwargs):
         super(DC2PhotozGalaxyCatalog, self)._subclass_init(**kwargs)
+        self._process_pdf_bins(kwargs.get("pdf_bin_info"))
+
+
+class DC2PhotozCatalog(DC2PhotozMixin, DC2DMTractCatalog):
+    """DC2 Parquet Photoz Catalog reader
+
+    Parameters
+    ----------
+    base_dir          (str): The directory of data files being served
+    file_pattern      (str): The optional regex pattern of served data files
+    meta_path         (str): path to yaml entries for quantities
+    tracts           (list): List of tracts (integer)
+    """
+    FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+    FILE_PATTERN = r'photoz_pdf_Run\d\.[0-9a-z]+_tract_\d+\.parquet$'
+    META_PATH = os.path.join(FILE_DIR, 'catalog_configs', '_dc2_photoz_parquet.yaml')
+
+    def _subclass_init(self, **kwargs):
+        super(DC2PhotozCatalog, self)._subclass_init(**kwargs)
         self._process_pdf_bins(kwargs.get("pdf_bin_info"))
