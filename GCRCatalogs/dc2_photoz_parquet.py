@@ -73,13 +73,13 @@ class CosmoDC2Parquet(DC2DMCatalog):
         except (ValueError, TypeError, AttributeError):
             warnings.warn('Filename {} does not contain correct z/healpix info or not in correct format. Skipped')
             return False
-        return {'zlo': zlo, 'healpix_pixel': hpx}
+        return {'redshift_block_lower': zlo, 'healpix_pixel': hpx}
 
     def _sort_datasets(self, datasets):
         current_healpix_pixels = set(dataset.info['healpix_pixel'] for dataset in datasets)
         if self._healpix_pixels and not all(t in current_healpix_pixels for t in self._healpix_pixels):
             warnings.warn('Not all healpix pixels that were requested are loaded. Use `available_healpix_pixels` to see what pixels have been loaded.')
-        return sorted(datasets, key=lambda d: (d.info['zlo'], d.info['healpix_pixel']))
+        return sorted(datasets, key=lambda d: (d.info['redshift_block_lower'], d.info['healpix_pixel']))
 
     @property
     def available_healpix_pixels(self):
