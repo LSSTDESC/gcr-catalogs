@@ -15,13 +15,13 @@ class DC2PhotozMixin:
 
     _PDF_BIN_INFO = {
         'start': 0.005,
-        'stop': 3.0055,
-        'step': 0.01,
+        'stop': 3.005,
+        'nbins': 301,
         'decimals_to_round': 3,
     }
 
     @staticmethod
-    def _generate_modifiers():
+    def _generate_modifiers(**kwargs):
         """Creates a dictionary relating native and homogenized column names
         Returns:
           A dictionary of the form {<homogenized name>: <native name>, ...}
@@ -40,10 +40,10 @@ class DC2PhotozMixin:
 
     def _process_pdf_bins(self, pdf_bin_info=None):
         self._pdf_bin_info = pdf_bin_info or self._PDF_BIN_INFO
-        self._pdf_bin_centers = np.round(np.arange(
+        self._pdf_bin_centers = np.round(np.linspace(
             self._pdf_bin_info['start'],
             self._pdf_bin_info['stop'],
-            self._pdf_bin_info['step'],
+            self._pdf_bin_info['nbins'],
         ), self._pdf_bin_info['decimals_to_round'])
         self._n_pdf_bins = len(self._pdf_bin_centers)
 
