@@ -1,0 +1,3 @@
+based_on: photoz_fzboost_for_cosmoDC2_v1.1.4_image
+healpix_pixels: [9559, 9686, 9687, 9814, 9815, 9816, 9942, 9943, 10070, 10071, 10072, 10198, 10199, 10200, 10326, 10327, 10450]
+addon_for: cosmoDC2_v1.1.4_small
