@@ -1,0 +1,16 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_matched_table.DC2MatchedTable
+table_dir: /global/cscratch1/sd/jsanch87/DC2_Run2.2i/
+table_filename_template: matched_ids_dc2_object_run{}_{}_{{}}.fits.gz
+data_release: dr6a
+version: '2.2i'
+truth_version: 'dc2_truth_run2.2i_galaxy_truth_summary'
+object_id: 'objectId'
+truth_id: 'truthId'
+match_flag: 'is_matched'
+is_star: 'is_star'
+creator: 'Javier Sanchez'
+description: 'This is the table of matches between the object catalog and the extragalactic catalog'
+addon_for: dc2_object_run2.2i_dr6a
+deprecated: false
