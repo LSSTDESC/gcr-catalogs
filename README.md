@@ -79,7 +79,12 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
-- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6
+- `dc2_object_run2.2i_dr6c`: static object catalog for Run 2.2i DR6c (an early release of DR6; 165 tracts)
+- `dc2_object_run2.2i_dr6c_with_metacal`: static object + metacal catalog for Run 2.2i DR6c (an early release of DR6; 159 tracts)
+- `dc2_object_run2.2i_dr6a`: static object catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
+- `dc2_object_run2.2i_dr6a_with_metacal`: static object +metacal catalog for Run 2.2i DR6a (an early release of DR6; 63 tracts)
+- `dc2_object_run2.2i_dr6a_with_photoz`: static object + photoz catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
+- `dc2_object_run2.2i_dr6a_matched_addon`: static object catalog + matched truth for Run 2.2i DR6a (an early release of DR6; 78 tracts)
 - `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
 - `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
 - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
