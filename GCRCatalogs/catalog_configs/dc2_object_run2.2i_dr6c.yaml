@@ -1,0 +1,7 @@
+subclass_name: dc2_object.DC2ObjectParquetCatalog
+base_dir: /global/cfs/cdirs/lsst/production/DC2_ImSim/Run2.2i/dpdd/run2.2i-wfd-dr6-pre-release/object_table_summary
+# base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6c/object_table_summary
+description: DC2 Run 2.2i DRc Object Table
+creators: ['DESC DC2 Team']
+pixel_scale: 0.2
+include_in_default_catalog_list: true
