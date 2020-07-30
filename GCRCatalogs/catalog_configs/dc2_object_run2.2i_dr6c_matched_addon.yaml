@@ -1,0 +1,11 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: composite.CompositeReader
+description: DC2 Run 2.2i Object Catalog with Matched Table addon
+creators: ['Javi Sanchez', 'Eve Kovacs']
+catalogs:
+  - catalog_name: dc2_object_run2.2i_dr6c
+    matching_method: MATCHING_ORDER
+  - catalog_name: dc2_object_run2.2i_dr6c_matched
+    matching_method: MATCHING_ORDER
+include_in_default_catalog_list: true
