@@ -1,7 +1,7 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_matched_table.DC2MatchedTable
-table_dir: /global/cscratch1/sd/jsanch87/DC2_Run2.2i
+table_dir: ^/DC2-prod/Run2.2i/addons/matched/dr6c
 table_filename_template: matched_ids_dc2_object_run{}_{}_{{}}.fits.gz
 data_release: dr6c
 version: '2.2i'
