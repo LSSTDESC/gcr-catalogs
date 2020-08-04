@@ -54,7 +54,7 @@ class ParquetFileWrapper():
         self._handle = None
 
     def __len__(self):
-        return int(self.handle.scan_contents)
+        return self.handle.metadata.num_rows
 
     def __contains__(self, item):
         return item in self.columns
