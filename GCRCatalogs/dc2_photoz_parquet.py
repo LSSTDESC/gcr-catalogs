@@ -7,8 +7,11 @@ import re
 import warnings
 import numpy as np
 from .dc2_dm_catalog import DC2DMCatalog, DC2DMTractCatalog
+from GCR import BaseGenericCatalog
+from .parquet import ParquetFileWrapper
 
-__all__ = ['DC2PhotozMixin', 'CosmoDC2Parquet', 'DC2PhotozGalaxyCatalog', 'DC2PhotozCatalog']
+__all__ = ['DC2PhotozMixin', 'CosmoDC2Parquet', 'DC2PhotozGalaxyCatalog',
+           'DC2PhotozCatalog', 'PZSKRFCatalog']
 
 
 class DC2PhotozMixin:
@@ -134,3 +137,57 @@ class DC2PhotozCatalog(DC2PhotozMixin, DC2DMTractCatalog):
     def _subclass_init(self, **kwargs):
         super(DC2PhotozCatalog, self)._subclass_init(**kwargs)
         self._process_pdf_bins(kwargs.get("pdf_bin_info"))
+
+
+class PZSKRFCatalog(DC2PhotozMixin,BaseGenericCatalog):
+    """
+    SK-learn Random Forest-based Photo-z catalog class.  Borrowed some structur
+    from Scott Daniel's AGN catalog, as it also uses one single file to load 
+    everything.  Columns available are different than other PZ catalogs, so
+    we will need this custom subclass.
+    """
+
+    # Olivia's data has different binning and numbins than BPZ
+    _PDF_BIN_INFO = {
+        'start': 0.015,
+        'stop': 2.985,
+        'nbins': 100,
+        'decimals_to_round': 3,
+    }
+
+    
+    def _subclass_init(self, base_dir, filename, **kwargs): 
+        if not os.path.isdir(base_dir):
+            raise RuntimeError("Catalog directory %s does not exist." % (base_dir))
+
+        self._path = os.path.join(base_dir, filename)
+        self._dataset = ParquetFileWrapper(self._path,None)
+        self._columns = self._dataset.columns
+        self._quantity_modifiers = self._generate_quantity_modifiers()
+        self._columns = self._dataset.columns
+        self._process_pdf_bins(kwargs.get("pdf_bin_info"))
+        
+    def __del__(self):
+        self._dataset = None
+
+    def _generate_quantity_modifiers(self):
+        quantity_modifiers = {
+            'galaxy_id': 'galid',
+            'mag_i_photoz': 'mag_i',
+            'rz_real': 'rz_real',
+            'photoz_mode': 'photoz_mode',
+            'photoz_pdf': 'photoz_pdf',
+        }
+        return quantity_modifiers
+    
+    def _iter_native_dataset(self, native_filters=None):
+        if native_filters is not None:
+            raise RuntimeError("*native_filters* not supported")
+        yield self._dataset
+
+    def _generate_native_quantity_list(self):
+        return self._columns
+    
+    @staticmethod
+    def _obtain_native_data_dict(native_quantities_needed, native_quantity_getter):
+        return native_quantity_getter.read_columns(list(native_quantities_needed), as_dict = True)
