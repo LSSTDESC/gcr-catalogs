@@ -61,6 +61,7 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         self._quantity_modifiers = {col: None for col in self._columns}
         
         self._native_filter_quantities = set(self.path_parser.group_names)
+        self._len = None
    
     def _generate_datasets(self):
         """Return viable data sets from all files in self.base_dir
@@ -91,6 +92,11 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         """
         return native_quantity_getter.read_columns_row_group(list(native_quantities_needed), as_dict=True)
 
+    def __len__(self):
+        if self._len == None:
+            self._len = sum(len(dataset) for dataset in self._datasets)
+        return self._len
+    
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             if (native_filters is not None and
