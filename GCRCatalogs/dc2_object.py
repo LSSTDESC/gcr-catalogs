@@ -639,7 +639,6 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return set(self._schema).union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
-        # pylint: disable=C0330
         for dataset in self._datasets:
             if (native_filters is None or
                 native_filters.check_scalar(dataset.tract_and_patch)):
