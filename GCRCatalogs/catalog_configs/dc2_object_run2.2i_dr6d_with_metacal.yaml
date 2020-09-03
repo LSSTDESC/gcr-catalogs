@@ -1,5 +1,5 @@
 subclass_name: composite.CompositeReader
-description: DC2 Run 2.2i DR6d Object Catalog with metacal (63 tracts)
+description: DC2 Run 2.2i DR6d Object Catalog with metacal
 catalogs:
   - catalog_name: dc2_object_run2.2i_dr6d
     tracts: [2723, 2724, 2725, 2726, 2727, 2728, 2729, 2730, 2731, 2732, 2733, 2734, 2735,
