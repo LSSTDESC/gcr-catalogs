@@ -1,5 +1,4 @@
 subclass_name: composite.CompositeReader
-only_use_master_attr: true
 description: |
      Composite catalog that matches the "observed" photometry catalog for
      cosmoDC2_v1.1.4_image (with names "scatmag_[band]" and "scaterr_[band]")
