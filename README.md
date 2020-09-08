@@ -79,8 +79,8 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
-- `dc2_object_run2.2i_dr6_wfd_v1`: static object catalog for Run 2.2i DR6 WFD v1 (166 tracts)
-- `dc2_object_run2.2i_dr6_wfd_v1_with_metacal`: static object + metacal catalog for Run 2.2i DR6 WFD v1 (166 tracts)
+- `dc2_object_run2.2i_dr6_wfd`: static object catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
+- `dc2_object_run2.2i_dr6_wfd_with_metacal`: static object + metacal catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
 - `dc2_object_run2.2i_dr6a`: static object catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
 - `dc2_object_run2.2i_dr6a_with_metacal`: static object +metacal catalog for Run 2.2i DR6a (an early release of DR6; 63 tracts)
 - `dc2_object_run2.2i_dr6a_with_photoz`: static object + photoz catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
