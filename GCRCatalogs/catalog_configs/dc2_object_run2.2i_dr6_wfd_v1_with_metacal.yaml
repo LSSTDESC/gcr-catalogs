@@ -34,4 +34,3 @@ catalogs:
     bands: 'griz'
     apply_metacal_test3_fix: true
     matching_method: MATCHING_FORMAT
-include_in_default_catalog_list: true
