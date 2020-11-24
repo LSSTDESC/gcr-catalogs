@@ -5,3 +5,4 @@ base_dir: ^/DC2-prod/Run2.2i/truth/startruth
 filename_pattern: 'star_truth_summary.parquet$'
 description: DC2 Run 2.2i  Summary truth table for stars
 creators: ['Joanne Bogart']
+include_in_default_catalog_list: true
