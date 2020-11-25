@@ -18,7 +18,7 @@ from .utils import md5, first
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
            'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
-__version__ = '1.1.5'
+__version__ = '2.0.1'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -55,7 +55,6 @@ def _calc_Av(lum_v, lum_v_dust):
         Av = -2.5*(np.log10(lum_v_dust/lum_v))
         return Av
 
-
 def _gen_position_angle(size_reference):
     # pylint: disable=protected-access
     size = size_reference.size
@@ -81,9 +80,14 @@ def _calc_ellipticity_2(ellipticity):
     # and position angle
     return ellipticity*np.sin(2.0*pos_angle)
 
+def _limit_magnification(mag):
+    mag = np.where(mag < 0.2, 1.0, mag)
+    mag = np.where(mag > 2.0, 1.0, mag)
+    return mag
+
 
 def _calc_lensed_magnitude(magnitude, magnification):
-    magnification[magnification == 0] = 1.0
+    magnification = _limit_magnification(magnification)
     return magnitude -2.5*np.log10(magnification)
 
 
@@ -123,6 +127,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                     setattr(self.cosmology, k, v)
         else:
             self.cosmology = None
+
 
         self.version = kwargs.get('version', '0.0.0')
         if StrictVersion(__version__) < self.version:
@@ -386,7 +391,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'shear_2_treecorr': (np.negative, 'shear2'),
             'shear_2_phosim':   'shear2',
             'convergence': 'convergence',
-            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
+            'magnification': (_limit_magnification, 'magnification'),
             'halo_id':       'uniqueHaloID',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
