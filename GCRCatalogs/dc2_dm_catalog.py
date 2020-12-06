@@ -12,7 +12,6 @@ import re
 import warnings
 
 import numpy as np
-import pyarrow.parquet as pq
 import yaml
 from GCR import BaseGenericCatalog
 from .parquet import ParquetFileWrapper
