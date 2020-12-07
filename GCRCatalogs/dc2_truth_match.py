@@ -44,7 +44,7 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
         if self._as_object_addon:
             no_postfix = ("is_unique_truth_entry", "match_sep", "match_objectId")
             self._quantity_modifiers = {
-                (k + ("" if k in no_postfix else "_truth"): v for k, v in self._quantity_modifiers.items()
+                (k + ("" if k in no_postfix else "_truth")): v for k, v in self._quantity_modifiers.items()
             }
 
     def _obtain_native_data_dict(self, native_quantities_needed, native_quantity_getter):
