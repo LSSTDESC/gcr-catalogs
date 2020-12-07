@@ -5,6 +5,8 @@ catalogs:
   - catalog_name: dc2_object_run2.2i_dr6_wfd_v1
     tracts: [3259]  # TODO: to be removed
   - catalog_name: dc2_truth_match_run2.2i_dr6_wfd
+    as_object_addon: true
+    as_truth_table: false
     matching_method: MATCHING_FORMAT   # For GCR 0.8.x. TODO: to be removed
     # Below are for GCR v0.9.0 new composite features
     matching_partition: true
