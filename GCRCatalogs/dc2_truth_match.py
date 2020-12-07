@@ -10,7 +10,8 @@ __all__ = ["DC2TruthMatchCatalog"]
 
 
 def _flux_to_mag(flux):
-    return (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+    with np.errstate(divide="ignore"):
+        return (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
 
 
 class DC2TruthMatchCatalog(DC2DMTractCatalog):
