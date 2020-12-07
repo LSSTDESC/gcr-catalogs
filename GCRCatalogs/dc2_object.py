@@ -15,6 +15,7 @@ from GCR import BaseGenericCatalog
 
 from .dc2_dm_catalog import DC2DMTractCatalog
 from .dc2_dm_catalog import convert_flux_to_mag, convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
+from .utils import decode
 
 __all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog']
 
@@ -121,7 +122,7 @@ class TableWrapper():
                 for i in range(self.storer.nblocks):
                     dtype = getattr(self.storer.group, 'block{}_values'.format(i)).dtype.name
                     for col in getattr(self.storer.group, 'block{}_items'.format(i)):
-                        self._native_schema[col.decode()] = {'dtype': dtype}
+                        self._native_schema[decode(col)] = {'dtype': dtype}
         return self._native_schema
 
     @property

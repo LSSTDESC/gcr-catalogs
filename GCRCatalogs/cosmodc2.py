@@ -14,7 +14,7 @@ import h5py
 import healpy as hp
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from .utils import md5, first
+from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
            'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
@@ -232,7 +232,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
         if collect_info_dict:
             quantity_info_dict = dict()
-            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
+            modifier = lambda k, v: None if k == 'description' and decode(v) == 'None given' else decode(v)
             for quantity in native_quantities:
                 quantity_info_dict[quantity] = {k: modifier(k, v) for k, v in fh[group_name][quantity].attrs.items()}
             return native_quantities, quantity_info_dict
