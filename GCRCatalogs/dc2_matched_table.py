@@ -12,10 +12,12 @@ https://gist.github.com/fjaviersanchez/787bb5cd6b598226174e1cd9661465ca
 
 import os
 import re
-import numpy.ma as ma
 from functools import partial
+
+import numpy.ma as ma
 from astropy.io import fits
-from GCRCatalogs import BaseGenericCatalog
+
+from GCR import BaseGenericCatalog
 
 __all__ = ['DC2MatchedTable']
 
@@ -52,8 +54,8 @@ class DC2MatchedTable(BaseGenericCatalog):
             return
 
         filename_template = table_filename_template.format(self._version, self._data_release)
-        tracts = kwargs.get('tracts', None)
-        self._files = self._get_file_list(table_dir, filename_template, tracts=tracts)
+        self._use_tracts = bool(kwargs.get('tracts', None))
+        self._files = self._get_file_list(table_dir, filename_template, tracts=self._use_tracts)
         if len(self._files) == 0:
             print("No files found matching template filename {}".format(filename_template))
             return
@@ -80,8 +82,6 @@ class DC2MatchedTable(BaseGenericCatalog):
         }
         modified_quantity_list = [c for c in self._column_names if self._is_star not in c and self._match_flag not in c and 'redshift' not in c]
         for q in modified_quantity_list:
-            #self._quantity_modifiers[q + '_galaxy'] = (lambda x: ma.MaskedArray(x, mask=self._galaxy_match_mask), q)
-            #self._quantity_modifiers[q + '_star'] = (lambda x: ma.MaskedArray(x, mask=self._star_match_mask), q)
             quantity_modifiers[q + '_galaxy'] = (_get_galaxy_array, q, self._is_star, self._match_flag)
             quantity_modifiers[q + '_star'] = (_get_star_array, q, self._is_star, self._match_flag)
 
@@ -126,13 +126,17 @@ class DC2MatchedTable(BaseGenericCatalog):
         return self._column_names
 
     def _iter_native_dataset(self, native_filters=None):
-        assert not native_filters, '*native_filters* is not supported'
+        if native_filters is not None and not self._use_tracts:
+            raise ValueError("*native_filters* is not supported")
 
-        for file_path in self._files.values():
+        for file_id, file_path in self._files.items():
+            if (
+                self._use_tracts and native_filters is not None and
+                not native_filters.check_scalar({"tract": file_id})
+            ):
+                continue
             with fits.open(file_path) as hdul:
                 handle = list(hdul)[1]
-                #def native_quantity_getter(native_quantity):
-                #    return handle.data[native_quantity]
                 yield partial(self._native_quantity_getter, handle=handle)
 
     @staticmethod
