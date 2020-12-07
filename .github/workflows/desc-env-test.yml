@@ -1,35 +1,32 @@
-name: desc-env-test
+name: DESC Env Docker Build Test
 
 on:
-  # Trigger the workflow on push, but only for the master branch
   push:
-    branches:
-      - master
+    branches: [ master ]
 
 jobs:
-  build:
-    name: Build on Ubuntu
+  docker-build:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+       include:
+         - docker_name: updateGCRpy
+           docker_image: lsstdesc/desc-python:latest
+           docker_image_updated: lsstdesc/desc-python:test
+           conda_activate: "conda activate desc;"
+           setup_script: /usr/local/py3.7/etc/profile.d/conda.sh
+         - docker_name: updateGCRstack
+           docker_image: lsstdesc/stack-jupyter:prod
+           docker_image_updated: lsstdesc/stack-jupyter:test
+           conda_activate: ""
+           setup_script: /opt/lsst/software/stack/loadLSST.bash
+
     steps:
-      - name: Docker login
-        run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username heather999 --password-stdin
-      - name: checkout gcr-catalogs
-        uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-  #    - name: pull desc-stack
-  #      run: docker pull lsstdesc/stack-jupyter:prod 
-      - name: pull desc-python - using latest for now
-        run: docker pull lsstdesc/desc-python:latest
-      - name: Install gcr master in desc-python
-        run: docker run --name="updateGCRpy" lsstdesc/desc-python:latest /bin/bash -c "source /usr/local/py3.7/etc/profile.d/conda.sh; conda activate desc; pip install https://github.com/LSSTDESC/gcr-catalogs/archive/master.zip"
-   #   - name: Install gcr master in desc-stack:test
-   #     run: docker run --name="updateGCRstack" lsstdesc/stack-jupyter:prod /bin/bash -c "source /opt/lsst/software/stack/loadLSST.bash; pip install https://github.com/LSSTDESC/gcr-catalogs/archive/master.zip"
-      - name: docker commit desc-python:test
-        run: docker commit -m="Installed latest GCR master" updateGCRpy lsstdesc/desc-python:test
-    #  - name: docker commit desc-stack:test
-    #    run: docker commit -m="Installed latest GCR master" updateGCRstack lsstdesc/stack-jupyter:test
-      - name: push desc-python
-        run: docker push lsstdesc/desc-python:test
-    #  - name: push desc-stack
-    #   run: docker push lsstdesc/stack-jupyter:test
+      - name: docker login
+        run: docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_ACCESSTOK }}
+      - run: docker pull ${{ matrix.docker_image }}
+      - name: Install master branch of ${{ github.repository }}
+        run: docker run --name=${{ matrix.docker_name }} ${{ matrix.docker_image }} /bin/bash \
+          -c "source ${{ matrix.setup_script }}; ${{ matrix.conda_activate }} pip install https://github.com/${{ github.repository }}/archive/master.zip"
+      - run: docker commit -m="Installed ${{ github.repository }} master" ${{ matrix.docker_name }} ${{ matrix.docker_image_updated }}
+      - run: docker push ${{ matrix.docker_image_updated }}
