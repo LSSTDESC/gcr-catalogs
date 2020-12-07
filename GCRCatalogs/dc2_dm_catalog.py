@@ -291,7 +291,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
         super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
-        match = re.search(r'tract_(\d+)', filename)
+        match = re.search(r'tract_?(\d+)', filename)
         if match is None:
             warnings.warn('Filename {} does not contain tract info or not in correct format. Skipped')
             return False
@@ -330,7 +330,7 @@ class DC2DMVisitCatalog(DC2DMCatalog):
         super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
-        match = re.search(r'visit_(\d+)', filename)
+        match = re.search(r'visit_?(\d+)', filename)
         if match is None:
             warnings.warn('Filename {} does not contain visit info or not in correct format. Skipped')
             return False
