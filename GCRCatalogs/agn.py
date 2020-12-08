@@ -28,11 +28,11 @@ class AGNCatalog(BaseGenericCatalog):
             raise RuntimeError("Catalog directory %s does not exist." % (base_dir))
 
         self._path = os.path.join(base_dir, filename)
-        self._handle = h5py.File(self._path)
+        self._handle = h5py.File(self._path, 'r')
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self.lightcone = kwargs.get('lightcone', True)
         self.sky_area = kwargs.get('sky_area', None)
-        
+
     def __del__(self):
         self._handle.close()
 
@@ -47,7 +47,7 @@ class AGNCatalog(BaseGenericCatalog):
             'halo_mass':                                    'halo_mass',
             'is_central':                                   'is_central',
             'Mag_true_i_agnonly_lsst_z0':                   'M_i(extincted)',
-            'Mag_true_i_agnonly_no_agn_extinction_lsst_z0': 'M_i', 
+            'Mag_true_i_agnonly_no_agn_extinction_lsst_z0': 'M_i',
             'ra':                                           'ra',
             'redshift':                                     'redshift',
             'stellar_mass':                                 'stellar_mass',
@@ -80,10 +80,10 @@ class AGNCatalog(BaseGenericCatalog):
                                                                                     'Mag_true_{}_lsst_z0'.format(band),
                                                                                     'M_{}(extincted)'.format(band),
                                                                                    )
-            
+
         return quantity_modifiers
 
-    
+
     def _iter_native_dataset(self, native_filters=None):
         if native_filters is not None:
             raise RuntimeError("*native_filters* not supported")
