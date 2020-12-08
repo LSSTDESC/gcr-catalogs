@@ -37,7 +37,10 @@ def first(iterable, default=None):
 
 def decode(bytestring):
     """
-    decode a bytestring is possible
+    Decode a bytestring is possible, return str if not.
+
+    Only bytestring has .decode() method. This utility provides a way to homogenize values
+    that may be bytestring or unicode string  (such as the attributes in h5py v2.x and v3.x).
     """
     try:
         return bytestring.decode()
