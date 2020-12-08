@@ -89,6 +89,8 @@ Confluence page (*DESC member only*).
 - `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
 - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
 - `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
+- `dc2_object_run2.2i_dr2`: static object catalog for Run2.2i DR2
+- `dc2_object_run2.2i_dr2_with_metacal`: `dc2_object_run2.2i_dr2` + metacal
 
 #### Run 1.2 Object Catalogs
 
