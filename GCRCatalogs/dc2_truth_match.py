@@ -18,8 +18,20 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
     r"""
     DC2 Truth-Match (parquet) Catalog reader
 
-    Presents tables exactly as they are defined in the files (no aliases,
-    no derived quantities)
+    This reader is intended for reading the truth-match catalog that is in
+    parquet format and partitioned by tracts.
+
+    Two options, `as_object_addon` and `as_truth_table` further control,
+    respectively, whether the returned table contains only rows that match
+    to the object catalog (`as_object_addon=True`), or only unique truth
+    entries (`as_truth_table=True`).
+
+    When `as_object_addon` is set, most column names will also be decorated
+    with a `_truth` postfix.
+
+    The underlying truth-match catalog files contain fluxes but not magnitudes.
+    The reader provides translation to magnitude (using `_flux_to_mag`) for
+    convenience. No other translation is applied.
 
     Parameters
     ----------
@@ -50,8 +62,10 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
     def _obtain_native_data_dict(self, native_quantities_needed, native_quantity_getter):
         """
-        Overloading this so that we can query the database backend
-        for multiple columns at once
+        When `as_object_addon` or `as_truth_table` is set, we need to filter the table
+        based on `match_objectId` or `is_unique_truth_entry` before the data is returned .
+        To achieve such, we have to overwrite this method to inject the additional columns
+        and to apply the masks.
         """
         native_quantities_needed = set(native_quantities_needed)
         if self._as_object_addon:
