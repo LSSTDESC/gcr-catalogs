@@ -141,7 +141,7 @@ class RootDirManager:
        If you want to use a non-standard root dir in the current session, use
             GCRCatalogs.set_root_dir('/path/to/your/root_dir')
 
-       To make that value the default in future sessions, use
+       To also make that value the default in future sessions, use
             GCRCatalogs.set_root_dir('/path/to/your/root_dir', write_to_config=True)
 
     """
@@ -170,8 +170,8 @@ class RootDirManager:
 
         if not self._default_root_dir:
             site_string = ' '.join(self.site_list)
-            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string,
-                                                            _USER_CONFIG_PATH))
+            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
+
 
     def _get_site_info(self):
         """
@@ -190,13 +190,14 @@ class RootDirManager:
             return site_from_env
         return site_from_socket
 
+    @property
     def root_dir(self):
         return self._custom_root_dir or self._default_root_dir
 
-    def set_root_dir(self, path, write_to_config=False):
+    @root_dir.setter
+    def root_dir(self, path):
         """
         If 'path' is acceptable, set root dir to it
-        If 'write_to_config' is True, also save value to config file
         """
         # os.listdir will throw exception if path is ill-formed or doesn't exist
         try:
@@ -210,9 +211,6 @@ class RootDirManager:
         except OSError as e:
             warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
         self._custom_root_dir = path
-
-        if write_to_config:
-            write_user_config({'root_dir' : os.path.abspath(path)})
 
     @property
     def site_list(self):
@@ -253,7 +251,7 @@ class RootDirManager:
                 orig_path = resolved_path = v
                 if orig_path.startswith(self._ROOT_DIR_SIGNAL):
                     try:
-                        resolved_path = os.path.join(self.root_dir(), orig_path[len(self._ROOT_DIR_SIGNAL):])
+                        resolved_path = os.path.join(self.root_dir, orig_path[len(self._ROOT_DIR_SIGNAL):])
                     except TypeError:
                         warnings.warn("Root dir has not been set!")
                     else:
@@ -581,13 +579,15 @@ class ConfigRegister(RootDirManager, ConfigManager):
         for config in self.configs:
             config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
 
+    @property
     def root_dir(self):
-        return super().root_dir()
+        return super().root_dir
 
-    def set_root_dir(self, path, write_to_config=False):
+    @root_dir.setter
+    def root_dir(self, path):
         for config in self.configs:
             config.reset_resolved_content()
-        super().set_root_dir(path, write_to_config)  # pylint: disable=no-member
+        RootDirManager.root_dir.__set__(self,path)   # pylint: disable=no-member
 
     def retrieve_paths(self, **kwargs):
         kwargs["names_only"] = False
@@ -605,21 +605,25 @@ def get_root_dir():
     """
     Returns current root_dir.
     """
-    return _config_register.root_dir()
+    return _config_register.root_dir
 
 
-def set_root_dir(path, write_to_config=False):
+def set_root_dir(path, write_to_config=False):    
     """
     Sets runtime root_dir to *path*.
     """
-    _config_register.set_root_dir(path, write_to_config)
+    _config_register.root_dir = path
+
+    if write_to_config:
+        write_user_config({ 'root_dir' : os.path.abspath(path) })
 
 
-def set_root_dir_by_site(site):
+def set_root_dir_by_site(site, write_to_config=False):
     """
     Sets runtime root_dir to path corresponding to *site*.
     """
     _config_register.set_root_dir_by_site(site)
+
 
 
 def get_site_list():
