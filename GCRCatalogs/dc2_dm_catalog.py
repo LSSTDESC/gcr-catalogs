@@ -12,7 +12,6 @@ import re
 import warnings
 
 import numpy as np
-import pyarrow.parquet as pq
 import yaml
 from GCR import BaseGenericCatalog
 from .parquet import ParquetFileWrapper
@@ -279,7 +278,7 @@ class DC2DMCatalog(BaseGenericCatalog):
 
 class DC2DMTractCatalog(DC2DMCatalog):
     _native_filter_quantities = {'tract'}
-    FILE_PATTERN = r'.+_tract_\d+\.parquet$'
+    FILE_PATTERN = r'.+_tract_?\d+\.parquet$'
 
     def _subclass_init(self, **kwargs):
         self._tracts = None
@@ -292,7 +291,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
         super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
-        match = re.search(r'tract_(\d+)', filename)
+        match = re.search(r'tract_?(\d+)', filename)
         if match is None:
             warnings.warn('Filename {} does not contain tract info or not in correct format. Skipped')
             return False
@@ -318,7 +317,7 @@ class DC2DMTractCatalog(DC2DMCatalog):
 
 class DC2DMVisitCatalog(DC2DMCatalog):
     _native_filter_quantities = {'visit'}
-    FILE_PATTERN = r'.+_visit_\d+\.parquet$'
+    FILE_PATTERN = r'.+_visit_?\d+\.parquet$'
 
     def _subclass_init(self, **kwargs):
         self._visits = None
@@ -331,7 +330,7 @@ class DC2DMVisitCatalog(DC2DMCatalog):
         super()._subclass_init(**kwargs)
 
     def _extract_dataset_info(self, filename):
-        match = re.search(r'visit_(\d+)', filename)
+        match = re.search(r'visit_?(\d+)', filename)
         if match is None:
             warnings.warn('Filename {} does not contain visit info or not in correct format. Skipped')
             return False

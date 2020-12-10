@@ -10,7 +10,7 @@ import numpy as np
 import h5py
 from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
-from .utils import md5
+from .utils import md5, decode
 
 __all__ = ['AlphaQGalaxyCatalog']
 __version__ = '5.0.0'
@@ -361,7 +361,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             quantity_key = 'galaxyProperties/' + quantity
             if quantity_key not in fh:
                 return default
-            modifier = lambda k, v: None if k == 'description' and v == b'None given' else v.decode()
+            modifier = lambda k, v: None if k == 'description' and decode(v) == 'None given' else decode(v)
             return_qty = {k: modifier(k, v) for k, v in fh[quantity_key].attrs.items()}
             # a hot fix of the units of native halo mass (hostHaloMass) and x for v3+
             if self.catalog_version >= StrictVersion('3.0') and quantity == 'hostHaloMass':

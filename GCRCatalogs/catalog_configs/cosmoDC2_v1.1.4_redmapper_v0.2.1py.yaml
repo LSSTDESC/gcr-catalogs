@@ -21,6 +21,6 @@ description: |
   Cluster and member catalogs computed from the redMaPPer cluster finder
   (v0.2.1py) run on cosmoDC2 v1.1.4.
 
-deprecated: Use cosmoDC2_v1.1.7_redmapper_v0.5.7 instead
+deprecated: Use cosmoDC2_v1.1.4_redmapper_v0.5.7 instead
 
 include_in_default_catalog_list: false

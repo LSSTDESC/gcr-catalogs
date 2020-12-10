@@ -4,7 +4,7 @@ utility module
 import hashlib
 import os
 
-__all__ = ['md5', 'is_string_like', 'get_config_dir']
+__all__ = ['md5', 'is_string_like', 'first', 'decode', 'get_config_dir']
 
 def md5(fname, chunk_size=65536):
     """
@@ -34,6 +34,7 @@ def first(iterable, default=None):
     """
     return next(iter(iterable), default)
 
+  
 def get_config_dir(create=False):
     if os.getenv("XDG_CONFIG_HOME"):                   # Unix
         user_config_dir = os.getenv("XDG_CONFIG_HOME")	
@@ -49,3 +50,15 @@ def get_config_dir(create=False):
 
     return desc_config_dir
       
+
+def decode(bytestring):
+    """
+    Decode a bytestring if possible, return str if not.
+
+    Only bytestring has .decode() method. This utility provides a way to homogenize values
+    that may be bytestring or unicode string  (such as the attributes in h5py v2.x and v3.x).
+    """
+    try:
+        return bytestring.decode()
+    except AttributeError:
+        return str(bytestring)
