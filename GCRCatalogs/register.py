@@ -11,7 +11,7 @@ from .utils import is_string_like, get_config_dir
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "write_to_user_config", "remove_from_user_config", "remove_root_dir_default"]
 
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
@@ -79,7 +79,7 @@ def load_catalog_from_config_dict(catalog_config):
     )(**catalog_config)
 
 
-def write_user_config(d, filename=_USER_CONFIG_NAME, overwrite=True):
+def write_to_user_config(d, filename=_USER_CONFIG_NAME, overwrite=True):
     """
     Write key/value pairs in dict d to the user's config file. 
 
@@ -639,7 +639,7 @@ def set_root_dir(path, write_to_config=False):
     _config_register.root_dir = path
 
     if write_to_config:
-        write_user_config({ 'root_dir' : os.path.abspath(path) })
+        write_to_user_config({ 'root_dir' : os.path.abspath(path) })
 
 
 def set_root_dir_by_site(site, write_to_config=False):
