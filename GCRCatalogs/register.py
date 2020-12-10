@@ -10,7 +10,7 @@ from GCR import BaseGenericCatalog
 from .utils import is_string_like, get_config_dir
 
 __all__ = [
-    "get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs",
+    "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
     "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
 
 
@@ -113,7 +113,30 @@ def write_user_config(d, filename=_USER_CONFIG_NAME, overwrite=True):
 
     return config_dict
 
+def remove_from_user_config(keys, filename=_USER_CONFIG_NAME):
+    """
+    Remove entries from config file
+    """
+    config_dir = get_config_dir()
+    config_dir = get_config_dir(create=True)
+    config_path = os.path.join(config_dir, filename)
 
+    if not os.path.exists(config_path):
+        return
+
+    config_dict = load_yaml_local(config_path)
+    for k in keys:
+        if k in config_dict.keys():
+            del config_dict[k]
+
+    if len(config_dict) == 0:
+        os.remove(config_path)
+    else:
+        with open(config_path, mode='w') as f:
+            f.write(yaml.dump(config_dict, default_flow_style=False))
+        
+        
+    
 # Classes
 
 class RootDirManager:
@@ -158,8 +181,9 @@ class RootDirManager:
         if self._user_config_path:
             if os.path.exists(_USER_CONFIG_PATH):
                 d = load_yaml_local(_USER_CONFIG_PATH)
-                self._default_root_dir = d['root_dir']
-                return
+                if 'root_dir' in d.keys():
+                    self._default_root_dir = d['root_dir']
+                    return
 
         if self._site_config_path:
             self._site_config = load_yaml_local(self._site_config_path)
@@ -625,7 +649,12 @@ def set_root_dir_by_site(site, write_to_config=False):
     _config_register.set_root_dir_by_site(site)
 
 
-
+def remove_root_dir_default():
+    """
+    Revert to state of no user default root dir
+    """
+    remove_from_user_config(['root_dir'])
+    
 def get_site_list():
     """
     Return list of recognized sites
