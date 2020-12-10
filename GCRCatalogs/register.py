@@ -118,7 +118,6 @@ def remove_from_user_config(keys, filename=_USER_CONFIG_NAME):
     Remove entries from config file
     """
     config_dir = get_config_dir()
-    config_dir = get_config_dir(create=True)
     config_path = os.path.join(config_dir, filename)
 
     if not os.path.exists(config_path):
