@@ -122,23 +122,21 @@ which is determined from the reference filter for each source (the filter that b
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
 `ra` | degree | Right Ascension | x | xx |
-`ra_err` | degree | Right Ascension | x | xx |
 `dec` | degree | Declination | x | xx |
-`dec_err` | degree | Declination | x | xx |
-`x` | pixels | 2D centroid location (x coordinate). |   | xx |
-`y` | pixels | 2D centroid location (y coordinate). |   | xx |
-`xErr` | pixels | Error value for `centroidX`. |   | xx |
-`yErr` | pixels | Error value for `centroidY`. |   | xx |
+`x` | pixel | 2D centroid location (x coordinate). |   | xx |
+`y` | pixel | 2D centroid location (y coordinate). |   | xx |
+`xErr` | pixel | Error value for `centroidX`. |   | xx |
+`yErr` | pixel | Error value for `centroidY`. |   | xx |
 `xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
 `psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
 `psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
-`Ixx_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
-`Iyy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
-`Ixy_<band>` | asec2 | Adaptive second moment of the source intensity in `<band>`. |   | x |
-`IxxPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
-`IyyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
-`IxyPSF_<band>` | asec2 | Adaptive second moment of the PSF  in `<band>`. |   | x |
+`Ixx_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`Iyy_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`Ixy_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`IxxPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
+`IyyPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
+`IxyPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
 `I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
 `cModelFlux_<band>` | nJy | composite model (CModel) flux in `<band>` | x |  |
 `cModelFluxErr_<band>` | nJy | Error value for cModel flux in `<band>` | x |  |
@@ -157,7 +155,7 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 
 Source Catalog contains information about high signal-to-noise detections on single frame images,
 
-Forced Source Catalog contains fixed-position photometry measurements performed on individual 
+Forced Source Catalog contains fixed-position photometry measurements performed on individual
 exposures based on the positions from objects in the Object Catalog.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
