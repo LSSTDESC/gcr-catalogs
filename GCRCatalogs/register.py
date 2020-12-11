@@ -105,8 +105,7 @@ def write_to_user_config(d, filename=_USER_CONFIG_NAME, overwrite=True):
                 warnings.warn("Overwrite condition violated; config file not updated")
                 return None
 
-    for k,v in d.items():
-        config_dict[k] = v
+    config_dict.update(d)
 
     with open(config_path, mode='w') as f:
         f.write(yaml.dump(config_dict, default_flow_style=False))
@@ -178,9 +177,9 @@ class RootDirManager:
 
         # User config has highest priority
         if self._user_config_path:
-            if os.path.exists(_USER_CONFIG_PATH):
-                d = load_yaml_local(_USER_CONFIG_PATH)
-                if 'root_dir' in d.keys():
+            if os.path.exists(self._user_config_path):
+                d = load_yaml_local(self._user_config_path)
+                if 'root_dir' in d:
                     self._default_root_dir = d['root_dir']
                     return
 
