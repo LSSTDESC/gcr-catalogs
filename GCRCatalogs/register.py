@@ -11,7 +11,7 @@ from .utils import is_string_like, get_config_dir
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "write_to_user_config", "remove_from_user_config", "remove_root_dir_default"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "write_to_user_config", "remove_from_user_config"]
 
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
@@ -631,7 +631,7 @@ def get_root_dir():
     return _config_register.root_dir
 
 
-def set_root_dir(path, write_to_config=False):    
+def set_root_dir(path, write_to_config=False):
     """
     Sets runtime root_dir to *path*.
     """

@@ -37,7 +37,7 @@ def first(iterable, default=None):
   
 def get_config_dir(create=False):
     if os.getenv("XDG_CONFIG_HOME"):                   # Unix
-        user_config_dir = os.getenv("XDG_CONFIG_HOME")	
+        user_config_dir = os.getenv("XDG_CONFIG_HOME")
     elif os.getenv("LOCALAPPDATA"):                     # Win
         user_config_dir = os.getenv("LOCALAPPDATA")
     else:
