@@ -11,7 +11,9 @@ __all__ = ["DC2TruthMatchCatalog"]
 
 def _flux_to_mag(flux):
     with np.errstate(divide="ignore"):
-        return (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+        mag = (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+    mag[~np.isfinite(mag)] = np.nan  # homogenize inf and nan
+    return mag
 
 
 class DC2TruthMatchCatalog(DC2DMTractCatalog):
