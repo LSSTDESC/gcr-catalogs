@@ -115,8 +115,6 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
         cf. https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
         """
 
-        native_columns = list(self._quantity_modifiers)
-
         quantity_modifiers = {
             "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
             "objectId": "match_objectId",
@@ -128,15 +126,16 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             "dist": "match_sep",
         }
 
-        for col in native_columns:
+        for col in self._columns:
             if col.startswith("flux_") and col.endswith("_noMW"):
                 quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (_flux_to_mag, col)
 
         quantity_modifiers['galaxy_match_mask'] = (lambda t, m: (t == 1) & m, "truth_type", "is_good_match")
         quantity_modifiers['star_match_mask'] = (lambda t, m: (t == 2) & m, "truth_type", "is_good_match")
 
-        # put into self for `self.add_derived_quantity` to work
+        # put these into self for `self.add_derived_quantity` to work
         self._quantity_modifiers = quantity_modifiers
+        self._native_quantities = set(self._columns)
 
         for col in list(quantity_modifiers):
             if col in ("is_matched", "is_star", "galaxy_match_mask", "star_match_mask"):
