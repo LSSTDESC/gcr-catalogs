@@ -23,8 +23,6 @@ _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
-_USER_CONFIG_NAME = "gcr_catalogs.yaml"
-_ROOT_DIR_KEY = "root_dir"
 
 
 # yaml helper functions
@@ -80,7 +78,7 @@ def load_catalog_from_config_dict(catalog_config):
         catalog_config[Config.READER_KEY], __package__, BaseGenericCatalog
     )(**catalog_config)
 
-    
+
 # Classes
 
 class RootDirManager:
@@ -97,6 +95,7 @@ class RootDirManager:
     )
     _DICT_LIST_KEYS = ("catalogs",)
     _DESC_SITE_ENV = "DESC_GCR_SITE"
+    _ROOT_DIR_KEY = "root_dir"
     _NO_DEFAULT_ROOT_WARN = """
        Default root dir has not been set; catalogs may not be found.
        You can specify the site as an environment variable before you import GCRCatalogs,
@@ -122,11 +121,11 @@ class RootDirManager:
         self._site_info = self._get_site_info()
 
         # User config has highest priority
-        user_root_dir = self._user_config_manager.get_value(_ROOT_DIR_KEY)
+        user_root_dir = self._user_config_manager[self._ROOT_DIR_KEY]
         if user_root_dir:
             self._default_root_dir = user_root_dir
             return
-        
+
         if self._site_config_path:
             self._site_config = load_yaml_local(self._site_config_path)
             for k, v in self._site_config.items():
@@ -195,14 +194,14 @@ class RootDirManager:
         """
         Write current root_dir to user config
         """
-        self._user_config_manager.write_entries({_ROOT_DIR_KEY : os.path.abspath(self.root_dir)})
+        self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(self.root_dir)
 
     def unpersist_root_dir(self):
         """
         Remove root_dir entry from user config.  root_dir for the current
         session is unchanged, however.
         """
-        self._user_config_manager.remove_keys([_ROOT_DIR_KEY])
+        del self._user_config_manager[self._ROOT_DIR_KEY]
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -608,7 +607,7 @@ def remove_root_dir_default():
     Revert to state of no user default root dir
     """
     _config_register.unpersist_root_dir()
-    
+
 
 def get_site_list():
     """
