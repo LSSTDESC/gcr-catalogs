@@ -57,7 +57,7 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             self._quantity_modifiers["mag_" + col.partition("_")[2]] = (_flux_to_mag, col)
 
         if self._as_object_addon:
-            no_postfix = ("truth_type", "is_unique_truth_entry", "match_sep", "match_objectId")
+            no_postfix = ("truth_type", "match_objectId", "match_sep", "is_good_match", "is_nearest_neighbor", "is_unique_truth_entry")
             self._quantity_modifiers = {
                 (k + ("" if k in no_postfix else "_truth")): (v or k) for k, v in self._quantity_modifiers.items()
             }
