@@ -78,8 +78,8 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
         columns = list(native_quantities_needed)
         d = native_quantity_getter.read_columns(columns, as_dict=False)
         if self._as_object_addon:
-            mask = d["match_objectId"].values > -1
-            return {c: d[c].values[mask] for c in columns}
+            n = np.count_nonzero(d["match_objectId"].values > -1)
+            return {c: d[c].values[:n] for c in columns}
         elif self._as_truth_table:
             mask = d["is_unique_truth_entry"].values
             return {c: d[c].values[mask] for c in columns}
