@@ -37,10 +37,11 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
     Parameters
     ----------
-    base_dir          (str): Directory of data files being served, required
-    filename_pattern  (str): The optional regex pattern of served data files
-    as_object_addon  (bool): If set, return rows in the the same row order as object catalog
-    as_truth_table   (bool): If set, remove duplicated truth rows
+    base_dir            (str): Directory of data files being served, required
+    filename_pattern    (str): The optional regex pattern of served data files
+    as_object_addon    (bool): If set, return rows in the the same row order as object catalog
+    as_truth_table     (bool): If set, remove duplicated truth rows
+    as_matchdc2_schema (bool): If set, use column names in Javi's matchDC2 catalog.
     """
 
     def _subclass_init(self, **kwargs):
@@ -49,8 +50,27 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
         self._as_object_addon = bool(kwargs.get("as_object_addon"))
         self._as_truth_table = bool(kwargs.get("as_truth_table"))
+        self._as_matchdc2_schema = self._as_object_addon = bool(kwargs.get("as_matchdc2_schema"))
+
         if self._as_object_addon and self._as_truth_table:
             raise ValueError("Reader options `as_object_addon` and `as_truth_table` cannot both be set to True.")
+
+        if self._as_matchdc2_schema:
+            # To recreate column names in https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
+            flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_") and k.endswith("_noMW")]
+            self._quantity_modifiers = {
+                "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
+                "objectId": "match_objectId",
+                "is_matched": "is_good_match",
+                "is_star": (lambda t: t > 1, "truth_type"),
+                "ra": "ra",
+                "dec": "dec",
+                "redshift_true": "redshift",
+                "dist": "match_sep",
+            }
+            for col in flux_cols:
+                self._quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (_flux_to_mag, col)
+            return
 
         flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_")]
         for col in flux_cols:
