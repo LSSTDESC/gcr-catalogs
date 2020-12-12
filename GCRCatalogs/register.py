@@ -8,11 +8,11 @@ import requests
 import socket
 from GCR import BaseGenericCatalog
 from .utils import is_string_like, get_config_dir
+from .user_config import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "write_to_user_config", "remove_from_user_config"]
-
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -22,8 +22,7 @@ _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
 _USER_CONFIG_NAME = "gcr_catalogs.yaml"
-_USER_CONFIG_PATH = os.path.join(get_config_dir(), _USER_CONFIG_NAME)
-
+_ROOT_DIR_KEY = "root_dir"
 
 # yaml helper functions
 
@@ -78,62 +77,6 @@ def load_catalog_from_config_dict(catalog_config):
         catalog_config[Config.READER_KEY], __package__, BaseGenericCatalog
     )(**catalog_config)
 
-
-def write_to_user_config(d, filename=_USER_CONFIG_NAME, overwrite=True):
-    """
-    Write key/value pairs in dict d to the user's config file. 
-
-    Parameters
-    ----------
-    filename : the config file to write to.  Create if necessary
-    overwrite : whether to overwrite old values in an existing file
-
-    Returns
-    -------
-    dict written to the file.  
-    If overwrite condition is violated, return None
-    
-    """
-    config_dir = get_config_dir(create=True)
-    config_path = os.path.join(config_dir, filename)
-    config_dict = {}
-
-    if os.path.exists(config_path):
-        config_dict = load_yaml_local(config_path)
-        if not overwrite:
-            if not config_dict.keys().isdisjoint(d.keys()):
-                warnings.warn("Overwrite condition violated; config file not updated")
-                return None
-
-    config_dict.update(d)
-
-    with open(config_path, mode='w') as f:
-        f.write(yaml.dump(config_dict, default_flow_style=False))
-
-    return config_dict
-
-def remove_from_user_config(keys, filename=_USER_CONFIG_NAME):
-    """
-    Remove entries from config file
-    """
-    config_dir = get_config_dir()
-    config_path = os.path.join(config_dir, filename)
-
-    if not os.path.exists(config_path):
-        return
-
-    config_dict = load_yaml_local(config_path)
-    for k in keys:
-        if k in config_dict.keys():
-            del config_dict[k]
-
-    if len(config_dict) == 0:
-        os.remove(config_path)
-    else:
-        with open(config_path, mode='w') as f:
-            f.write(yaml.dump(config_dict, default_flow_style=False))
-        
-        
     
 # Classes
 
@@ -167,22 +110,20 @@ class RootDirManager:
 
     """
 
-    def __init__(self, site_config_path=None, user_config_path=None):
+    def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
-        self._user_config_path = user_config_path
+        self._user_config_manager = UserConfigManager(user_config_name)
         self._default_root_dir = None
         self._custom_root_dir = None
         self._site_config = {}
         self._site_info = self._get_site_info()
 
         # User config has highest priority
-        if self._user_config_path:
-            if os.path.exists(self._user_config_path):
-                d = load_yaml_local(self._user_config_path)
-                if 'root_dir' in d:
-                    self._default_root_dir = d['root_dir']
-                    return
-
+        user_root_dir = self._user_config_manager.get_value(_ROOT_DIR_KEY)
+        if user_root_dir:
+            self._default_root_dir = user_root_dir
+            return
+        
         if self._site_config_path:
             self._site_config = load_yaml_local(self._site_config_path)
             for k, v in self._site_config.items():
@@ -247,6 +188,19 @@ class RootDirManager:
         except KeyError:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
+
+    def persist_root_dir(self):
+        """
+        Write current root_dir to user config
+        """
+        self._user_config_manager.write_entries({_ROOT_DIR_KEY : os.path.abspath(self.root_dir)})
+
+    def unpersist_root_dir(self):
+        """
+        Remove root_dir entry from user config.  root_dir for the current
+        session is unchanged, however.
+        """
+        self._user_config_manager.remove_keys([_ROOT_DIR_KEY])
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -595,9 +549,9 @@ class ConfigManager(Mapping):
 
 
 class ConfigRegister(RootDirManager, ConfigManager):
-    def __init__(self, config_dir, site_config_path=None, user_config_path=None):
+    def __init__(self, config_dir, site_config_path=None, user_config_name=None):
         ConfigManager.__init__(self, config_dir)
-        RootDirManager.__init__(self, site_config_path, user_config_path)
+        RootDirManager.__init__(self, site_config_path, user_config_name)
         for config in self.configs:
             config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
 
@@ -637,7 +591,7 @@ def set_root_dir(path, write_to_config=False):
     _config_register.root_dir = path
 
     if write_to_config:
-        write_to_user_config({ 'root_dir' : os.path.abspath(path) })
+        _config_register.persist_root_dir()
 
 
 def set_root_dir_by_site(site, write_to_config=False):
@@ -651,7 +605,7 @@ def remove_root_dir_default():
     """
     Revert to state of no user default root dir
     """
-    remove_from_user_config(['root_dir'])
+    _config_register.unpersist_root_dir()
     
 def get_site_list():
     """
@@ -761,7 +715,6 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     The format would be [(catalog_name, original_path, resolved_path), ...]
     """
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
-
-
-_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH, _USER_CONFIG_PATH)
+_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH,
+                                  _USER_CONFIG_NAME)
 print(get_root_dir())           # for debugging.  Delete this line before release
