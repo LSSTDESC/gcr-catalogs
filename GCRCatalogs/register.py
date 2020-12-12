@@ -121,7 +121,7 @@ class RootDirManager:
         self._site_info = self._get_site_info()
 
         # User config has highest priority
-        user_root_dir = self._user_config_manager[self._ROOT_DIR_KEY]
+        user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
             self._default_root_dir = user_root_dir
             return
@@ -201,7 +201,10 @@ class RootDirManager:
         Remove root_dir entry from user config.  root_dir for the current
         session is unchanged, however.
         """
-        del self._user_config_manager[self._ROOT_DIR_KEY]
+        try:
+            del self._user_config_manager[self._ROOT_DIR_KEY]
+        except KeyError:
+            pass
 
     def reset_root_dir(self):
         self._custom_root_dir = None
