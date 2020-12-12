@@ -39,7 +39,7 @@ class UserConfigManager(MutableMapping):
                 return
         os.makedirs(os.path.dirname(self._config_path), exist_ok=True)
         with open(self._config_path, mode='w') as f:
-            yaml.dump(config_dict, f, default_flow_style=False)
+            yaml.safe_dump(config_dict, f, default_flow_style=False)
 
     def _load_config(self):
         """
