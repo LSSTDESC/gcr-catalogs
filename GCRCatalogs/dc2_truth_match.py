@@ -56,7 +56,7 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             raise ValueError("Reader options `as_object_addon` and `as_truth_table` cannot both be set to True.")
 
         if self._as_matchdc2_schema:
-            self._quantity_modifiers = self._generate_matchdc2_quantity_modifiers(list(self._quantity_modifiers))
+            self._use_matchdc2_quantity_modifiers()
             return
 
         flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_")]
@@ -109,12 +109,13 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
                 self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
 
-    @staticmethod
-    def _generate_matchdc2_quantity_modifiers(native_columns):
+    def _use_matchdc2_quantity_modifiers(self):
         """
         To recreate column names in dc2_matched_table.py
         cf. https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
         """
+
+        native_columns = list(self._quantity_modifiers)
 
         quantity_modifiers = {
             "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
@@ -131,12 +132,19 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             if col.startswith("flux_") and col.endswith("_noMW"):
                 quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (_flux_to_mag, col)
 
-        for col in list(quantity_modifiers):
-            if col in ("is_matched", "is_star"):
-                continue
-            quantity_modifiers[col + "_galaxy"] = (lambda d, t, m: np.ma.array(d, mask=((t == 1) & m)), col, "truth_type", "is_good_match")
-            quantity_modifiers[col + "_star"] = (lambda d, t, m: np.ma.array(d, mask=((t == 2) & m)), col, "truth_type", "is_good_match")
         quantity_modifiers['galaxy_match_mask'] = (lambda t, m: (t == 1) & m, "truth_type", "is_good_match")
         quantity_modifiers['star_match_mask'] = (lambda t, m: (t == 2) & m, "truth_type", "is_good_match")
 
-        return quantity_modifiers
+        # put into self for `self.add_derived_quantity` to work
+        self._quantity_modifiers = quantity_modifiers
+
+        for col in list(quantity_modifiers):
+            if col in ("is_matched", "is_star", "galaxy_match_mask", "star_match_mask"):
+                continue
+            for t in ("galaxy", "star"):
+                self.add_derived_quantity(
+                    "{}_{}".format(col, t),
+                    lambda d, m: np.ma.array(d, mask=m),
+                    col,
+                    "{}_match_mask".format(t),
+                )
