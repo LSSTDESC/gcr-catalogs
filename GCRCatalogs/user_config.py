@@ -36,7 +36,8 @@ class UserConfigManager(MutableMapping):
             try:
                 os.remove(self._config_path)
             except FileNotFoundError:
-                return
+                pass
+            return
         os.makedirs(os.path.dirname(self._config_path), exist_ok=True)
         with open(self._config_path, mode='w') as f:
             yaml.safe_dump(config_dict, f, default_flow_style=False)
