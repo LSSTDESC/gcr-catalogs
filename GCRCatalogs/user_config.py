@@ -22,7 +22,7 @@ class UserConfigManager(MutableMapping):
 
     @staticmethod
     def _get_user_config_home():
-        if os.getenv("XDG_CONFIG_HOME"):                   # Unix
+        if os.getenv("XDG_CONFIG_HOME"):                 # Unix
             return os.getenv("XDG_CONFIG_HOME")
         if os.getenv("LOCALAPPDATA"):                    # Win
             return os.getenv("LOCALAPPDATA")
@@ -32,17 +32,24 @@ class UserConfigManager(MutableMapping):
         """
         Low-level function to write config_dict to disk
         """
+        if not config_dict:
+            try:
+                os.remove(self._config_path)
+            except FileNotFoundError:
+                return
         os.makedirs(os.path.dirname(self._config_path), exist_ok=True)
         with open(self._config_path, mode='w') as f:
-            f.write(yaml.dump(config_dict, default_flow_style=False))
+            yaml.dump(config_dict, f, default_flow_style=False)
 
     def _load_config(self):
         """
         Low-level function to load config_dict from disk
         """
-        if os.path.isfile(self._config_path):
+        try:
             with open(self._config_path) as f:
                 return yaml.safe_load(f)
+        except FileNotFoundError:
+            pass
         return dict()
 
     def __getitem__(self, key):
