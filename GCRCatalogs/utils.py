@@ -4,7 +4,8 @@ utility module
 import hashlib
 import os
 
-__all__ = ['md5', 'is_string_like', 'first', 'decode', 'get_config_dir']
+__all__ = ['md5', 'is_string_like', 'first', 'decode']
+
 
 def md5(fname, chunk_size=65536):
     """
@@ -34,22 +35,6 @@ def first(iterable, default=None):
     """
     return next(iter(iterable), default)
 
-  
-def get_config_dir(create=False):
-    if os.getenv("XDG_CONFIG_HOME"):                   # Unix
-        user_config_dir = os.getenv("XDG_CONFIG_HOME")
-    elif os.getenv("LOCALAPPDATA"):                     # Win
-        user_config_dir = os.getenv("LOCALAPPDATA")
-    else:
-        user_config_dir = os.path.join(os.path.expanduser("~"), ".config")
-
-    desc_config_dir = os.path.join(user_config_dir, "lsstdesc")
-
-    if create:
-        os.makedirs(desc_config_dir, exist_ok=True)
-
-    return desc_config_dir
-      
 
 def decode(bytestring):
     """

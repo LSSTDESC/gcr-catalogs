@@ -7,7 +7,7 @@ import yaml
 import requests
 import socket
 from GCR import BaseGenericCatalog
-from .utils import is_string_like, get_config_dir
+from .utils import is_string_like
 from .user_config import UserConfigManager
 
 __all__ = [
