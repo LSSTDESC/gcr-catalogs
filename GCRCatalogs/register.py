@@ -12,7 +12,9 @@ from .user_config import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list",
+    "set_root_dir_by_site"
+]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -23,6 +25,7 @@ _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
 _USER_CONFIG_NAME = "gcr_catalogs.yaml"
 _ROOT_DIR_KEY = "root_dir"
+
 
 # yaml helper functions
 
@@ -134,7 +137,6 @@ class RootDirManager:
         if not self._default_root_dir:
             site_string = ' '.join(self.site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
-
 
     def _get_site_info(self):
         """
@@ -563,7 +565,7 @@ class ConfigRegister(RootDirManager, ConfigManager):
     def root_dir(self, path):
         for config in self.configs:
             config.reset_resolved_content()
-        RootDirManager.root_dir.__set__(self,path)   # pylint: disable=no-member
+        RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
 
     def retrieve_paths(self, **kwargs):
         kwargs["names_only"] = False
@@ -607,6 +609,7 @@ def remove_root_dir_default():
     """
     _config_register.unpersist_root_dir()
     
+
 def get_site_list():
     """
     Return list of recognized sites
@@ -715,6 +718,8 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     The format would be [(catalog_name, original_path, resolved_path), ...]
     """
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
-_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH,
-                                  _USER_CONFIG_NAME)
-print(get_root_dir())           # for debugging.  Delete this line before release
+
+
+_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
+
+print(get_root_dir())  # FIXME: for debugging.  Delete this line before release
