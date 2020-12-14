@@ -131,12 +131,12 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
 `psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
 `psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
-`Ixx_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
-`Iyy_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
-`Ixy_pixel_<band>` | pixel | Adaptive second moment of the source intensity in `<band>`. |   | xx |
-`IxxPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
-`IyyPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
-`IxyPSF_pixel_<band>` | pixel | Adaptive second moment of the PSF  in `<band>`. |   | xx |
+`Ixx_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`Iyy_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`Ixy_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`IxxPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
+`IyyPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
+`IxyPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
 `I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
 `cModelFlux_<band>` | nJy | composite model (CModel) flux in `<band>` | x |  |
 `cModelFluxErr_<band>` | nJy | Error value for cModel flux in `<band>` | x |  |
