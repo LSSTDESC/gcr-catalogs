@@ -112,14 +112,14 @@ class RootDirManager:
 
     def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
-        self._user_config_manager = UserConfigManager(user_config_name)
+        self._user_config_manager = UserConfigManager()
         self._default_root_dir = None
         self._custom_root_dir = None
         self._site_config = {}
         self._site_info = self._get_site_info()
 
         # User config has highest priority
-        user_root_dir = self._user_config_manager.get_value(_ROOT_DIR_KEY)
+        user_root_dir = self._user_config_manager.get(_ROOT_DIR_KEY)
         if user_root_dir:
             self._default_root_dir = user_root_dir
             return
@@ -193,14 +193,14 @@ class RootDirManager:
         """
         Write current root_dir to user config
         """
-        self._user_config_manager.write_entries({_ROOT_DIR_KEY : os.path.abspath(self.root_dir)})
+        self._user_config_manager.__setitem__(_ROOT_DIR_KEY, os.path.abspath(self.root_dir))
 
     def unpersist_root_dir(self):
         """
-        Remove root_dir entry from user config.  root_dir for the current
+        Remove root_dir item from user config.  root_dir for the current
         session is unchanged, however.
         """
-        self._user_config_manager.remove_keys([_ROOT_DIR_KEY])
+        self._user_config_manager.pop(_ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
