@@ -104,7 +104,7 @@ class UserConfigManager(MutableMapping):
         for k in keys_to_try:
             del config_dict[k]
 
-        return _write_config(self, config_dict)
+        return self._write_config(self, config_dict)
 
     def _user_config_exists(self):
         return os.path.exists(self._user_config_path)
