@@ -77,7 +77,7 @@ class UserConfigManager(MutableMapping):
         config_dict = {}
 
         if self._user_config_exists():
-            config_dict = _load_config()
+            config_dict = self._load_config()
             if not overwrite:
                 if not config_dict.keys().isdisjoint(entries.keys()):
                     raise ValueError('items argument violates overwrite condition')
