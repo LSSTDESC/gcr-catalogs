@@ -27,9 +27,9 @@ class UserConfigManager(MutableMapping):
     @staticmethod
     def _get_config_home():
         if os.getenv("XDG_CONFIG_HOME"):                   # Unix
-            user_config_dir = os.getenv("XDG_CONFIG_HOME")	
+            return(os.getenv("XDG_CONFIG_HOME"))	
         elif os.getenv("LOCALAPPDATA"):                     # Win
-            user_config_dir = os.getenv("LOCALAPPDATA")
+            return(os.getenv("LOCALAPPDATA"))
 
         return os.path.join(os.path.expanduser("~"), ".config")
 
@@ -54,6 +54,7 @@ class UserConfigManager(MutableMapping):
             ret = config_dict[key]
             del config_dict[key]
             self._write_config(config_dict)
+            return ret
         else:
             return absent
 
@@ -104,7 +105,7 @@ class UserConfigManager(MutableMapping):
         for k in keys_to_try:
             del config_dict[k]
 
-        return self._write_config(self, config_dict)
+        return self._write_config(config_dict)
 
     def _user_config_exists(self):
         return os.path.exists(self._user_config_path)
