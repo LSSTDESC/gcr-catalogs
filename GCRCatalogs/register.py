@@ -189,11 +189,16 @@ class RootDirManager:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
 
-    def persist_root_dir(self):
+    def persist_root_dir(self, value=None, overwrite=True):
         """
-        Write current root_dir to user config
+        Write root_dir to user config. By default write current value
         """
-        self._user_config_manager.__setitem__(_ROOT_DIR_KEY, os.path.abspath(self.root_dir))
+        to_write = value or self.root_dir
+        if not overwrite:
+            if self._user_config_manager.get(_ROOT_DIR_KEY):
+                warnings.warn("New root dir not saved. Root dir was already set and overwrite is disabled")
+                return
+        self._user_config_manager.__setitem__(_ROOT_DIR_KEY, os.path.abspath(to_write))
 
     def unpersist_root_dir(self):
         """
@@ -584,14 +589,14 @@ def get_root_dir():
     return _config_register.root_dir
 
 
-def set_root_dir(path, write_to_config=False):
+def set_root_dir(path, write_to_config=False, overwrite=True):
     """
     Sets runtime root_dir to *path*.
     """
     _config_register.root_dir = path
 
     if write_to_config:
-        _config_register.persist_root_dir()
+        _config_register.persist_root_dir(overwrite=overwrite)
 
 
 def set_root_dir_by_site(site, write_to_config=False):

@@ -16,8 +16,6 @@ class UserConfigManager(MutableMapping):
     
     def __init__(self, config_filename=None, config_reldir=None):
         config_name = os.path.basename(config_filename or self._default_config_filename)
-        #print("Config dir: ", self._get_config_dir())
-        #print("rel dir: ", self._reldir)
         reldir = config_reldir or self._default_config_reldir
         if os.path.isabs(reldir):
             raise ValueError(f'{reldir} must be a relative path')
@@ -72,7 +70,7 @@ class UserConfigManager(MutableMapping):
         Returns
         -------
         dict written to the file.  
-        If overwrite condition is violated, raise AttributeError
+        If overwrite condition is violated, raise ValueError
 
         """
         config_dict = {}

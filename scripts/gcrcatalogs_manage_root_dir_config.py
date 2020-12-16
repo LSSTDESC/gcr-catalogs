@@ -6,7 +6,7 @@ root_dir
 """
 import os
 from argparse import ArgumentParser, RawTextHelpFormatter
-from GCRCatalogs import write_to_user_config, remove_root_dir_default
+from GCRCatalogs import set_root_dir, remove_root_dir_default
 
 def main():
     usage = """Add, modify or remove a path to be used as root_dir in the package config file. A relative path will be resolved to the corresponding absolute path.
@@ -18,7 +18,8 @@ If there already is a path in the config file and --override has not been specif
     parser.add_argument("--root-dir", default=None, help="root_dir path to be stored in config file")
     parser.add_argument("--override", action="store_true",
                         help="New value will replace old value, even if that value was not 'None'")
-    parser.add_argument("--remove-path", action="store_true")
+    parser.add_argument("--remove-path", action="store_true",
+                        help="Remove root_dir value from user config file")
 
     args = parser.parse_args()
 
@@ -28,9 +29,11 @@ If there already is a path in the config file and --override has not been specif
             return
         remove_root_dir_default()
     else:
-        write_to_user_config({'root_dir' : os.path.abspath(args.root_dir)},
-                             overwrite=args.override)
-        
+        if not args.root_dir:
+            print("Must specify one of --root-dir, --remove-path")
+            return
+        set_root_dir(os.path.abspath(args.root_dir), write_to_config=True,
+                     overwrite=args.override)
     
 
 if __name__ == '__main__':
