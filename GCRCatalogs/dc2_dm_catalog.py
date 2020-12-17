@@ -122,6 +122,8 @@ class DC2DMCatalog(BaseGenericCatalog):
             raise RuntimeError(err_msg.format(self.base_dir))
 
         self._columns = first(self._datasets).columns
+        bands = kwargs.get("bands") or self._detect_available_bands()
+
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
@@ -130,7 +132,6 @@ class DC2DMCatalog(BaseGenericCatalog):
             dm_schema_version = kwargs.get("dm_schema_version") or self._detect_dm_schema_version()
             quantity_modifiers_kwargs["dm_schema_version"] = dm_schema_version
 
-            bands = kwargs.get("bands") or self._detect_available_bands()
             if bands:
                 quantity_modifiers_kwargs["bands"] = list(bands)
 
@@ -141,7 +142,8 @@ class DC2DMCatalog(BaseGenericCatalog):
             self._quantity_modifiers = self._generate_modifiers(**quantity_modifiers_kwargs)
 
         if self.META_PATH:
-            self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
+            self._quantity_info_dict = self._generate_info_dict(self.META_PATH, bands)
+
         self._len = None
 
     def _detect_dm_schema_version(self):
