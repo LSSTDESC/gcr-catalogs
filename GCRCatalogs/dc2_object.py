@@ -678,7 +678,10 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         super()._subclass_init(**kwargs)
 
     def _detect_available_bands(self):
-        return [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')]
+        return (
+            [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')] or
+            [col.rpartition('_')[2] for col in self._columns if col.startswith('psFlux_')]
+        )
 
     @staticmethod
     def _generate_modifiers(dm_schema_version=4, bands='ugrizy', pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
