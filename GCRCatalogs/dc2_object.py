@@ -442,30 +442,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             Dictionary of the form
                 {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
         """
-
-        with open(meta_path, 'r') as ofile:
-            base_dict = yaml.safe_load(ofile)
-
-        info_dict = dict()
-        for quantity, info_list in base_dict.items():
-            quantity_info = dict(
-                description=info_list[0],
-                unit=info_list[1],
-                in_GCRbase=info_list[2],
-                in_DPDD=info_list[3]
-            )
-
-            if '<band>' in quantity:
-                for band in bands:
-                    band_quantity = quantity.replace('<band>', band)
-                    band_quantity_info = quantity_info.copy()
-                    band_quantity_info['description'] = band_quantity_info['description'].replace('`<band>`', '{} band'.format(band))
-                    info_dict[band_quantity] = band_quantity_info
-
-            else:
-                info_dict[quantity] = quantity_info
-
-        return info_dict
+        return DC2DMTractCatalog._generate_info_dict(meta_path, bands)
 
     def _get_quantity_info_dict(self, quantity, default=None):
         """Return a dictionary with descriptive information for a quantity
