@@ -169,7 +169,7 @@ class DC2DMCatalog(BaseGenericCatalog):
         return dict()
 
     @staticmethod
-    def _generate_info_dict(meta_path):
+    def _generate_info_dict(meta_path, bands=None):
         """Creates a 2d dictionary with information for each homogenized quantity
 
         Args:
@@ -184,14 +184,15 @@ class DC2DMCatalog(BaseGenericCatalog):
             base_dict = yaml.safe_load(f)
 
         info_dict = dict()
-        for quantity, info_list in base_dict.items():
-            quantity_info = dict(
-                description=info_list[0],
-                unit=info_list[1],
-                in_GCRbase=info_list[2],
-                in_DPDD=info_list[3]
-            )
-            info_dict[quantity] = quantity_info
+        for q, info in base_dict.items():
+            if not isinstance(info, dict):  # for backward compatibility
+                info = dict(zip(("description", "unit", "in_GCRbase", "in_DPDD"), info))
+
+            if bands and "<band>" in q:
+                for band in bands:
+                    info_dict[q.replace("<band>", band)] = {k: v.replace("<band>", band) for k, v in info.items()}
+            else:
+                info_dict[q] = info
 
         return info_dict
 
