@@ -1,12 +1,17 @@
 """
 Reader for truth-match catalogs persisted as parquet files and partitioned in tracts.
 """
+import os
+
 import numpy as np
 import astropy.units as u
 
 from .dc2_dm_catalog import DC2DMTractCatalog
 
 __all__ = ["DC2TruthMatchCatalog"]
+
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_truth_match_meta.yaml')
 
 
 def _flux_to_mag(flux):
@@ -45,6 +50,7 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
     """
 
     def _subclass_init(self, **kwargs):
+        self.META_PATH = META_PATH
 
         super()._subclass_init(**dict(kwargs, is_dpdd=True))  # set is_dpdd=True to obtain bare modifiers
 
@@ -68,6 +74,9 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             self._quantity_modifiers = {
                 (k + ("" if k in no_postfix else "_truth")): (v or k) for k, v in self._quantity_modifiers.items()
             }
+
+    def _detect_available_bands(self):
+        return ["_".join(col.split("_")[1:-1]) for col in self._columns if col.startswith('flux_') and col.endswith('_noMW')]
 
     def _obtain_native_data_dict(self, native_quantities_needed, native_quantity_getter):
         """
