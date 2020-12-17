@@ -11,7 +11,9 @@ __all__ = ["DC2TruthMatchCatalog"]
 
 def _flux_to_mag(flux):
     with np.errstate(divide="ignore"):
-        return (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+        mag = (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+    mag[~np.isfinite(mag)] = np.nan  # homogenize inf and nan
+    return mag
 
 
 class DC2TruthMatchCatalog(DC2DMTractCatalog):
@@ -35,10 +37,11 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
     Parameters
     ----------
-    base_dir          (str): Directory of data files being served, required
-    filename_pattern  (str): The optional regex pattern of served data files
-    as_object_addon  (bool): If set, return rows in the the same row order as object catalog
-    as_truth_table   (bool): If set, remove duplicated truth rows
+    base_dir            (str): Directory of data files being served, required
+    filename_pattern    (str): The optional regex pattern of served data files
+    as_object_addon    (bool): If set, return rows in the the same row order as object catalog
+    as_truth_table     (bool): If set, remove duplicated truth rows
+    as_matchdc2_schema (bool): If set, use column names in Javi's matchDC2 catalog.
     """
 
     def _subclass_init(self, **kwargs):
@@ -47,15 +50,21 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
         self._as_object_addon = bool(kwargs.get("as_object_addon"))
         self._as_truth_table = bool(kwargs.get("as_truth_table"))
+        self._as_matchdc2_schema = self._as_object_addon = bool(kwargs.get("as_matchdc2_schema"))
+
         if self._as_object_addon and self._as_truth_table:
             raise ValueError("Reader options `as_object_addon` and `as_truth_table` cannot both be set to True.")
+
+        if self._as_matchdc2_schema:
+            self._use_matchdc2_quantity_modifiers()
+            return
 
         flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_")]
         for col in flux_cols:
             self._quantity_modifiers["mag_" + col.partition("_")[2]] = (_flux_to_mag, col)
 
         if self._as_object_addon:
-            no_postfix = ("truth_type", "is_unique_truth_entry", "match_sep", "match_objectId")
+            no_postfix = ("truth_type", "match_objectId", "match_sep", "is_good_match", "is_nearest_neighbor", "is_unique_truth_entry")
             self._quantity_modifiers = {
                 (k + ("" if k in no_postfix else "_truth")): (v or k) for k, v in self._quantity_modifiers.items()
             }
@@ -76,8 +85,8 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
         columns = list(native_quantities_needed)
         d = native_quantity_getter.read_columns(columns, as_dict=False)
         if self._as_object_addon:
-            mask = d["match_objectId"].values > -1
-            return {c: d[c].values[mask] for c in columns}
+            n = np.count_nonzero(d["match_objectId"].values > -1)
+            return {c: d[c].values[:n] for c in columns}
         elif self._as_truth_table:
             mask = d["is_unique_truth_entry"].values
             return {c: d[c].values[mask] for c in columns}
@@ -99,3 +108,42 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
             else:
                 self._len = sum(len(dataset) for dataset in self._datasets)
         return self._len
+
+    def _use_matchdc2_quantity_modifiers(self):
+        """
+        To recreate column names in dc2_matched_table.py
+        cf. https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
+        """
+
+        quantity_modifiers = {
+            "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
+            "objectId": "match_objectId",
+            "is_matched": "is_good_match",
+            "is_star": (lambda t: t > 1, "truth_type"),
+            "ra": "ra",
+            "dec": "dec",
+            "redshift_true": "redshift",
+            "dist": "match_sep",
+        }
+
+        for col in self._columns:
+            if col.startswith("flux_") and col.endswith("_noMW"):
+                quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (_flux_to_mag, col)
+
+        quantity_modifiers['galaxy_match_mask'] = (lambda t, m: (t == 1) & m, "truth_type", "is_good_match")
+        quantity_modifiers['star_match_mask'] = (lambda t, m: (t == 2) & m, "truth_type", "is_good_match")
+
+        # put these into self for `self.add_derived_quantity` to work
+        self._quantity_modifiers = quantity_modifiers
+        self._native_quantities = set(self._columns)
+
+        for col in list(quantity_modifiers):
+            if col in ("is_matched", "is_star", "galaxy_match_mask", "star_match_mask"):
+                continue
+            for t in ("galaxy", "star"):
+                self.add_derived_quantity(
+                    "{}_{}".format(col, t),
+                    lambda d, m: np.ma.array(d, mask=m),
+                    col,
+                    "{}_match_mask".format(t),
+                )
