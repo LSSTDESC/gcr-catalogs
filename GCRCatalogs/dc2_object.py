@@ -667,7 +667,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         """
         return (
             [col.rpartition('_')[0] for col in self._columns if col.endswith('_FLUXMAG0')] or
-            [col.rpartition('_')[2] for col in self._columns if col.startswith('psFlux_')]
+            [col.partition('_')[2] for col in self._columns if col.startswith('psFlux_')]
         )
 
     @staticmethod
