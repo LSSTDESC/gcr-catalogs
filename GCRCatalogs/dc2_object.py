@@ -671,7 +671,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         )
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=4, bands='ugrizy', pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=4, bands=None, pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -682,6 +682,7 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
             A dictionary of the form {<homogenized name>: <native name>, ...}
         """
 
+        bands = bands or 'ugrizy'
         FLUX = 'flux' if dm_schema_version <= 2 else 'instFlux'
         ERR = 'Sigma' if dm_schema_version <= 1 else 'Err'
 
