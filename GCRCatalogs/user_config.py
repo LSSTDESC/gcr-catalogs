@@ -32,13 +32,13 @@ class UserConfigManager(MutableMapping):
         return os.path.join(os.path.expanduser("~"), ".config")
 
     # Override methods which may access more than one item for efficiency
-    def keys():
+    def keys(self):
         return self._load_config().keys()
 
-    def values():
+    def values(self):
         return self._load_config().values()
 
-    def items():
+    def items(self):
         return self._load_config().items()
 
     def update(self, items):
@@ -64,7 +64,7 @@ class UserConfigManager(MutableMapping):
         config_dict.update(items)
         return self._write_config(config_dict)
     
-    def clear():
+    def clear(self):
         return self._write_config(dict())
 
     def deleteitems(self, keys, absent_ok=True):
