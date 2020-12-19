@@ -31,32 +31,17 @@ class UserConfigManager(MutableMapping):
 
         return os.path.join(os.path.expanduser("~"), ".config")
 
-    
-    def get(self, key):
-        """
-        Similar to __getitem__ but return None if key not found
-        """
-        config_dict = self._load_config()
-        if key in config_dict:
-            return config_dict[key]
-        else:
-            return None
+    # Override methods which may access more than one item for efficiency
+    def keys():
+        return self._load_config().keys()
 
-    def pop(self, key, absent):
-        """
-        If key is in the dict, return its value. Else return value supplied for 
-        parameter 'absent'
-        """
-        config_dict = self._load_config()
-        if key in config_dict:
-            ret = config_dict[key]
-            del config_dict[key]
-            self._write_config(config_dict)
-            return ret
-        else:
-            return absent
+    def values():
+        return self._load_config().values()
 
-    def setitems(self, items, overwrite=True):
+    def items():
+        return self._load_config().items()
+
+    def update(self, items):
         """
         Write one or more key-value pairs to the config file.  Create new file or
         append to existing file. 
@@ -64,8 +49,6 @@ class UserConfigManager(MutableMapping):
         Parameters
         ----------
         items       dict of entries to be written to file
-        overwrite   boolean.  If new keys overlap with old and overwrite is False, do
-                    nothing.  If True, new values prevail.
 
         Returns
         -------
@@ -77,14 +60,13 @@ class UserConfigManager(MutableMapping):
 
         if self._user_config_exists():
             config_dict = self._load_config()
-            if not overwrite:
-                if not config_dict.keys().isdisjoint(items.keys()):
-                    raise ValueError('items argument violates overwrite condition')
 
         config_dict.update(items)
         return self._write_config(config_dict)
-
     
+    def clear():
+        return self._write_config(dict())
+
     def deleteitems(self, keys, absent_ok=True):
         """
         Remove specified items from config file
@@ -108,7 +90,6 @@ class UserConfigManager(MutableMapping):
     def _user_config_exists(self):
         return os.path.exists(self._user_config_path)
 
-    
     def _write_config(self, config_dict):
         os.makedirs(self._user_config_dir, exist_ok=True)
         if not config_dict:
@@ -117,7 +98,6 @@ class UserConfigManager(MutableMapping):
         with open(self._user_config_path, mode='w') as f:
             yaml.dump(config_dict, f, default_flow_style=False)
         return config_dict
-            
         
     def _load_config(self):
         if not self._user_config_exists():
@@ -141,9 +121,46 @@ class UserConfigManager(MutableMapping):
         self._write_config(config_dict)
         
     def __iter__(self):
-        config_dict = self._load_config()
-        return iter(config_dict)
+        return iter(self._load_config())
     
     def __len__(self):
-        config_dict = self._load_config()
-        return len(config_dict)
+        return len(self._load_config())
+
+from argparse import ArgumentParser, RawTextHelpFormatter
+if __name__ == "__main__":
+    usage="""Directly manipulate items in user config"""
+
+    parser = ArgumentParser(description=usage,
+                            formatter_class=RawTextHelpFormatter)
+    parser.add_argument("operation", help="Operation to be performed for a particular key",
+                        choices=("set", "get", "del"))
+    parser.add_argument("key", help="Key on which operation is to be performed")
+    parser.add_argument("value", help="Value to use when operation is 'set'",
+                        default=None, nargs="?")
+
+    args = parser.parse_args()
+
+    umgr = UserConfigManager()
+    
+    if args.operation == 'get':
+        old = umgr.get(args.key)
+        if old:
+            print(f"Value of {args.key}: {old}")
+        else:
+            print(f"{args.key} is not in the user config")
+    if args.operation == 'del':
+        old = umgr.pop(args.key, None)
+        if old:
+            print(f"{args.key} deleted from user config")
+        else:
+            print(f"{args.key} was not in user config")
+    if args.operation == 'set':
+        if not args.value:
+            raise ValueError("Must supply value for 'set' operation")
+        else:
+            old = umgr.get(args.key)
+            umgr[args.key] = args.value
+            if old:
+                print(f"New value set. Old value was {old}")
+            else:
+                print(f"New value set. No old value")

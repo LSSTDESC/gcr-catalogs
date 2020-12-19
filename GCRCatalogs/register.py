@@ -7,7 +7,7 @@ import yaml
 import requests
 import socket
 from GCR import BaseGenericCatalog
-from .utils import is_string_like, get_config_dir
+from .utils import is_string_like
 from .user_config import UserConfigManager
 
 __all__ = [
@@ -67,7 +67,6 @@ def import_subclass(subclass_path, package=None, required_base_class=None):
     if required_base_class and not issubclass(subclass, required_base_class):
         raise ValueError("Provided class is not a subclass of *required_base_class*")
     return subclass
-
 
 def load_catalog_from_config_dict(catalog_config):
     """
@@ -135,7 +134,6 @@ class RootDirManager:
             site_string = ' '.join(self.site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
 
-
     def _get_site_info(self):
         """
         Return a string which, when executing at a recognized site with
@@ -189,23 +187,27 @@ class RootDirManager:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
 
-    def persist_root_dir(self, value=None, overwrite=True):
+    def persist_root_dir(self, value=None):
         """
-        Write root_dir to user config. By default write current value
+        Write root_dir to user config. By default write current session value
+        Returns
+        -------
+        old value (may be None)
         """
+        old = self._user_config_manager.get(_ROOT_DIR_KEY)
         to_write = value or self.root_dir
-        if not overwrite:
-            if self._user_config_manager.get(_ROOT_DIR_KEY):
-                warnings.warn("New root dir not saved. Root dir was already set and overwrite is disabled")
-                return
-        self._user_config_manager.__setitem__(_ROOT_DIR_KEY, os.path.abspath(to_write))
+        self._user_config_manager[_ROOT_DIR_KEY] = os.path.abspath(to_write)
+        return old
 
     def unpersist_root_dir(self):
         """
         Remove root_dir item from user config.  root_dir for the current
         session is unchanged, however.
+        Returns
+        -------
+        old value (may be None)
         """
-        self._user_config_manager.pop(_ROOT_DIR_KEY, None)
+        return self._user_config_manager.pop(_ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -589,17 +591,24 @@ def get_root_dir():
     return _config_register.root_dir
 
 
-def set_root_dir(path, write_to_config=False, overwrite=True):
+def set_root_dir(path, write_to_config=False):
     """
     Sets runtime root_dir to *path*.
+
+    Returns
+    -------
+    If write_to_config, return old persisted value (which may be None);
+    else None.
     """
     _config_register.root_dir = path
 
     if write_to_config:
-        _config_register.persist_root_dir(overwrite=overwrite)
+        return _config_register.persist_root_dir()
+    else:
+        return None
 
 
-def set_root_dir_by_site(site, write_to_config=False):
+def set_root_dir_by_site(site):
     """
     Sets runtime root_dir to path corresponding to *site*.
     """
@@ -609,8 +618,13 @@ def set_root_dir_by_site(site, write_to_config=False):
 def remove_root_dir_default():
     """
     Revert to state of no user default root dir
+
+    Returns
+    -------
+    Old persisted value (may be None)
     """
     _config_register.unpersist_root_dir()
+
     
 def get_site_list():
     """
@@ -722,4 +736,5 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
 _config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH,
                                   _USER_CONFIG_NAME)
-print(get_root_dir())           # for debugging.  Delete this line before release
+
+
