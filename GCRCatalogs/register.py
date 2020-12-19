@@ -8,7 +8,7 @@ import requests
 import socket
 from GCR import BaseGenericCatalog
 from .utils import is_string_like
-from .user_config import UserConfigManager
+from .user_config_mgr import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",

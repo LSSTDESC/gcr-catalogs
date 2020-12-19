@@ -29,7 +29,6 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    scripts=['scripts/gcrcatalogs_manage_config.py'],
     install_requires=['requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.9.1'],
     extras_require={
         'full': ['h5py', 'healpy', 'pandas', 'pyarrow', 'tables'],
