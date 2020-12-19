@@ -26,6 +26,7 @@ if __name__ == "__main__":
         old = umgr.pop(args.key, None)
         if old:
             print(f"{args.key} deleted from user config")
+            print(f"Old value was {old}")
         else:
             print(f"{args.key} was not in user config")
     if args.operation == 'set':
@@ -35,6 +36,6 @@ if __name__ == "__main__":
             old = umgr.get(args.key)
             umgr[args.key] = args.value
             if old:
-                print(f"New value set. Old value was {old}")
+                print(f"New value {args.value} was set. Old value was {old}")
             else:
-                print(f"New value set. No old value")
+                print(f"New value {args.value} was set. No old value")
