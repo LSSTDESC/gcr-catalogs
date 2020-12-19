@@ -56,10 +56,7 @@ class UserConfigManager(MutableMapping):
         If overwrite condition is violated, raise ValueError
 
         """
-        config_dict = {}
-
-        if self._user_config_exists():
-            config_dict = self._load_config()
+        config_dict = self._load_config()
 
         config_dict.update(items)
         return self._write_config(config_dict)
@@ -78,12 +75,11 @@ class UserConfigManager(MutableMapping):
 
         config_dict = self._load_config()
 
-        keys_to_try = keys
-        if absent_ok:
-            keys_to_try = set(keys).intersection(config_dict.keys())
+        if not absent_ok and not all(key in config_dict for key in keys):
+        	raise KeyError("Some keys do not exist")
 
-        for k in keys_to_try:
-            del config_dict[k]
+        for key in keys:
+            config_dict.pop(key, None)
 
         return self._write_config(config_dict)
 

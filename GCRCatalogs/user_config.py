@@ -1,5 +1,5 @@
-from .user_config_mgr import UserConfigManager
 from argparse import ArgumentParser, RawTextHelpFormatter
+from .user_config_mgr import UserConfigManager
 
 if __name__ == "__main__":
     usage="""Directly manipulate items in user config"""
@@ -30,7 +30,7 @@ if __name__ == "__main__":
             print(f"{args.key} was not in user config")
     if args.operation == 'set':
         if not args.value:
-            raise ValueError("Must supply value for 'set' operation")
+            raise parser.error("Must supply value for 'set' operation")
         else:
             old = umgr.get(args.key)
             umgr[args.key] = args.value

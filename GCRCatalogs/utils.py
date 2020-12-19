@@ -2,7 +2,6 @@
 utility module
 """
 import hashlib
-import os
 
 __all__ = ['md5', 'is_string_like', 'first', 'decode']
 
@@ -34,7 +33,6 @@ def first(iterable, default=None):
     """
     return next(iter(iterable), default)
 
-  
 def decode(bytestring):
     """
     Decode a bytestring if possible, return str if not.
