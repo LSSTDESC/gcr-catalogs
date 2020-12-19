@@ -7,7 +7,7 @@ from collections.abc import MutableMapping
 Utility class for managing user config (a dict) persisted to a yaml file. 
 """
 
-all = ['UserConfigManager']
+__all__ = ['UserConfigManager']
 
 
 class UserConfigManager(MutableMapping):
