@@ -21,8 +21,6 @@ _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
-_USER_CONFIG_NAME = "gcr_catalogs.yaml"
-_ROOT_DIR_KEY = "root_dir"
 
 # yaml helper functions
 
@@ -81,6 +79,7 @@ def load_catalog_from_config_dict(catalog_config):
 
 class RootDirManager:
     _ROOT_DIR_SIGNAL = "^/"
+    _ROOT_DIR_KEY = "root_dir"
     _PATH_LIKE_KEYS = (
         "filename",
         "addon_filename",
@@ -111,14 +110,14 @@ class RootDirManager:
 
     def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
-        self._user_config_manager = UserConfigManager()
+        self._user_config_manager = UserConfigManager(config_filename=user_config_name)
         self._default_root_dir = None
         self._custom_root_dir = None
         self._site_config = {}
         self._site_info = self._get_site_info()
 
         # User config has highest priority
-        user_root_dir = self._user_config_manager.get(_ROOT_DIR_KEY)
+        user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
             self._default_root_dir = user_root_dir
             return
@@ -194,9 +193,9 @@ class RootDirManager:
         -------
         old value (may be None)
         """
-        old = self._user_config_manager.get(_ROOT_DIR_KEY)
+        old = self._user_config_manager.get(self._ROOT_DIR_KEY)
         to_write = value or self.root_dir
-        self._user_config_manager[_ROOT_DIR_KEY] = os.path.abspath(to_write)
+        self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(to_write)
         return old
 
     def unpersist_root_dir(self):
@@ -207,7 +206,7 @@ class RootDirManager:
         -------
         old value (may be None)
         """
-        return self._user_config_manager.pop(_ROOT_DIR_KEY, None)
+        return self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -734,7 +733,6 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     The format would be [(catalog_name, original_path, resolved_path), ...]
     """
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
-_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH,
-                                  _USER_CONFIG_NAME)
+_config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
 
 
