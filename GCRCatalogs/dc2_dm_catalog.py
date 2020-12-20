@@ -176,6 +176,9 @@ class DC2DMCatalog(BaseGenericCatalog):
 
         Args:
             meta_path (path): Path of yaml config file with object meta data
+            bands (list or None): A list of band names.
+              They are used to replace the "<band>" place holders in
+              quantity names and their descriptions.
 
         Returns:
             Dictionary of the form
