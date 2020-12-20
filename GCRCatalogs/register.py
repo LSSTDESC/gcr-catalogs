@@ -189,7 +189,6 @@ class RootDirManager:
         """
         Write root_dir to user config. By default write current session value
         """
-        old = self._user_config_manager.get(self._ROOT_DIR_KEY)
         to_write = value or self.root_dir
         self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(to_write)
     def unpersist_root_dir(self):
