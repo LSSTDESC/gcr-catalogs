@@ -50,7 +50,9 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
 
         self._as_object_addon = bool(kwargs.get("as_object_addon"))
         self._as_truth_table = bool(kwargs.get("as_truth_table"))
-        self._as_matchdc2_schema = self._as_object_addon = bool(kwargs.get("as_matchdc2_schema"))
+        self._as_matchdc2_schema = bool(kwargs.get("as_matchdc2_schema"))
+        if self._as_matchdc2_schema:
+            self._as_object_addon = True
 
         if self._as_object_addon and self._as_truth_table:
             raise ValueError("Reader options `as_object_addon` and `as_truth_table` cannot both be set to True.")
