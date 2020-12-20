@@ -141,8 +141,11 @@ class DC2DMCatalog(BaseGenericCatalog):
 
             self._quantity_modifiers = self._generate_modifiers(**quantity_modifiers_kwargs)
 
-        if self.META_PATH:
-            self._quantity_info_dict = self._generate_info_dict(self.META_PATH, bands)
+        # meta_path in catalog config take precedence, otherwise use the class default value
+        meta_path = kwargs.get("meta_path", self.META_PATH)
+        if meta_path:
+            meta_path = os.path.join(self.FILE_DIR, meta_path)  # for relative meta_path
+            self._quantity_info_dict = self._generate_info_dict(meta_path, bands)
         else:
             self._quantity_info_dict = dict()
 
