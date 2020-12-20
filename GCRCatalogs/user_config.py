@@ -29,7 +29,7 @@ if __name__ == "__main__":
             print(f"{args.key} deleted from user config")
             print(f"Old value was {old}")
         else:
-            print(f"{args.key} was not in user config")
+            print(f"{args.key} was not in user config or its value was None.")
     if args.operation == 'set':
         if not args.value:
             raise parser.error("Must supply value for 'set' operation")
@@ -39,4 +39,4 @@ if __name__ == "__main__":
             if old:
                 print(f"New value {args.value} was set. Old value was {old}")
             else:
-                print(f"New value {args.value} was set. No old value")
+                print(f"New value {args.value} was set. No old value or old value was None")

@@ -25,7 +25,7 @@ class UserConfigManager(MutableMapping):
     @staticmethod
     def _get_config_home():
         if os.getenv("XDG_CONFIG_HOME"):                   # Unix
-            return(os.getenv("XDG_CONFIG_HOME"))	
+            return(os.getenv("XDG_CONFIG_HOME"))
         elif os.getenv("LOCALAPPDATA"):                     # Win
             return(os.getenv("LOCALAPPDATA"))
 
@@ -76,7 +76,7 @@ class UserConfigManager(MutableMapping):
         config_dict = self._load_config()
 
         if not absent_ok and not all(key in config_dict for key in keys):
-        	raise KeyError("Some keys do not exist")
+            raise KeyError("Some keys do not exist")
 
         for key in keys:
             config_dict.pop(key, None)

@@ -74,7 +74,6 @@ def load_catalog_from_config_dict(catalog_config):
         catalog_config[Config.READER_KEY], __package__, BaseGenericCatalog
     )(**catalog_config)
 
-    
 # Classes
 
 class RootDirManager:
@@ -569,7 +568,7 @@ class ConfigRegister(RootDirManager, ConfigManager):
     def root_dir(self, path):
         for config in self.configs:
             config.reset_resolved_content()
-        RootDirManager.root_dir.__set__(self,path)   # pylint: disable=no-member
+        RootDirManager.root_dir.__set__(self, path)  # pylint: disable=no-member
 
     def retrieve_paths(self, **kwargs):
         kwargs["names_only"] = False
@@ -603,8 +602,6 @@ def set_root_dir(path, write_to_config=False):
 
     if write_to_config:
         return _config_register.persist_root_dir()
-    else:
-        return None
 
 
 def set_root_dir_by_site(site):
@@ -734,5 +731,4 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     """
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
 _config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
-
 
