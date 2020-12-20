@@ -122,6 +122,8 @@ class DC2DMCatalog(BaseGenericCatalog):
             raise RuntimeError(err_msg.format(self.base_dir))
 
         self._columns = first(self._datasets).columns
+        bands = kwargs.get("bands") or self._detect_available_bands()
+
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._columns}
         else:
@@ -130,7 +132,6 @@ class DC2DMCatalog(BaseGenericCatalog):
             dm_schema_version = kwargs.get("dm_schema_version") or self._detect_dm_schema_version()
             quantity_modifiers_kwargs["dm_schema_version"] = dm_schema_version
 
-            bands = kwargs.get("bands") or self._detect_available_bands()
             if bands:
                 quantity_modifiers_kwargs["bands"] = list(bands)
 
@@ -141,7 +142,8 @@ class DC2DMCatalog(BaseGenericCatalog):
             self._quantity_modifiers = self._generate_modifiers(**quantity_modifiers_kwargs)
 
         if self.META_PATH:
-            self._quantity_info_dict = self._generate_info_dict(self.META_PATH)
+            self._quantity_info_dict = self._generate_info_dict(self.META_PATH, bands)
+
         self._len = None
 
     def _detect_dm_schema_version(self):
@@ -169,11 +171,14 @@ class DC2DMCatalog(BaseGenericCatalog):
         return dict()
 
     @staticmethod
-    def _generate_info_dict(meta_path):
+    def _generate_info_dict(meta_path, bands=None):
         """Creates a 2d dictionary with information for each homogenized quantity
 
         Args:
             meta_path (path): Path of yaml config file with object meta data
+            bands (list or None): A list of band names.
+              They are used to replace the "<band>" place holders in
+              quantity names and their descriptions.
 
         Returns:
             Dictionary of the form
@@ -184,14 +189,15 @@ class DC2DMCatalog(BaseGenericCatalog):
             base_dict = yaml.safe_load(f)
 
         info_dict = dict()
-        for quantity, info_list in base_dict.items():
-            quantity_info = dict(
-                description=info_list[0],
-                unit=info_list[1],
-                in_GCRbase=info_list[2],
-                in_DPDD=info_list[3]
-            )
-            info_dict[quantity] = quantity_info
+        for q, info in base_dict.items():
+            if not isinstance(info, dict):  # for backward compatibility
+                info = dict(zip(("description", "unit", "in_GCRbase", "in_DPDD"), info))
+
+            if bands and "<band>" in q:
+                for band in bands:
+                    info_dict[q.replace("<band>", band)] = {k: v.replace("<band>", band) for k, v in info.items()}
+            else:
+                info_dict[q] = info
 
         return info_dict
 
