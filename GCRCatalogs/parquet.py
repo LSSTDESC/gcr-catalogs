@@ -4,7 +4,7 @@ import re
 __all__ = ['ParquetFileWrapper']
 
 
-def _retrive_data_from_arrow_table(table, as_dict=False):
+def _retrieve_data_from_arrow_table(table, as_dict=False):
     try:
         # Options introdcued in arrow 0.16+ to improve speed and memory usage
         df = table.to_pandas(split_blocks=True, self_destruct=True)
@@ -87,7 +87,7 @@ class ParquetFileWrapper():
 
         '''
         table = self.handle.read(columns=columns)
-        return _retrive_data_from_arrow_table(table, as_dict=as_dict)
+        return _retrieve_data_from_arrow_table(table, as_dict=as_dict)
 
     def read_columns_row_group(self, columns, as_dict=False):
         '''
@@ -104,7 +104,7 @@ class ParquetFileWrapper():
         dict or dataframe   See as_dict parameter above
         '''
         table = self.handle.read_row_group(self.current_row_group, columns=columns)
-        return _retrive_data_from_arrow_table(table, as_dict=as_dict)
+        return _retrieve_data_from_arrow_table(table, as_dict=as_dict)
 
     @property
     def info(self):
