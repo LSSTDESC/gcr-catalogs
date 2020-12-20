@@ -185,12 +185,11 @@ class RootDirManager:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
 
-    def persist_root_dir(self, value=None):
+    def persist_root_dir(self):
         """
-        Write root_dir to user config. By default write current session value
+        Write current session value of root_dir to user config.
         """
-        to_write = value or self.root_dir
-        self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(to_write)
+        self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(self.root_dir)
     def unpersist_root_dir(self):
         """
         Remove root_dir item from user config.  root_dir for the current
@@ -603,9 +602,6 @@ def remove_root_dir_default():
     """
     Revert to state of no user default root dir
 
-    Returns
-    -------
-    Old persisted value (may be None)
     """
     _config_register.unpersist_root_dir()
 
