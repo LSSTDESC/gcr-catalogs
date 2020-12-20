@@ -2,9 +2,10 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from .user_config_mgr import UserConfigManager
 
 if __name__ == "__main__":
-    usage="""Directly manipulate items in user config"""
+    desc="""Directly manipulate items in user config"""
 
-    parser = ArgumentParser(description=usage,
+    parser = ArgumentParser(description=desc, prog='GCRCatalogs.user_config',
+                            usage='python -m %(prog)s [options]',
                             formatter_class=RawTextHelpFormatter)
     parser.add_argument("operation", help="Operation to be performed for a particular key",
                         choices=("set", "get", "del"))
