@@ -1,10 +1,9 @@
 import os
-import warnings
 import yaml
 from collections.abc import MutableMapping
 
 """
-Utility class for managing user config (a dict) persisted to a yaml file. 
+Utility class for managing user config (a dict) persisted to a yaml file.
 """
 
 __all__ = ['UserConfigManager']
@@ -13,7 +12,7 @@ __all__ = ['UserConfigManager']
 class UserConfigManager(MutableMapping):
     _default_config_filename = "gcr-catalogs.yaml"
     _default_config_reldir = "lsstdesc"
-    
+
     def __init__(self, config_filename=None, config_reldir=None):
         config_name = os.path.basename(config_filename or self._default_config_filename)
         reldir = config_reldir or self._default_config_reldir
@@ -44,7 +43,7 @@ class UserConfigManager(MutableMapping):
     def update(self, items):
         """
         Write one or more key-value pairs to the config file.  Create new file or
-        append to existing file. 
+        append to existing file.
 
         Parameters
         ----------
@@ -52,7 +51,7 @@ class UserConfigManager(MutableMapping):
 
         Returns
         -------
-        dict written to the file.  
+        dict written to the file.
         If overwrite condition is violated, raise ValueError
 
         """
@@ -60,7 +59,7 @@ class UserConfigManager(MutableMapping):
 
         config_dict.update(items)
         return self._write_config(config_dict)
-    
+
     def clear(self):
         return self._write_config(dict())
 
@@ -94,30 +93,30 @@ class UserConfigManager(MutableMapping):
         with open(self._user_config_path, mode='w') as f:
             yaml.dump(config_dict, f, default_flow_style=False)
         return config_dict
-        
+
     def _load_config(self):
         if not self._user_config_exists():
             return dict()
 
         with open(self._user_config_path) as f:
             return yaml.safe_load(f)
-    
+
     def __getitem__(self, key):
         config_dict = self._load_config()
         return config_dict[key]
-        
+
     def __setitem__(self, key, value):
         config_dict = self._load_config()
         config_dict[key] = value
         self._write_config(config_dict)
-        
+
     def __delitem__(self, key):
         config_dict = self._load_config()
         del config_dict[key]
         self._write_config(config_dict)
-        
+
     def __iter__(self):
         return iter(self._load_config())
-    
+
     def __len__(self):
         return len(self._load_config())
