@@ -1,5 +1,5 @@
 id: {"type": "string", "unit": "none", "description": "Unique object ID"}
-host_galaxy: {"type": "int64", "unit": "none", "description": "ID of the host galaxy for a SN entry (-1 for other truth types)"}
+host_galaxy: {"type": "int64", "unit": "none", "description": "ID of the host galaxy for a SN/AGN entry (-1 for other truth types)"}
 ra: {"type": "float64", "unit": "degree", "description": "Right Ascension"}
 dec: {"type": "float64", "unit": "degree", "description": "Declination"}
 redshift: {"type": "float32", "unit": "none", "description": "Redshift"}

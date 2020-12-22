@@ -15,8 +15,8 @@ tract: {"type": "int64", "unit": "none", "description": "Tract ID in Sky Map"}
 patch: {"type": "string", "unit": "none", "description": "Patch ID in Sky Map (as a string, `x,y`)"}
 Ixx_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of source intensity, averaged across bands"}
 Ixx_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of source intensity in <band>"}
-Iyy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity in <band>"}
-Iyy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity, averaged across bands"}
+Iyy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity, averaged across bands"}
+Iyy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity in <band>"}
 Ixy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity, averaged across bands"}
 Ixy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity in <band>"}
 I_flag: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx`, `Iyy_pixel`, and `Ixy`"}
