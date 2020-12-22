@@ -1,0 +1,21 @@
+id: {"type": "string", "unit": "none", "description": "Unique object ID"}
+host_galaxy: {"type": "int64", "unit": "none", "description": "ID of the host galaxy for a SN entry (-1 for other truth types)"}
+ra: {"type": "float64", "unit": "degree", "description": "Right Ascension"}
+dec: {"type": "float64", "unit": "degree", "description": "Declination"}
+redshift: {"type": "float32", "unit": "none", "description": "Redshift"}
+is_variable: {"type": "int32", "unit": "none", "description": "1 for a variable source"}
+is_pointsource: {"type": "int32", "unit": "none", "description": "1 for a point source"}
+flux_<band>: {"type": "float32", "unit": "nJy", "description": "Static flux value in <band>"}
+flux_<band>_noMW: {"type": "float32", "unit": "nJy", "description": "Static flux value in <band>, without Milky Way extinction (i.e., dereddened)"}
+mag_<band>: {"type": "float32", "unit": "AB mag", "description": "Magnitude in <band>"}
+mag_<band>_noMW: {"type": "float32", "unit": "AB mag", "description": "Magnitude in <band>, without Milky Way extinction (i.e., dereddened)"}
+tract: {"type": "int64", "unit": "none", "description": "Tract ID in Sky Map"}
+patch: {"type": "string", "unit": "none", "description": "Patch ID in Sky Map (as a string, `x,y`)"}
+cosmodc2_hp: {"type": "int64", "unit": "none", "description": "Healpix ID in cosmoDC2 (for galaxies only; -1 for stars and SNe)"}
+cosmodc2_id: {"type": "int64", "unit": "none", "description": "Galaxy ID in cosmoDC2 (for galaxies only; -1 for stars and SNe)"}
+truth_type: {"type": "int64", "unit": "none", "description": "1 for galaxies, 2 for stars, and 3 for SNe"}
+match_objectId: {"type": "int64", "unit": "none", "description": "`objectId` of the matching object entry (-1 for unmatched truth entries)"}
+match_sep: {"type": "float64", "unit": "arcsec", "description": "On-sky angular separation of this object--truth matching pair (-1 for unmatched truth entries)"}
+is_good_match: {"type": "bool", "unit": "none", "description": "True if this object--truth matching pair satisfies the matching criteria"}
+is_nearest_neighbor: {"type": "bool", "unit": "none", "description": "True if this truth entry is the nearest neighbor of the object specified by `match_objectId`"}
+is_unique_truth_entry: {"type": "bool", "unit": "none", "description": "True for truth entries that appear for the first time in this truth table"}

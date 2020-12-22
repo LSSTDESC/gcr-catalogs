@@ -1,0 +1,6 @@
+# test for olivia photo-z's
+
+subclass_name: dc2_photoz_parquet.PZSKRFCatalog
+base_dir: ^/xgal/cosmoDC2/addons/photoz_v1.1.4/10_year_error_estimates/OLIVIA_WORK
+filename: final-result.parquet
+addon_for: cosmoDC2_v1.1.4_small

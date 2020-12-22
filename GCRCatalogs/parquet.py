@@ -3,6 +3,20 @@ import re
 
 __all__ = ['ParquetFileWrapper']
 
+
+def _retrieve_data_from_arrow_table(table, as_dict=False):
+    try:
+        # Options introdcued in arrow 0.16+ to improve speed and memory usage
+        df = table.to_pandas(split_blocks=True, self_destruct=True)
+    except TypeError:
+        df = table.to_pandas()
+
+    if as_dict:
+        return {col: arr.values for col, arr in df.iteritems()}
+
+    return df
+
+
 class ParquetFileWrapper():
     '''
     Provide services commonly needed when catalog consists of one or more parquet files.
@@ -17,7 +31,6 @@ class ParquetFileWrapper():
     In the latter case _iter_native_dataset will have to iterate over row groups as well
     as files.  See reader dc2_truth_parquet.py for an example.
     The two methods are equivalent for files having only a single row group.
-        
     '''
     def __init__(self, file_path, info=None):
         '''
@@ -54,7 +67,7 @@ class ParquetFileWrapper():
         self._handle = None
 
     def __len__(self):
-        return int(self.handle.scan_contents)
+        return self.handle.metadata.num_rows
 
     def __contains__(self, item):
         return item in self.columns
@@ -67,16 +80,14 @@ class ParquetFileWrapper():
         ----------
         columns   list of columns to be read
         as_dict   boolean.  If true, return data as dict where keys are column names
-                            Else return pandas dataframe 
-        returns
+                            Else return pandas dataframe
+        Returns
         -------
         dict or dataframe   See as_dict parameter above
 
         '''
-        d = self.handle.read(columns=columns).to_pandas()
-        if as_dict:
-            return {c: d[c].values for c in columns}
-        return d
+        table = self.handle.read(columns=columns)
+        return _retrieve_data_from_arrow_table(table, as_dict=as_dict)
 
     def read_columns_row_group(self, columns, as_dict=False):
         '''
@@ -87,16 +98,13 @@ class ParquetFileWrapper():
         ----------
         columns   list of columns to be read
         as_dict   boolean.  If true, return data as dict where keys are column names
-                            Else return pandas dataframe 
-        returns
+                            Else return pandas dataframe
+        Returns
         -------
         dict or dataframe   See as_dict parameter above
         '''
-        d = self.handle.read_row_group(self.current_row_group, columns=columns).to_pandas()
-        if as_dict:
-            return {c: d[c].values for c in columns}
-        return d
-        
+        table = self.handle.read_row_group(self.current_row_group, columns=columns)
+        return _retrieve_data_from_arrow_table(table, as_dict=as_dict)
 
     @property
     def info(self):
@@ -113,3 +121,6 @@ class ParquetFileWrapper():
             self._columns = [col for col in self.handle.schema.to_arrow_schema().names
                              if re.match(r'__\w+__$', col) is None]
         return list(self._columns)
+
+    def __getitem__(self, key):
+        return self.read_columns([key], as_dict=True)[key]

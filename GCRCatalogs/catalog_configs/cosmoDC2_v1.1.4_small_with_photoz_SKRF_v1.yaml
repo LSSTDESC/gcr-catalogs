@@ -1,0 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: composite.CompositeReader
+catalogs:
+ - catalog_name: cosmoDC2_v1.1.4_small
+   matching_method: galaxy_id
+ - catalog_name: photoz_SKRF_v1_for_cosmoDC2_v1.1.4_small
+   matching_method: galaxy_id

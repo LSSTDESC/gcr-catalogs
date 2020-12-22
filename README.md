@@ -79,8 +79,8 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
-- `dc2_object_run2.2i_dr6c`: static object catalog for Run 2.2i DR6c (an early release of DR6; 165 tracts)
-- `dc2_object_run2.2i_dr6c_with_metacal`: static object + metacal catalog for Run 2.2i DR6c (an early release of DR6; 159 tracts)
+- `dc2_object_run2.2i_dr6_wfd`: static object catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
+- `dc2_object_run2.2i_dr6_wfd_with_metacal`: static object + metacal catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
 - `dc2_object_run2.2i_dr6a`: static object catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
 - `dc2_object_run2.2i_dr6a_with_metacal`: static object +metacal catalog for Run 2.2i DR6a (an early release of DR6; 63 tracts)
 - `dc2_object_run2.2i_dr6a_with_photoz`: static object + photoz catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
@@ -89,6 +89,7 @@ Confluence page (*DESC member only*).
 - `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
 - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
 - `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
+- `dc2_object_run2.2i_dr2`: static object catalog for Run2.2i DR2
 
 #### Run 1.2 Object Catalogs
 

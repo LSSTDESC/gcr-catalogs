@@ -1,0 +1,6 @@
+subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+base_dir: ^/DC2-prod/Run2.2i/truth/tract_partition/match_dr6_wfd
+as_truth_table: true
+description: DC2 Run 2.2i Truth Catalog in tracts
+creators: ['DESC DC2 Team']
+include_in_default_catalog_list: true

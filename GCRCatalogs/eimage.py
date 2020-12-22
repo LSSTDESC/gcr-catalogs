@@ -2,8 +2,12 @@ from __future__ import division, print_function
 import os
 import re
 from astropy.io import fits
-from skimage.transform import rescale
 from GCR import BaseGenericCatalog
+_HAS_SKIMAGE = True
+try:
+    from skimage.transform import rescale
+except ImportError:
+    _HAS_SKIMAGE = False
 
 __all__ = ['EImageReader']
 
@@ -52,6 +56,8 @@ class Sensor(object):
         if rebinning is None:
             rebinning = self.default_rebinning
         if rebinning != 1:
+            if not _HAS_SKIMAGE:
+                raise RuntimeError("scikit-image is not installed. It is requred to rescale images.")
             data = rescale(data, 1 / rebinning, mode='constant', preserve_range=True, multichannel=False, anti_aliasing=True)
         return data
 
