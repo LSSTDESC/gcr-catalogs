@@ -5,6 +5,7 @@ import hashlib
 
 __all__ = ['md5', 'is_string_like', 'first', 'decode']
 
+
 def md5(fname, chunk_size=65536):
     """
     generate MD5 sum for *fname*
@@ -32,6 +33,7 @@ def first(iterable, default=None):
     returns the first element of `iterable`
     """
     return next(iter(iterable), default)
+
 
 def decode(bytestring):
     """
