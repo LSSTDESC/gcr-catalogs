@@ -17,18 +17,18 @@ jobs:
            docker_image_updated: lsstdesc/desc-python:test
            conda_activate: "conda activate desc;"
            setup_script: /usr/local/py3.7/etc/profile.d/conda.sh
-         - docker_name: updateGCRstack
-           docker_image: lsstdesc/stack-jupyter:prod
-           docker_image_updated: lsstdesc/stack-jupyter:test
-           conda_activate: ""
-           setup_script: /opt/lsst/software/stack/loadLSST.bash
+         ## Disable stack build for now
+         #- docker_name: updateGCRstack
+         #  docker_image: lsstdesc/stack-jupyter:prod
+         #  docker_image_updated: lsstdesc/stack-jupyter:test
+         #  conda_activate: ""
+         #  setup_script: /opt/lsst/software/stack/loadLSST.bash
 
     steps:
       - name: docker login
-        run: docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password ${{ secrets.DOCKERHUB_ACCESSTOK }}
+        run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
       - run: docker pull ${{ matrix.docker_image }}
       - name: Install master branch of ${{ github.repository }}
-        run: docker run --name=${{ matrix.docker_name }} ${{ matrix.docker_image }} /bin/bash \
-          -c "source ${{ matrix.setup_script }}; ${{ matrix.conda_activate }} pip install https://github.com/${{ github.repository }}/archive/master.zip"
+        run: docker run --name=${{ matrix.docker_name }} ${{ matrix.docker_image }} /bin/bash -c "source ${{ matrix.setup_script }}; ${{ matrix.conda_activate }} pip install https://github.com/${{ github.repository }}/archive/master.zip"
       - run: docker commit -m="Installed ${{ github.repository }} master" ${{ matrix.docker_name }} ${{ matrix.docker_image_updated }}
       - run: docker push ${{ matrix.docker_image_updated }}
