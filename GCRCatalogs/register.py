@@ -8,11 +8,11 @@ import requests
 import socket
 from GCR import BaseGenericCatalog
 from .utils import is_string_like
+from .user_config_mgr import UserConfigManager
 
 __all__ = [
-    "get_root_dir", "set_root_dir", "reset_root_dir", "get_available_catalogs",
+    "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
     "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
-
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -81,6 +81,7 @@ def load_catalog_from_config_dict(catalog_config):
 
 class RootDirManager:
     _ROOT_DIR_SIGNAL = "^/"
+    _ROOT_DIR_KEY = "root_dir"
     _PATH_LIKE_KEYS = (
         "filename",
         "addon_filename",
@@ -95,22 +96,38 @@ class RootDirManager:
     _DESC_SITE_ENV = "DESC_GCR_SITE"
     _NO_DEFAULT_ROOT_WARN = """
        Default root dir has not been set; catalogs may not be found.
+
+       For DESC users:
        You can specify the site as an environment variable before you import GCRCatalogs,
             $ export {}='sitename'
        or, from within Python and after you import GCRCatalogs,
             GCRCatalogs.set_root_dir_by_site('sitename')
        where sitename is one of ({})
 
-       If you want to use a non-standard root dir, use
+       For anyone:
+       If you want to set root dir in the current session to a value not associated with
+       a site, use
             GCRCatalogs.set_root_dir('/path/to/your/root_dir')
+
+       To also make that value the default in future sessions, use
+            GCRCatalogs.set_root_dir('/path/to/your/root_dir', write_to_config=True)
+       or, before starting Python, invoke the script user_config from the command line, e.g.
+            $ python -m GCRCatalogs.user_config set root_dir /path/to/your/root_dir
     """
 
-    def __init__(self, site_config_path=None):
+    def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
+        self._user_config_manager = UserConfigManager(config_filename=user_config_name)
         self._default_root_dir = None
         self._custom_root_dir = None
         self._site_config = {}
         self._site_info = self._get_site_info()
+
+        # User config has highest priority
+        user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
+        if user_root_dir:
+            self._default_root_dir = user_root_dir
+            return
 
         if self._site_config_path:
             self._site_config = load_yaml_local(self._site_config_path)
@@ -118,10 +135,6 @@ class RootDirManager:
                 if k in self._site_info:
                     self._default_root_dir = v
                     break
-
-        if not self._default_root_dir:
-            site_string = ' '.join(self.site_list)
-            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
 
     def _get_site_info(self):
         """
@@ -142,7 +155,12 @@ class RootDirManager:
 
     @property
     def root_dir(self):
-        return self._custom_root_dir or self._default_root_dir
+        current_root_dir = self._custom_root_dir or self._default_root_dir
+        if not current_root_dir:
+            site_string = ' '.join(self.site_list)
+            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
+
+        return current_root_dir
 
     @root_dir.setter
     def root_dir(self, path):
@@ -175,6 +193,22 @@ class RootDirManager:
         except KeyError:
             site_string = ' '.join(_config_register.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
+
+    def persist_root_dir(self):
+        """
+        Write current session value of root_dir to user config.
+        """
+        self._user_config_manager[self._ROOT_DIR_KEY] = os.path.abspath(self.root_dir)
+
+    def unpersist_root_dir(self):
+        """
+        Remove root_dir item from user config.  root_dir for the current
+        session is unchanged, however.
+        Returns
+        -------
+        old value (may be None)
+        """
+        return self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -523,9 +557,9 @@ class ConfigManager(Mapping):
 
 
 class ConfigRegister(RootDirManager, ConfigManager):
-    def __init__(self, config_dir, site_config_path=None):
+    def __init__(self, config_dir, site_config_path=None, user_config_name=None):
         ConfigManager.__init__(self, config_dir)
-        RootDirManager.__init__(self, site_config_path)
+        RootDirManager.__init__(self, site_config_path, user_config_name)
         for config in self.configs:
             config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
 
@@ -558,11 +592,14 @@ def get_root_dir():
     return _config_register.root_dir
 
 
-def set_root_dir(path):
+def set_root_dir(path, write_to_config=False):
     """
     Sets runtime root_dir to *path*.
     """
     _config_register.root_dir = path
+
+    if write_to_config:
+        _config_register.persist_root_dir()
 
 
 def set_root_dir_by_site(site):
@@ -570,6 +607,14 @@ def set_root_dir_by_site(site):
     Sets runtime root_dir to path corresponding to *site*.
     """
     _config_register.set_root_dir_by_site(site)
+
+
+def remove_root_dir_default():
+    """
+    Revert to state of no user default root dir
+
+    """
+    _config_register.unpersist_root_dir()
 
 
 def get_site_list():

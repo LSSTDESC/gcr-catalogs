@@ -113,6 +113,9 @@ ENV/
 # Session
 Session.vim
 
+# emacs backup
+*~
+
 .noseids
 .vscode/
 pytest_session.txt
