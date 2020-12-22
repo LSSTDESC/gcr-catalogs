@@ -96,18 +96,23 @@ class RootDirManager:
     _DESC_SITE_ENV = "DESC_GCR_SITE"
     _NO_DEFAULT_ROOT_WARN = """
        Default root dir has not been set; catalogs may not be found.
+
+       For DESC users:
        You can specify the site as an environment variable before you import GCRCatalogs,
             $ export {}='sitename'
        or, from within Python and after you import GCRCatalogs,
             GCRCatalogs.set_root_dir_by_site('sitename')
        where sitename is one of ({})
 
-       If you want to use a non-standard root dir in the current session, use
+       For anyone:
+       If you want to set root dir in the current session to a value not associated with
+       a site, use
             GCRCatalogs.set_root_dir('/path/to/your/root_dir')
 
        To also make that value the default in future sessions, use
             GCRCatalogs.set_root_dir('/path/to/your/root_dir', write_to_config=True)
-
+       or, before starting Python, invoke the script user_config from the command line, e.g.
+            $ python -m GCRCatalogs.user_config set root_dir /path/to/your/root_dir
     """
 
     def __init__(self, site_config_path=None, user_config_name=None):
@@ -131,10 +136,6 @@ class RootDirManager:
                     self._default_root_dir = v
                     break
 
-        if not self._default_root_dir:
-            site_string = ' '.join(self.site_list)
-            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
-
     def _get_site_info(self):
         """
         Return a string which, when executing at a recognized site with
@@ -154,7 +155,12 @@ class RootDirManager:
 
     @property
     def root_dir(self):
-        return self._custom_root_dir or self._default_root_dir
+        current_root_dir = self._custom_root_dir or self._default_root_dir
+        if not current_root_dir:
+            site_string = ' '.join(self.site_list)
+            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
+
+        return current_root_dir
 
     @root_dir.setter
     def root_dir(self, path):
