@@ -725,4 +725,6 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     The format would be [(catalog_name, original_path, resolved_path), ...]
     """
     return _config_register.retrieve_paths(name_startswith=name_startswith, name_contains=name_contains, **kwargs)
+
+
 _config_register = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
