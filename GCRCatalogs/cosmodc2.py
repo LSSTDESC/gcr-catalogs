@@ -17,7 +17,7 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
-           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog']
+           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog']
 __version__ = '2.0.1'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
@@ -87,6 +87,11 @@ def _limit_magnification(mag):
 
 
 def _calc_lensed_magnitude(magnitude, magnification):
+    magnification[magnification == 0] = 1.0
+    return magnitude -2.5*np.log10(magnification)
+
+
+def _calc_lensed_magnitude_with_limits(magnitude, magnification):
     magnification = _limit_magnification(magnification)
     return magnitude -2.5*np.log10(magnification)
 
@@ -391,7 +396,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'shear_2_treecorr': (np.negative, 'shear2'),
             'shear_2_phosim':   'shear2',
             'convergence': 'convergence',
-            'magnification': (_limit_magnification, 'magnification'),
+            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'uniqueHaloID',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
             'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
@@ -533,6 +538,27 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             orig_output[1]['hostHaloMass']['units'] = 'Msun/h'
         return orig_output
 
+
+class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
+    """                                                                                                                                                                   
+    SkySim5000  galaxy catalog reader, inherited from CosmoDC2GalaxyCatalog                                                                                                    
+    """
+
+    def _generate_quantity_modifiers(self):
+        quantity_modifiers = super()._generate_quantity_modifiers()
+
+        #change magnification definition
+        quantity_modifiers['magnification']= (_limit_magnification, 'magnification')
+
+        #change magnitude computation
+        for band in 'ugrizyY':
+            if band != 'y' and band != 'Y':
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
+                quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
+        quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
+        quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+
+        return quantity_modifiers
 
 class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
