@@ -133,7 +133,6 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         else:
             self.cosmology = None
 
-
         self.version = kwargs.get('version', '0.0.0')
         if StrictVersion(__version__) < self.version:
             raise ValueError('Reader version {} is less than config version {} for'.format(__version__, self.version))
