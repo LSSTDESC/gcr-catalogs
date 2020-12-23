@@ -547,7 +547,7 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
         quantity_modifiers = super()._generate_quantity_modifiers()
 
         #change magnification definition
-        quantity_modifiers['magnification']= (_limit_magnification, 'magnification')
+        quantity_modifiers['magnification'] = (_limit_magnification, 'magnification')
 
         #change magnitude computation
         for band in 'ugrizyY':
