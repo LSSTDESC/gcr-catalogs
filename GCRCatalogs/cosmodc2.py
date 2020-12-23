@@ -539,8 +539,8 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
 
 
 class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
-    """                                                                                                                                                                   
-    SkySim5000  galaxy catalog reader, inherited from CosmoDC2GalaxyCatalog                                                                                                    
+    """
+    SkySim5000  galaxy catalog reader, inherited from CosmoDC2GalaxyCatalog
     """
 
     def _generate_quantity_modifiers(self):
