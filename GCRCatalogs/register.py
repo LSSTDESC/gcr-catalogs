@@ -91,6 +91,7 @@ class RootDirManager:
         "header_file",
         "repo",
         "table_dir",
+        "meta_path",
     )
     _DICT_LIST_KEYS = ("catalogs",)
     _DESC_SITE_ENV = "DESC_GCR_SITE"
