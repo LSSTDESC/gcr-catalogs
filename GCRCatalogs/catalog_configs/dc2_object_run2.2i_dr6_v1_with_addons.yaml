@@ -1,4 +1,4 @@
-based_on: dc2_object_run2.2i_dr6_v1_with_addons
+subclass_name: composite.CompositeReader
 catalogs:
   - catalog_name: dc2_object_run2.2i_dr6_wfd_v1
   - subclass_name: dc2_metacal.DC2MetacalCatalog
@@ -10,11 +10,14 @@ catalogs:
     overwrite_quantities: false
     overwrite_attributes: false
     include_native_quantities: true
-  - catalog_name: dc2_object_run2.2i_dr6_wfd_matched
+  - subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+    base_dir: ^/DC2-prod/Run2.2i/truth/tract_partition/match_dr6_v1
+    as_object_addon: true
     matching_partition: true
     matching_row_order: true
-    overwrite_quantities: true
+    overwrite_quantities: false
     overwrite_attributes: false
-    include_native_quantities: true
+    include_native_quantities: false
 
-deprecated: Use dc2_object_run2.2i_dr6_with_addons
+description: DC2 Run 2.2i DR6 Object Table v1 with all available add-ons (currently only metacal and truth-match)
+creators: ['DESC DC2 Team']

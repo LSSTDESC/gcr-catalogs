@@ -1,13 +1,2 @@
-subclass_name: composite.CompositeReader
-description: DC2 Run 2.2i Object Catalog with Truth Match Information
-creators: ['DESC DC2 Team']
-catalogs:
-  - catalog_name: dc2_object_run2.2i_dr6_wfd_v1
-  - catalog_name: dc2_truth_match_run2.2i_dr6_wfd
-    as_object_addon: true
-    as_truth_table: false
-    matching_partition: true
-    matching_row_order: true
-    overwrite_quantities: false
-    overwrite_attributes: false
-    include_native_quantities: false
+alias: dc2_object_run2.2i_dr6_with_addons
+deprecated: Use dc2_object_run2.2i_dr6_with_addons

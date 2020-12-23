@@ -5,3 +5,4 @@ apply_metacal_test3_fix: true
 description: DC2 Run 2.2i DR6 WFD v1 Metacal Table
 creators: ['DESC DC2 Team']
 addon_for: dc2_object_run2.2i_dr6_wfd_v1
+deprecated: Use dc2_object_run2.2i_dr6_with_addons

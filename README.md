@@ -84,14 +84,14 @@ Confluence page (*DESC member only*).
 
 - `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits)
   (Note: a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
-- `dc2_object_run2.2i_dr6_wfd_with_all_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs
+- `dc2_object_run2.2i_dr6_with_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs
   (Note: currently available add-ons include metacal and truth-match. Photo-z add-on not yet available for DR6; use `dc2_object_run2.2i_dr6a_with_photoz` for a preview.)
 
 ##### DR2 (up to Year 1)
 
-- `dc2_object_run2.2i_dr2`: static object catalog for Run2.2i DR2
-- `dc2_object_run2.2i_dr2_with_all_addons`: static object + truth-match catalog for Run 2.2i DR2 <br>
-   (Note: metacal, photo-z not yet available for DR2.)
+- `dc2_object_run2.2i_dr2_wfd`: static object catalog for Run2.2i DR2 WFD
+- `dc2_object_run2.2i_dr2_wfd_with_addons`: same as `dc2_object_run2.2i_dr2_wfd` but with all available add-on catalogs
+  (Note: currently only truth-match add-on is available; metacal, photo-z not yet available for DR2 WFD.)
 
 ##### DR3  (up to Year 2)
 
@@ -103,15 +103,13 @@ Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3
 
 #### Run 2.2 Truth Catalogs
 
-- `dc2_truth_match_run2.2i_dr6_wfd`: combined truth summary table (galaxies, stars, SNe) and partitioned in tracts.
-   With matching columns for `dc2_object_run2.2i_dr6_wfd` (but truth columns are not specific to DRs).
+- `dc2_truth_run2.2i_summary_tract_partition`: combined truth summary table (galaxies, stars, SNe); partitioned in tracts.
 - `dc2_truth_run2.2i_galaxy_truth_summary`: galaxy truth summary table, partitioned in healpixels as cosmoDC2.
 - `dc2_truth_run2.2i_sn_truth_summary`: SN truth summary table.
 - `dc2_truth_run2.2i_sn_variability_truth`: SN variable truth information.
 - `dc2_truth_run2.2i_star_lc_stats`: star light curve statistics.
 - `dc2_truth_run2.2i_star_truth_summary`: star truth summary table.
 - `dc2_truth_run2.2i_star_variability_truth`: star variable truth information.
-
 
 #### Run 1.2 Object Catalogs
 
