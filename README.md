@@ -82,9 +82,10 @@ Confluence page (*DESC member only*).
 
 ##### DR6 WFD (up to Year 5)
 
-- `dc2_object_run2.2i_dr6_wfd`: static object catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
-- `dc2_object_run2.2i_dr6_wfd_with_all_addons`: static object + metacal + truth-match catalog for Run 2.2i DR6 WFD <br>
-   (Note: photo-z not yet available for DR6 WFD. Use `dc2_object_run2.2i_dr6a_with_photoz` for a preview.)
+- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits)
+  (Note: a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
+- `dc2_object_run2.2i_dr6_wfd_with_all_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs
+  (Note: currently available add-ons include metacal and truth-match. Photo-z add-on not yet available for DR6; use `dc2_object_run2.2i_dr6a_with_photoz` for a preview.)
 
 ##### DR2 (up to Year 1)
 
