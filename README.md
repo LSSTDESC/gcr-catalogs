@@ -97,6 +97,18 @@ Confluence page (*DESC member only*).
 - `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal (missing a few tracts)
 - `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
 
+#### Run 2.2 Truth Catalogs
+
+- `dc2_truth_match_run2.2i_dr6_wfd`: combined truth summary table (galaxies, stars, SNe) and partitioned in tracts.
+   With matching columns for `dc2_object_run2.2i_dr6_wfd` (but truth columns are not specific to DRs).
+- `dc2_truth_run2.2i_galaxy_truth_summary`: galaxy truth summary table, partitioned in healpixels as cosmoDC2.
+- `dc2_truth_run2.2i_sn_truth_summary`: SN truth summary table.
+- `dc2_truth_run2.2i_sn_variability_truth`: SN variable truth information.
+- `dc2_truth_run2.2i_star_lc_stats`: star light curve statistics.
+- `dc2_truth_run2.2i_star_truth_summary`: star truth summary table.
+- `dc2_truth_run2.2i_star_variability_truth`: star variable truth information.
+
+
 #### Run 1.2 Object Catalogs
 
 - `dc2_object_run1.2i`: static object catalog for Run 1.2i (with only DPDD columns and native columns needed for the DPDD columns)
