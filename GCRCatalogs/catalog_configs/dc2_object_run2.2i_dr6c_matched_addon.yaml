@@ -8,4 +8,4 @@ catalogs:
     matching_method: MATCHING_FORMAT
   - catalog_name: dc2_object_run2.2i_dr6c_matched
     matching_method: MATCHING_FORMAT
-deprecated: Use dc2_object_run2.2i_dr6_wfd_matched_addon
+deprecated: Use dc2_object_run2.2i_dr6_with_addons

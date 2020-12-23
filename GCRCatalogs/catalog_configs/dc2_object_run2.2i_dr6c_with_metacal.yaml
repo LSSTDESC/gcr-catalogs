@@ -34,4 +34,4 @@ catalogs:
     bands: 'griz'
     apply_metacal_test3_fix: true
     matching_method: MATCHING_FORMAT
-deprecated: Use dc2_object_run2.2i_dr6_wfd_with_all_addons
+deprecated: Use dc2_object_run2.2i_dr6_with_addons

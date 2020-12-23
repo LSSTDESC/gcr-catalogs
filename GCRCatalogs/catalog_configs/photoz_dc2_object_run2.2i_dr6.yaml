@@ -1,7 +1,0 @@
-subclass_name: dc2_photoz_parquet.DC2PhotozCatalog
-base_dir: ^/DC2-prod/Run2.2i/addons/photoz/dr6
-filename_pattern: 'photoz_pdf_Run2.2i_dr6_tract_\d+\.parquet$'
-description: DC2 Run 2.2i_dr6 test BPZ Photoz table
-creators: ['Sam Schmidt, DESC DC2 team']
-addon_for: dc2_object_run2.2i_dr6
-deprecated: Use photoz_dc2_object_run2.2i_dr6a
