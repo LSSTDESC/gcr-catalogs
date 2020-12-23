@@ -79,17 +79,23 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
+##### DR6 WFD (up to Year 5)
+
 - `dc2_object_run2.2i_dr6_wfd`: static object catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
-- `dc2_object_run2.2i_dr6_wfd_with_metacal`: static object + metacal catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
-- `dc2_object_run2.2i_dr6a`: static object catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr6a_with_metacal`: static object +metacal catalog for Run 2.2i DR6a (an early release of DR6; 63 tracts)
-- `dc2_object_run2.2i_dr6a_with_photoz`: static object + photoz catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr6a_matched_addon`: static object catalog + matched truth for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
-- `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
-- `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
-- `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
+- `dc2_object_run2.2i_dr6_wfd_with_all_addons`: static object + metacal + truth-match catalog for Run 2.2i DR6 WFD <br>
+   (Note: photo-z not yet available for DR6 WFD. Use `dc2_object_run2.2i_dr6a_with_photoz` for a preview.)
+
+##### DR2 (up to Year 1)
+
 - `dc2_object_run2.2i_dr2`: static object catalog for Run2.2i DR2
+- `dc2_object_run2.2i_dr2_with_all_addons`: static object + truth-match catalog for Run 2.2i DR2 <br>
+   (Note: metacal, photo-z not yet available for DR2.)
+
+##### DR3  (up to Year 2)
+
+- `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
+- `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal (missing a few tracts)
+- `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
 
 #### Run 1.2 Object Catalogs
 
