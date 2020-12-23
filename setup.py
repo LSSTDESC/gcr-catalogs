@@ -9,11 +9,11 @@ import os
 from setuptools import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
-    exec(f.read()) # pylint: disable=W0122
+    exec(f.read())  # pylint: disable=W0122
 
 setup(
     name='GCRCatalogs',
-    version=__version__, # pylint: disable=E0602 # noqa: F821
+    version=__version__,  # pylint: disable=E0602 # noqa: F821
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
     author='Yao-Yuan Mao',
