@@ -373,8 +373,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         # cross-band average, second moment values
         modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
         for ax in ['xx', 'yy', 'xy']:
-            modifiers['I{}'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
-            modifiers['I{}PSF'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
+            modifiers['I{}_pixel'.format(ax)] = 'ext_shapeHSM_HsmSourceMoments_{}'.format(ax)
+            modifiers['I{}PSF_pixel'.format(ax)] = 'base_SdssShape_psf_{}'.format(ax)
 
         for band in bands:
             modifiers['mag_{}'.format(band)] = '{}_mag'.format(band)
@@ -388,8 +388,8 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             modifiers['I_flag_{}'.format(band)] = '{}_base_SdssShape_flag'.format(band)
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers['I{}_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
-                modifiers['I{}PSF_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
+                modifiers['I{}_pixel_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
+                modifiers['I{}PSF_pixel_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
@@ -721,8 +721,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
         # cross-band average, second moment values
         modifiers['I_flag'] = 'ext_shapeHSM_HsmSourceMoments_flag'
         for ax in ['xx', 'yy', 'xy']:
-            modifiers[f'I{ax}'] = f'ext_shapeHSM_HsmSourceMoments_{ax}'
-            modifiers[f'I{ax}PSF'] = f'base_SdssShape_psf_{ax}'
+            modifiers[f'I{ax}_pixel'] = f'ext_shapeHSM_HsmSourceMoments_{ax}'
+            modifiers[f'I{ax}PSF_pixel'] = f'base_SdssShape_psf_{ax}'
 
         for band in bands:
             modifiers[f'psFlux_{band}'] = (convert_flux_to_nanoJansky,
@@ -760,8 +760,8 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
             modifiers[f'I_flag_{band}'] = f'{band}_base_SdssShape_flag'
 
             for ax in ['xx', 'yy', 'xy']:
-                modifiers[f'I{ax}_{band}'] = f'{band}_base_SdssShape_{ax}'
-                modifiers[f'I{ax}PSF_{band}'] = f'{band}_base_SdssShape_psf_{ax}'
+                modifiers[f'I{ax}_pixel_{band}'] = f'{band}_base_SdssShape_{ax}'
+                modifiers[f'I{ax}PSF_pixel_{band}'] = f'{band}_base_SdssShape_psf_{ax}'
 
             modifiers[f'psf_fwhm_{band}'] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
