@@ -55,6 +55,7 @@ def _calc_Av(lum_v, lum_v_dust):
         Av = -2.5*(np.log10(lum_v_dust/lum_v))
         return Av
 
+
 def _gen_position_angle(size_reference):
     # pylint: disable=protected-access
     size = size_reference.size
