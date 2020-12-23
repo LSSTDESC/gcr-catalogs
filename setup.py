@@ -29,7 +29,7 @@ setup(
     ],
     keywords='GCR',
     packages=['GCRCatalogs'],
-    install_requires=['requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.9.1'],
+    install_requires=['requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.9.2'],
     extras_require={
         'full': ['h5py', 'healpy', 'pandas', 'pyarrow', 'tables'],
     },

@@ -143,6 +143,8 @@ class DC2DMCatalog(BaseGenericCatalog):
 
         if self.META_PATH:
             self._quantity_info_dict = self._generate_info_dict(self.META_PATH, bands)
+        else:
+            self._quantity_info_dict = dict()
 
         self._len = None
 

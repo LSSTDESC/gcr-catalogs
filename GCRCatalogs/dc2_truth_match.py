@@ -158,3 +158,16 @@ class DC2TruthMatchCatalog(DC2DMTractCatalog):
                     col,
                     "{}_match_mask".format(t),
                 )
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        """
+        Befere calling the parent method, check if `quantity` has an added "_truth" postfix
+        due to the `if self._as_object_addon:...` part in _subclass_init. If so, remove the postfix.
+        """
+        if (
+            quantity not in self._quantity_info_dict and
+            quantity in self._quantity_modifiers and
+            quantity.endswith("_truth")
+        ):
+            quantity = quantity[:-6]
+        return super()._get_quantity_info_dict(quantity, default)
