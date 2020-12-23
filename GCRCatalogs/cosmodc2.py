@@ -559,6 +559,7 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
 
         return quantity_modifiers
 
+
 class BaseDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
     BaseDC2 galaxy catalog reader, inherited from CosmoDC2ParentClass
