@@ -1,3 +1,0 @@
-based_on: dc2_object_run2.2i_dr3
-tract: 3830
-deprecated: Use dc2_object_run2.2i_dr3 and native_filters to select individual tracts

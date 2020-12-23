@@ -94,9 +94,11 @@ Confluence page (*DESC member only*).
 
 ##### DR3  (up to Year 2)
 
-- `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
-- `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal (missing a few tracts)
-- `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
+Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3a` is a preview of DR3.
+
+- `dc2_object_run2.2i_dr3a`: static object catalog for Run 2.2i DR3 (preview)
+- `dc2_object_run2.2i_dr3a_with_metacal`: `dc2_object_run2.2i_dr3a` + metacal (preview; missing more tracts)
+- `dc2_object_run2.2i_dr3a_with_photoz`: `dc2_object_run2.2i_dr3a` + photo-z (preview)
 
 #### Run 2.2 Truth Catalogs
 
