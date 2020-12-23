@@ -80,20 +80,18 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
-##### DR6 WFD (up to Year 5)
+##### DR6 (up to Year 5)
 
-- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits)
-  (Note: a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
-- `dc2_object_run2.2i_dr6_with_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs
-  (Note: currently available add-ons include metacal and truth-match. Photo-z add-on not yet available for DR6; use `dc2_object_run2.2i_dr6a_with_photoz` for a preview.)
+- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits; a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
+- `dc2_object_run2.2i_dr6_with_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs (currently including metacal and truth-match; photo-z add-on not yet available. Use `dc2_object_run2.2i_dr6a_with_photoz` for a preview of photo-z.)
 
 ##### DR2 (up to Year 1)
 
-- `dc2_object_run2.2i_dr2_wfd`: static object catalog for Run2.2i DR2 WFD
+- `dc2_object_run2.2i_dr2_wfd`: static object catalog for Run2.2i DR2 (WFD visits)
 - `dc2_object_run2.2i_dr2_wfd_with_addons`: same as `dc2_object_run2.2i_dr2_wfd` but with all available add-on catalogs
-  (Note: currently only truth-match add-on is available; metacal, photo-z not yet available for DR2 WFD.)
+  (currently including only truth-match; metacal, photo-z not yet available)
 
-##### DR3  (up to Year 2)
+##### DR3 (up to Year 2)
 
 Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3a` is a preview of DR3.
 
