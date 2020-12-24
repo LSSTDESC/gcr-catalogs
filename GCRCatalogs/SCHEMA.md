@@ -121,6 +121,8 @@ which is determined from the reference filter for each source (the filter that b
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
+`objectId` | - | Unique object ID |  | x |
+`parentObjectId` | - | Parent object ID |  | x |
 `ra` | degree | Right Ascension | x | xx |
 `dec` | degree | Declination | x | xx |
 `x` | pixel | 2D centroid location (x coordinate). |   | xx |
@@ -128,26 +130,35 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `xErr` | pixel | Error value for `centroidX`. |   | xx |
 `yErr` | pixel | Error value for `centroidY`. |   | xx |
 `xy_flag` | - | Flag for issues with `x` and `y`. |   | xx |
-`psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
-`psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
-`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
+`Ixx_pixel` | pixel^2 | Adaptive second moment of the source intensity, averaged across bands. |   | xx |
+`Iyy_pixel` | pixel^2 | Adaptive second moment of the source intensity, averaged across bands. |   | xx |
+`Ixy_pixel` | pixel^2 | Adaptive second moment of the source intensity, averaged across bands. |   | xx |
+`I_flag` | - | Flag for issues with `Ixx_pixel`, `Ixy_pixel`, and `Iyy_pixel`. |   | xx |
+`IxxPSF_pixel` | pixel^2 | Adaptive second moment of the PSF, averaged across bands. |   | xx |
+`IyyPSF_pixel` | pixel^2 | Adaptive second moment of the PSF, averaged across bands. |   | xx |
+`IxyPSF_pixel` | pixel^2 | Adaptive second moment of the PSF, averaged across bands. |   | xx |
 `Ixx_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
 `Iyy_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
 `Ixy_pixel_<band>` | pixel^2 | Adaptive second moment of the source intensity in `<band>`. |   | xx |
+`I_flag_<band>` | - | Flag for issues with `Ixx_pixel_<band>`, `Ixy_pixel_<band>`, and `Iyy_pixel_<band>`. |   | xx |
 `IxxPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
 `IyyPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
 `IxyPSF_pixel_<band>` | pixel^2 | Adaptive second moment of the PSF  in `<band>`. |   | xx |
-`I_flag_<band>` | - | Flag for issues with `Ixx_<band>`, `Ixx_<band>`, and `Ixx_<band>.` |   | x |
+`psFlux_<band>` | nJy | Point source model flux in `<band>.` |   | x |
+`psFluxErr_<band>` | nJy | Error value for `psFlux_<band>`. |   | x |
+`psFlux_flag_<band>` | - | Flag for issues with `psFlux_<band>`. |   | x |
 `cModelFlux_<band>` | nJy | composite model (CModel) flux in `<band>` | x |  |
 `cModelFluxErr_<band>` | nJy | Error value for cModel flux in `<band>` | x |  |
 `cModelFlux_flag_<band>` | - | Flag for issues with `cModelFlux_flag_<band>` | x |  |
+`mag_<band>` | mag | Point-source model magnitude in `<band>`, fitted by cModel. | x |   |
+`magerr_<band>` | mag | Error value for `mag_<band>.` | x |   |
 `mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
 `magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
 `snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
 `psf_fwhm_<band>` | asec | PSF FWHM calculated from 'base_SdssShape' |   |   |
+`psNdata` | - | Number of data points (pixels) used to fit the model |  | x |
 `good` | - | True if the source has no flagged pixels. |   |   |
 `clean` | - |  True if the source has no flagged pixels and is not skipped by the deblender (`good && ~deblend_skipped`). |   |   |
-`I_flag` | - | Flag for issues with `Ixx`, `Iyy`, and `Ixy`. |   | xx |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 
@@ -160,10 +171,10 @@ exposures based on the positions from objects in the Object Catalog.
 
 Quantity Label | Unit | Definition | GCRbase | DPDD
 --- | --- | --- | --- | ---
+`objectId` | - | Unique object ID |  | x |
+`parentObjectId` | - | Parent object ID |  | x |
 `ra` | degree | Right Ascension | x | xx |
-`ra_err` | degree | Right Ascension | x | xx |
 `dec` | degree | Declination | x | xx |
-`dec_err` | degree | Declination | x | xx |
 `x` | pixels | 2D centroid location (x coordinate). |   | xx |
 `y` | pixels | 2D centroid location (y coordinate). |   | xx |
 `xErr` | pixels | Error value for `centroidX`. |   | xx |
@@ -172,15 +183,45 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `psFlux` | nJy | Point source model flux. |   | x |
 `psFluxErr` | nJy | Error value for `psFlux`. |   | x |
 `psFlux_flag` | - | Flag for issues with `psFlux`. |   | x |
-`Ixx` | asec2 | Adaptive second moment of the source intensity. |   | x |
-`Iyy` | asec2 | Adaptive second moment of the source intensity. |   | x |
-`Ixy` | asec2 | Adaptive second moment of the source intensity. |   | x |
-`IxxPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
-`IyyPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
-`IxyPSF` | asec2 | Adaptive second moment of the PSF. |   | x |
-`I_flag` | - | Flag for issues with `Ixx`, `Ixx`, and `Ixx.` |   | x |
+`Ixx_pixel` | pixel^2 | Adaptive second moment of the source intensity. |   | xx |
+`Iyy_pixel` | pixel^2 | Adaptive second moment of the source intensity. |   | xx |
+`Ixy_pixel` | pixel^2 | Adaptive second moment of the source intensity. |   | xx |
+`IxxPSF_pixel` | pixel^2 | Adaptive second moment of the PSF. |   | xx |
+`IyyPSF_pixel` | pixel^2 | Adaptive second moment of the PSF. |   | xx |
+`IxyPSF_pixel` | pixel^2 | Adaptive second moment of the PSF. |   | xx |
+`I_flag` | - | Flag for issues with `Ixx_pixel`, `Ixy_pixel`, and `Iyy_pixel.` |   | x |
+`psNdata` | - | Number of data points (pixels) used to fit the model |  | x |
+`good` | - | True if the source has no flagged pixels. |   |   |
+`clean` | - |  True if the source has no flagged pixels and is not skipped by the deblender (`good && ~deblend_skipped`). |   |   |
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
+
+## DC2 Run 2.x truth summary catalogs
+
+Quantity Label | Unit | Definition
+--- | --- | ---
+`id` | - | Unique object ID (string)
+`host_galaxy` | - | ID of the host galaxy for a SN/AGN entry (-1 for other truth types)
+`ra` | degree | Right Ascension
+`dec` | degree | Declination
+`redshift` | - | Redshift
+`is_variable` | - | 1 for a variable source
+`is_pointsource` | - | 1 for a point source
+`flux_<band>` | nJy | Static flux value in `<band>`
+`flux_<band>_noMW` | nJy | Static flux value in `<band>`, without Milky Way extinction (i.e., dereddened)
+`mag_<band>` | AB mag | Magnitude in `<band>`
+`mag_<band>_noMW` | AB mag | Magnitude in `<band>`, without Milky Way extinction (i.e., dereddened)
+`tract` | - | Tract ID in Sky Map
+`patch` | string - | Patch ID in Sky Map (as a string, `x,y`)
+`cosmodc2_hp` | - | Healpix ID in cosmoDC2 (for galaxies only; -1 for stars and SNe)
+`cosmodc2_id` | - | Galaxy ID in cosmoDC2 (for galaxies only; -1 for stars and SNe)
+`truth_type` | - | 1 for galaxies, 2 for stars, and 3 for SNe
+`match_objectId` | - | `objectId` of the matching object entry (-1 for unmatched truth entries)
+`match_sep` | arcsec | On-sky angular separation of this object-truth matching pair (-1 for unmatched truth entries)
+`is_good_match` | - | True if this object--truth matching pair satisfies all matching criteria
+`is_nearest_neighbor` | - | True if this truth entry is the nearest neighbor of the object specified by `match_objectId`
+`is_unique_truth_entry` | - | True for truth entries that appear for the first time in this truth table
+
 
 ## DC2 Run 1.x truth catalogs
 
