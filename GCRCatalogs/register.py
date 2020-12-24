@@ -681,10 +681,8 @@ def get_available_catalogs(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains with *name_contains*
     """
-    if "resolve_content" not in kwargs:
-        kwargs["resolve_content"] = (not names_only)
-    if "is_public_release" not in kwargs and not _config_register.has_root_dir_from_site:
-        kwargs["is_public_release"] = True
+    kwargs.setdefault("resolve_content", (not names_only))
+    kwargs.setdefault("is_public_release", (not _config_register.has_root_dir_from_site))
     return _config_register.get_configs(
         names_only=names_only,
         include_default_only=include_default_only,
@@ -713,9 +711,9 @@ def get_available_catalog_names(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains with *name_contains*
     """
+    kwargs["names_only"] = False
     return get_available_catalogs(
         include_default_only=include_default_only,
-        names_only=True,
         name_startswith=name_startswith,
         name_contains=name_contains,
         **kwargs
