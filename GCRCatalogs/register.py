@@ -197,10 +197,12 @@ class RootDirManager:
         If *site* is a recognized site, set root_dir to corresponding value
         """
         try:
-            self.root_dir = self._site_config[site]
+            new_root_dir = self._site_config[site]
         except KeyError:
-            site_string = ' '.join(_config_register.site_list)
+            site_string = ' '.join(self.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
+        else:
+            self.root_dir = new_root_dir
 
     def persist_root_dir(self):
         """
