@@ -214,11 +214,8 @@ class RootDirManager:
         """
         Remove root_dir item from user config.  root_dir for the current
         session is unchanged, however.
-        Returns
-        -------
-        old value (may be None)
         """
-        return self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
+        self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
