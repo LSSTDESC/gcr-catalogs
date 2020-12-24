@@ -127,14 +127,18 @@ class RootDirManager:
         # User config has highest priority
         user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
-            self._default_root_dir = user_root_dir
-            return
+            self._root_dir_from_config = user_root_dir
 
-        if self._site_config_path:
+        # Try to set self._root_dir_from_site
+        if self._site_config_path and os.path.isfile(self._site_config_path):
             self._site_config = load_yaml_local(self._site_config_path)
+
+        if self._site_config:
+            site_info = self._get_site_info()
+            if site_info:
             for k, v in self._site_config.items():
-                if k in self._site_info:
-                    self._default_root_dir = v
+                    if k in site_info:
+                        self._root_dir_from_site = v
                     break
 
     def _get_site_info(self):
