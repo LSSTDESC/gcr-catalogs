@@ -12,7 +12,7 @@ from .user_config_mgr import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "get_available_catalog_names"]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -119,12 +119,12 @@ class RootDirManager:
     def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
         self._user_config_manager = UserConfigManager(config_filename=user_config_name)
-        self._default_root_dir = None
-        self._custom_root_dir = None
+        self._root_dir_from_config = None
+        self._root_dir_from_site = None
+        self._root_dir_from_runtime = None
         self._site_config = {}
-        self._site_info = self._get_site_info()
 
-        # User config has highest priority
+        # Try to set self._root_dir_from_config
         user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
             self._root_dir_from_config = user_root_dir
@@ -136,10 +136,10 @@ class RootDirManager:
         if self._site_config:
             site_info = self._get_site_info()
             if site_info:
-            for k, v in self._site_config.items():
+                for k, v in self._site_config.items():
                     if k in site_info:
                         self._root_dir_from_site = v
-                    break
+                        break
 
     def _get_site_info(self):
         """
@@ -163,7 +163,12 @@ class RootDirManager:
 
     @property
     def root_dir(self):
-        current_root_dir = self._custom_root_dir or self._default_root_dir
+        current_root_dir = (
+            self._root_dir_from_runtime or
+            self._root_dir_from_config or
+            self._root_dir_from_site
+        )
+
         if not current_root_dir:
             site_string = ' '.join(self.site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
@@ -186,7 +191,7 @@ class RootDirManager:
             warnings.warn("root_dir has been set to '{}' but you have no permission to access it".format(path))
         except OSError as e:
             warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
-        self._custom_root_dir = path
+        self._root_dir_from_runtime = path
 
     @property
     def site_list(self):
@@ -218,7 +223,7 @@ class RootDirManager:
         self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
-        self._custom_root_dir = None
+        self._root_dir_from_runtime = None
 
     def resolve_root_dir(self, config_dict, config_name=None, record=None):
         """
@@ -257,6 +262,10 @@ class RootDirManager:
 
         return config_dict
 
+    @property
+    def has_root_dir_from_site(self):
+        return bool(self._root_dir_from_site and os.path.isdir(self._root_dir_from_site))
+
 
 class Config(Mapping):
     YAML_EXTENSIONS = (".yaml", ".yml")
@@ -267,6 +276,7 @@ class Config(Mapping):
     READER_KEY = "subclass_name"
     DEPRECATED_KEY = "deprecated"
     ADDON_KEY = "addon_for"
+    PUBLIC_RELEASE_KEY = "public_release"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -360,6 +370,10 @@ class Config(Mapping):
         return self.get(self.ADDON_KEY)
 
     @property
+    def is_public_release(self):
+        return self.get(self.PUBLIC_RELEASE_KEY)
+
+    @property
     def has_reference(self):
         return any(map(self.get, self.REFERENCE_KEYS))
 
@@ -414,6 +428,7 @@ class ConfigManager(Mapping):
     def __init__(self, config_dir):
         self._config_dir = config_dir
         self._configs = dict()
+        self.default_to_public_releases_only = False
         for config_file in sorted(os.listdir(self._config_dir)):
             config = Config(config_file, self._config_dir)
             if not config.ignore:
@@ -487,6 +502,7 @@ class ConfigManager(Mapping):
         include_deprecated=False,
         include_pseudo=False,
         include_pseudo_only=False,
+        is_public_release=None,
         name_startswith=None,
         name_contains=None,
         additional_conditions=None,
@@ -516,7 +532,9 @@ class ConfigManager(Mapping):
                 get_content = lambda config: (config.rootname, config.content)  # noqa: E731
 
         conditions = list()
-        if include_default_only:
+        if include_default_only and self.default_to_public_releases_only:
+            conditions.append(lambda config: config.is_public_release)
+        elif include_default_only:
             conditions.append(lambda config: config.is_default)
         if not include_addons:
             conditions.append(lambda config: not config.is_addon)
@@ -526,6 +544,12 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
             conditions.append(lambda config: not config.is_pseudo)
+        if is_public_release is True:
+            conditions.append(lambda config: config.is_public_release)
+        elif is_public_release is False:
+            conditions.append(lambda config: not config.is_public_release)
+        elif is_public_release:
+            conditions.append(lambda config: config.is_public_release and is_public_release in config.is_public_release)
         if name_startswith:
             name_startswith_lower = str(name_startswith).lower()
             conditions.append(lambda config: config.name.startswith(name_startswith_lower))
@@ -569,6 +593,7 @@ class ConfigRegister(RootDirManager, ConfigManager):
         RootDirManager.__init__(self, site_config_path, user_config_name)
         for config in self.configs:
             config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
+        self.default_to_public_releases_only = not self.has_root_dir_from_site
 
     @property
     def root_dir(self):
@@ -665,6 +690,34 @@ def get_available_catalogs(
     return _config_register.get_configs(
         names_only=names_only,
         include_default_only=include_default_only,
+        name_startswith=name_startswith,
+        name_contains=name_contains,
+        **kwargs
+    )
+
+
+def get_available_catalog_names(
+    include_default_only=True,
+    name_startswith=None,
+    name_contains=None,
+    **kwargs
+):
+    """
+    Returns a list of all available catalog names.
+
+    Parameters
+    ----------
+    include_default_only: bool, optional (default: True)
+        When set to False, returned list will include catalogs that are not in the default listing
+        (i.e., those may not be suitable for general comsumption)
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains with *name_contains*
+    """
+    return get_available_catalogs(
+        include_default_only=include_default_only,
+        names_only=True,
         name_startswith=name_startswith,
         name_contains=name_contains,
         **kwargs
