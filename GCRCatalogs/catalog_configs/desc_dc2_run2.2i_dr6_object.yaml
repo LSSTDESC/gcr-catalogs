@@ -5,4 +5,5 @@ is_dpdd: true
 
 description: DESC DC2 DR6 Object Table for the public release
 creators: Rubin LSST DESC DC2 Team
+include_in_default_catalog_list: true
 public_release: v1
