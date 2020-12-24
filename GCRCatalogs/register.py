@@ -428,7 +428,6 @@ class ConfigManager(Mapping):
     def __init__(self, config_dir):
         self._config_dir = config_dir
         self._configs = dict()
-        self.default_to_public_releases_only = False
         for config_file in sorted(os.listdir(self._config_dir)):
             config = Config(config_file, self._config_dir)
             if not config.ignore:
@@ -532,9 +531,7 @@ class ConfigManager(Mapping):
                 get_content = lambda config: (config.rootname, config.content)  # noqa: E731
 
         conditions = list()
-        if include_default_only and self.default_to_public_releases_only:
-            conditions.append(lambda config: config.is_public_release)
-        elif include_default_only:
+        if include_default_only:
             conditions.append(lambda config: config.is_default)
         if not include_addons:
             conditions.append(lambda config: not config.is_addon)
@@ -593,7 +590,6 @@ class ConfigRegister(RootDirManager, ConfigManager):
         RootDirManager.__init__(self, site_config_path, user_config_name)
         for config in self.configs:
             config.set_resolvers(self.resolve_reference, self.resolve_root_dir)
-        self.default_to_public_releases_only = not self.has_root_dir_from_site
 
     @property
     def root_dir(self):
@@ -687,6 +683,8 @@ def get_available_catalogs(
     """
     if "resolve_content" not in kwargs:
         kwargs["resolve_content"] = (not names_only)
+    if "is_public_release" not in kwargs and not _config_register.has_root_dir_from_site:
+        kwargs["is_public_release"] = True
     return _config_register.get_configs(
         names_only=names_only,
         include_default_only=include_default_only,
