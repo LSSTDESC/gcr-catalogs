@@ -1,9 +1,9 @@
 subclass_name: composite.CompositeReader
 catalogs:
-  - catalog_name: desc_dc2_dr6_object
+  - catalog_name: desc_dc2_run2.2i_dr6_object
     is_main: true
     include_native_quantities: false
-  - catalog_name: desc_dc2_dr6_truth
+  - catalog_name: desc_dc2_run2.2i_dr6_truth
     as_object_addon: true
     as_truth_table: false
     matching_partition: true
