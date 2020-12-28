@@ -1,0 +1,3 @@
+based_on: dc2_object_run2.2i_dr3
+tract: 3830
+deprecated: Use dc2_object_run2.2i_dr3. Add native_filters="tract==3830" when calling get_quantities().
