@@ -12,7 +12,7 @@ from .user_config_mgr import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "get_available_catalog_names"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "get_available_catalog_names", "get_public_catalog_names"]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -119,26 +119,27 @@ class RootDirManager:
     def __init__(self, site_config_path=None, user_config_name=None):
         self._site_config_path = site_config_path
         self._user_config_manager = UserConfigManager(config_filename=user_config_name)
-        self._root_dir_from_config = None
-        self._root_dir_from_site = None
-        self._root_dir_from_runtime = None
+        self._default_root_dir = None
+        self._custom_root_dir = None
+
+        # Obtain site config content if available
         self._site_config = {}
+        if self._site_config_path and os.path.isfile(self._site_config_path):
+            self._site_config = load_yaml_local(self._site_config_path)
 
         # Try to set self._root_dir_from_config
         user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
-            self._root_dir_from_config = user_root_dir
+            self._default_root_dir = user_root_dir
+            return
 
         # Try to set self._root_dir_from_site
-        if self._site_config_path and os.path.isfile(self._site_config_path):
-            self._site_config = load_yaml_local(self._site_config_path)
-
         if self._site_config:
             site_info = self._get_site_info()
             if site_info:
                 for k, v in self._site_config.items():
                     if k in site_info:
-                        self._root_dir_from_site = v
+                        self._default_root_dir = v
                         break
 
     def _get_site_info(self):
@@ -163,12 +164,7 @@ class RootDirManager:
 
     @property
     def root_dir(self):
-        current_root_dir = (
-            self._root_dir_from_runtime or
-            self._root_dir_from_config or
-            self._root_dir_from_site
-        )
-
+        current_root_dir = self._custom_root_dir or self._default_root_dir
         if not current_root_dir:
             site_string = ' '.join(self.site_list)
             warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
@@ -191,7 +187,7 @@ class RootDirManager:
             warnings.warn("root_dir has been set to '{}' but you have no permission to access it".format(path))
         except OSError as e:
             warnings.warn("root_dir has been set to '{}' but errors may occur when you try to access it: {}".format(path, e))
-        self._root_dir_from_runtime = path
+        self._custom_root_dir = path
 
     @property
     def site_list(self):
@@ -223,7 +219,7 @@ class RootDirManager:
         self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
-        self._root_dir_from_runtime = None
+        self._custom_root_dir = None
 
     def resolve_root_dir(self, config_dict, config_name=None, record=None):
         """
@@ -263,8 +259,14 @@ class RootDirManager:
         return config_dict
 
     @property
-    def has_root_dir_from_site(self):
-        return bool(self._root_dir_from_site and os.path.isdir(self._root_dir_from_site))
+    def has_valid_root_dir_in_site_config(self):
+        root_dir = self.root_dir
+        return bool(
+            root_dir and
+            os.path.abspath(root_dir) in self._site_config.values() and
+            os.path.isdir(root_dir) and
+            os.access(root_dir, os.R_OK)
+        )
 
 
 class Config(Mapping):
@@ -681,8 +683,12 @@ def get_available_catalogs(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains with *name_contains*
     """
+    if not kwargs.get("is_public_release") and not _config_register.has_valid_root_dir_in_site_config:
+        warnings.warn("""It appears that you do not have access to DESC default root dir, or you are using a customized root dir.
+As such, the returned catalogs may not all be available to you.
+Use get_public_catalog_names to see catalogs to see a list of catalogs from public releases.
+If you are a DESC member and believe you are getting this warning by mistake, please contact DESC help.""")
     kwargs.setdefault("resolve_content", (not names_only))
-    kwargs.setdefault("is_public_release", (not _config_register.has_root_dir_from_site))
     return _config_register.get_configs(
         names_only=names_only,
         include_default_only=include_default_only,
@@ -712,6 +718,38 @@ def get_available_catalog_names(
         If set, only return catalogs whose name contains with *name_contains*
     """
     kwargs["names_only"] = False
+    return get_available_catalogs(
+        include_default_only=include_default_only,
+        name_startswith=name_startswith,
+        name_contains=name_contains,
+        **kwargs
+    )
+
+
+def get_public_catalog_names(
+    include_default_only=True,
+    name_startswith=None,
+    name_contains=None,
+    public_release_name=None,
+    **kwargs
+):
+    """
+    Returns a list of all available catalog names.
+
+    Parameters
+    ----------
+    include_default_only: bool, optional (default: True)
+        When set to False, returned list will include catalogs that are not in the default listing
+        (i.e., those may not be suitable for general comsumption)
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains with *name_contains*
+    public_release_name: str, optional (default: None)
+        If set, only return catalogs that are part of *public_release_name*
+    """
+    kwargs["names_only"] = False
+    kwargs["is_public_release"] = public_release_name or True
     return get_available_catalogs(
         include_default_only=include_default_only,
         name_startswith=name_startswith,
