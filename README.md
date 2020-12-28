@@ -102,7 +102,7 @@ Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3
 #### Run 2.2 Truth Catalogs
 
 - `dc2_truth_run2.2i_summary_tract_partition`: combined truth summary table (galaxies, stars, SNe); partitioned in tracts.
-- `dc2_truth_run2.2i_galaxy_truth_summary`: galaxy truth summary table, partitioned in healpixels as cosmoDC2.
+`dc2_truth_run2.2i_galaxy_truth_summary`: galaxy truth summary table, partitioned by healpixel, like cosmoDC2.
 - `dc2_truth_run2.2i_sn_truth_summary`: SN truth summary table.
 - `dc2_truth_run2.2i_sn_variability_truth`: SN variable truth information.
 - `dc2_truth_run2.2i_star_lc_stats`: star light curve statistics.
