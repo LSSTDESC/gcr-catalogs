@@ -1,6 +1,6 @@
 based_on: dc2_object_run2.2i_dr6_v1_with_addons
 catalogs:
-  - catalog_name: dc2_object_run2.2i_dr6_wfd_v1
+  - catalog_name: dc2_object_run2.2i_dr6_v1
   - subclass_name: dc2_metacal.DC2MetacalCatalog
     base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-wfd-v1/metacal_table_summary
     bands: griz
