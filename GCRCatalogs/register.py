@@ -245,7 +245,7 @@ class RootDirManager:
                     try:
                         resolved_path = os.path.join(self.root_dir, orig_path[len(self._ROOT_DIR_SIGNAL):])
                     except TypeError:
-                        warnings.warn("Root dir has not been set!")
+                        pass
                     else:
                         config_dict[k] = resolved_path
                 if record is not None:
