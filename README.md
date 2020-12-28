@@ -142,11 +142,11 @@ Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3
 - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
 - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
-## Use GCRCatalogs at NERSC
+## Using GCRCatalogs at NERSC
 
-Here's the instruction of using `GCRCatalogs` at NERSC.
-All catalogs that are available in `GCRCatalogs` are all physically located at NERSC.
-Note that you need to be in the `lsst` user group to access them.
+All catalogs available in `GCRCatalogs` are physically located at NERSC
+(most are mirrored at IN2P3-CC as well).
+At NERSC, you need to be in the `lsst` user group to access them.
 You can find instructions about getting NERSC account and joining `lsst` group
 at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 (*DESC members only*).
