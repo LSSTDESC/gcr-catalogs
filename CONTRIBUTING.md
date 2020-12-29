@@ -60,6 +60,7 @@ include_in_default_catalog_list: true
 addon_for: another_catalog_name
 deprecated: "A short deprecation message."
 is_pseudo_entry: true
+public_release: v1, v2
 ```
 
 The first two keywords allow you to reference another catalog:
@@ -73,6 +74,7 @@ The rest are mainly for documentation/informational purpose:
 - `addon_for` should _only_ be set to indicate that the catalog is intended to be used _only_ as an addon catalog for `another_catalog_name`, and is not for standalone use. Note that setting this keyword does not prohibit users from loading this catalog.
 - `deprecated` should _only_ be set to indicate that the catalog has been deprecated and should no longer be used. Deprecation message can include alternative catalogs that the users may use. Note that setting this keyword does not prohibit users from loading this catalog.
 - `is_pseudo_entry` should _only_ be set to indicate that the config is a pseudo entry (i.e., not intended to be loaded via GCR; no reader required). Pseudo entries will by default be ignored by the register.
+- `public_release` should _only_ be set to indicate that the config is a public release entry. It can be set to a string or a list of strings.
 
 ## GitHub workflow
 

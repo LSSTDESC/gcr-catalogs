@@ -12,7 +12,7 @@ from .user_config_mgr import UserConfigManager
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default", "reset_root_dir", "get_available_catalogs",
-    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site"]
+    "get_reader_list", "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths", "get_site_list", "set_root_dir_by_site", "get_available_catalog_names", "get_public_catalog_names"]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -121,33 +121,41 @@ class RootDirManager:
         self._user_config_manager = UserConfigManager(config_filename=user_config_name)
         self._default_root_dir = None
         self._custom_root_dir = None
-        self._site_config = {}
-        self._site_info = self._get_site_info()
 
-        # User config has highest priority
+        # Obtain site config content if available
+        self._site_config = {}
+        if self._site_config_path and os.path.isfile(self._site_config_path):
+            self._site_config = load_yaml_local(self._site_config_path)
+
+        # Try to set self._root_dir_from_config
         user_root_dir = self._user_config_manager.get(self._ROOT_DIR_KEY)
         if user_root_dir:
             self._default_root_dir = user_root_dir
             return
 
-        if self._site_config_path:
-            self._site_config = load_yaml_local(self._site_config_path)
-            for k, v in self._site_config.items():
-                if k in self._site_info:
-                    self._default_root_dir = v
-                    break
+        # Try to set self._root_dir_from_site
+        if self._site_config:
+            site_info = self._get_site_info()
+            if site_info:
+                for k, v in self._site_config.items():
+                    if k in site_info:
+                        self._default_root_dir = v
+                        break
 
     def _get_site_info(self):
         """
         Return a string which, when executing at a recognized site with
         well-known name, will include the name for that site
         """
-        site_from_env = os.getenv(self._DESC_SITE_ENV)
+        site_from_env = os.getenv(self._DESC_SITE_ENV, "")
         site_from_socket = socket.getfqdn()
+
+        # hack for nersc batch nodes
+        if site_from_socket.startswith("nid") and site_from_socket[3:].isdigit():
+            site_from_socket += ".nersc.gov"
+
         if site_from_env:
-            if site_from_socket and site_from_env not in site_from_socket and not (
-                site_from_env == "nersc" and site_from_socket.startswith("nid")
-            ):
+            if site_from_socket and site_from_env not in site_from_socket:
                 warnings.warn("Site determined from env variable {} = {}, which differs from node name {}".format(
                     self._DESC_SITE_ENV, site_from_env, site_from_socket
                 ))
@@ -190,10 +198,12 @@ class RootDirManager:
         If *site* is a recognized site, set root_dir to corresponding value
         """
         try:
-            self.root_dir = self._site_config[site]
+            new_root_dir = self._site_config[site]
         except KeyError:
-            site_string = ' '.join(_config_register.site_list)
+            site_string = ' '.join(self.site_list)
             warnings.warn(f"Unknown site '{site}'.\nAvailable sites are: {site_string}\nroot_dir is unchanged")
+        else:
+            self.root_dir = new_root_dir
 
     def persist_root_dir(self):
         """
@@ -205,11 +215,8 @@ class RootDirManager:
         """
         Remove root_dir item from user config.  root_dir for the current
         session is unchanged, however.
-        Returns
-        -------
-        old value (may be None)
         """
-        return self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
+        self._user_config_manager.pop(self._ROOT_DIR_KEY, None)
 
     def reset_root_dir(self):
         self._custom_root_dir = None
@@ -238,7 +245,7 @@ class RootDirManager:
                     try:
                         resolved_path = os.path.join(self.root_dir, orig_path[len(self._ROOT_DIR_SIGNAL):])
                     except TypeError:
-                        warnings.warn("Root dir has not been set!")
+                        pass
                     else:
                         config_dict[k] = resolved_path
                 if record is not None:
@@ -251,6 +258,16 @@ class RootDirManager:
 
         return config_dict
 
+    @property
+    def has_valid_root_dir_in_site_config(self):
+        root_dir = self.root_dir
+        return bool(
+            root_dir and
+            os.path.abspath(root_dir) in self._site_config.values() and
+            os.path.isdir(root_dir) and
+            os.access(root_dir, os.R_OK)
+        )
+
 
 class Config(Mapping):
     YAML_EXTENSIONS = (".yaml", ".yml")
@@ -261,6 +278,7 @@ class Config(Mapping):
     READER_KEY = "subclass_name"
     DEPRECATED_KEY = "deprecated"
     ADDON_KEY = "addon_for"
+    PUBLIC_RELEASE_KEY = "public_release"
 
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
@@ -352,6 +370,10 @@ class Config(Mapping):
     @property
     def is_addon(self):
         return self.get(self.ADDON_KEY)
+
+    @property
+    def is_public_release(self):
+        return self.get(self.PUBLIC_RELEASE_KEY)
 
     @property
     def has_reference(self):
@@ -480,6 +502,7 @@ class ConfigManager(Mapping):
         include_deprecated=False,
         include_pseudo=False,
         include_pseudo_only=False,
+        is_public_release=None,
         name_startswith=None,
         name_contains=None,
         additional_conditions=None,
@@ -519,6 +542,12 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
             conditions.append(lambda config: not config.is_pseudo)
+        if is_public_release is True:
+            conditions.append(lambda config: config.is_public_release)
+        elif is_public_release is False:
+            conditions.append(lambda config: not config.is_public_release)
+        elif is_public_release:
+            conditions.append(lambda config: config.is_public_release and is_public_release in config.is_public_release)
         if name_startswith:
             name_startswith_lower = str(name_startswith).lower()
             conditions.append(lambda config: config.name.startswith(name_startswith_lower))
@@ -653,10 +682,74 @@ def get_available_catalogs(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains with *name_contains*
     """
-    if "resolve_content" not in kwargs:
-        kwargs["resolve_content"] = (not names_only)
+    if not kwargs.get("is_public_release") and not _config_register.has_valid_root_dir_in_site_config:
+        warnings.warn("""It appears that you do not have access to the default root dir at a recognized DESC site, or you are using a customized root dir.
+As such, the returned catalogs may not all be available to you.
+Use get_public_catalog_names to see a list of catalogs from public releases only.
+If you are a DESC member and believe you are getting this warning by mistake, please contact DESC help.""")
+    kwargs.setdefault("resolve_content", (not names_only))
     return _config_register.get_configs(
         names_only=names_only,
+        include_default_only=include_default_only,
+        name_startswith=name_startswith,
+        name_contains=name_contains,
+        **kwargs
+    )
+
+
+def get_available_catalog_names(
+    include_default_only=True,
+    name_startswith=None,
+    name_contains=None,
+    **kwargs
+):
+    """
+    Returns a list of all available catalog names.
+
+    Parameters
+    ----------
+    include_default_only: bool, optional (default: True)
+        When set to False, returned list will include catalogs that are not in the default listing
+        (i.e., those which may not be suitable for general consumption)
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains *name_contains*
+    """
+    kwargs["names_only"] = False
+    return get_available_catalogs(
+        include_default_only=include_default_only,
+        name_startswith=name_startswith,
+        name_contains=name_contains,
+        **kwargs
+    )
+
+
+def get_public_catalog_names(
+    include_default_only=True,
+    name_startswith=None,
+    name_contains=None,
+    public_release_name=None,
+    **kwargs
+):
+    """
+    Returns a list of names of all available catalog satisfying any constraints specified in parameters.
+
+    Parameters
+    ----------
+    include_default_only: bool, optional (default: True)
+        When set to False, returned list will include catalogs that are not in the default listing
+        (i.e., those which may not be suitable for general consumption)
+    name_startswith: str, optional (default: None)
+        If set, only return catalogs whose name starts with *name_startswith*
+    name_contains: str, optional (default: None)
+        If set, only return catalogs whose name contains *name_contains*
+    public_release_name: str, optional (default: None)
+        If set, only return catalogs that are part of *public_release_name*
+    """
+    kwargs["names_only"] = False
+    kwargs["is_public_release"] = public_release_name or True
+    return get_available_catalogs(
         include_default_only=include_default_only,
         name_startswith=name_startswith,
         name_contains=name_contains,
