@@ -734,7 +734,7 @@ def get_public_catalog_names(
     **kwargs
 ):
     """
-    Returns a list of all available catalog names.
+    Returns a list of names of all available catalog satisfying any constraints specified in parameters.
 
     Parameters
     ----------
