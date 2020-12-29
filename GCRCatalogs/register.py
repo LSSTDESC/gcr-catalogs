@@ -684,9 +684,9 @@ def get_available_catalogs(
         If set, only return catalogs whose name contains with *name_contains*
     """
     if not kwargs.get("is_public_release") and not _config_register.has_valid_root_dir_in_site_config:
-        warnings.warn("""It appears that you do not have access to DESC default root dir, or you are using a customized root dir.
+        warnings.warn("""It appears that you do not have access to the default root dir at a recognized DESC site, or you are using a customized root dir.
 As such, the returned catalogs may not all be available to you.
-Use get_public_catalog_names to see catalogs to see a list of catalogs from public releases.
+Use get_public_catalog_names to see a list of catalogs from public releases only.
 If you are a DESC member and believe you are getting this warning by mistake, please contact DESC help.""")
     kwargs.setdefault("resolve_content", (not names_only))
     return _config_register.get_configs(
