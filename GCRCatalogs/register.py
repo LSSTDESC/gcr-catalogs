@@ -744,7 +744,7 @@ def get_public_catalog_names(
     name_startswith: str, optional (default: None)
         If set, only return catalogs whose name starts with *name_startswith*
     name_contains: str, optional (default: None)
-        If set, only return catalogs whose name contains with *name_contains*
+        If set, only return catalogs whose name contains *name_contains*
     public_release_name: str, optional (default: None)
         If set, only return catalogs that are part of *public_release_name*
     """
