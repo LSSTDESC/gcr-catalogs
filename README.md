@@ -147,7 +147,7 @@ Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3
 All catalogs available in `GCRCatalogs` are physically located at NERSC
 (most are mirrored at IN2P3-CC as well).
 At NERSC, you need to be in the `lsst` user group to access them.
-You can find instructions about getting NERSC account and joining `lsst` group
+You can find instructions about getting a NERSC account and joining `lsst` group
 at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 (*DESC members only*).
 
@@ -196,7 +196,7 @@ Python environment before you run the script, or edit the hashbang line of the s
 #!/global/common/software/lsst/common/miniconda/current/envs/stack/bin/python
 ```
 
-### Use the latest version of GCRCatalogs
+### Using the latest version of GCRCatalogs
 
 If you need to use a newer version of `GCRCatalogs` than the one installed in the DESC Python environment,
 here's what you need to do:
