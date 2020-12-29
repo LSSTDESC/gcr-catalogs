@@ -740,7 +740,7 @@ def get_public_catalog_names(
     ----------
     include_default_only: bool, optional (default: True)
         When set to False, returned list will include catalogs that are not in the default listing
-        (i.e., those may not be suitable for general comsumption)
+        (i.e., those which may not be suitable for general consumption)
     name_startswith: str, optional (default: None)
         If set, only return catalogs whose name starts with *name_startswith*
     name_contains: str, optional (default: None)
