@@ -715,7 +715,7 @@ def get_available_catalog_names(
     name_startswith: str, optional (default: None)
         If set, only return catalogs whose name starts with *name_startswith*
     name_contains: str, optional (default: None)
-        If set, only return catalogs whose name contains with *name_contains*
+        If set, only return catalogs whose name contains *name_contains*
     """
     kwargs["names_only"] = False
     return get_available_catalogs(
