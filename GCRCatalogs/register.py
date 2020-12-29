@@ -372,7 +372,6 @@ class Config(Mapping):
             warnings.warn(
                 f"`{self.rootname}` has been deprecated and may be removed in the future.\n{deprecation_msg}"
                 f"If your analysis requires this specific catalog, please open an issue at {_GITHUB_ISSUE_URL}",
-                DeprecationWarning,
             )
         self.online_alias_check()
         if config_overwrite:

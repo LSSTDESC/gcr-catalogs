@@ -12,4 +12,5 @@ match_flag: 'is_matched'
 is_star: 'is_star'
 creator: 'Javier Sanchez'
 description: 'This is the table of matches between the object catalog and the extragalactic catalog'
-addon_for: dc2_object_run2.2i_dr6_wfd_with_metacal
+addon_for: dc2_object_run2.2i_dr6_v1
+deprecated: Use dc2_object_run2.2i_dr6_v1_with_addons

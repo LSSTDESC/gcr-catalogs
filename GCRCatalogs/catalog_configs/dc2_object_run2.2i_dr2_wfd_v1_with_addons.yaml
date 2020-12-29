@@ -1,0 +1,14 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: dc2_object_run2.2i_dr2_wfd_v1
+  - subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+    base_dir: ^/DC2-prod/Run2.2i/truth/tract_partition/match_dr2_wfd_v1
+    as_object_addon: true
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: false
+
+description: DC2 Run 2.2i DR2 WFD Object Table v1 with all available add-ons (currently only truth-match)
+creators: ['DESC DC2 Team']

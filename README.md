@@ -1,5 +1,6 @@
 # GCR Catalogs
 
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/lsstdesc-gcr-catalogs.svg)](https://anaconda.org/conda-forge/lsstdesc-gcr-catalogs)
 [![doi:10.3847/1538-4365/aaa6c3](https://img.shields.io/badge/Paper%20DOI-10.3847%2F1538--4365%2Faaa6c3-brightgreen.svg)](https://doi.org/10.3847/1538-4365/aaa6c3)
 [![arXiv:1709.09665](https://img.shields.io/badge/astro--ph.IM-arXiv%3A1709.09665-B31B1B.svg)](https://arxiv.org/abs/1709.09665)
 
@@ -79,17 +80,34 @@ Confluence page (*DESC member only*).
 
 #### Run 2.2 Object Catalogs
 
-- `dc2_object_run2.2i_dr6_wfd`: static object catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
-- `dc2_object_run2.2i_dr6_wfd_with_metacal`: static object + metacal catalog for Run 2.2i DR6 WFD (v1; 166 tracts)
-- `dc2_object_run2.2i_dr6a`: static object catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr6a_with_metacal`: static object +metacal catalog for Run 2.2i DR6a (an early release of DR6; 63 tracts)
-- `dc2_object_run2.2i_dr6a_with_photoz`: static object + photoz catalog for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr6a_matched_addon`: static object catalog + matched truth for Run 2.2i DR6a (an early release of DR6; 78 tracts)
-- `dc2_object_run2.2i_dr3`: static object catalog for Run 2.2i DR3
-- `dc2_object_run2.2i_dr3_tract3830`: same as `dc2_object_run2.2i_dr3` but with one tract only, for testing purpose / faster access
-- `dc2_object_run2.2i_dr3_with_metacal`: `dc2_object_run2.2i_dr3` + metacal
-- `dc2_object_run2.2i_dr3_with_photoz`: `dc2_object_run2.2i_dr3` + photo-z
-- `dc2_object_run2.2i_dr2`: static object catalog for Run2.2i DR2
+##### DR6 (up to Year 5)
+
+- `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits; a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
+- `dc2_object_run2.2i_dr6_with_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs (currently including metacal and truth-match; photo-z add-on not yet available. Use `dc2_object_run2.2i_dr6a_with_photoz` for a preview of photo-z.)
+
+##### DR2 (up to Year 1)
+
+- `dc2_object_run2.2i_dr2_wfd`: static object catalog for Run2.2i DR2 (WFD visits)
+- `dc2_object_run2.2i_dr2_wfd_with_addons`: same as `dc2_object_run2.2i_dr2_wfd` but with all available add-on catalogs
+  (currently including only truth-match; metacal, photo-z not yet available)
+
+##### DR3 (up to Year 2)
+
+Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3a` is a preview of DR3.
+
+- `dc2_object_run2.2i_dr3a`: static object catalog for Run 2.2i DR3 (preview)
+- `dc2_object_run2.2i_dr3a_with_metacal`: `dc2_object_run2.2i_dr3a` + metacal (preview; missing more tracts)
+- `dc2_object_run2.2i_dr3a_with_photoz`: `dc2_object_run2.2i_dr3a` + photo-z (preview)
+
+#### Run 2.2 Truth Catalogs
+
+- `dc2_truth_run2.2i_summary_tract_partition`: combined truth summary table (galaxies, stars, SNe); partitioned by tract.
+- `dc2_truth_run2.2i_galaxy_truth_summary`: galaxy truth summary table, partitioned by healpixel, like cosmoDC2.
+- `dc2_truth_run2.2i_sn_truth_summary`: SN truth summary table.
+- `dc2_truth_run2.2i_sn_variability_truth`: SN variable truth information.
+- `dc2_truth_run2.2i_star_lc_stats`: star light curve statistics.
+- `dc2_truth_run2.2i_star_truth_summary`: star truth summary table.
+- `dc2_truth_run2.2i_star_variability_truth`: star variable truth information.
 
 #### Run 1.2 Object Catalogs
 
@@ -124,12 +142,12 @@ Confluence page (*DESC member only*).
 - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
 - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
 
-## Use GCRCatalogs at NERSC
+## Using GCRCatalogs at NERSC
 
-Here's the instruction of using `GCRCatalogs` at NERSC.
-All catalogs that are available in `GCRCatalogs` are all physically located at NERSC.
-Note that you need to be in the `lsst` user group to access them.
-You can find instructions about getting NERSC account and joining `lsst` group
+All catalogs available in `GCRCatalogs` are physically located at NERSC
+(most are mirrored at IN2P3-CC as well).
+At NERSC, you need to be in the `lsst` user group to access them.
+You can find instructions about getting a NERSC account and joining `lsst` group
 at [this Confluence page](https://confluence.slac.stanford.edu/x/mgRTD)
 (*DESC members only*).
 
@@ -178,7 +196,7 @@ Python environment before you run the script, or edit the hashbang line of the s
 #!/global/common/software/lsst/common/miniconda/current/envs/stack/bin/python
 ```
 
-### Use the latest version of GCRCatalogs
+### Using the latest version of GCRCatalogs
 
 If you need to use a newer version of `GCRCatalogs` than the one installed in the DESC Python environment,
 here's what you need to do:

@@ -13,3 +13,4 @@ is_star: 'is_star'
 creator: 'Javier Sanchez'
 description: 'This is the table of matches between the object catalog and the extragalactic catalog'
 addon_for: dc2_object_run2.2i_dr6a
+deprecated: Use dc2_object_run2.2i_dr6_with_addons
