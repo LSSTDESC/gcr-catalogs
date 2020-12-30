@@ -16,7 +16,7 @@ import yaml
 from GCR import BaseGenericCatalog
 from .parquet import ParquetFileWrapper
 
-from .utils import first
+from .utils import first, is_string_like
 
 __all__ = ['DC2DMCatalog', 'DC2DMTractCatalog', 'DC2DMVisitCatalog']
 
@@ -200,7 +200,9 @@ class DC2DMCatalog(BaseGenericCatalog):
 
             if bands and "<band>" in q:
                 for band in bands:
-                    info_dict[q.replace("<band>", band)] = {k: v.replace("<band>", band) for k, v in info.items()}
+                    info_dict[q.replace("<band>", band)] = {
+                        k: v.replace("<band>", band) if is_string_like(v) else v for k, v in info.items()
+                    }
             else:
                 info_dict[q] = info
 
