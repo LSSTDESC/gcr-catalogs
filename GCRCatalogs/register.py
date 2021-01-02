@@ -716,7 +716,7 @@ def get_available_catalog_names(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains *name_contains*
     """
-    kwargs["names_only"] = False
+    kwargs["names_only"] = True
     return get_available_catalogs(
         include_default_only=include_default_only,
         name_startswith=name_startswith,
@@ -747,7 +747,7 @@ def get_public_catalog_names(
     public_release_name: str, optional (default: None)
         If set, only return catalogs that are part of *public_release_name*
     """
-    kwargs["names_only"] = False
+    kwargs["names_only"] = True
     kwargs["is_public_release"] = public_release_name or True
     return get_available_catalogs(
         include_default_only=include_default_only,
