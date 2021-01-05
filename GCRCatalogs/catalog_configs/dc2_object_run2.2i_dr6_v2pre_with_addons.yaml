@@ -1,0 +1,15 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: dc2_object_run2.2i_dr6_v2pre
+  - subclass_name: dc2_metacal.DC2MetacalCatalog
+    base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-wfd-v2pre/metacal_table_summary
+    bands: griz
+    apply_metacal_test3_fix: true
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: true
+
+description: DC2 Run 2.2i DR6 Object Table v2 pre-release with all available add-ons (currently only metacal)
+creators: ['DESC DC2 Team']
