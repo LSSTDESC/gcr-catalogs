@@ -56,8 +56,8 @@ def sample_filter(frac, random_state=None):
         random_state = np.random.RandomState(random_state)
     seed = random_state.randint(65536)
 
-    def _sampler(tract, frac=frac, seed=seed):
-        size = len(tract)
+    def _sampler(tract_arr, frac=frac, seed=seed):
+        size = len(tract_arr)  # tract_arr is a numpy array of tract IDs
         if size:
             return np.random.RandomState(tract[0] + seed).rand(size) < frac
         return np.zeros(0, dtype=np.bool)
