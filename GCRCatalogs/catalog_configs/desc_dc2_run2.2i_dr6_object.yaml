@@ -1,5 +1,5 @@
 subclass_name: dc2_object.DC2ObjectParquetCatalog
-base_dir: ^/object_dpdd
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v1/object_dpdd
 filename_pattern: object_dpdd_tract\d+.parquet$
 is_dpdd: true
 
