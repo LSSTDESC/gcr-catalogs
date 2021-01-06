@@ -19,8 +19,8 @@ Iyy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive sec
 Iyy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity in <band>"}
 Ixy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity, averaged across bands"}
 Ixy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity in <band>"}
-I_flag: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx`, `Iyy_pixel`, and `Ixy`"}
-I_flag_<band>: {"type": "bool", "unit": "none", "description": "Flag for issues with `Iyy_pixel_<band>`, `Ixy_<band>`, and `Ixx_<band>`"}
+I_flag: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx_pixel`, `Ixy_pixel`, and `Iyy_pixel`"}
+I_flag_<band>: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx_pixel_<band>`, `Ixy_pixel_<band>`, and `Iyy_pixel_<band>`"}
 IxxPSF_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of PSFy, averaged across bands"}
 IxxPSF_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of PSF in <band>"}
 IyyPSF_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of PSFy, averaged across bands"}

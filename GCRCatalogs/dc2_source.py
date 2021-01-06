@@ -32,7 +32,6 @@ class DC2SourceCatalog(DC2DMVisitCatalog):
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'source_visit_\d+\.parquet$'
-    SCHEMA_FILENAME = 'schema.yaml'
     META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_source_meta.yaml')
 
     @staticmethod
@@ -71,12 +70,12 @@ class DC2SourceCatalog(DC2DMVisitCatalog):
                        'fluxmag0'),
             'sky_flag': 'base_LocalBackground_flag',
             'I_flag': 'slot_Shape_flag',
-            'Ixx': 'slot_Shape_xx',
-            'IxxPSF': 'slot_PsfShape_xx',
-            'Iyy': 'slot_Shape_yy',
-            'IyyPSF': 'slot_PsfShape_yy',
-            'Ixy': 'slot_Shape_xy',
-            'IxyPSF': 'slot_PsfShape_xy',
+            'Ixx_pixel': 'slot_Shape_xx',
+            'IxxPSF_pixel': 'slot_PsfShape_xx',
+            'Iyy_pixel': 'slot_Shape_yy',
+            'IyyPSF_pixel': 'slot_PsfShape_yy',
+            'Ixy_pixel': 'slot_Shape_xy',
+            'IxyPSF_pixel': 'slot_PsfShape_xy',
             'mag': 'mag',
             'magerr': 'mag_err',
             'fluxmag0': 'fluxmag0',
@@ -95,7 +94,7 @@ class DC2SourceCatalog(DC2DMVisitCatalog):
                           'fluxmag0'),
             'psFlux_flag': 'slot_PsfFlux_flag',
             'psNdata': 'slot_PsfFlux_area',
-            'psf_fwhm_pixels': (
+            'psf_fwhm_pixel': (
                 lambda xx, yy, xy: 2.355 * (xx * yy - xy * xy) ** 0.25,
                 'slot_PsfShape_xx',
                 'slot_PsfShape_yy',

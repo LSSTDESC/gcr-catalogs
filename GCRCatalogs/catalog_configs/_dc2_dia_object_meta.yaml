@@ -1,8 +1,6 @@
 diaObjectId: ['DIA Object Id', '', false, true]
 ra: ['Right Ascension', 'degree', true, true]
 dec: ['Declination', 'degree', true, true]
-ra_err: ['Error value for Right Ascension', 'degree', true, true]
-dec_err: ['Error value for Declination', 'degree', true, true]
 psFluxMean_<band>: ['Point source model flux in `<band>`.', 'nanoJansky', false, true]
 psFluxMeanErr_<band>: ['Error value for `psFlux` in `<band>`.', 'nanoJansky', false, true]
 nobs: ['Number of observations.', '', false, true]

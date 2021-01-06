@@ -30,8 +30,7 @@ class DC2MetacalCatalog(DC2DMTractCatalog):
 
     FILE_DIR = os.path.dirname(os.path.abspath(__file__))
     FILE_PATTERN = r'metacal_tract_\d+\.parquet$'
-    SCHEMA_FILENAME = 'schema.yaml'
-    META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_metacal_meta.yaml')
+    META_PATH = None
     METACAL_ZEROPOINT = 27.0
 
     def _subclass_init(self, **kwargs):

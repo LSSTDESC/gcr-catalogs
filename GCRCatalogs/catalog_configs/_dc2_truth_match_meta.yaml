@@ -15,7 +15,7 @@ cosmodc2_hp: {"type": "int64", "unit": "none", "description": "Healpix ID in cos
 cosmodc2_id: {"type": "int64", "unit": "none", "description": "Galaxy ID in cosmoDC2 (for galaxies only; -1 for stars and SNe)"}
 truth_type: {"type": "int64", "unit": "none", "description": "1 for galaxies, 2 for stars, and 3 for SNe"}
 match_objectId: {"type": "int64", "unit": "none", "description": "`objectId` of the matching object entry (-1 for unmatched truth entries)"}
-match_sep: {"type": "float64", "unit": "arcsec", "description": "On-sky angular separation of this object--truth matching pair (-1 for unmatched truth entries)"}
+match_sep: {"type": "float64", "unit": "arcsec", "description": "On-sky angular separation of this object-truth matching pair (-1 for unmatched truth entries)"}
 is_good_match: {"type": "bool", "unit": "none", "description": "True if this object--truth matching pair satisfies all matching criteria"}
 is_nearest_neighbor: {"type": "bool", "unit": "none", "description": "True if this truth entry is the nearest neighbor of the object specified by `match_objectId`"}
 is_unique_truth_entry: {"type": "bool", "unit": "none", "description": "True for truth entries that appear for the first time in this truth table"}
