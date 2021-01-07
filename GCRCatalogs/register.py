@@ -503,6 +503,7 @@ class ConfigManager(Mapping):
         include_pseudo=False,
         include_pseudo_only=False,
         include_public_release=False,
+        include_public_release_only=False,
         name_startswith=None,
         name_contains=None,
         additional_conditions=None,
@@ -542,7 +543,11 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
             conditions.append(lambda config: not config.is_pseudo)
-        if not include_public_release:
+        if include_public_release_only is True:
+            conditions.append(lambda config: config.is_public_release)
+        elif include_public_release_only:
+            conditions.append(lambda config: config.is_public_release and include_public_release_only in config.is_public_release)
+        elif not include_public_release:
             conditions.append(lambda config: not config.is_public_release)
         if name_startswith:
             name_startswith_lower = str(name_startswith).lower()
@@ -678,7 +683,7 @@ def get_available_catalogs(
     name_contains: str, optional (default: None)
         If set, only return catalogs whose name contains with *name_contains*
     """
-    if not kwargs.get("is_public_release") and not _config_register.has_valid_root_dir_in_site_config:
+    if not kwargs.get("include_public_release_only") and not _config_register.has_valid_root_dir_in_site_config:
         warnings.warn("""It appears that you do not have access to the default root dir at a recognized DESC site, or you are using a customized root dir.
 As such, the returned catalogs may not all be available to you.
 Use get_public_catalog_names to see a list of catalogs from public releases only.
@@ -744,7 +749,7 @@ def get_public_catalog_names(
         If set, only return catalogs that are part of *public_release_name*
     """
     kwargs["names_only"] = True
-    kwargs["is_public_release"] = public_release_name or True
+    kwargs["include_public_release_only"] = public_release_name or True
     return get_available_catalogs(
         include_default_only=include_default_only,
         name_startswith=name_startswith,
