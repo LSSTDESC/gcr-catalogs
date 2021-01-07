@@ -502,7 +502,7 @@ class ConfigManager(Mapping):
         include_deprecated=False,
         include_pseudo=False,
         include_pseudo_only=False,
-        is_public_release=None,
+        include_public_release=False,
         name_startswith=None,
         name_contains=None,
         additional_conditions=None,
@@ -542,11 +542,7 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: config.is_pseudo)
         elif not include_pseudo:
             conditions.append(lambda config: not config.is_pseudo)
-        if is_public_release is True:
-            conditions.append(lambda config: config.is_public_release)
-        elif is_public_release:
-            conditions.append(lambda config: config.is_public_release and is_public_release in config.is_public_release)
-        else:
+        if not include_public_release:
             conditions.append(lambda config: not config.is_public_release)
         if name_startswith:
             name_startswith_lower = str(name_startswith).lower()
