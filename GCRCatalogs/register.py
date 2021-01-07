@@ -544,10 +544,10 @@ class ConfigManager(Mapping):
             conditions.append(lambda config: not config.is_pseudo)
         if is_public_release is True:
             conditions.append(lambda config: config.is_public_release)
-        elif is_public_release is False:
-            conditions.append(lambda config: not config.is_public_release)
         elif is_public_release:
             conditions.append(lambda config: config.is_public_release and is_public_release in config.is_public_release)
+        else:
+            conditions.append(lambda config: not config.is_public_release)
         if name_startswith:
             name_startswith_lower = str(name_startswith).lower()
             conditions.append(lambda config: config.name.startswith(name_startswith_lower))
