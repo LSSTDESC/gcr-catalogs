@@ -38,6 +38,6 @@ if __name__ == "__main__":
             old = umgr.get(args.key)
             umgr[args.key] = args.value
             if old:
-                print(f"New value {args.value} was set. Old value was {old}")
+                print(f"{args.key} is now set to {args.value}\nOld value was {old}")
             else:
-                print(f"New value {args.value} was set. No old value or old value was None")
+                print(f"{args.key} is now set to {args.value}\nNo old value or old value was None")
