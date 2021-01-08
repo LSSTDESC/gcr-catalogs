@@ -6,7 +6,7 @@ http://opensource.org/licenses/MIT
 """
 
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) as f:
     exec(f.read())  # pylint: disable=W0122
@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     keywords='GCR',
-    packages=['GCRCatalogs'],
+    packages=find_packages(),
     install_requires=['requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.9.2'],
     extras_require={
         'full': ['h5py', 'healpy', 'pandas', 'pyarrow', 'tables'],
