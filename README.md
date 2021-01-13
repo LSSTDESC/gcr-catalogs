@@ -14,6 +14,9 @@ validation framework, and the concept and description of this reader interface
 can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3)
 and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
+The instructions below are intended for DESC members. 
+**If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: lsstdesc-portal.nersc.gov](https://lsstdesc-portal.nersc.gov/).**
+
 ## Available Catalogs
 
 Below is a list of most-used catalogs. To find a complete, most up-to-date list of all available catalogs,
@@ -22,17 +25,17 @@ run the following code:
 ```python
 import GCRCatalogs
 
-# List all catalogs that are recommended for general comsumption
-GCRCatalogs.get_available_catalogs(names_only=True)
+# List all catalogs that are recommended for general consumption
+GCRCatalogs.get_available_catalog_names()
 
-# List all catalogs, including those may not be intended for general comsumption
-GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True)
+# List all catalogs, including those may not be intended for general consumption
+GCRCatalogs.get_available_catalog_names(include_default_only=False)
 
 # List all catalogs whose names contain the word "object"
-GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_contains="object")
+GCRCatalogs.get_available_catalog_names(include_default_only=False, name_contains="object")
 
 # List all catalogs whose names start with the word "buzzard"
-GCRCatalogs.get_available_catalogs(include_default_only=False, names_only=True, name_startswith="buzzard")
+GCRCatalogs.get_available_catalog_names(include_default_only=False, name_startswith="buzzard")
 ```
 
 (*Note*: remove `False` in the above line to only see recommended catalogs.)
