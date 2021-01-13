@@ -28,7 +28,7 @@ import GCRCatalogs
 # List all catalogs that are recommended for general comsumption
 GCRCatalogs.get_available_catalog_names()
 
-# List all catalogs, including those may not be intended for general comsumption
+# List all catalogs, including those may not be intended for general consumption
 GCRCatalogs.get_available_catalog_names(include_default_only=False)
 
 # List all catalogs whose names contain the word "object"
