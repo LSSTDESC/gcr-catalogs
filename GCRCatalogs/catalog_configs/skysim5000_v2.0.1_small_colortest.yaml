@@ -21,6 +21,8 @@ healpix_pixels: [9559,  9686,  9687,  9814,  9815,  9816,  9942,  9943, 10070, 1
 check_md5: false
 check_size: false
 check_cosmology: false
+ensure_meta_consistent: false
+sky_area: 57.071968
 
 creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
 

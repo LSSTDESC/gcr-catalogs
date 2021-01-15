@@ -274,14 +274,18 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if abs(value_catalog - value_config) > atol:
                 raise ValueError('Mismatch in cosmological parameters ({} should be {}, not {}) for healpix file {}'.format(name_hdf5, value_config, value_catalog, file_name))
 
-    def _process_metadata(self, ensure_quantity_consistent=False, # pylint: disable=W0613
+    def _process_metadata(self, ensure_quantity_consistent=False,
                           check_version=True, check_md5=True, check_size=True,
-                          check_cosmology=True, cosmology_atol=1e-4, **kwargs):
+                          check_cosmology=True, cosmology_atol=1e-4,
+                          sky_area=None, ensure_meta_consistent=True,
+                          **kwargs):
         meta_dict = dict()
         native_quantities = None
         quantity_info = None
 
-        if self.lightcone:
+        calc_sky_area = bool(self.lightcone and not sky_area)
+
+        if calc_sky_area:
             sky_area = dict()
             max_healpixel = max(hpx_this for _, hpx_this in self._healpix_files)
             min_valid_nside = hp.pixelfunc.get_min_valid_nside(max_healpixel)
@@ -311,7 +315,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                 if check_cosmology:
                     self._check_cosmology(fh, file_name, cosmology_atol)
 
-                if self.lightcone: # get sky area
+                if calc_sky_area:  # get sky area
                     try:
                         sky_area_this = fh['metaData/skyArea'][()]
                     except KeyError:
@@ -321,10 +325,10 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                     if sky_area.get(hpx_this, 0) < sky_area_this:
                         sky_area[hpx_this] = sky_area_this
 
-                else: # get other meta info (box size and redshift)
+                elif not self.lightcone:  # get meta info for boxes (box size and redshift)
                     for key in ('box_size', 'redshift'):
                         try:
-                            value_this = fh['metaData/'+key][()]
+                            value_this = fh['metaData/' + key][()]
                         except KeyError:
                             pass
                         else:
@@ -341,8 +345,17 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
                       native_quantities != self._collect_native_quantities(fh)):
                     raise ValueError('native quantities are not consistent among different files')
 
+            # Break the loop if no more check needed
+            if not (calc_sky_area or check_size or check_md5 or ensure_quantity_consistent or ensure_meta_consistent):
+                break
+
         if self.lightcone:
-            meta_dict['sky_area'] = sum(sky_area.values())
+            if isinstance(sky_area, dict):
+                sky_area = sum(sky_area.values())
+            else:
+                sky_area = float(sky_area)
+            meta_dict['sky_area'] = sky_area
+
         else:
             if 'redshift' not in meta_dict:
                 filename = os.path.basename(first(self._file_list.values()))
