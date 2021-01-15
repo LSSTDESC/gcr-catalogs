@@ -14,7 +14,7 @@ validation framework, and the concept and description of this reader interface
 can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3)
 and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
-The instructions below are intended for DESC members. 
+The instructions below are intended for DESC members.
 **If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: lsstdesc-portal.nersc.gov](https://lsstdesc-portal.nersc.gov/).**
 
 ## Available Catalogs
@@ -50,12 +50,21 @@ Confluence page (*DESC member only*).
 
 ### Extragalactic Catalogs and Add-ons
 
+#### SkySim5000
+
+*by Andrew Hearin, Danila Korytov, Eve Kovacs, Esteban Rangel, Patricia Larsen, Joe Hollowed, Andrew Benson, Katrin Heitmann et al.*
+
+- `skysim5000_v1.1.1`: latest SkySim5000 catalog, full sky area (~5000 sq. deg.)
+  - `skysim5000_v1.1.1_image`: same but only covers the image simulation sky area (~400 sq. deg.)
+  - `skysim5000_v1.1.1_small`: same but only covers a small  sky area (~50 sq. deg.) for testing purposes
+  - `skysim5000_v1.1.1_parquet`: same but using parquet files as the underlying format for better performance; no native quantities
+
 #### cosmoDC2
 
 *by Andrew Benson, Andrew Hearin, Katrin Heitmann, Danila Korytov, Eve Kovacs, Patricia Larsen et al.*
 
 - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
-- `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purpose
+- `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purposes
 - `cosmoDC2_v1.1.4_redmapper_v0.5.7`: Redmapper catalog (v0.5.7) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
 - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
