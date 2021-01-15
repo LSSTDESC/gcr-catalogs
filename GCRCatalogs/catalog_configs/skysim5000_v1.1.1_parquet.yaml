@@ -1,0 +1,16 @@
+subclass_name: cosmodc2_parquet.CosmoDC2ParquetCatalog
+base_dir: ^/xgal/skysim/skysim5000_v1.1.1_parquet
+filename_pattern: 'skysim5000_v1.1.1_healpix{healpix_pixel}.parquet$'
+
+version: "1.1.1"
+sky_area: 5264.05
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
+description: |
+    This is the 5000 sq. deg. extra-galactic catalog for LSST DESC in Parquet format
