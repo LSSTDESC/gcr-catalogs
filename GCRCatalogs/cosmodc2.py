@@ -283,7 +283,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         native_quantities = None
         quantity_info = None
 
-        calc_sky_area = bool(sky_area is None and self.lightcone)
+        calc_sky_area = bool(self.lightcone and not sky_area)
 
         if calc_sky_area:
             sky_area = dict()
@@ -349,14 +349,14 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             if not (calc_sky_area or check_size or check_md5 or ensure_quantity_consistent or ensure_meta_consistent):
                 break
 
-        if calc_sky_area:
+        if self.lightcone:
             if isinstance(sky_area, dict):
                 sky_area = sum(sky_area.values())
             else:
                 sky_area = float(sky_area)
             meta_dict['sky_area'] = sky_area
 
-        elif not self.lightcone:
+        else:
             if 'redshift' not in meta_dict:
                 filename = os.path.basename(first(self._file_list.values()))
                 m = re.search(r'z(\d+(?:\.\d+)?)', filename)
