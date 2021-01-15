@@ -1,0 +1,16 @@
+subclass_name: cosmodc2_parquet.CosmoDC2ParquetCatalog
+base_dir: ^/xgal/cosmoDC2/cosmoDC2_v1.1.4_parquet
+filename_pattern: 'cosmoDC2_v1.1.4_image_healpix{healpix_pixel}.parquet$'
+
+version: "1.1.4"
+sky_area: 439.78987
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
+description: |
+    This is the extra-galactic catalog for the LSST-DESC data challenge DC2 in Parquet format.
