@@ -389,6 +389,12 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             return default
         return self._quantity_info.get(q_mod or quantity, default)
 
+    @property
+    def available_healpix_pixels(self):
+        if not self.lightcone:
+            raise AttributeError("Non-lightcone catalog has no attribute 'available_healpix_pixels'")
+        return sorted(set(k[1] for k in self._file_list))
+
 
 class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
     """
