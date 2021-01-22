@@ -9,10 +9,11 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
+       desc_image_ver: [bleed, latest]
        include:
-         - docker_name: updateGCRpy
-           docker_image: lsstdesc/desc-python:latest
-           docker_image_updated: lsstdesc/desc-python:test
+         - docker_name: updateGCR-${{ matrix.desc_image_ver }}
+           docker_image: lsstdesc/desc-python:${{ matrix.desc_image_ver }} 
+           docker_image_updated: lsstdesc/desc-python:${{ matrix.desc_image_ver }}
            conda_activate: "conda activate desc;"
            setup_script: /usr/local/py3.7/etc/profile.d/conda.sh
          ## Disable stack build for now
