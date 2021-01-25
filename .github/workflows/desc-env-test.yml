@@ -9,13 +9,11 @@ on:
 jobs:
   docker-build:
     runs-on: ubuntu-18.04
-    strategy:
     env:
       TARBALL_URL: https://github.com/${{ github.repository }}/archive/master.zip
-      
+    strategy:
       matrix:
         image_version: [bleed, latest]
-        
     steps:
       - name: docker login
         run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
