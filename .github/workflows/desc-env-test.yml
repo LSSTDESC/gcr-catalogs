@@ -10,26 +10,24 @@ jobs:
   docker-build:
     runs-on: ubuntu-18.04
     strategy:
+      env:
+         TARBALL_URL: https://github.com/${{ github.repository }}/archive/master.zip
       matrix:
-       desc_image_ver: [bleed, latest]
-       include:
-         - docker_name: updateGCR-${{ matrix.desc_image_ver }}
-           docker_image: lsstdesc/desc-python:${{ matrix.desc_image_ver }} 
-           docker_image_updated: lsstdesc/desc-python:${{ matrix.desc_image_ver }}
-           conda_activate: "conda activate desc;"
-           setup_script: /usr/local/py3.7/etc/profile.d/conda.sh
-         ## Disable stack build for now
-         #- docker_name: updateGCRstack
-         #  docker_image: lsstdesc/stack-jupyter:prod
-         #  docker_image_updated: lsstdesc/stack-jupyter:test
-         #  conda_activate: ""
-         #  setup_script: /opt/lsst/software/stack/loadLSST.bash
-
-    steps:
-      - name: docker login
-        run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      - run: docker pull ${{ matrix.docker_image }}
-      - name: Install master branch of ${{ github.repository }}
-        run: docker run --name=${{ matrix.docker_name }} ${{ matrix.docker_image }} /bin/bash -c "source ${{ matrix.setup_script }}; ${{ matrix.conda_activate }} pip install https://github.com/${{ github.repository }}/archive/master.zip"
-      - run: docker commit -m="Installed ${{ github.repository }} master" ${{ matrix.docker_name }} ${{ matrix.docker_image_updated }}
-      - run: docker push ${{ matrix.docker_image_updated }}
+         image_version: [bleed, latest]
+      steps:
+        - name: docker login
+          run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+        - name: set environment variables for bleed/latest
+          if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
+          run: |
+            echo "DOCKER_NAME=updateGCR-${{ matrix.image_version }}" >> $GITHUB_ENV
+            echo "IMAGE_NAME=lsstdesc/desc-python:${{ matrix.image_version }}" >> $GITHUB_ENV
+            echo "PRE_INSTALL='source /usr/local/py3.7/etc/profile.d/conda.sh; conda activate desc;'" >> $GITHUB_ENV
+            echo "TEST_INSTALL='source /usr/local/py3.7/etc/profile.d/conda.sh; conda activate desc; python -c 'import GCRCatalogs; import pyccl''" >> $GITHUB_ENV
+        - run: docker pull "$IMAGE_NAME"
+        - name: Install master branch of ${{ github.repository }}
+          run: docker run --name=$DOCKER_NAME $IMAGE_NAME /bin/bash -c "$PRE_INSTALL pip install $TARBALL_URL"
+        - run: docker commit -m="Installed ${{ github.repository }} master" $DOCKER_NAME $IMAGE_NAME
+        - name: Test new $IMAGE_NAME 
+          run: docker run --rm $IMAGE_NAME /bin/bash -c "$TEST_INSTALL"
+        - run: docker push $IMAGE_NAME
