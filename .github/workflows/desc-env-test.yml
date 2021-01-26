@@ -1,4 +1,4 @@
-name: DESC Env Docker Build Test
+name: DESC Env Docker Deployment
 
 on:
   push:
@@ -6,27 +6,48 @@ on:
 
 jobs:
   docker-build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
+    env:
+      SCRIPT_DIR: scripts
+      INSTALL_SCRIPT: scripts/install.sh
+      TEST_SCRIPT: scripts/test.sh
     strategy:
       matrix:
-       include:
-         - docker_name: updateGCRpy
-           docker_image: lsstdesc/desc-python:latest
-           docker_image_updated: lsstdesc/desc-python:test
-           conda_activate: "conda activate desc;"
-           setup_script: /usr/local/py3.7/etc/profile.d/conda.sh
-         ## Disable stack build for now
-         #- docker_name: updateGCRstack
-         #  docker_image: lsstdesc/stack-jupyter:prod
-         #  docker_image_updated: lsstdesc/stack-jupyter:test
-         #  conda_activate: ""
-         #  setup_script: /opt/lsst/software/stack/loadLSST.bash
-
+        image_version: [bleed, latest]
     steps:
-      - name: docker login
+      - name: Prepare an installation script
+        run: |
+          mkdir -p $SCRIPT_DIR
+          echo '#!/bin/bash' > $INSTALL_SCRIPT
+      - name: Add pre-installation steps for bleed/latest
+        if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
+        run: |
+          echo 'source /usr/local/py3.7/etc/profile.d/conda.sh' >> $INSTALL_SCRIPT
+          echo 'conda activate desc' >> $INSTALL_SCRIPT
+      - name: Make a copy of the installation script for test script
+        run: |
+          cp $INSTALL_SCRIPT $TEST_SCRIPT
+      - name: Add installation steps
+        run: |
+          echo 'pip install https://github.com/${{ github.repository }}/archive/master.zip' >> $INSTALL_SCRIPT
+      - name: Add test steps
+        run: |
+          echo 'python -c "import GCRCatalogs; print(GCRCatalogs.__version__)"' >> $TEST_SCRIPT
+          echo 'python -c "import pyccl; print(pyccl.__version__)"' >> $TEST_SCRIPT
+      - name: Set up environment variables for bleed/latest
+        if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
+        run: |
+          echo "CONTAINER=updateGCR-${{ matrix.image_version }}" >> $GITHUB_ENV
+          echo "IMAGE=lsstdesc/desc-python:${{ matrix.image_version }}" >> $GITHUB_ENV
+      - name: Run docker login
         run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      - run: docker pull ${{ matrix.docker_image }}
-      - name: Install master branch of ${{ github.repository }}
-        run: docker run --name=${{ matrix.docker_name }} ${{ matrix.docker_image }} /bin/bash -c "source ${{ matrix.setup_script }}; ${{ matrix.conda_activate }} pip install https://github.com/${{ github.repository }}/archive/master.zip"
-      - run: docker commit -m="Installed ${{ github.repository }} master" ${{ matrix.docker_name }} ${{ matrix.docker_image_updated }}
-      - run: docker push ${{ matrix.docker_image_updated }}
+      - run: docker pull $IMAGE
+      - name: Run installation script in docker
+        run: |
+          docker run -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR --name=$CONTAINER $IMAGE /bin/bash /$INSTALL_SCRIPT
+          docker commit -m="Installed ${{ github.repository }} master" $CONTAINER $IMAGE
+          docker rm $CONTAINER
+      - name: Test the updated image
+        run: |
+          docker run --rm -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR $IMAGE /bin/bash /$TEST_SCRIPT
+      - run: docker push $IMAGE
