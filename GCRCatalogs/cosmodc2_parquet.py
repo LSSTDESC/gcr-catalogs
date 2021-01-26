@@ -31,3 +31,7 @@ class CosmoDC2ParquetCatalog(DC2TruthParquetCatalog):
         self.sky_area = None
         if 'sky_area' in kwargs:
             self.sky_area = float(kwargs["sky_area"])
+
+    @property
+    def available_healpix_pixels(self):
+        return sorted((d.info["healpix_pixel"] for d in self._datasets))
