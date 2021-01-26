@@ -10,22 +10,32 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     env:
-      INSTALL_SCRIPT: install.sh
+      SCRIPT_DIR: scripts
+      INSTALL_SCRIPT: scripts/install.sh
+      TEST_SCRIPT: scripts/test.sh
     strategy:
       matrix:
         image_version: [bleed, latest]
     steps:
       - name: Prepare an installation script
         run: |
+          mkdir -p $SCRIPT_DIR
           echo '#!/bin/bash' > $INSTALL_SCRIPT
       - name: Add pre-installation steps for bleed/latest
         if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
         run: |
           echo 'source /usr/local/py3.7/etc/profile.d/conda.sh' >> $INSTALL_SCRIPT
           echo 'conda activate desc' >> $INSTALL_SCRIPT
+      - name: Make a copy of the installation script for test script
+        run: |
+          cp $INSTALL_SCRIPT $TEST_SCRIPT
       - name: Add installation steps
         run: |
           echo 'pip install https://github.com/${{ github.repository }}/archive/master.zip' >> $INSTALL_SCRIPT
+      - name: Add test steps
+        run: |
+          echo 'python -c "import GCRCatalogs; print(GCRCatalogs.__version__)"' >> $TEST_SCRIPT
+          echo 'python -c "import pyccl; print(pyccl.__version__)"' >> $TEST_SCRIPT
       - name: Set up environment variables for bleed/latest
         if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
         run: |
@@ -36,10 +46,9 @@ jobs:
       - run: docker pull $IMAGE
       - name: Run installation script in docker
         run: |
-          docker run -v $(pwd)/$INSTALL_SCRIPT:/work/$INSTALL_SCRIPT --name=$CONTAINER $IMAGE /bin/bash /work/$INSTALL_SCRIPT
+          docker run -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR --name=$CONTAINER $IMAGE /bin/bash /$INSTALL_SCRIPT
           docker commit -m="Installed ${{ github.repository }} master" $CONTAINER $IMAGE
       - name: Test the updated image
         run: |
-          docker run $IMAGE python -c 'import GCRCatalogs; print(GCRCatalogs.__version__)'
-          docker run $IMAGE python -c 'import pyccl; print(pyccl.__version__)'
+          docker run -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR --name=$CONTAINER $IMAGE /bin/bash /$TEST_SCRIPT
       - run: docker push $IMAGE
