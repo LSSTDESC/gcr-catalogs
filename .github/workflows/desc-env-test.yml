@@ -48,7 +48,8 @@ jobs:
         run: |
           docker run -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR --name=$CONTAINER $IMAGE /bin/bash /$INSTALL_SCRIPT
           docker commit -m="Installed ${{ github.repository }} master" $CONTAINER $IMAGE
+          docker rm $CONTAINER
       - name: Test the updated image
         run: |
-          docker run -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR --name=$CONTAINER $IMAGE /bin/bash /$TEST_SCRIPT
+          docker run --rm -v $(pwd)/$SCRIPT_DIR:/$SCRIPT_DIR $IMAGE /bin/bash /$TEST_SCRIPT
       - run: docker push $IMAGE
