@@ -8,26 +8,31 @@ on:
 
 jobs:
   docker-build:
-    runs-on: ubuntu-18.04
-    env:
-      TARBALL_URL: https://github.com/${{ github.repository }}/archive/master.zip
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         image_version: [bleed, latest]
     steps:
       - name: docker login
         run: echo '${{ secrets.DOCKERHUB_ACCESSTOK }}' | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      - name: set environment variables for bleed/latest
+      - name: Set up environment variables for bleed/latest
         if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
         run: |
-          echo "DOCKER_NAME=updateGCR-${{ matrix.image_version }}" >> $GITHUB_ENV            
-          echo "IMAGE_NAME=lsstdesc/desc-python:${{ matrix.image_version }}" >> $GITHUB_ENV
-          echo "PRE_INSTALL='source /usr/local/py3.7/etc/profile.d/conda.sh; conda activate desc;'" >> $GITHUB_ENV
-          echo "TEST_INSTALL='source /usr/local/py3.7/etc/profile.d/conda.sh; conda activate desc; python -c 'import GCRCatalogs; import pyccl''" >> $GITHUB_ENV
-      - run: docker pull "$IMAGE_NAME"
+          echo "CONTAINER=updateGCR-${{ matrix.image_version }}" >> $GITHUB_ENV
+          echo "IMAGE=lsstdesc/desc-python:${{ matrix.image_version }}" >> $GITHUB_ENV
+      - run: docker pull $IMAGE
+      - name: Start a docker container
+        run: docker run --name=$CONTAINER $IMAGE bash
+      - name: Set up pre-installation steps for bleed/latest
+        if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
+        run:
+          docker exec $CONTAINER source /usr/local/py3.7/etc/profile.d/conda.sh
+          docker exec $CONTAINER conda activate desc
       - name: Install master branch of ${{ github.repository }}
-        run: docker run --name=$DOCKER_NAME $IMAGE_NAME /bin/bash -c "$PRE_INSTALL pip install $TARBALL_URL"
-      - run: docker commit -m="Installed ${{ github.repository }} master" $DOCKER_NAME $IMAGE_NAME        
-      - name: Test new $IMAGE_NAME 
-        run: docker run --rm $IMAGE_NAME /bin/bash -c "$TEST_INSTALL"
-      - run: docker push $IMAGE_NAME
+        run: docker exec $CONTAINER pip install https://github.com/${{ github.repository }}/archive/master.zip
+      - run: docker commit -m="Installed ${{ github.repository }} master" $CONTAINER $IMAGE
+      - name: Test new $CONTAINER
+        run: |
+          docker exec $CONTAINER python -c 'import GCRCatalogs; print(GCRCatalogs.__version__)'
+          docker exec $CONTAINER python -c 'import pyccl; print(pyccl.__version__)'
+      - run: docker push $IMAGE
