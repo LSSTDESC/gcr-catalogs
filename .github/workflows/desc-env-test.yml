@@ -36,7 +36,7 @@ jobs:
       - run: docker pull $IMAGE
       - name: Run installation script in docker
         run: |
-          docker run --name=$CONTAINER $IMAGE -v $(pwd)/$INSTALL_SCRIPT:/work/$INSTALL_SCRIPT /bin/bash $INSTALL_SCRIPT
+          docker run -v $(pwd)/$INSTALL_SCRIPT:/work/$INSTALL_SCRIPT --name=$CONTAINER $IMAGE /bin/bash $INSTALL_SCRIPT
           docker commit -m="Installed ${{ github.repository }} master" $CONTAINER $IMAGE
       - name: Test the updated image
         run: |
