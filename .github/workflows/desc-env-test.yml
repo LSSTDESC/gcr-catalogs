@@ -3,8 +3,6 @@ name: DESC Env Docker Deployment
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   docker-build:
