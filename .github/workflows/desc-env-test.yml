@@ -1,4 +1,4 @@
-name: DESC Env Docker Build Test
+name: DESC Env Docker Deployment
 
 on:
   push:
