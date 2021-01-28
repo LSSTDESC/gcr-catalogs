@@ -1,6 +1,6 @@
 subclass_name: composite.CompositeReader
 catalogs:
-  - catalog_name: dc2_object_run2.2i_dr6_v2pre
+  - catalog_name: dc2_object_run2.2i_dr6_v2
   - subclass_name: dc2_metacal.DC2MetacalCatalog
     base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-wfd-v2/metacal_table_summary
     bands: griz
