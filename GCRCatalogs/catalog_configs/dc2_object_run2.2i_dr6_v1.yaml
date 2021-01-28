@@ -4,3 +4,4 @@ pixel_scale: 0.2
 
 description: DC2 Run 2.2i DR6 Object Table v1
 creators: ['DESC DC2 Team']
+deprecated: Use dc2_object_run2.2i_dr6_v2

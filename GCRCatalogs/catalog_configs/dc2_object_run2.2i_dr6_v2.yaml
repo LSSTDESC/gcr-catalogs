@@ -1,0 +1,6 @@
+subclass_name: dc2_object.DC2ObjectParquetCatalog
+base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-v2/object_table_summary
+pixel_scale: 0.2
+
+description: DC2 Run 2.2i DR6 Object Table v2
+creators: ['DESC DC2 Team']
