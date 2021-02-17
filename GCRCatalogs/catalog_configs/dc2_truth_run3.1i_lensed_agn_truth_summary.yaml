@@ -1,0 +1,10 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
+#   Change base dir before releasing
+# base_dir: ^/DC2-prod/Run3.1i/truth/lensed_agntruth
+base_dir: /global/cscratch1/sd/jrbogart/desc/truth/pq
+filename_pattern: 'lensed_agn_truth_summary.parquet$'
+description: DC2 Run 3.1i  Summary truth table for lensed agn
+creators: ['Joanne Bogart']
+include_in_default_catalog_list: true
