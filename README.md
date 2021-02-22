@@ -90,6 +90,17 @@ Confluence page (*DESC member only*).
 
 *by LSST DESC, compiled by the DC2 Team*
 
+#### Run 3.1 Truth Catalogs
+
+- `dc2_truth_run3.1i_agn_auxiliary_info`: Useful derived information for AGN.
+- `dc2_truth_run3.1i_agn_truth_summary`: AGN truth summary table.
+- `dc2_truth_run3.1i_agn_variability_truth`: AGN variable truth information
+- `dc2_truth_run3.1i_lensed_agn_truth_summary`: Truth summary table for lensed AGN.
+- `dc2_truth_run3.1i_lensed_agn_variability_truth`: Variable truth information for lensed AGN.
+- `dc2_truth_run3.1i_lensed_host_truth_summary`: Truth summary table for lensed host galaxies.
+- `dc2_truth_run3.1i_lensed_sne_truth_summary`: Truth summary table for lensed SNe.
+- `dc2_truth_run3.1i_lensed_sn_variability_truth`: Variable truth information for lensed SNe.
+
 #### Run 2.2 Object Catalogs
 
 ##### DR6 (up to Year 5)
