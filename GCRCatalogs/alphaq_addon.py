@@ -63,7 +63,7 @@ class AlphaQTidalCatalog(BaseGenericCatalog):
         native_quantities = set()
         with h5py.File(self._filename, 'r') as fh:
             data = fh['tidal'][()]
-            for name, (dt, _) in data.dtype.fields.items():
+            for name, (dt, _) in data.dtype.fields.items():  # pylint: disable=no-member
                 native_quantities.add(name)
                 if dt.shape:
                     for indices in product(*map(range, dt.shape)):
