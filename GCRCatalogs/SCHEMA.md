@@ -196,11 +196,14 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `blendedness` | - | measure of how flux is affected by neighbors: (1 - flux.child/flux.parent) (see 4.9.11 of [1705.06766](https://arxiv.org/abs/1705.06766)) |   |   |
 `extendedness` | - | 0:star, 1:extended.  DM Stack `base_ClassificationExtendedness_value` |   |   |
 
-## DC2 Run 2.x truth summary catalogs
+## DC2 Run 2.x and Run 3.x truth summary catalogs
+There are two kinds of summary truth catalogs: those confined to a single source type (galaxy, sn, etc.) and the combined catalog, merging all the single-source catalogs, which is partitioned by tract. The latter has additional quantities.
+
+### Quantities belonging to all truth summary catalogs:
 
 Quantity Label | Unit | Definition
 --- | --- | ---
-`id` | - | Unique object ID (string)
+`id` | - | Unique object ID (string for all but galaxy-only catalog, where it's bigint)
 `host_galaxy` | - | ID of the host galaxy for a SN/AGN entry (-1 for other truth types)
 `ra` | degree | Right Ascension
 `dec` | degree | Declination
@@ -209,6 +212,11 @@ Quantity Label | Unit | Definition
 `is_pointsource` | - | 1 for a point source
 `flux_<band>` | nJy | Static flux value in `<band>`
 `flux_<band>_noMW` | nJy | Static flux value in `<band>`, without Milky Way extinction (i.e., dereddened)
+
+### Quantities found only in the merged truth summary:
+
+Quantity Label | Unit | Definition
+--- | --- | ---
 `mag_<band>` | AB mag | Magnitude in `<band>`
 `mag_<band>_noMW` | AB mag | Magnitude in `<band>`, without Milky Way extinction (i.e., dereddened)
 `tract` | - | Tract ID in Sky Map
