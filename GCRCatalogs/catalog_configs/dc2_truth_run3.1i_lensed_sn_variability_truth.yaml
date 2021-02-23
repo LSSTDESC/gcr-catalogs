@@ -1,0 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
+base_dir: ^/DC2-prod/Run3.1i/truth/lensed_snetruth
+filename_pattern: 'lensed_sn_variability_truth.parquet$'
+description: DC2 Run 3.1i  Variability truth table for lensed SNe
+creators: ['Joanne Bogart']
+include_in_default_catalog_list: true
