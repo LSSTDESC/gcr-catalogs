@@ -150,8 +150,8 @@ Quantity Label | Unit | Definition | GCRbase | DPDD
 `cModelFlux_<band>` | nJy | composite model (CModel) flux in `<band>` | x |  |
 `cModelFluxErr_<band>` | nJy | Error value for cModel flux in `<band>` | x |  |
 `cModelFlux_flag_<band>` | - | Flag for issues with `cModelFlux_flag_<band>` | x |  |
-`mag_<band>` | mag | Point-source model magnitude in `<band>`, fitted by cModel. | x |   |
-`magerr_<band>` | mag | Error value for `mag_<band>.` | x |   |
+`mag_<band>` | mag | Point-source model magnitude in `<band>` | x |   |
+`magerr_<band>` | mag | Error value for `mag_<band>` | x |   |
 `mag_<band>_cModel` | mag | composite model (cModel) magnitude in `<band>`, fitted by cModel. | x |   |
 `magerr_<band>_cModel` | mag | Error value for `mag_<band>_cModel.` | x |   |
 `snr_<band>_cModel` | - | Signal to noise ratio for magnitude in `<band>`, fitted by cModel. |   |   |
