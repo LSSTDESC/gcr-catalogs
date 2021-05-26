@@ -1,0 +1,8 @@
+subclass_name: dc2_object.DC2ObjectParquetCatalog
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v2/object_dpdd
+filename_pattern: object_dpdd_tract\d+.parquet$
+is_dpdd: true
+
+description: DESC DC2 (Run2.2i) DR6 Object Table for the Public Release v2
+creators: Rubin LSST DESC DC2 Team
+public_release: v2
