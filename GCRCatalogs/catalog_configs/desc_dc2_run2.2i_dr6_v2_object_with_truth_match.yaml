@@ -1,9 +1,9 @@
 subclass_name: composite.CompositeReader
 catalogs:
-  - catalog_name: desc_dc2_run2.2i_dr6_v1_object
+  - catalog_name: desc_dc2_run2.2i_dr6_v2_object
     is_main: true
     include_native_quantities: false
-  - catalog_name: desc_dc2_run2.2i_dr6_v1_truth
+  - catalog_name: desc_dc2_run2.2i_dr6_v2_truth
     as_object_addon: true
     as_truth_table: false
     matching_partition: true
@@ -12,7 +12,6 @@ catalogs:
     overwrite_attributes: false
     include_native_quantities: false
 
-description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v1
+description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v2
 creators: Rubin LSST DESC DC2 Team
-public_release: v1
-deprecated: Please use desc_dc2_run2.2i_dr6_object_with_truth_match instead
+public_release: v2
