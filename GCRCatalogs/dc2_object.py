@@ -53,7 +53,7 @@ def convert_dm_ref_zp_flux_to_nanoJansky(flux, dm_ref_zp=27):
     """
     AB_mag_zp_wrt_Jansky = 8.90  # Definition of AB
     AB_mag_zp_wrt_nanoJansky = 2.5 * 9 + AB_mag_zp_wrt_Jansky  # 9 is from nano=10**(-9)
-    calibrated_flux_to_nanoJansky = 10**((AB_mag_zp_wrt_nanoJansky - dm_ref_zp)/2.5)
+    calibrated_flux_to_nanoJansky = 10**((AB_mag_zp_wrt_nanoJansky - dm_ref_zp) / 2.5)
 
     return calibrated_flux_to_nanoJansky * flux
 
@@ -157,7 +157,7 @@ class TableWrapper():
     get = __getitem__
 
     @classmethod
-    def _get_default_value(cls, dtype, key=None): # pylint: disable=W0613
+    def _get_default_value(cls, dtype, key=None):  # pylint: disable=W0613
         return cls._default_values.get(np.dtype(dtype).kind, np.nan)
 
     def _get_constant_array(self, key):
@@ -272,7 +272,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._schema = self._generate_schema_from_yaml(self._schema_path)
 
         self._file_handles = dict()
-        self._datasets = self._generate_datasets() # uses self._schema when available
+        self._datasets = self._generate_datasets()  # uses self._schema when available
         if not self._datasets:
             err_msg = 'No catalogs were found in `base_dir` {}'
             raise RuntimeError(err_msg.format(self.base_dir))
@@ -281,6 +281,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             warnings.warn('Falling back to reading all datafiles for column names')
             self._schema = self._generate_schema_from_datafiles(self._datasets)
 
+        # pylint: disable=not-an-iterable  # for self._schema
         if kwargs.get('is_dpdd'):
             self._quantity_modifiers = {col: None for col in self._schema}
             bands = [col[0] for col in self._schema if len(col) == 5 and col.startswith('mag_')]
@@ -619,7 +620,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         for dataset in self._datasets:
             if (native_filters is None or
-                native_filters.check_scalar(dataset.tract_and_patch)):
+                    native_filters.check_scalar(dataset.tract_and_patch)):
                 yield dataset.get
                 if not self.use_cache:
                     dataset.clear_cache()
