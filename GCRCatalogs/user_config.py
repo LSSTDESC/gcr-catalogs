@@ -33,7 +33,7 @@ if __name__ == "__main__":
             print(f"{args.key} was not in user config or its value was None.")
     if args.operation == 'set':
         if not args.value:
-            raise parser.error("Must supply value for 'set' operation")
+            parser.error("Must supply value for 'set' operation")
         else:
             old = umgr.get(args.key)
             umgr[args.key] = args.value
