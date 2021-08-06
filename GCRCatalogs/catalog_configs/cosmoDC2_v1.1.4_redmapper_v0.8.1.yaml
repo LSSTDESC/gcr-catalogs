@@ -4,8 +4,8 @@ subclass_name: redmapper.RedmapperCatalog
 
 catalog_root_dir: ^/xgal/cosmoDC2/addons/redmapper_v1.1.4
 catalog_path_template:
-  clusters: cosmoDC2_v1.1.4_mag_run_redmapper_v0.7.5_lgt20_catalog.fit
-  members: cosmoDC2_v1.1.4_mag_run_redmapper_v0.7.5_lgt20_catalog_members.fit
+  clusters: cosmoDC2_v1.1.4_mag_run_redmapper_v0.8.1_lgt05_catalog.fit
+  members: cosmoDC2_v1.1.4_mag_run_redmapper_v0.8.1_lgt05_catalog_members.fit
 
 sky_area: 439.78987
 
@@ -19,8 +19,7 @@ cosmology:
 creators: ['Eli Rykoff']
 description: |
   Cluster and member catalogs computed from the redMaPPer cluster finder
-  (v0.7.5) run on cosmoDC2 v1.1.4.
+  (v0.8.1) run on cosmoDC2 v1.1.4.  Richness selection is lambda > 5 to
+  facilitate matching with catalogs run on run2.2i DR6.
 
-include_in_default_catalog_list: false
-deprecated: Use cosmoDC2_v1.1.4_redmapper_v0.8.1 instead
-
+include_in_default_catalog_list: true
