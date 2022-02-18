@@ -18,7 +18,7 @@ from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
            'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog']
-__version__ = '2.0.1'
+__version__ = '2.1.0'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -28,6 +28,12 @@ def _calc_weighted_size(size1, size2, lum1, lum2):
 
 def _calc_weighted_size_minor(size1, size2, lum1, lum2, ell):
     size = _calc_weighted_size(size1, size2, lum1, lum2)
+    return size * (1.0 - ell) / (1.0 + ell)
+
+
+def _fix_calc_weighted_size_minor(size1, size2, lum1, lum2, e_disk, e_bulge):
+    size = _calc_weighted_size(size1, size2, lum1, lum2)
+    ell = _fix_total_ellipticity(e_disk, e_bulge, lum1, lum2)
     return size * (1.0 - ell) / (1.0 + ell)
 
 
@@ -55,6 +61,46 @@ def _calc_Av(lum_v, lum_v_dust):
         Av = -2.5*(np.log10(lum_v_dust/lum_v))
         return Av
 
+    
+def _fix_axis_ratio(q_bad):
+    # back out incorrect computation of q using Johnsonb function
+    e_jb = np.sqrt((1 - q_bad**2)/(1 + q_bad**2))
+    q_new = np.sqrt((1 - e_jb)/(1 + e_jb)) # use correct relationship to compute q from e_jb 
+    return q_new
+
+    
+def _fix_ellipticity_disk_or_bulge(ellipticity):
+    # back out incorrect computation of q using Johnsonb function 
+    q_bad = (1-ellipticity)/(1+ellipticity) #use default e definition to calculate q
+    # q_bad incorrectly computed from e_jb using q_bad = sqrt((1 - e_jb^2)/(1 + e_jb^2))
+    q_new = _fix_axis_ratio(q_bad)
+    e_new = (1 - q_new)/(1 + q_new)  # recompute e using default (1-q)/(1+q) definition
+    return e_new
+
+
+def _fix_total_ellipticity(e_disk, e_bulge, lum_disk, lum_bulge):
+    ellip_disk = _fix_ellipticity_disk_or_bulge(e_disk)
+    ellip_bulge = _fix_ellipticity_disk_or_bulge(e_bulge)
+    lum_tot = lum_disk + lum_bulge
+    e_tot = (lum_disk*ellip_disk + lum_bulge*ellip_bulge)/(lum_tot)
+    return e_tot
+
+
+def _fix_e_1(e):
+    e_new = _fix_ellipticity_disk_or_bulge(e)
+    e = _calc_ellipticity_1(e_new)
+    return e
+
+
+def _fix_e_2(e):
+    e_new = _fix_ellipticity_disk_or_bulge(e)
+    e = _calc_ellipticity_2(e_new)
+    return e
+
+def _fix_size_minor(a, b):
+    q_bad = b/a
+    q_new = _fix_axis_ratio(q_bad)
+    return q_new*a
 
 def _gen_position_angle(size_reference):
     # pylint: disable=protected-access
@@ -63,7 +109,19 @@ def _gen_position_angle(size_reference):
         _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
     return _gen_position_angle._pos_angle
 
+def _fix_calc_ellipticity_1(e_disk, e_bulge, lum_disk, lum_bulge):
+    e_tot = _fix_total_ellipticity(e_disk, e_bulge, lum_disk, lum_bulge)
+    e = _calc_ellipticity_1(e_tot)
+    return e
 
+
+def _fix_calc_ellipticity_2(e_disk, e_bulge, lum_disk, lum_bulge):
+    e_tot = _fix_total_ellipticity(e_disk, e_bulge, lum_disk, lum_bulge)
+    e = _calc_ellipticity_2(e_tot)
+    return e
+
+
+# these functions are appropriate for corrected ellipticities only
 def _calc_ellipticity_1(ellipticity):
     # position angle using ellipticity as reference for the size or
     # the array. The angle is converted from degrees to radians
@@ -424,20 +482,35 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'stellar_mass_bulge':       'spheroidMassStellar',
             'size_disk_true':           'morphology/diskMajorAxisArcsec',
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
-            'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
-            'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
+            'size_minor_disk_true':     (_fix_size_minor, 'morphology/diskMajorAxisArcsec', 'morphology/diskMinorAxisArcsec'),
+            'size_minor_bulge_true':    (_fix_size_minor, 'morphology/spheroidMajorAxisArcsec', 'morphology/spheroidMinorAxisArcsec'),
             'position_angle_true':      (_gen_position_angle, 'morphology/positionAngle'),
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
-            'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity'),
-            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity'),
-            'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity'),
-            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity'),
-            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
-            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
-            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
+            'ellipticity_true':         (_fix_total_ellipticity,
+                                         'morphology/diskEllipticity',
+                                         'morphology/spheroidEllipticity', 
+                                         'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                                         'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+                                        ), 
+            'ellipticity_1_true':       (_fix_calc_ellipticity_1,
+                                         'morphology/diskEllipticity',
+                                         'morphology/spheroidEllipticity', 
+                                         'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                                         'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+                                        ), 
+            'ellipticity_2_true':       (_fix_calc_ellipticity_2,
+                                         'morphology/diskEllipticity',
+                                         'morphology/spheroidEllipticity', 
+                                         'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
+                                         'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
+                                        ), 
+            'ellipticity_disk_true':    (_fix_ellipticity_disk_or_bulge, 'morphology/diskEllipticity'),
+            'ellipticity_1_disk_true':  (_fix_e_1, 'morphology/diskEllipticity'),
+            'ellipticity_2_disk_true':  (_fix_e_2, 'morphology/diskEllipticity'),
+            'ellipticity_bulge_true':   (_fix_ellipticity_disk_or_bulge, 'morphology/spheroidEllipticity'),
+            'ellipticity_1_bulge_true': (_fix_e_1, 'morphology/spheroidEllipticity'),
+            'ellipticity_2_bulge_true': (_fix_e_2, 'morphology/spheroidEllipticity'),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
@@ -446,17 +519,23 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
             'size_minor_true': (
-                _calc_weighted_size_minor,
+                _fix_calc_weighted_size_minor,
                 'morphology/diskMajorAxisArcsec',
                 'morphology/spheroidMajorAxisArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
-                'morphology/totalEllipticity',
+                'morphology/diskEllipticity',
+                'morphology/spheroidEllipticity',
             ),
             'bulge_to_total_ratio_i': (
                 lambda x, y: x/(x+y),
                 'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed',
                 'SDSS_filters/diskLuminositiesStellar:SDSS_i:observed',
+            ),
+            'bulge_to_total_ratio_stellar': (
+                lambda x, y: x/(x+y),
+                'diskMassStellar',
+                'spheroidMassStellar',
             ),
             'A_v': (
                 _calc_Av,
@@ -569,14 +648,88 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
         #change magnification definition
         quantity_modifiers['magnification'] = (_limit_magnification, 'magnification')
 
+        version = StrictVersion(self.version)
+
         #change magnitude computation
         for band in 'ugrizyY':
-            if band != 'y' and band != 'Y':
-                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band), 'magnification',)
-                quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
-        quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
-        quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+            if version < StrictVersion('2.1.0'):
+                if band != 'y' and band != 'Y':
+                    quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                      'SDSS_filters/magnitude:SDSS_{}:observed:dustAtlas'.format(band.lower()),
+                                                                      'magnification',)
+                    quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                                         'SDSS_filters/magnitude:SDSS_{}:observed'.format(band.lower()),
+                                                                                         'magnification',)
+                quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                  'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower().lower()),
+                                                                  'magnification',)
+                quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                                     'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()),
+                                                                                     'magnification',)
+            else: #version 2+
+                quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                  'mag_LSST_{}'.format(band.lower()),
+                                                                  'magnification',)
+                quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits,
+                                                                                     'mag_LSST_{}'.format(band.lower()),
+                                                                                     'magnification',)
+                quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'mag_LSST_{}'.format(band.lower())
+                quantity_modifiers['mag_true_{}_lsst_no_host_extinction'.format(band)] = 'mag_LSST_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'Mag_LSST_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_lsst_z0_no_host_extinction'.format(band)] = 'Mag_LSST_{}'.format(band.lower())
+                if band == 'g' or band =='r' or band == 'i':
+                    quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'Mag_SDSS_{}'.format(band.lower())
+                    quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)] = 'Mag_LSST_{}'.format(band.lower())
+                elif band == 'u' or band == 'z': # not included yet
+                    del quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)]
+                    del quantity_modifiers['Mag_true_{}_sdss_z0_no_host_extinction'.format(band)]
+                if band != 'y' and band != 'Y': # no observer frame SDSS filters yet
+                    del quantity_modifiers['mag_{}_sdss'.format(band)]
+                    del quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)]
+                    del quantity_modifiers['mag_true_{}_sdss'.format(band)]
+                    del quantity_modifiers['mag_true_{}_sdss_no_host_extinction'.format(band)]                
+                
+        if version >= StrictVersion('2.1.0'):  #ellipticity bug fixed
+            print('modifying {} morphology quantities'.format(version))
+            quantity_modifiers['size_minor_disk_true'] = 'morphology/diskMinorAxisArcsec',
+            quantity_modifiers['size_minor_bulge_true'] = 'morphology/spheroidMinorAxisArcsec',
+            quantity_modifiers['position_angle_true'] = (_gen_position_angle, 'morphology/positionAngle'),
+            quantity_modifiers['ellipticity_true'] = 'morphology/totalEllipticity',
+            quantity_modifiers['ellipticity_1_true'] = (_calc_ellipticity_1, 'morphology/totalEllipticity'),
+            quantity_modifiers['ellipticity_2_true'] = (_calc_ellipticity_2, 'morphology/totalEllipticity'),
+            quantity_modifiers['ellipticity_disk_true'] = 'morphology/diskEllipticity',
+            quantity_modifiers['ellipticity_1_disk_true'] = (_calc_ellipticity_1, 'morphology/diskEllipticity'),
+            quantity_modifiers['ellipticity_2_disk_true'] = (_calc_ellipticity_2, 'morphology/diskEllipticity'),
+            quantity_modifiers['ellipticity_bulge_true'] = 'morphology/spheroidEllipticity',
+            quantity_modifiers['ellipticity_1_bulge_true'] = (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
+            quantity_modifiers['ellipticity_2_bulge_true'] = (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
 
+            #adjust sizes for new quantities; delete av rv
+            quantity_modifiers['bulge_to_total_ratio_i'] = (lambda x, y: x/(x+y),
+                                                            'lum_LSST_i_spheroid',
+                                                            'lum_LSST_i_disk',
+                                                           )
+            quantity_modifiers['size_true'] = (_calc_weighted_size,
+                                               'morphology/diskMajorAxisArcsec',
+                                               'morphology/spheroidMajorAxisArcsec',
+                                               'Lum_LSST_r_disk',
+                                               'Lum_LSST_r_spheroid',
+                                              )
+            quantity_modifiers['size_minor_true'] = (_calc_weighted_size_minor,
+                                                     'morphology/diskMajorAxisArcsec',
+                                                     'morphology/spheroidMajorAxisArcsec',
+                                                     'Lum_LSST_r_disk',
+                                                     'Lum_LSST_r_spheroid',
+                                                     'morphology/totalEllipticity',
+                                                    )
+            print('deleting dust quantities for v{}'.format(version))
+            del quantity_modifiers['A_v']
+            del quantity_modifiers['A_v_disk']
+            del quantity_modifiers['A_v_bulge']
+            del quantity_modifiers['R_v']
+            del quantity_modifiers['R_v_disk']
+            del quantity_modifiers['R_v_bulge']
+            
         return quantity_modifiers
 
 
