@@ -1,0 +1,8 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v2/star_truth/parquet
+filename_pattern: 'star_truth_summary_trimmed_int_id.parquet$'
+description: DC2 Run 2.2i  Summary truth table for stars restricted to DC2 footprint; id of type int
+creators: ['Rubin LSST DESC DC2 Team']
+public_release: v4
