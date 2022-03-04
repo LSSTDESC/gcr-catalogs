@@ -6,4 +6,4 @@ filename_pattern: 'sn_variability_truth.parquet$'
 
 description: DESC DC2 (Run 2.2i)  Variability table for SNe for the Public Release
 creators: Rubin LSST DESC DC2 Team
-public_release: v4
+public_release: [v4]
