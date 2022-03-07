@@ -2,6 +2,7 @@
 
 subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
 base_dir: ^/DC2-prod/Run2.2i/truth/startruth
-filename_pattern: 'star_truth_summary.parquet$'
-description: DC2 Run 2.2i  Summary truth table for stars
+filename_pattern: 'star_truth_summary_trimmed.parquet$'
+description: DC2 Run 2.2i  Summary truth table for stars, trimmed to DC2 footprint. For full version see dc2_truth_run2.2i_star_truth_summary_full
 creators: ['DESC DC2 Team', 'Joanne Bogart']
+include_in_default_catalog_list: true
