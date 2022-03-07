@@ -2,7 +2,7 @@
 
 subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
 base_dir: ^/DC2-prod/Run2.2i/truth/startruth
-filename_pattern: 'star_lc_stats_trimmed_int_id.parquet$'
+filename_pattern: 'star_lc_stats_int_id.parquet$'
 
-description: DC2 Run 2.2i light curve statistics for stars; id of type int
+description: DC2 Run 2.2i light curve statistics for stars restricted to the DC2 footprint; id of type int
 creators: ['DESC DC2 Team', 'Joanne Bogart']
