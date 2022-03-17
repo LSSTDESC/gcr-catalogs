@@ -66,6 +66,8 @@ Confluence page (*DESC member only*).
 - `cosmoDC2_v1.1.4_image`: latest cosmoDC2 catalog (used for Run 2.1+)
 - `cosmoDC2_v1.1.4_small`: 17 contiguous healpixels of `cosmoDC2_v1.1.4_image` for testing purposes
 - `cosmoDC2_v1.1.4_redmapper_v0.8.1`: Redmapper catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_redmagic_v0.8.1_highdens`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high density sample (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_redmagic_v0.8.1_highlum`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high luminosity sample (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
 - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
@@ -108,6 +110,8 @@ Confluence page (*DESC member only*).
 - `dc2_object_run2.2i_dr6`: static object catalog for Run 2.2i DR6 (WFD and DDF visits; a small sky region in the upper right corner of the footprint was excluded in the current version (v1))
 - `dc2_object_run2.2i_dr6_with_addons`: same as `dc2_object_run2.2i_dr6` but with all available add-on catalogs (currently including metacal and truth-match; photo-z add-on not yet available. Use `dc2_object_run2.2i_dr6a_with_photoz` for a preview of photo-z.)
 - `dc2_redmapper_run2.2i_dr6_wfd_v0.8.1`: Redmapper catalog (v0.8.1) for `dc2_object_run2.2i_dr6` (provided by Eli Rykoff).
+- `dc2_redmagic_run2.2i_dr6_wfd_v0.8.1_highdens`: Redmagic catalog (v0.8.1) for `dc2_object_run2.2i_dr` for the high density sample (provided by Eli Rykoff).
+- `dc2_redmagic_run2.2i_dr6_wfd_v0.8.1_highlum`: Redmagic catalog (v0.8.1) for `dc2_object_run2.2i_dr` for the high luminosity sample (provided by Eli Rykoff).
 
 ##### DR2 (up to Year 1)
 

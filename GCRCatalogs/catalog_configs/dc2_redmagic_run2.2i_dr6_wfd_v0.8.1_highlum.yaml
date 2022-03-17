@@ -1,0 +1,24 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: redmagic.RedmagicCatalog
+
+catalog_root_dir: ^/DC2-prod/Run2.2i/addons/redmagic/dr6-wfd
+
+catalog_path_template:
+  redmagic: dc2_dr6_run_redmapper_v0.8.1_redmagic_highlum-chi.fit
+
+sky_area: 302.65
+
+cosmology:
+  H0: 71.0
+  Om0: 0.2648
+  Ob0: 0.0448
+  sigma8: 0.8
+  n_s: 0.963
+
+creators: ['Eli Rykoff']
+description: |
+  RedMaGiC high luminosity red galaxy catalog computed from the redMaPPer
+  cluster finder (v0.8.1) run on run2.2i DR6 (WFD).
+
+include_in_default_catalog_list: true

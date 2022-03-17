@@ -1,0 +1,24 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: redmagic.RedmagicCatalog
+
+catalog_root_dir: ^/xgal/cosmoDC2/addons/redmagic_v1.1.4
+
+catalog_path_template:
+  redmagic: cosmoDC2_v1.1.4_mag_run_redmapper_v0.8.1_redmagic_highdens-chi.fit
+
+sky_area: 439.78987
+
+cosmology:
+  H0: 71.0
+  Om0: 0.2648
+  Ob0: 0.0448
+  sigma8: 0.8
+  n_s: 0.963
+
+creators: ['Eli Rykoff']
+description: |
+  RedMaGiC high density red galaxy catalog computed from the redMaPPer
+  cluster finder (v0.8.1) run on cosmoDC2 v1.1.4.
+
+include_in_default_catalog_list: true
