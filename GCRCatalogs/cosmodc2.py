@@ -367,20 +367,26 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
 
         return meta_dict, native_quantities, quantity_info
 
-    def _iter_native_dataset(self, native_filters=None):
+    def _iter_native_dataset(self, native_filters=None, rank=0, size=1):
         if self.lightcone:
             key_to_dict = lambda key: dict(zip(('redshift_block_lower', 'healpix_pixel'), key))
         else:
             key_to_dict = lambda key: {'block': key}
+
+        count = 0
         for key, file_path in self._file_list.items():
             d = key_to_dict(key)
             if native_filters is not None and not native_filters.check_scalar(d):
                 continue
-            with h5py.File(file_path, 'r') as fh:
-                for group in self._get_group_names(fh):
-                    # pylint: disable=W0640
-                    if len(fh[group]):
-                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)][()]
+            if (count%size==rank):
+                count+=1
+                with h5py.File(file_path, 'r') as fh:
+                    for group in self._get_group_names(fh):
+                        # pylint: disable=W0640
+                        if len(fh[group]):
+                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)][()]
+            else:
+                count+=1
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)
