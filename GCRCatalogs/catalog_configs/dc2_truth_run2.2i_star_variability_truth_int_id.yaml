@@ -1,9 +1,0 @@
-#  Use ^/ to indicate file path relative to GCR root dir
-
-subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
-base_dir: ^/DC2-prod/Run2.2i/truth/startruth
-filename_pattern: 'star_variability_truth_int_id.parquet$'
-
-description: DC2 Run 2.2i  variability truth table for stars
- restricted to the DC2 footprint; int ID field
-creators: ['DESC DC2 Team', 'Joanne Bogart']
