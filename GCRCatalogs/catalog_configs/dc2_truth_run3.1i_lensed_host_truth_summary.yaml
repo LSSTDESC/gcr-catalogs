@@ -4,5 +4,5 @@ subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
 base_dir: ^/DC2-prod/Run3.1i/truth/lensed_hosttruth
 filename_pattern: 'lensed_host_truth_summary.parquet$'
 description: DC2 Run 3.1i  Summary truth table for lensed host galaxies
-creators: ['Joanne Bogart']
+creators: ['DESC DC2 Team', 'Joanne Bogart']
 include_in_default_catalog_list: true

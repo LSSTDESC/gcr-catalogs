@@ -14,4 +14,4 @@ catalogs:
 
 description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v2
 creators: Rubin LSST DESC DC2 Team
-public_release: v2
+public_release: [v2, v3, v4]

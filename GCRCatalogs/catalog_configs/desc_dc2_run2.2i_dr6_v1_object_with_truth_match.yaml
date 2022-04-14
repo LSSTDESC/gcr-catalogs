@@ -14,5 +14,5 @@ catalogs:
 
 description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v1
 creators: Rubin LSST DESC DC2 Team
-public_release: v1
+public_release: [v1]
 deprecated: Please use desc_dc2_run2.2i_dr6_object_with_truth_match instead

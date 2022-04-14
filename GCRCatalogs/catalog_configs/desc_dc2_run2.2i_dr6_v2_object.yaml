@@ -5,4 +5,4 @@ is_dpdd: true
 
 description: DESC DC2 (Run2.2i) DR6 Object Table for the Public Release v2
 creators: Rubin LSST DESC DC2 Team
-public_release: v2
+public_release: [v2, v3, v4]
