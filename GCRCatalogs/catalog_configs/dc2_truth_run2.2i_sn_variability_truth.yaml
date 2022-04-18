@@ -5,4 +5,4 @@ base_dir: ^/DC2-prod/Run2.2i/truth/sntruth
 filename_pattern: 'sn_variability_truth.parquet$'
 description: DC2 Run 2.2i  variability truth table for SNe
 creators: ['DESC DC2 Team', 'Joanne Bogart']
-include_in_default_catalog_list: true
+deprecated: Use dc2_run2.2i_truth_sn_variability instead
