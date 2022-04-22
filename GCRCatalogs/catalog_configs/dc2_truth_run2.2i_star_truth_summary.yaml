@@ -6,3 +6,4 @@ filename_pattern: 'star_truth_summary.parquet$'
 description: 'DC2 Run 2.2i  Summary truth table for stars, extends
   beyond DC2 footprint.  See also dc2_truth_run2.2i_star_truth_summary.'
 creators: ['DESC DC2 Team', 'Joanne Bogart']
+deprecated: Use dc2_run2.2i_truth_star_summary instead
