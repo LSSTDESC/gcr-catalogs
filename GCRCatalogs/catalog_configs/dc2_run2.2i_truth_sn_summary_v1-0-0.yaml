@@ -2,7 +2,7 @@
 
 subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
 base_dir: ^/DC2-prod/Run2.2i/truth/sntruth
-filename_pattern: 'sn_variability_truth.parquet$'
-description: DC2 Run 2.2i  variability truth table for SNe
+filename_pattern: 'dc2_run2.2i_truth_sn_summary_v1-0-0.parquet$'
+
+description: DC2 Run 2.2i  Summary truth table for SNe restricted to DC2 footprint
 creators: ['DESC DC2 Team', 'Joanne Bogart']
-deprecated: Use dc2_run2.2i_truth_sn_variability instead

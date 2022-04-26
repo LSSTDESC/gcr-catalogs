@@ -1,8 +1,8 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
 subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
-base_dir: ^/DC2-prod/Run2.2i/truth/galtruth
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v2/truth_unmerged/truth_galaxy_summary_v1-0-0
 filename_pattern: 'truth_summary_hp{healpix}.parquet$'
 description: DC2 Run 2.2i  Summary truth table for galaxies
-creators: ['DESC DC2 Team', 'Joanne Bogart']
-deprecated: Use instead dc2_run2.2i_truth_galaxy_summary.yaml
+creators: ['Rubin LSST DESC DC2 Team']
+public_release: [v4]

@@ -1,0 +1,9 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v2/truth_unmerged
+filename_pattern: 'dc2_run2.2i_truth_sn_variability_v1-0-0.parquet$'
+
+description: DC2 Run 2.2i  Variability truth table for SNe restricted to DC2 footprint
+creators: ['Rubin LSST DESC DC2 Team']
+public_release: [v4]

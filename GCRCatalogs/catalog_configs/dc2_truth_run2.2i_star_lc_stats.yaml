@@ -4,5 +4,6 @@ subclass_name: dc2_truth_parquet.DC2TruthParquetCatalog
 base_dir: ^/DC2-prod/Run2.2i/truth/startruth
 filename_pattern: 'star_lc_stats_trimmed.parquet$'
 description: DC2 Run 2.2i light curve statistics for stars
-creators: ['Joanne Bogart']
-include_in_default_catalog_list: true
+creators: ['DESC DC2 Team', 'Joanne Bogart']
+deprecated: Use dc2_run2.2i_truth_star_summary instead
+
