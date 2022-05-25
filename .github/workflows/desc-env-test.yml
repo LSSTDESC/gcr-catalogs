@@ -22,8 +22,8 @@ jobs:
       - name: Add pre-installation steps for bleed/latest
         if: matrix.image_version == 'bleed' || matrix.image_version == 'latest'
         run: |
-          echo 'source /usr/local/py/etc/profile.d/conda.sh' >> $INSTALL_SCRIPT
-          echo 'conda activate desc' >> $INSTALL_SCRIPT
+          echo 'source /opt/desc/py/etc/profile.d/conda.sh' >> $INSTALL_SCRIPT
+          echo 'conda activate base' >> $INSTALL_SCRIPT
       - name: Make a copy of the installation script for test script
         run: |
           cp $INSTALL_SCRIPT $TEST_SCRIPT
