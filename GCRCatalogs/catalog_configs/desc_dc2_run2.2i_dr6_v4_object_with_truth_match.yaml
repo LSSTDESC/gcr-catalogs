@@ -1,0 +1,17 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: desc_dc2_run2.2i_dr6_v4_object
+    is_main: true
+    include_native_quantities: false
+  - catalog_name: desc_dc2_run2.2i_dr6_v4_truth
+    as_object_addon: true
+    as_truth_table: false
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: false
+
+description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v4
+creators: Rubin LSST DESC DC2 Team
+public_release: [v4]

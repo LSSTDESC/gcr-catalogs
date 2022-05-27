@@ -1,0 +1,8 @@
+subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v4/truth_match
+filename_pattern: truth_tract\d+.parquet$
+as_truth_table: true
+
+description: DESC DC2 (Run2.2i) DR6 Truth Table for the Public Release v4
+creators: Rubin LSST DESC DC2 Team
+public_release: [v4]
