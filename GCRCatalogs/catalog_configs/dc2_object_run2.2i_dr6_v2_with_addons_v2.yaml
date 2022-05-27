@@ -1,0 +1,34 @@
+subclass_name: composite.CompositeReader
+catalogs:
+  - catalog_name: dc2_object_run2.2i_dr6_v2
+  - subclass_name: dc2_metacal.DC2MetacalCatalog
+    base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-v2/metacal_table_summary
+    bands: griz
+    apply_metacal_test3_fix: true
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: true
+  - subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+    base_dir: ^/DC2-prod/Run2.2i/truth/truth_merged_summary_v1-0-0/match_dr6_v2
+    as_object_addon: true
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: false
+  - subclass_name: dc2_photoz_parquet.DC2PhotozCatalog
+    base_dir: ^/DC2-prod/Run2.2i/addons/photoz/dr6_v2
+    filename_pattern: 'photoz_pdf_Run2.2i_dr6_tract_\d+\.parquet$'
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: false
+
+description: |
+  DC2 Run 2.2i DR6 Object Table v2 with all available add-ons (currently only metacal and truth-match).
+  The truth-match addon was updated in May 2022.
+creators: ['DESC DC2 Team']
+include_in_default_catalog_list: true
