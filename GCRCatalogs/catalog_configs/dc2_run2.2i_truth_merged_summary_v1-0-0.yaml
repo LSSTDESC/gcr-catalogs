@@ -1,0 +1,4 @@
+subclass_name: dc2_truth_match.DC2TruthMatchCatalog
+base_dir: ^/DC2-prod/Run2.2i/truth/truth_merged_summary_v1-0-0/raw
+description: DC2 Run 2.2i Truth Summary Table (all types merged), partitioned in tracts. Updated May 2022.
+creators: ['DESC DC2 Team', 'Yao-Yuan Mao', 'Joanne Bogart']
