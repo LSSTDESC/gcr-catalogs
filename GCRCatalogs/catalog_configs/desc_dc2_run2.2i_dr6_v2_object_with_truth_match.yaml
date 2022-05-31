@@ -12,6 +12,6 @@ catalogs:
     overwrite_attributes: false
     include_native_quantities: false
 
-description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v2
+description: DESC DC2 DR6 Object + Truth-match Table for the Public Release v4
 creators: Rubin LSST DESC DC2 Team
-public_release: [v2, v3, v4]
+public_release: [v4]
