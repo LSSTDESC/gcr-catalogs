@@ -617,13 +617,18 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
         return set(self._schema).union(self._native_filter_quantities)
 
-    def _iter_native_dataset(self, native_filters=None):
+    def _iter_native_dataset(self, native_filters=None, rank=0, size=1):
         for dataset in self._datasets:
+            count=0
             if (native_filters is None or
                     native_filters.check_scalar(dataset.tract_and_patch)):
-                yield dataset.get
-                if not self.use_cache:
-                    dataset.clear_cache()
+                if (count%size ==rank):
+                    count+=1
+                    yield dataset.get
+                    if not self.use_cache:
+                        dataset.clear_cache()
+                else:
+                    count+=1
 
     def __len__(self):
         if self._len is None:
