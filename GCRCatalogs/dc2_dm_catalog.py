@@ -270,12 +270,16 @@ class DC2DMCatalog(BaseGenericCatalog):
         return native_quantity_getter.read_columns(list(native_quantities_needed),
                                                    as_dict=True)
 
-    def _iter_native_dataset(self, native_filters=None):
+    def _iter_native_dataset(self, native_filters=None,rank=0,size=1):
+        count = 0
         for dataset in self._datasets:
             if (native_filters is not None and
                     not native_filters.check_scalar(dataset.info)):
                 continue
-            yield dataset
+            count+=1
+            if (count%size ==rank):
+                yield dataset
+
 
     def __len__(self):
         if self._len is None:
