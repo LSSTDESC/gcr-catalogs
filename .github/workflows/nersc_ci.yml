@@ -4,21 +4,21 @@ on: [workflow_dispatch]
 
 env:
   # URL to source repository on GitHub.
-  GITHUB_SOURCE_REPO: https://github.com/LSSTDESC/<source-repo>.git
+  GITHUB_SOURCE_REPO: https://github.com/LSSTDESC/gcr-catalogs.git
   # Branch to work with.
-  GITHUB_SOURCE_BRANCH: main
+  GITHUB_SOURCE_BRANCH: nersc_ci
   
   # URL to target repository on GitLab and its project number.
-  GITLAB_TARGET_REPO: https://software.nersc.gov/<namespace>/<target-repo>.git
-  GITLAB_TARGET_PROJECT_NUMBER: <target-repo-project-number>
+  GITLAB_TARGET_REPO: https://software.nersc.gov/mcalpine/gcr-catalogs.git
+  GITLAB_TARGET_PROJECT_NUMBER: 453
   
   # URL to mirror repository on GitLab and its project number.
-  GITLAB_MIRROR_REPO: https://software.nersc.gov/<namespace>/<mirror-repo>.git
-  GITLAB_MIRROR_PROJECT_NUMBER: <mirror-repo-project-number>
+  GITLAB_MIRROR_REPO: https://software.nersc.gov/<namespace>/mirror-gcr-catalogs.git
+  GITLAB_MIRROR_PROJECT_NUMBER: 454
   
   # URL to status repository on GitLab, its project number, and tag.
-  GITLAB_STATUS_REPO: https://software.nersc.gov/<namespace>/<status-repo>.git
-  GITLAB_STATUS_PROJECT_NUMBER: <status-repo-project-number>
+  GITLAB_STATUS_REPO: https://software.nersc.gov/<namespace>/status-gcr-catalogs.git
+  GITLAB_STATUS_PROJECT_NUMBER: 455
   GITLAB_STATUS_CONTEXT: NERSC
   
 jobs:
