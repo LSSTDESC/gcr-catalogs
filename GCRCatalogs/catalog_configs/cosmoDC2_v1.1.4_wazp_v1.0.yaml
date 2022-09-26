@@ -1,0 +1,27 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: wazp.WazpCatalog
+
+catalog_root_dir: ^/xgal/cosmoDC2/addons/wazp_v1.1.4/true
+
+catalog_path_template:
+
+  clusters: cosmoDC2_v1.1.4_wazp_cluster_v1.0.fits
+  members: cosmoDC2_v1.1.4_wazp_membership_v1.0.fits
+
+sky_area: 439.78987
+
+cosmology:
+  H0: 71.0
+  Om0: 0.2648
+  Ob0: 0.0448
+  sigma8: 0.8
+  n_s: 0.963
+
+creators: ['Michel Aguena', 'Cristophe Benoist', 'Julia Gschwend', 'Luiz da Costa']
+description: |
+  Cluster and member catalogs computed from the WaZP cluster finder
+  (v5.1.0) run on cosmoDC2 v1.1.4 using true redshifts. Richness selection
+  is NGALS > 5 to filter for more significant detections.
+
+include_in_default_catalog_list: true
