@@ -3,7 +3,6 @@
 subclass_name: wazp.WazpCatalog
 
 catalog_root_dir: ^/xgal/cosmoDC2/addons/wazp_v1.1.4/true
-#catalog_root_dir: /global/cscratch1/sd/aguena/catalogs/dc2/cosmoDC2_v1.1.4/extragal/full/wazp/6948/
 
 catalog_path_template:
 
