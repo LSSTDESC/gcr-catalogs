@@ -68,6 +68,8 @@ Confluence page (*DESC member only*).
 - `cosmoDC2_v1.1.4_redmapper_v0.8.1`: Redmapper catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_redmagic_v0.8.1_highdens`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high density sample (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_redmagic_v0.8.1_highlum`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high luminosity sample (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_wazp_v1.0_truez`: WaZP catalog (v1.0) for `cosmoDC2_v1.1.4` using true redshifts (provided by Michel Aguena).
+- `cosmoDC2_v1.1.4_wazp_v1.0_flexzboost_v1`: WaZP catalog (v1.0) for `cosmoDC2_v1.1.4_image_with_photozs_flexzboost_v1` using FlexZBoost redshifts (provided by Michel Aguena).
 - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
 - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
