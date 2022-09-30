@@ -1,0 +1,135 @@
+clusters/ID: {"type": "int", "unit": "none", "description": "Unique ID of cluster"}
+clusters/RA: {"type": "float", "unit": "degrees", "description": "in deg"}
+clusters/DEC: {"type": "float", "unit": "degrees", "description": "in deg"}
+clusters/zp_bright: {"type": "float", "unit": "none", "description": "final cluster redshift"}
+clusters/NGALS: {"type": "float", "unit": "none", "description": "Richness, sum of Pmem down to m*+1.5 and within RADIUS_MPC"}
+clusters/RADIUS_MPC: {"type": "float", "unit": "Mpc", "description": "cluster radius"}
+clusters/RADIUS_AMIN: {"type": "float", "unit": "arcmin", "description": "same as RADIUS_MPC in arcmin at cluster redshift"}
+clusters/SNR: {"type": "float", "unit": "none", "description": "Signal to Noise Ratio"}
+clusters/MSTAR_CL: {"type": "float", "unit": "none", "description": "mag_star at the cluster redshift zp"}
+clusters/LOCAL_NBKG: {"type": "float", "unit": "Mpc2", "description": "local bkg in gal. counts at the cluster redshift (per Mpc2)"}
+clusters/GLOBAL_NBKG: {"type": "float", "unit": "Mpc2", "description": "global bkg in gal. counts at the cluster redshift (per Mpc2)"}
+clusters/NMEM: {"type": "int", "unit": "none", "description": "number of members (Pmem>0)"}
+clusters/NGALS_R300: {"type": "float", "unit": "none", "description": "Richness, sum of Pmem down to m*+1.5 and within 0.3 Mpc"}
+clusters/NGALS_R500: {"type": "float", "unit": "none", "description": "Richness, sum of Pmem down to m*+1.5 and within 0.5 Mpc"}
+clusters/E_NGALS: {"type": "float", "unit": "none", "description": "error on NGALS"}
+clusters/E_NGALS_R300: {"type": "float", "unit": "none", "description": "error on NGALS_R300"}
+clusters/E_NGALS_R500: {"type": "float", "unit": "none", "description": "error on NGALS_R500"}
+clusters/MASKED_FRAC_1MPC: {"type": "float", "unit": "none", "description": "masked fraction with a 1.0 Mpc radius disk centered on cluster"}
+clusters/MASKED_FRAC_05MPC: {"type": "float", "unit": "none", "description": "masked fraction with a 0.5 Mpc radius disk centered on cluster"}
+clusters/MASKED_FRAC_03MPC: {"type": "float", "unit": "none", "description": "masked fraction with a 0.3 Mpc radius disk centered on cluster"}
+clusters/RA_BCG: {"type": "float", "unit": "degrees", "description": "RA of the BCG (deg)"}
+clusters/DEC_BCG: {"type": "float", "unit": "degrees", "description": "DEC of the BCG (deg)"}
+clusters/ZP_BCG: {"type": "float", "unit": "none", "description": "Redshift of BCG"}
+clusters/DMAG_BCG: {"type": "float", "unit": "none", "description": "m_BCG - m* within Radius_max of the cluster"}
+clusters/DIST_BCG: {"type": "float", "unit": "Mpc", "description": "projected distance of the BCG to the cluster center"}
+clusters/rank: {"type": "int", "unit": "none", "description": "Cluster richness rank"}
+clusters/DETECTION_TILE: {"type": "int", "unit": "none", "description": "Tile ID used in the detection"}
+clusters/SeqNr: {"type": "int", "unit": "none", "description": ""}
+clusters/IZ_INIT: {"type": "int", "unit": "none", "description": ""}
+clusters/IZ_FINAL: {"type": "int", "unit": "none", "description": ""}
+clusters/PEAK_ID_TILE_IZ: {"type": "int", "unit": "none", "description": ""}
+clusters/ID_IN_TILE: {"type": "int", "unit": "none", "description": ""}
+clusters/zp: {"type": "float", "unit": "none", "description": ""}
+clusters/zp_median: {"type": "float", "unit": "none", "description": ""}
+clusters/Z_INIT: {"type": "float", "unit": "none", "description": ""}
+clusters/ZMIN_CL: {"type": "float", "unit": "none", "description": ""}
+clusters/ZMAX_CL: {"type": "float", "unit": "none", "description": ""}
+clusters/ZMIN_95_CL: {"type": "float", "unit": "none", "description": ""}
+clusters/ZMAX_95_CL: {"type": "float", "unit": "none", "description": ""}
+clusters/XPEAK: {"type": "int", "unit": "none", "description": ""}
+clusters/YPEAK: {"type": "int", "unit": "none", "description": ""}
+clusters/RADIUS_ISO_MPC: {"type": "float", "unit": "none", "description": ""}
+clusters/RADIUS_SADDLE_MPC: {"type": "float", "unit": "none", "description": ""}
+clusters/MAXWAVE: {"type": "float", "unit": "none", "description": ""}
+clusters/FLUX_WAVE: {"type": "float", "unit": "none", "description": ""}
+clusters/FLAG_MERGE: {"type": "int", "unit": "none", "description": ""}
+clusters/SIGMA_DZ_INIT: {"type": "float", "unit": "none", "description": ""}
+clusters/SIGMA_DZ_EFF: {"type": "float", "unit": "none", "description": ""}
+clusters/FLAG_ZP: {"type": "int", "unit": "none", "description": ""}
+clusters/NGAL_FOR_ZP: {"type": "int", "unit": "none", "description": ""}
+clusters/FLAG_IZ: {"type": "int", "unit": "none", "description": ""}
+clusters/GLOBAL_NBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/GLOBAL_LBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/SIG_NBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/SIG_LBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/LOCAL_NBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/LOCAL_LBKG_ZM: {"type": "float", "unit": "none", "description": ""}
+clusters/AREA_LOCAL_BKG: {"type": "float", "unit": "none", "description": ""}
+clusters/SNR_NGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/SNR_LGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/CONTRAST_NGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/CONTRAST_LGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/DMAG_CORE: {"type": "float", "unit": "none", "description": ""}
+clusters/NGALS_TEST: {"type": "float", "unit": "none", "description": ""}
+clusters/NGALS_CEN: {"type": "float", "unit": "none", "description": ""}
+clusters/LGALS_CEN: {"type": "float", "unit": "none", "description": ""}
+clusters/LOCAL_LBKG: {"type": "float", "unit": "none", "description": ""}
+clusters/GLOBAL_LBKG: {"type": "float", "unit": "none", "description": ""}
+clusters/SIG_NBKG: {"type": "float", "unit": "none", "description": ""}
+clusters/SIG_LBKG: {"type": "float", "unit": "none", "description": ""}
+clusters/OUT_OF_CYL: {"type": "int", "unit": "none", "description": ""}
+clusters/CYL_NSL: {"type": "int", "unit": "none", "description": ""}
+clusters/PARENT_CYL_NSL: {"type": "int", "unit": "none", "description": ""}
+clusters/ZMIN_CYL: {"type": "float", "unit": "none", "description": ""}
+clusters/ZMAX_CYL: {"type": "float", "unit": "none", "description": ""}
+clusters/IZ_MIN_CYL: {"type": "int", "unit": "none", "description": ""}
+clusters/IZ_MAX_CYL: {"type": "int", "unit": "none", "description": ""}
+clusters/CONTRAST_CYL: {"type": "float", "unit": "none", "description": ""}
+clusters/NMAX_CYL: {"type": "int", "unit": "none", "description": ""}
+clusters/KING_Rc: {"type": "float", "unit": "none", "description": ""}
+clusters/KING_D0: {"type": "float", "unit": "none", "description": ""}
+clusters/KING_CHI2: {"type": "float", "unit": "none", "description": ""}
+clusters/KING_NFIT: {"type": "int", "unit": "none", "description": ""}
+clusters/RADIUS_MAX_CONTRAST: {"type": "float", "unit": "none", "description": ""}
+clusters/RADIUS_SCALING: {"type": "float", "unit": "none", "description": ""}
+clusters/NGALS_MODEL_FIT: {"type": "float", "unit": "none", "description": ""}
+clusters/NGALS_MODEL: {"type": "float", "unit": "none", "description": ""}
+clusters/FLAG_DUPLICATE: {"type": "int", "unit": "none", "description": ""}
+clusters/RADIUS_500kpc_amin: {"type": "float", "unit": "arcmin", "description": ""}
+clusters/RADIUS_1Mpc_amin: {"type": "float", "unit": "arcmin", "description": ""}
+clusters/LGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/LGALS_R300: {"type": "float", "unit": "none", "description": ""}
+clusters/LGALS_R500: {"type": "float", "unit": "none", "description": ""}
+clusters/E_LGALS: {"type": "float", "unit": "none", "description": ""}
+clusters/E_LGALS_R300: {"type": "float", "unit": "none", "description": ""}
+clusters/E_LGALS_R500: {"type": "float", "unit": "none", "description": ""}
+clusters/zs: {"type": "float", "unit": "none", "description": ""}
+clusters/zs_min: {"type": "float", "unit": "none", "description": ""}
+clusters/zs_max: {"type": "float", "unit": "none", "description": ""}
+clusters/zp_err: {"type": "float", "unit": "none", "description": ""}
+members/ID_g: {"type": "int", "unit": "none", "description": "ID of the galaxy"}
+members/NMEM_CL: {"type": "int", "unit": "none", "description": "number of members in the cluster"}
+members/PMEM: {"type": "float", "unit": "none", "description": "membership probability"}
+members/MAG: {"type": "float", "unit": "none", "description": "reference magnitude band"}
+members/RA: {"type": "float", "unit": "degrees", "description": "RA of the galaxy (deg)"}
+members/DEC: {"type": "float", "unit": "degrees", "description": "DEC f the galaxy (deg)"}
+members/RA_CL: {"type": "float", "unit": "degrees", "description": "RA of host cluster (deg)"}
+members/DEC_CL: {"type": "float", "unit": "degrees", "description": "DEC of host cluster (deg)"}
+members/ZP: {"type": "float", "unit": "none", "description": "photometric redshift of the galaxy"}
+members/ZP_CL: {"type": "float", "unit": "none", "description": "redshift of host cluster"}
+members/MSTAR_CL: {"type": "float", "unit": "none", "description": "mstar in the ref band at the cluster redshift"}
+members/mag_bcg: {"type": "float", "unit": "none", "description": "magnitude of the BCG"}
+members/FLAG_BCG: {"type": "int", "unit": "none", "description": "=1 for the BCG"}
+members/DCEN: {"type": "float", "unit": "Mpc", "description": "projected distance of the BCG"}
+members/DCEN_NORM: {"type": "float", "unit": "none", "description": "DCEN/RADIUS_MPC"}
+members/SNR: {"type": "float", "unit": "none", "description": "SNR of host cluster"}
+members/NGALS: {"type": "float", "unit": "none", "description": "Richness of host cluster"}
+members/mag_g: {"type": "float", "unit": "none", "description": "Magnitude in g band"}
+members/mag_r: {"type": "float", "unit": "none", "description": "Magnitude in r band"}
+members/mag_i: {"type": "float", "unit": "none", "description": "Magnitude in i band"}
+members/mag_z: {"type": "float", "unit": "none", "description": "Magnitude in z band"}
+members/mag_y: {"type": "float", "unit": "none", "description": "Magnitude in y band"}
+members/SeqNr: {"type": "int", "unit": "none", "description": ""}
+members/ID_CLUSTER_TILE: {"type": "int", "unit": "none", "description": ""}
+members/DETECTION_TILE: {"type": "int", "unit": "none", "description": ""}
+members/PMEM_ERR: {"type": "float", "unit": "none", "description": ""}
+members/mag_bcg_cen: {"type": "float", "unit": "none", "description": ""}
+members/FLAG_BCG_CEN: {"type": "int", "unit": "none", "description": ""}
+members/mag_u: {"type": "float", "unit": "none", "description": ""}
+members/mag_j: {"type": "float", "unit": "none", "description": ""}
+members/mag_h: {"type": "float", "unit": "none", "description": ""}
+members/mag_k: {"type": "float", "unit": "none", "description": ""}
+members/zs: {"type": "float", "unit": "none", "description": ""}
+members/zs_flag: {"type": "float", "unit": "none", "description": ""}
+members/ID_CLUSTER: {"type": "int", "unit": "none", "description": "ID of host cluster"}

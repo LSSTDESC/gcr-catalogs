@@ -1,10 +1,14 @@
 """
 WaZP catalog class.
 """
+import os
+import yaml
 from .redmapper import RedmapperCatalog
 
 __all__ = ['WazpCatalog',]
 
+FILE_DIR = os.path.dirname(os.path.abspath(__file__))
+META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_wazp_v1.0_meta.yaml')
 
 class WazpCatalog(RedmapperCatalog):
     """
@@ -12,6 +16,42 @@ class WazpCatalog(RedmapperCatalog):
     defined by BaseGenericCatalog class with functionalities from
     RedmapperCatalog.
     """
+    def _subclass_init(self, *args, **kwargs):
+        RedmapperCatalog._subclass_init(self, *args, **kwargs)
+        self._quantity_info_dict = self._generate_info_dict(META_PATH)
+
+    def _generate_info_dict(self, meta_path):
+        """Creates a 2d dictionary with information for each homogenized quantity
+
+        Args:
+            meta_path (path): Path of yaml config file with object meta data
+            bands (list or None): A list of band names.
+
+        Returns:
+            Dictionary of the form
+                {<homonogized value (str)>: {<meta value (str)>: <meta data>}, ...}
+        """
+        out = {}
+        with open(meta_path, 'r') as f:
+            base_dict = yaml.safe_load(f)
+        for key, value in self._quantity_modifiers.items():
+            out[key] = base_dict[value]
+        out.update(base_dict)
+        return out
+
+    def _get_quantity_info_dict(self, quantity, default=None):
+        return self._quantity_info_dict.get(quantity, default)
+
+    def print_quantity_info(self, quantity):
+        """
+        Print information of a certain quantity.
+        """
+        if quantity in  self._quantity_info_dict:
+            info = self._quantity_info_dict.get(quantity)
+            unit = f', unit:{info["unit"]}' if info['unit']!='none' else ''
+            return f'({info["type"]}{unit}): {info["description"]}'
+        else:
+            return None
 
     def _generate_quantity_modifiers(self):
         return {
@@ -49,146 +89,3 @@ class WazpCatalog(RedmapperCatalog):
             'member_mag_z': 'members/mag_z',
             'member_mag_y': 'members/mag_y',
             }
-
-########################
-### ALL WaZP columns ###
-########################
-# ID
-# SeqNr
-# DETECTION_TILE
-# IZ_INIT
-# IZ_FINAL
-# PEAK_ID_TILE_IZ
-# ID_IN_TILE
-# RA
-# DEC
-# zp
-# zp_median
-# Z_INIT
-# ZMIN_CL
-# ZMAX_CL
-# ZMIN_95_CL
-# ZMAX_95_CL
-# MSTAR_CL
-# XPEAK
-# YPEAK
-# RADIUS_ISO_MPC
-# RADIUS_SADDLE_MPC
-# MAXWAVE
-# FLUX_WAVE
-# FLAG_MERGE
-# SIGMA_DZ_INIT
-# SIGMA_DZ_EFF
-# FLAG_ZP
-# NGAL_FOR_ZP
-# FLAG_IZ
-# GLOBAL_NBKG_ZM
-# GLOBAL_LBKG_ZM
-# SIG_NBKG_ZM
-# SIG_LBKG_ZM
-# LOCAL_NBKG_ZM
-# LOCAL_LBKG_ZM
-# AREA_LOCAL_BKG
-# MASKED_FRAC_1MPC
-# MASKED_FRAC_05MPC
-# MASKED_FRAC_03MPC
-# SNR
-# SNR_NGALS
-# SNR_LGALS
-# CONTRAST_NGALS
-# CONTRAST_LGALS
-# DMAG_CORE
-# DMAG_BCG
-# DIST_BCG
-# NGALS_TEST
-# NGALS_CEN
-# LGALS_CEN
-# LOCAL_NBKG
-# LOCAL_LBKG
-# GLOBAL_NBKG
-# GLOBAL_LBKG
-# SIG_NBKG
-# SIG_LBKG
-# OUT_OF_CYL
-# CYL_NSL
-# PARENT_CYL_NSL
-# ZMIN_CYL
-# ZMAX_CYL
-# IZ_MIN_CYL
-# IZ_MAX_CYL
-# CONTRAST_CYL
-# NMAX_CYL
-# KING_Rc
-# KING_D0
-# KING_CHI2
-# KING_NFIT
-# RADIUS_MPC
-# RADIUS_AMIN
-# RADIUS_MAX_CONTRAST
-# RADIUS_SCALING
-# NGALS_MODEL_FIT
-# NGALS_MODEL
-# FLAG_DUPLICATE
-# RADIUS_500kpc_amin
-# RADIUS_1Mpc_amin
-# NMEM
-# NGALS
-# NGALS_R300
-# NGALS_R500
-# LGALS
-# LGALS_R300
-# LGALS_R500
-# E_NGALS
-# E_NGALS_R300
-# E_NGALS_R500
-# E_LGALS
-# E_LGALS_R300
-# E_LGALS_R500
-# RA_BCG
-# DEC_BCG
-# ZP_BCG
-# zp_bright
-# zs
-# zs_min
-# zs_max
-# zp_err
-# rank
-
-################################
-### ALL WaZP members columns ###
-################################
-# SeqNr
-# ID_CLUSTER_TILE
-# DETECTION_TILE
-# ID_g
-# NMEM_CL
-# PMEM
-# PMEM_ERR
-# MAG
-# RA
-# DEC
-# RA_CL
-# DEC_CL
-# ZP
-# ZP_CL
-# MSTAR_CL
-# mag_bcg
-# FLAG_BCG
-# mag_bcg_cen
-# FLAG_BCG_CEN
-# DCEN
-# DCEN_NORM
-# SNR
-# NGALS
-# mag_u
-# mag_g
-# mag_r
-# mag_i
-# mag_z
-# mag_y
-# mag_j
-# mag_h
-# mag_k
-# zs
-# zs_flag
-# ID_CLUSTER
