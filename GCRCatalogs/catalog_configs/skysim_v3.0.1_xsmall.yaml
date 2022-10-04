@@ -1,0 +1,30 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: cosmodc2.SkySimGalaxyCatalog
+
+catalog_root_dir: /global/cfs/cdirs/lsst/groups/CS/skysim_v3.0.1_test
+catalog_filename_template: skysim_z_{}_{}_cutout_{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+lightcone: true
+
+version: "3.0.1"
+
+healpix_pixels: [9554]
+
+check_md5: false
+check_size: false
+check_cosmology: false
+ensure_meta_consistent: false
+sky_area: 3.4
+
+creators: ['Andrew Hearin', 'Eve Kovacs', 'Patricia Larsen', 'Katrin Heitmann']
+
+description: |
+    This is a small test version of the 5000 sq. deg. extra-galactic catalog for LSST-DESC.

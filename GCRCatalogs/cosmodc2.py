@@ -17,8 +17,9 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
-           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog']
-__version__ = '2.0.1'
+           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog',
+           'SkySimGalaxyCatalog']
+__version__ = '3.0.1'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -106,6 +107,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
     """
     CosmoDC2ParentClass: the parent class for
     CosmoDC2GalaxyCatalog, BaseDC2GalaxyCatalog, and BaseDC2ShearCatalog
+    SkySim5000GalaxyCatalog and SkySimGalaxyCatalog
     """
 
     def _subclass_init(self, catalog_root_dir, catalog_filename_template, **kwargs):
@@ -576,6 +578,70 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
                 quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
         quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
         quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+
+        return quantity_modifiers
+
+
+class SkySimGalaxyCatalog(CosmoDC2ParentClass):
+    """
+    SkySim galaxy catalog reader, inherited from CosmoDC2ParentClass
+    """
+
+    def _get_group_names(self, fh):
+        return [k for k in fh if k.isdigit()]
+
+    def _generate_quantity_modifiers(self):
+        quantity_modifiers = {
+            'galaxy_id' :    'galaxy_id',
+            'ra_true':       'ra',
+            'dec_true':      'dec',
+            'redshift':      'redshift',
+            'redshift_true': 'redshiftHubble',
+            'shear_1':       'shear1',
+            'shear_2':       'shear2',
+            'shear_2_phosim': (np.negative, 'shear2'),
+            'shear_2_treecorr':   'shear2',
+            'convergence': 'convergence',
+            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
+            'halo_id':       'target_halo_id',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
+            'stellar_mass':  'obs_sm',
+            'size_disk_true':           'diskMajorAxisArcsec',
+            'size_bulge_true':          'spheroidMajorAxisArcsec',
+            'size_minor_disk_true':     'diskMinorAxisArcsec',
+            'size_minor_bulge_true':    'spheroidMinorAxisArcsec',
+            'position_angle_true':      (_gen_position_angle, 'positionAngle'),
+            'ellipticity_disk_true':    'diskEllipticity',
+            'ellipticity_bulge_true':   'spheroidEllipticity',
+            'position_x': (lambda x: x/self.cosmology.h, 'x'),
+            'position_y': (lambda x: x/self.cosmology.h, 'y'),
+            'position_z': (lambda x: x/self.cosmology.h, 'z'),
+            'velocity_x': 'vx',
+            'velocity_y': 'vy',
+            'velocity_z': 'vz',
+            'is_central': (lambda x: x == -1, 'source_halo_upid'),
+            'A_v':        'Av'
+        }
+
+        # add magnitudes
+        for band in 'ugrizyY':
+            if band != 'y' and band != 'Y':
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_obs_{}'.format(band), 'magnification',)
+                quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_obs_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_rest_{}'.format(band.upper())
+
+            if band != 'u':
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_obs_{}'.format(band), 'magnification',)
+                quantity_modifiers['mag_true_{}_hsc'.format(band)] = 'HSC_obs_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_hsc_z0'.format(band)] = 'HSC_rest_{}'.format(band.upper())
+                
+            quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_obs_{}'.format(band.lower()), 'magnification',)
+            quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_obs_{}'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_rest_{}'.format(band.upper())
+
+            if band != 'Y':
+                quantity_modifiers['mag_{}'.format(band)] = quantity_modifiers['mag_{}_lsst'.format(band)]
+                quantity_modifiers['mag_true_{}'.format(band)] = quantity_modifiers['mag_true_{}_lsst'.format(band)]
 
         return quantity_modifiers
 
