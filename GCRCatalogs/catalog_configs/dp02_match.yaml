@@ -1,0 +1,36 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+
+subclass_name: composite.CompositeReader
+catalogs:
+  - subclass_name: dc2_dm_catalog.DC2DMTractCatalog
+    base_dir: ^/DC2-prod/Run2.2i/truth/tract_partition/match_dr6_v2
+    filename_pattern: 'truth_tract\d+\.parquet'
+    pixel_scale: 0.2
+    tract: 4850
+    #- subclass_name: dc2_object.DP02TruthParquetCatalog
+    #base_dir: ^/rubin/DP0.2/match_ref_truth_summary_objectTable
+    #filename_pattern: 'match_ref_truth_summary_objectTable_tract_{}_DC2_u_ctslater_matchObjectToTruth_{}_{}.parq'
+    #matching_partition: true
+    #matching_row_order: true
+    #overwrite_quantities: false
+    #overwrite_attributes: false
+    #include_native_quantities: true
+  - subclass_name: dc2_object.DP02TruthMatchCatalog
+    base_dir: ^/rubin/DP0.2/match_ref_truth_summary_objectTable
+    filename_pattern: 'match_ref_truth_summary_objectTable_tract_\d+\_DC2_u_ctslater_matchObjectToTruth_w22_20220527T164747Z.parq'
+    tract: 4850
+    matching_partition: true
+    matching_row_order: true
+    overwrite_quantities: false
+    overwrite_attributes: false
+    include_native_quantities: true
+
+
+description: |
+  Truth-matched catalog for DP02 run, using DC2 Run 2.2i DR6 Truth Table. 
+  The truth-match addon was updated in September 2022 by Patricia Larsen.
+
+creators: ['DESC DC2 Team/ Rubin Observatory']
+include_in_default_catalog_list: true
+

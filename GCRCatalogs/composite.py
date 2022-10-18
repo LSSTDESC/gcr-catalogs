@@ -20,6 +20,7 @@ class CompositeReader(CompositeCatalog):
                     catalog_name = catalog_dict['subclass_name']
                 catalog = load_catalog_from_config_dict(catalog_dict)
             else:
+                print(catalog_dict)
                 raise ValueError('catalog config must specify `catalog_name`, `based_on`, or `subclass_name`')
             instances.append(CompositeSpecs(catalog, catalog_name, **catalog_dict))
 
