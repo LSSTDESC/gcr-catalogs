@@ -1,0 +1,6 @@
+based_on: cosmoDC2_v1.1.4
+
+healpix_pixels: [9554]
+sky_area: 57.071968
+
+include_in_default_catalog_list: true
