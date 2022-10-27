@@ -1,2 +1,3 @@
-alias: desc_dc2_run2.2i_dr6_v2_object
+based_on: desc_dc2_run2.2i_dr6_v2_object
+base_dir: ^/lsstdesc-public/dc2/run2.2i-dr6-v4/object_dpdd
 public_release: [v4]
