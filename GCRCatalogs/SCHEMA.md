@@ -55,19 +55,27 @@ Quantity Label | Unit | Definition
 `size_bulge_true` | arcsec | Bulge half-light radius (of major axis), not lensed
 `size_minor_bulge_true` | arcsec | Bulge half-light radius (of minor axis), not lensed
 `position_angle` | deg | Position angle (arctan(E2/E1)), for galaxy, lensed
-`position_angle_true` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed
+`position_angle_true` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed, treecorr/GalSim convention
+`position_angle_true_phosim` | deg | Position angle (arctan(E2/E1)), for galaxy, not lensed, phosim convention
+`position_angle_true_dc2` | deg | Position angle (arctan(E2_dc2/E1_dc2)), for galaxy, not lensed; legacy value for DC2
 `ellipticity` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, lensed, where `q = size_minor/size`
 `ellipticity_1` | - | Ellipticity component 1, for galaxy, lensed
 `ellipticity_2` | - | Ellipticity component 2, for galaxy, lensed
 `ellipticity_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for galaxy, not lensed, where `q = size_minor_true/size_true`
-`ellipticity_1_true` | - | Ellipticity component 1, for galaxy, not lensed
-`ellipticity_2_true` | - | Ellipticity component 2, for galaxy, not lensed
+`ellipticity_1_true` | - | Ellipticity component 1, for galaxy, not lensed (treecorr/GalSim convention)
+`ellipticity_2_true` | - | Ellipticity component 2, for galaxy, not lensed (treecorr/GalSim convention)
+`ellipticity_1_true_dc2` | - | Ellipticity component 1, for galaxy, not lensed; legacy value for DC2
+`ellipticity_2_true_dc2` | - | Ellipticity component 2, for galaxy, not lensed; legacy value for DC2
 `ellipticity_disk_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for disk, not lensed, where `q = size_minor_disk_true/size_disk_true`
-`ellipticity_1_disk_true` | - | Ellipticity component 1, for disk, not lensed
-`ellipticity_2_disk_true` | - | Ellipticity component 2, for disk, not lensed
+`ellipticity_1_disk_true` | - | Ellipticity component 1, for disk, not lensed (treecorr/GalSim convention)
+`ellipticity_2_disk_true` | - | Ellipticity component 2, for disk, not lensed (treecorr/GalSim convention)
+`ellipticity_1_disk_true_dc2` | - | Ellipticity component 1, for disk, not lensed; legacy value for DC2
+`ellipticity_2_disk_true_dc2` | - | Ellipticity component 2, for disk, not lensed; legacy value for DC2
 `ellipticity_bulge_true` | - | Ellipticity (= sqrt(E1^2+E2^2) = (1-q)/(1+q)), for bulge, not lensed, where `q = size_minor_bulge_true/size_bulge_true`
-`ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed
-`ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed
+`ellipticity_1_bulge_true` | - | Ellipticity component 1, for bulge, not lensed (treecorr/GalSim convention)
+`ellipticity_2_bulge_true` | - | Ellipticity component 2, for bulge, not lensed (treecorr/GalSim convention)
+`ellipticity_1_bulge_true_dc2` | - | Ellipticity component 1, for bulge, not lensed; legacy value for DC2
+`ellipticity_2_bulge_true_dc2` | - | Ellipticity component 2, for bulge, not lensed; legacy value for DC2
 `shear_1` | - | Shear (gamma) component 1 in treecorr/GalSim convention
 `shear_2` | - | Shear (gamma) component 2 in treecorr/GalSim convention
 `shear_2_treecorr` | - | Shear (gamma) component 2 in treecorr/GalSim convention (`= shear_2`)
