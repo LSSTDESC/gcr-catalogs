@@ -63,8 +63,7 @@ def _gen_position_angle(size_reference):
         _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
     return _gen_position_angle._pos_angle
 
-
-def _calc_ellipticity_1(ellipticity):
+def _calc_ellipticity_1_dc2(ellipticity):
     # position angle using ellipticity as reference for the size or
     # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0
@@ -73,13 +72,26 @@ def _calc_ellipticity_1(ellipticity):
     return ellipticity*np.cos(2.0*pos_angle)
 
 
-def _calc_ellipticity_2(ellipticity):
+def _calc_ellipticity_2_dc2(ellipticity):
     # position angle using ellipticity as reference for the size or
     # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0
     # use the correct conversion for ellipticity 2 from ellipticity
     # and position angle
     return ellipticity*np.sin(2.0*pos_angle)
+
+
+def _calc_ellipticity_1(ellipticity, pos_angle):
+    # convert to treecorr convention and from deg to radians
+    pos_angle = np.negative(pos_angle)*np.pi/180.0
+    return ellipticity*np.cos(2.0*pos_angle)
+
+
+def _calc_ellipticity_2(ellipticity, pos_angle):
+    # convert to treecorr convention and from deg to radians
+    pos_angle = np.negative(pos_angle)*np.pi/180.0
+    return ellipticity*np.sin(2.0*pos_angle)
+
 
 def _limit_magnification(mag):
     mag = np.where(mag < 0.2, 1.0, mag)
@@ -426,18 +438,26 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
-            'position_angle_true':      (_gen_position_angle, 'morphology/positionAngle'),
+            'position_angle_true_dc2':  (_gen_position_angle, 'morphology/positionAngle'),
+            'position_angle_true_phosim': 'morphology/positionAngle',
+            'position_angle_true':      (np.negative, 'morphology/positionAngle'),
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity'),
-            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity'),
-            'ellipticity_disk_true':    'morphology/diskEllipticity',
-            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity'),
-            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity'),
-            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
-            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
-            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
+            'ellipticity_disk_true':         'morphology/diskEllipticity',
+            'ellipticity_bulge_true':        'morphology/spheroidEllipticity',
+            'ellipticity_1_true_dc2':       (_calc_ellipticity_1_dc2, 'morphology/totalEllipticity'),
+            'ellipticity_2_true_dc2':       (_calc_ellipticity_2_dc2, 'morphology/totalEllipticity'),
+            'ellipticity_1_disk_true_dc2':  (_calc_ellipticity_1_dc2, 'morphology/diskEllipticity'),
+            'ellipticity_2_disk_true_dc2':  (_calc_ellipticity_2_dc2, 'morphology/diskEllipticity'),
+            'ellipticity_1_bulge_true_dc2': (_calc_ellipticity_1_dc2, 'morphology/spheroidEllipticity'),
+            'ellipticity_2_bulge_true_dc2': (_calc_ellipticity_2_dc2, 'morphology/spheroidEllipticity'),
+            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity', 'morphology/positionAngle'),
+            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity', 'morphology/positionAngle'),
+            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity', 'morphology/positionAngle'),
+            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity', 'morphology/positionAngle'),
+            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity', 'morphology/positionAngle'),
+            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity', 'morphology/positionAngle'),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
