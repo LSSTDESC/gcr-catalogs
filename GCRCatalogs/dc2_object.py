@@ -875,7 +875,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
         bands = bands or 'ugrizy'
         FLUX = 'Flux'
         ERR = 'Err'
-
+        aps = ['0p5','0p7','1p0','1p5','2p5','3p0']
 
         modifiers = {
             'objectId': 'objectId', #I think this doesn't exist for this catalog 
@@ -952,19 +952,50 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
             modifiers[f'psFluxErr_{band}'] = f'{band}_psf{FLUX}{ERR}'
 
-            # double check if this is right - do these not need a PSF in the label?
-            modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
-                                           f'{band}_psf{FLUX}')
+            modifiers[f'psFlux_free_{band}'] = f'{band}_free_psf{FLUX}'
+            modifiers[f'psFlux_flag_free_{band}'] = f'{band}_free_psf{FLUX}_flag'
 
-            modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
+            modifiers[f'psFluxErr_free_{band}'] = f'{band}_free_psf{FLUX}{ERR}'
+
+
+            modifiers[f'mag_{band}_psf'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_psf{FLUX}')
+            modifiers[f'magerr_{band}_psf'] = (convert_flux_err_to_mag_err,
                                            f'{band}_psf{FLUX}',
                                            f'{band}_psf{FLUX}{ERR}')
+
+            modifiers[f'mag_{band}_psf_free'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_free_psf{FLUX}')
+
+            modifiers[f'magerr_{band}_psf_free'] = (convert_flux_err_to_mag_err,
+                                           f'{band}_free_psf{FLUX}',
+                                           f'{band}_free_psf{FLUX}{ERR}')
+            modifiers[f'snr_{band}_psf'] = (np.divide,
+                                               f'{band}_psf{FLUX}',
+                                               f'{band}_psf{FLUX}{ERR}')
+
+
+
+            # double check if this is right - defaulting to cModel magnitude
+            modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_cModel{FLUX}')
+
+            modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
+                                           f'{band}_cModel{FLUX}',
+                                           f'{band}_cModel{FLUX}{ERR}')
 
             modifiers[f'cModelFlux_{band}'] = f'{band}_cModel{FLUX}'
             modifiers[f'cModelFluxErr_{band}'] = f'{band}_cModel{FLUX}{ERR}'
 
 
             modifiers[f'cModelFlux_flag_{band}'] = f'{band}_cModel_flag'
+
+            modifiers[f'cModelFlux_free_{band}'] = f'{band}_free_cModel{FLUX}'
+            modifiers[f'cModelFluxErr_free_{band}'] = f'{band}_free_cModel{FLUX}{ERR}'
+
+
+            modifiers[f'cModelFlux_flag_free_{band}'] = f'{band}_free_cModel_flag'
+
 
             modifiers[f'mag_{band}_cModel'] = (convert_nanoJansky_to_mag,
                                                f'{band}_cModel{FLUX}')
@@ -997,10 +1028,9 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
                                                f'{band}_calib{FLUX}{ERR}')
 
 
+
             modifiers[f'gaapFlux_{band}'] = f'{band}_gaapOptimal{FLUX}'
             modifiers[f'gaapFluxErr_{band}'] = f'{band}_gaapOptimal{FLUX}{ERR}'
-
-
             modifiers[f'gaapFlux_flag_{band}'] = f'{band}_gaap{FLUX}_flag'
 
             modifiers[f'mag_{band}_gaap'] = (convert_nanoJansky_to_mag,
@@ -1013,6 +1043,19 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
             modifiers[f'snr_{band}_gaap'] = (np.divide,
                                                f'{band}_gaapOptimal{FLUX}',
                                                f'{band}_gaapOptimal{FLUX}{ERR}')
+
+            for ap in aps:
+                modifiers[f'gaapFlux_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}'
+                modifiers[f'gaapFluxErr_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}{ERR}'
+                modifiers[f'gaapFlux_flag_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}_flag_bigPsf'
+                modifiers[f'snr_{ap}_{band}_gaap'] = (np.divide,
+                                                   f'{band}_gaap{ap}{FLUX}',
+                                                   f'{band}_gaap{ap}{FLUX}{ERR}')
+                modifiers[f'mag_{ap}_{band}_gaap'] = (convert_nanoJansky_to_mag,
+                                                   f'{band}_gaap{ap}{FLUX}')
+                modifiers[f'magerr_{ap}_{band}_gaap'] = (convert_flux_err_to_mag_err,
+                                                   f'{band}_gaap{ap}{FLUX}',
+                                                   f'{band}_gaap{ap}{FLUX}{ERR}')
 
 
 
