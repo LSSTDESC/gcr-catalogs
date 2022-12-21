@@ -171,7 +171,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'hostHaloTag',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
-            'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
+            'is_central':    (lambda x: x.astype(bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
             'stellar_mass_disk':        'diskMassStellar',
             'stellar_mass_bulge':       'spheroidMassStellar',

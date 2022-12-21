@@ -138,9 +138,9 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
                 'mag_true_i': 'i',
                 'mag_true_z': 'z',
                 'mag_true_y': 'y',
-                'agn': (lambda x: x.astype(np.bool)),
-                'star': (lambda x: x.astype(np.bool)),
-                'sprinkled': (lambda x: x.astype(np.bool)),
+                'agn': (lambda x: x.astype(bool)),
+                'star': (lambda x: x.astype(bool)),
+                'sprinkled': (lambda x: x.astype(bool)),
             }
 
     def _generate_native_quantity_list(self):

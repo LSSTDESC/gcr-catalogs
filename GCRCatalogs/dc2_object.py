@@ -70,7 +70,7 @@ def create_basic_flag_mask(*flags):
         The combined mask array
     """
 
-    out = np.ones(len(flags[0]), np.bool)
+    out = np.ones(len(flags[0]), bool)
     for flag in flags:
         out &= (~flag)
 

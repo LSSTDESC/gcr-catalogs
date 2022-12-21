@@ -86,7 +86,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                                    'truth/Z', 'truth/PX', 'truth/PY', 'truth/PZ', 'truth/VX', 'truth/VY', 'truth/VZ'),
                 'halo_id': 'truth/HALOID',
                 'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
-                'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
+                'is_central': (lambda x: x.astype(bool), 'truth/CENTRAL'),
                 'ellipticity_1_true': 'truth/TE/0',
                 'ellipticity_2_true': 'truth/TE/1',
                 'ellipticity_true': (np.hypot, 'truth/TE/0', 'truth/TE/1'),
@@ -147,7 +147,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
                 'dec_true': 'truth/TDEC',
                 'halo_id': 'truth/HALOID',
                 'halo_mass': (lambda x: x/self.cosmology.h, 'truth/M200'),
-                'is_central': (lambda x: x.astype(np.bool), 'truth/CENTRAL'),
+                'is_central': (lambda x: x.astype(bool), 'truth/CENTRAL'),
                 'ellipticity_1': 'truth/EPSILON/0',
                 'ellipticity_2': 'truth/EPSILON/1',
                 'ellipticity': (np.hypot, 'truth/EPSILON/0', 'truth/EPSILON/1'),
@@ -250,7 +250,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
     def _native_quantity_getter(self, native_quantity, healpix):
         if native_quantity == 'healpix_pixel':
-            data = np.empty(self._open_dataset(healpix, self._default_subset).data.shape, np.int)
+            data = np.empty(self._open_dataset(healpix, self._default_subset).data.shape, int)
             data.fill(healpix)
             return data
 
