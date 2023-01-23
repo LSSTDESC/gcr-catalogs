@@ -148,13 +148,13 @@ class RootDirManager:
         well-known name, will include the name for that site
         """
         site_from_env = os.getenv(self._DESC_SITE_ENV, "")
+        if site_from_env:
+            return site_from_env
+
         if  os.getenv("NERSC_HOST", ""):
             site_from_node = 'nersc'
         else:
             site_from_node = None
-
-        if site_from_env:
-            return site_from_env
         return site_from_node
 
     @property
