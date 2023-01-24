@@ -1,0 +1,24 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: redmagic.RedmagicCatalog
+
+catalog_root_dir: ^/xgal/skysim/addons/redmagic_v1.1.1
+
+catalog_path_template:
+  redmagic: skysim_5000_v1.1.1_run_redmapper_v0.8.5_redmagic_highdens-chi.fit
+
+sky_area: 5000.0
+
+cosmology:
+  H0: 71.0
+  Om0: 0.2648
+  Ob0: 0.0448
+  sigma8: 0.8
+  n_s: 0.963
+
+creators: ['Eli Rykoff']
+description: |
+  RedMaGiC high density red galaxy catalog computed from the redMaPPer
+  cluster finder (v0.8.5) run on skysim5000 v1.1.1.
+
+include_in_default_catalog_list: true
