@@ -59,6 +59,9 @@ Confluence page (*DESC member only*).
   - `skysim5000_v1.1.1_image`: same but only covers the image simulation sky area (~400 sq. deg.)
   - `skysim5000_v1.1.1_small`: same but only covers a small  sky area (~50 sq. deg.) for testing purposes
   - `skysim5000_v1.1.1_parquet`: same but using parquet files as the underlying format for better performance; no native quantities
+  - `skysim5000_v1.1.1_redmapper_v0.8.5`: Redmapper catalog (v0.8.5) for `skysim5000_v1.1.1` (provided by Eli Rykoff).
+  - `skysim5000_v1.1.1_redmagic_v0.8.5_highdens`: Redmagic catalog (v0.8.5) for `skysim5000_v1.1.1` for the high density sample (provided by Eli Rykoff).
+  - `skysim5000_v1.1.1_redmagic_v0.8.5_highlum`: Redmagic catalog (v0.8.5) for `skysim5000_v1.1.1` for the high luminosity sample (provided by Eli Rykoff).
 
 #### cosmoDC2
 
