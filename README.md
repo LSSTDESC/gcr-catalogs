@@ -15,7 +15,7 @@ can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3)
 and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
 The instructions below are intended for DESC members.
-**If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: lsstdesc-portal.nersc.gov](https://lsstdesc-portal.nersc.gov/).**
+**If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: data.lsstdesc.org](https://data.lsstdesc.org).**
 
 ## Available Catalogs
 
