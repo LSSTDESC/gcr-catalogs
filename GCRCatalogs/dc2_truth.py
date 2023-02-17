@@ -50,6 +50,11 @@ class DC2TruthLCSummaryReader(BaseGenericCatalog):
         self._info_dict['sprinkled'] = {'units': 'unitless',
                    'description': 'an int that is 1 if the object was '
                    'added by the sprinkler; 0 otherwise.'}
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
 
     def _get_quantity_info(self, quantity, default=None):
         return self._info_dict.get(quantity, default)
@@ -143,6 +148,11 @@ class DC2TruthCatalogReader(BaseGenericCatalog):
                 'sprinkled': (lambda x: x.astype(np.bool)),
             }
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
     def _generate_native_quantity_list(self):
         return list(self._native_quantity_dtypes)
 
@@ -214,6 +224,11 @@ class DC2TruthCatalogLightCurveReader(BaseGenericCatalog):
         self._tables['light_curves'] = kwargs.get('table_light_curves', 'light_curves')
         self._tables['summary'] = kwargs.get('table_summary', 'variables_and_transients')
         self._tables['obs_meta'] = kwargs.get('table_obs_metadata', 'obs_metadata')
+
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
 
         base_filters = kwargs.get('base_filters')
         if base_filters:

@@ -166,6 +166,11 @@ class PZSKRFCatalog(DC2PhotozMixin,BaseGenericCatalog):
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self._columns = self._dataset.columns
         self._process_pdf_bins(kwargs.get("pdf_bin_info"))
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
         
     def __del__(self):
         self._dataset = None

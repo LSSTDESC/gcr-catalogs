@@ -331,6 +331,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._quantity_modifiers = self._generate_modifiers(
                 self.pixel_scale, bands, has_modelfit_mag, has_modelfit_flux, has_modelfit_flag, dm_schema_version)
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
 
@@ -638,12 +641,12 @@ class DC2ObjectCatalog(BaseGenericCatalog):
 
         return set(self._schema).union(self._native_filter_quantities)
 
-    def _iter_native_dataset(self, native_filters=None, rank=0, size=1):
+    def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for dataset in self._datasets:
-            count=0
             if (native_filters is None or
                     native_filters.check_scalar(dataset.tract_and_patch)):
-                if (count%size ==rank):
+                if (count%self._size == self._rank):
                     count+=1
                     yield dataset.get
                     if not self.use_cache:

@@ -73,6 +73,10 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self.sky_area  = float(sky_area or np.nan)
         self.version = kwargs.get('version', '0.0.0')
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+
+
         _c = 299792.458
         _abs_mask_func = lambda x: np.where(x==99.0, np.nan, x + 5 * np.log10(self.cosmology.h))
         _mask_func = lambda x: np.where(x==99.0, np.nan, x)
@@ -231,10 +235,14 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for healpix in self.healpix_pixels:
             if native_filters is None or native_filters.check_scalar({'healpix_pixel': healpix}):
-                yield functools.partial(self._native_quantity_getter, healpix=healpix)
-
+                if (count%self._size == self._rank):
+                    count+=1
+                    yield functools.partial(self._native_quantity_getter, healpix=healpix)
+                else:
+                    count+=1
 
     def _open_dataset(self, healpix, subset):
         path = self._catalog_path_template[subset].format(healpix)

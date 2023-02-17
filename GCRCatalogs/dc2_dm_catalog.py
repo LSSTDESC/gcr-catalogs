@@ -141,6 +141,10 @@ class DC2DMCatalog(BaseGenericCatalog):
 
             self._quantity_modifiers = self._generate_modifiers(**quantity_modifiers_kwargs)
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+
+            
         # meta_path in catalog config take precedence, otherwise use the class default value
         meta_path = kwargs.get("meta_path", self.META_PATH)
         if meta_path:
@@ -270,14 +274,14 @@ class DC2DMCatalog(BaseGenericCatalog):
         return native_quantity_getter.read_columns(list(native_quantities_needed),
                                                    as_dict=True)
 
-    def _iter_native_dataset(self, native_filters=None,rank=0,size=1):
+    def _iter_native_dataset(self, native_filters=None):
         count = 0
         for dataset in self._datasets:
             if (native_filters is not None and
                     not native_filters.check_scalar(dataset.info)):
                 continue
             count+=1
-            if (count%size ==rank):
+            if (count%self._size == self._rank):
                 yield dataset
 
 

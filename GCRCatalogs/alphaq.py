@@ -139,6 +139,7 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                     self._native_quantities.add(name)
             fh['galaxyProperties'].visititems(_collect_native_quantities)
 
+
         # check versions
         self.version = kwargs.get('version', '0.0.0')
         config_version = StrictVersion(self.version)
@@ -148,6 +149,11 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
             raise ValueError('Reader version {} is less than config version {}'.format(__version__, catalog_version))
 
         self.catalog_version = catalog_version
+
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
 
         # specify quantity modifiers
         self._quantity_modifiers = {

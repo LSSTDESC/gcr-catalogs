@@ -193,6 +193,11 @@ class InstanceCatalog(BaseGenericCatalog):
         self.cosmology = FlatLambdaCDM(H0=71, Om0=0.265, Ob0=0.0448)
         self.lightcone = True
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
         self.legacy_gal_catalog = False
         self._data = dict()
         self._object_files = dict()

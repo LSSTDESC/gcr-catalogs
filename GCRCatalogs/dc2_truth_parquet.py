@@ -59,6 +59,8 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
 
         self._native_filter_quantities = set(self.path_parser.group_names)
         self._len = None
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
 
     def _generate_datasets(self):
         """Return viable data sets from all files in self.base_dir
@@ -95,13 +97,18 @@ class DC2TruthParquetCatalog(BaseGenericCatalog):
         return self._len
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for dataset in self._datasets:
             if (native_filters is not None and
                     not native_filters.check_scalar(dataset.info)):
                 continue
             for i in range(dataset.num_row_groups):
-                dataset.current_row_group = i
-                yield dataset
+                if (count%self._size == self._rank):
+                    dataset.current_row_group = i
+                    count+=1 
+                    yield dataset
+                else:
+                    count+=1
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""

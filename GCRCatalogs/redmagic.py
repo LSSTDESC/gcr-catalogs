@@ -38,6 +38,11 @@ class RedmagicCatalog(BaseGenericCatalog):
         self.sky_area = kwargs.get('sky_area')
         self.cache = dict() if use_cache else None
         self._quantity_modifiers = self._generate_quantity_modifiers()
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
 
     def _generate_quantity_modifiers(self):
         quantity_modifiers = {

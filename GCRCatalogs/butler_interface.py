@@ -33,6 +33,11 @@ class SimpleButlerInterface(BaseGenericCatalog):
         self._datasetType = datasetType
         self._dataId_cache = self._butler.subset(self._datasetType, dataId=dataId).cache
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
         self._columns = None
         for dataId in self._dataId_cache:
             data = self._get_data(dataId)

@@ -38,7 +38,8 @@ class PZCalibrateCatalog(BaseGenericCatalog):
             self._healpix_files[key] = os.path.join(self.base_dir, f)
 
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
-
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
         self._quantity_dict = {
             "QSO": "Flag selecting QSOs by BlackHoleMass and EddingtonRatio. Objects have a mag/redshift "
                    "distributions similar to those in DESI and are meant to be used as reference objects "
@@ -78,8 +79,13 @@ class PZCalibrateCatalog(BaseGenericCatalog):
         return list(np.load(first(self._healpix_files.values())).keys())
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for (zlo_this, hpx_this), file_path in self._healpix_files.items():
             d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
             if native_filters is not None and not native_filters.check_scalar(d):
                 continue
-            yield np.load(file_path).__getitem__
+            if (count%self._size = self._rank):
+                count+=1
+                yield np.load(file_path).__getitem__
+            else:
+                count+=1 

@@ -122,6 +122,11 @@ class EImageReader(BaseGenericCatalog):
         filename_re = re.compile(filename_pattern)
         self.focal_planes = dict()
         self._valid_keys = set()
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
 
         for dirpath, _, filenames in os.walk(root_dir):
             if dirpath_contain and dirpath_contain not in dirpath:

@@ -72,6 +72,9 @@ class DC2MatchedTable(BaseGenericCatalog):
                                                is_star=self._is_star)
         self._native_quantities = self._generate_native_quantity_list()
         self._quantity_modifiers = self._generate_quantity_modifiers()
+  
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
 
     def _generate_quantity_modifiers(self):
         # modify native quantities
@@ -128,16 +131,20 @@ class DC2MatchedTable(BaseGenericCatalog):
     def _iter_native_dataset(self, native_filters=None):
         if native_filters is not None and not self._use_tracts:
             raise ValueError("*native_filters* is not supported")
-
+        count = 0 
         for file_id, file_path in self._files.items():
             if (
                 self._use_tracts and native_filters is not None and
                 not native_filters.check_scalar({"tract": file_id})
             ):
                 continue
-            with fits.open(file_path) as hdul:
-                handle = list(hdul)[1]
-                yield partial(self._native_quantity_getter, handle=handle)
+            if (count%self._size == self._rank):
+                count+=1
+                with fits.open(file_path) as hdul:
+                    handle = list(hdul)[1]
+                    yield partial(self._native_quantity_getter, handle=handle)
+            else:
+                count+=1
 
     @staticmethod
     def _native_quantity_getter(native_quantity, handle):
