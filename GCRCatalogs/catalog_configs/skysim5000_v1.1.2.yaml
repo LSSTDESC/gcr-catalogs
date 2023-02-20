@@ -1,0 +1,30 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: cosmodc2.SkySim5000GalaxyCatalog
+
+catalog_root_dir:  ^/xgal/skysim/skysim5000_v1.1.2
+catalog_filename_template: z_{}_{}.step_all.healpix_{}.hdf5
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+lightcone: true
+
+version: "1.1.1"
+
+check_md5: false
+check_size: false
+check_cosmology: false
+ensure_meta_consistent: false
+sky_area: 5264.05
+
+creators: ['Andrew Hearin', 'Danila Korytov', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Joe Hollowed', 'Andrew Benson', 'Katrin Heitmann']
+
+description: |
+    This is the 5000 sq. deg. extra-galactic catalog for LSST DESC
+
+include_in_default_catalog_list: true

@@ -41,8 +41,8 @@ class ReferenceCatalogReader(BaseGenericCatalog):
             'dec_unsmeared' : 'decJ2000',
             'sigma_ra' : 'sigma_raJ2000',
             'sigma_dec' : 'sigma_decJ2000',
-            'is_agn': (lambda x: x.astype(np.bool), 'isagn'),
-            'is_resolved': (lambda x: x.astype(np.bool), 'isresolved'),
+            'is_agn': (lambda x: x.astype(bool), 'isagn'),
+            'is_resolved': (lambda x: x.astype(bool), 'isresolved'),
         }
 
         for band in 'ugrizy':
@@ -87,5 +87,5 @@ class ReferenceCatalogReader(BaseGenericCatalog):
             raise ValueError('Cannot find header line!')
 
         fields = [field.strip() for field in line[1:].split(',')]
-        self._data_dtype = np.dtype([(field, np.int if field.startswith('is') or field.endswith('Id') else np.float) for field in fields])
+        self._data_dtype = np.dtype([(field, int if field.startswith('is') or field.endswith('Id') else float) for field in fields])
         return fields

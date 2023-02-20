@@ -31,7 +31,7 @@ def partition_filter(partition_name, ids, id_high=None):
             return GCRQuery(f"{partition_name} >= {ids}", f"{partition_name} <= {id_high}")
         raise ValueError(f"When `{partition_name}s` is an integer, `{partition_name}_high` must be an integer or None.")
 
-    ids = np.unique(np.asarray(ids, dtype=np.int))
+    ids = np.unique(np.asarray(ids, dtype=int))
     if not ids.size:
         raise ValueError(f"Must select at least one {partition_name}.")
 
@@ -58,7 +58,7 @@ def sample_filter(ref_col_name, frac, random_state=None):
     if frac == 1:
         return GCRQuery()
     if frac == 0:
-        return GCRQuery((lambda a: np.zeros_like(a, dtype=np.bool), ref_col_name))
+        return GCRQuery((lambda a: np.zeros_like(a, dtype=bool), ref_col_name))
 
     if not isinstance(random_state, np.random.RandomState):
         random_state = np.random.RandomState(random_state)
@@ -68,6 +68,6 @@ def sample_filter(ref_col_name, frac, random_state=None):
         size = len(arr)  # arr is a numpy array of integers
         if size:
             return np.random.RandomState((int(arr[0]) + seed) % (2**32)).rand(size) < frac
-        return np.zeros(0, dtype=np.bool)
+        return np.zeros(0, dtype=bool)
 
     return GCRQuery((_sampler, ref_col_name))

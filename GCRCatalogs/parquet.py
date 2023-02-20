@@ -12,7 +12,7 @@ def _retrieve_data_from_arrow_table(table, as_dict=False):
         df = table.to_pandas()
 
     if as_dict:
-        return {col: arr.values for col, arr in df.iteritems()}
+        return {col: arr.values for col, arr in df.items()}
 
     return df
 

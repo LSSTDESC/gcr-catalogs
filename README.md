@@ -15,7 +15,7 @@ can be found in the [DESCQA paper](https://doi.org/10.3847/1538-4365/aaa6c3)
 and also the [GCR repo](https://github.com/yymao/generic-catalog-reader).
 
 The instructions below are intended for DESC members.
-**If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: lsstdesc-portal.nersc.gov](https://lsstdesc-portal.nersc.gov/).**
+**If you are using public DESC data sets with `GCRCatalogs`, please follow the instructions on the [DESC Data Portal: data.lsstdesc.org](https://data.lsstdesc.org).**
 
 ## Available Catalogs
 
@@ -54,10 +54,14 @@ Confluence page (*DESC member only*).
 
 *by Andrew Hearin, Danila Korytov, Eve Kovacs, Esteban Rangel, Patricia Larsen, Joe Hollowed, Andrew Benson, Katrin Heitmann et al.*
 
-- `skysim5000_v1.1.1`: latest SkySim5000 catalog, full sky area (~5000 sq. deg.)
+- `skysim5000_v1.1.2`: latest SkySim5000 catalog, full sky area (~5000 sq. deg.) for 0<z<1 only.
+  - `skysim5000_v1.1.1`: previous SkySim5000 catalog, full sky area (~5000 sq. deg.)
   - `skysim5000_v1.1.1_image`: same but only covers the image simulation sky area (~400 sq. deg.)
   - `skysim5000_v1.1.1_small`: same but only covers a small  sky area (~50 sq. deg.) for testing purposes
   - `skysim5000_v1.1.1_parquet`: same but using parquet files as the underlying format for better performance; no native quantities
+  - `skysim5000_v1.1.1_redmapper_v0.8.5`: Redmapper catalog (v0.8.5) for `skysim5000_v1.1.1` (provided by Eli Rykoff).
+  - `skysim5000_v1.1.1_redmagic_v0.8.5_highdens`: Redmagic catalog (v0.8.5) for `skysim5000_v1.1.1` for the high density sample (provided by Eli Rykoff).
+  - `skysim5000_v1.1.1_redmagic_v0.8.5_highlum`: Redmagic catalog (v0.8.5) for `skysim5000_v1.1.1` for the high luminosity sample (provided by Eli Rykoff).
 
 #### cosmoDC2
 
@@ -68,6 +72,8 @@ Confluence page (*DESC member only*).
 - `cosmoDC2_v1.1.4_redmapper_v0.8.1`: Redmapper catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_redmagic_v0.8.1_highdens`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high density sample (provided by Eli Rykoff).
 - `cosmoDC2_v1.1.4_redmagic_v0.8.1_highlum`: Redmagic catalog (v0.8.1) for `cosmoDC2_v1.1.4_image` for the high luminosity sample (provided by Eli Rykoff).
+- `cosmoDC2_v1.1.4_wazp_v1.0_truez`: WaZP catalog (v1.0) for `cosmoDC2_v1.1.4` using true redshifts (provided by Michel Aguena).
+- `cosmoDC2_v1.1.4_wazp_v1.0_flexzboost_v1`: WaZP catalog (v1.0) for `cosmoDC2_v1.1.4_image_with_photozs_flexzboost_v1` using FlexZBoost redshifts (provided by Michel Aguena).
 - `cosmoDC2_v1.1.4_image_with_photozs_v1` and `cosmoDC2_v1.1.4_small_with_photozs_v1`: containing photo-z for cosmoDC2 v1.1.4 (provided by Sam Schmidt)
 - `cosmoDC2_v1.1.4_image_with_photoz_calib` and `cosmoDC2_v1.1.4_small_with_photoz_calib`: containing columns that identify DESI-like QSOs, LRGs, ELGs, or a magnitude limited sample in cosmoDC2 v1.1.4 (provided by Chris Morrison)
 
