@@ -18,7 +18,7 @@ from .utils import decode
 
 __all__ = ['LSSTCatalog']
 
-#        'DC2ObjectCatalog', 'DC2ObjectParquetCatalog','DP02ObjectParquetCatalog','DP02TruthMatchCatalog','DP02TruthParquetCatalog','CosmoDC2AddonCatalog']
+#        'DC2ObjectCatalog', 'DC2ObjectParquetCatalog','DP02ObjectParquetCatalog','DP02TruthMatchCatalog','CosmoDC2AddonCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'

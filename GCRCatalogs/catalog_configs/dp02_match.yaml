@@ -8,14 +8,6 @@ catalogs:
     filename_pattern: 'truth_tract\d+\.parquet'
     pixel_scale: 0.2
     tract: 4850
-    #- subclass_name: dc2_object.DP02TruthParquetCatalog
-    #base_dir: ^/rubin/DP0.2/match_ref_truth_summary_objectTable
-    #filename_pattern: 'match_ref_truth_summary_objectTable_tract_{}_DC2_u_ctslater_matchObjectToTruth_{}_{}.parq'
-    #matching_partition: true
-    #matching_row_order: true
-    #overwrite_quantities: false
-    #overwrite_attributes: false
-    #include_native_quantities: true
   - subclass_name: dc2_object.DP02TruthMatchCatalog
     base_dir: ^/rubin/DP0.2/match_ref_truth_summary_objectTable
     filename_pattern: 'match_ref_truth_summary_objectTable_tract_\d+\_DC2_u_ctslater_matchObjectToTruth_w22_20220527T164747Z.parq'

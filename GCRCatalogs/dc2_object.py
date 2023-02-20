@@ -17,7 +17,7 @@ from .dc2_dm_catalog import DC2DMTractCatalog
 from .dc2_dm_catalog import convert_flux_to_mag, convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
 from .utils import decode
 
-__all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog','DP02ObjectParquetCatalog','DP02TruthMatchCatalog','DP02TruthParquetCatalog','CosmoDC2AddonCatalog']
+__all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog','DP02ObjectParquetCatalog','DP02TruthMatchCatalog','CosmoDC2AddonCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'

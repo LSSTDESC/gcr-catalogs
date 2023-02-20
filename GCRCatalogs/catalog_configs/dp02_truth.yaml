@@ -1,6 +1,5 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
-#subclass_name: dc2_object.DP02TruthParquetCatalog
 subclass_name: dc2_dm_catalog.DC2DMTractCatalog
 base_dir: ^/DC2-prod/Run2.2i/dpdd/Run2.2i-dr6-v2/object_dpdd_only
 
