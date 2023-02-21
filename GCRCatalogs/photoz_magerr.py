@@ -212,7 +212,7 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
                          'redshift_block_lower': zlo_this}
             if native_filters and not native_filters.check_scalar(pix_block):
                 continue
-            if (count%self._size = self._rank):
+            if (count%self._size == self._rank):
                 count+=1
                 dataset = PhotoZFileObject3(file_path, self._filename_re)
                 yield dataset.get

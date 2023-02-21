@@ -84,7 +84,7 @@ class PZCalibrateCatalog(BaseGenericCatalog):
             d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
             if native_filters is not None and not native_filters.check_scalar(d):
                 continue
-            if (count%self._size = self._rank):
+            if (count%self._size == self._rank):
                 count+=1
                 yield np.load(file_path).__getitem__
             else:

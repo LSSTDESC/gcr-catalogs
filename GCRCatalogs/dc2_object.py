@@ -927,7 +927,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
         for ax in ['xx', 'yy', 'xy']:
             modifiers[f'I{ax}_pixel'] = f'shape_{ax}'
-            modifiers[f'I{ax}PSF_pixel'] = f['r_i{ax}PSF']
+            modifiers[f'I{ax}PSF_pixel'] = [f'r_i{ax}PSF']
 
         for band in bands:
             # For this catalog all flux units are in nJy
