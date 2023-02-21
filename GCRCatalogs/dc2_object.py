@@ -25,11 +25,6 @@ GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
 SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
-def _flux_to_mag(flux):
-    with np.errstate(divide="ignore"):
-        mag = (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
-    mag[~np.isfinite(mag)] = np.nan  # homogenize inf and nan
-    return mag
 
 def convert_dm_ref_zp_flux_to_mag(flux, dm_ref_zp=27):
     """Convert the listed DM coadd-reported flux values to AB mag
@@ -1107,7 +1102,7 @@ class DP02TruthMatchCatalog(DC2DMTractCatalog):
 
         flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_")]
         for col in flux_cols:
-            self._quantity_modifiers["mag_" + col.partition("_")[2]] = (_flux_to_mag, col)
+            self._quantity_modifiers["mag_" + col.partition("_")[2]] = (convert_nanoJansky_to_mag, col)
 
         if self._as_object_addon:
             no_postfix = ("truth_type", "match_objectId", "match_sep", "is_good_match", "is_nearest_neighbor", "is_unique_truth_entry")
@@ -1179,7 +1174,7 @@ class DP02TruthMatchCatalog(DC2DMTractCatalog):
 
         for col in self._columns:
             if col.startswith("flux_") and col.endswith("_noMW"):
-                quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (_flux_to_mag, col)
+                quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (convert_nanoJansky_to_mag, col)
 
         quantity_modifiers['galaxy_match_mask'] = (lambda t, m: (t == 1) & m, "truth_type", "is_good_match")
         quantity_modifiers['star_match_mask'] = (lambda t, m: (t == 2) & m, "truth_type", "is_good_match")
