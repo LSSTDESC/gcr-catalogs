@@ -143,7 +143,6 @@ class DC2DMCatalog(BaseGenericCatalog):
 
         self._rank = int(kwargs.get('mpi_rank', 0))
         self._size = int(kwargs.get('mpi_size', 1))
-
             
         # meta_path in catalog config take precedence, otherwise use the class default value
         meta_path = kwargs.get("meta_path", self.META_PATH)

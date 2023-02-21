@@ -139,7 +139,6 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
                     self._native_quantities.add(name)
             fh['galaxyProperties'].visititems(_collect_native_quantities)
 
-
         # check versions
         self.version = kwargs.get('version', '0.0.0')
         config_version = StrictVersion(self.version)

@@ -76,7 +76,6 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         self._rank = int(kwargs.get('mpi_rank', 0))
         self._size = int(kwargs.get('mpi_size', 1))
 
-
         _c = 299792.458
         _abs_mask_func = lambda x: np.where(x==99.0, np.nan, x + 5 * np.log10(self.cosmology.h))
         _mask_func = lambda x: np.where(x==99.0, np.nan, x)

@@ -25,6 +25,11 @@ GROUP_PATTERN = r'(?:coadd|object)_\d+_\d\d$'
 SCHEMA_FILENAME = 'schema.yaml'
 META_PATH = os.path.join(FILE_DIR, 'catalog_configs/_dc2_object_meta.yaml')
 
+def _flux_to_mag(flux):
+    with np.errstate(divide="ignore"):
+        mag = (flux * u.nJy).to_value(u.ABmag)  # pylint: disable=no-member
+    mag[~np.isfinite(mag)] = np.nan  # homogenize inf and nan
+    return mag
 
 def convert_dm_ref_zp_flux_to_mag(flux, dm_ref_zp=27):
     """Convert the listed DM coadd-reported flux values to AB mag
@@ -826,8 +831,8 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
         super()._subclass_init(**kwargs)
 
-        #self._schema = self._generate_schema_from_datafiles(self._datasets)
-        self._quantity_modifiers = self._generate_modifiers(dm_schema_version=5, bands = None, pixel_scale=self.pixel_scale)
+        self._schema = self._generate_schema_from_datafiles(self._datasets)
+        self._quantity_modifiers = self._generate_modifiers(dm_schema_version=0, bands = None, pixel_scale=self.pixel_scale)
         self._quantity_info_dict = self._generate_info_dict(META_PATH)
         self._len = None
 
@@ -864,7 +869,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
         return schema
 
     @staticmethod
-    def _generate_modifiers(dm_schema_version=5, bands=None, pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
+    def _generate_modifiers(dm_schema_version=0, bands=None, pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
         """Creates a dictionary relating native and homogenized column names
 
         Args:
@@ -880,63 +885,46 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
         ERR = 'Err'
         aps = ['0p5','0p7','1p0','1p5','2p5','3p0']
 
+        # note: quantities which were previously general are now band-specific,
+        # defaulting to r-band
         modifiers = {
-            'objectId': 'objectId', #I think this doesn't exist for this catalog 
+            'objectId': 'objectId', 
             'parentObjectId': 'parentObjectId',
-            'ra':  'coord_ra',
+            'ra':  'coord_ra', 
             'dec':  'coord_dec',
-            'x': 'x',
+            'x': 'x', # centroid from sdss algorithm
             'y': 'y',
             'xErr': f'x{ERR}',
             'yErr': f'y{ERR}',
             'xy_flag': 'xy_flag',
             'psNdata': 'r_psfFlux_area', # now band-specific 
-            'extendedness': 'refExtendedness', # band-specific, not sure what the ref one is
+            'extendedness': 'refExtendedness', 
             'blendedness': 'r_blendedness', # band-specific  
-            # we should probably change this to the reference band 
         }
 
+        # example set of flags
         not_good_flags = (
-        'i_blendedness_flag',
-        #'i_cModel_flag',
+        'r_blendedness_flag',
+        'r_cModel_flag',
          'deblend_skipped',
-        'i_centroid_flag',
-        'i_hsmShapeRegauss_flag',
-        'i_pixelFlags_bad',
-        'i_pixelFlags_clippedCenter',
-        'i_pixelFlags_crCenter',
-        'i_pixelFlags_interpolatedCenter',
-        'i_pixelFlags_edge',
-        'i_pixelFlags_suspectCenter', # check which of these are true
-        'i_pixelFlags_saturatedCenter',
-        'i_pixelFlags_clipped'
+        'r_centroid_flag',
+        'r_hsmShapeRegauss_flag',
+        'r_pixelFlags_bad',
+        'r_pixelFlags_clippedCenter',
+        'r_pixelFlags_crCenter',
+        'r_pixelFlags_interpolatedCenter',
+        'r_pixelFlags_edge',
+        'r_pixelFlags_suspectCenter', 
+        'r_pixelFlags_saturatedCenter',
+        'r_pixelFlags_clipped'
         )
 
-        # detect_isPrimary
-        modifiers['good'] = (create_basic_flag_mask,) + not_good_flags
+        modifiers['good'] = (create_basic_flag_mask, 'detect_isPrimary',) + not_good_flags
         modifiers['clean'] = (
             create_basic_flag_mask,
-            'deblend_skipped',
+            'deblend_skipped', 'detect_isPrimary',
         ) + not_good_flags
 
-
-
-        #modifiers['clean'] = (
-        ##create_basic_flag_mask,
-        #'deblend_skipped',
-        #'i_blendedness_flag',
-        #'i_cModel_flag',
-        #'i_centroid_flag',
-        #'i_hsmShapeRegauss_flag',
-        #'i_pixelFlags_bad',
-        #'i_pixelFlags_clippedCenter',
-        #'i_pixelFlags_crCenter',
-        #'i_pixelFlags_interpolatedCenter',
-        #'i_pixelFlags_edge',
-        #'i_pixelFlags_suspectCenter', # check which of these are true
-        #'i_pixelFlags_saturatedCenter',
-        #'i_pixelFlags_clipped'
-        #) #+ not_good_flags
 
 
         # cross-band average, second moment values
@@ -944,20 +932,18 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
         for ax in ['xx', 'yy', 'xy']:
             modifiers[f'I{ax}_pixel'] = f'shape_{ax}'
-            #modifiers[f'I{ax}PSF_pixel'] = f'base_SdssShape_psf_{ax}'
+            modifiers[f'I{ax}PSF_pixel'] = f['r_i{ax}PSF']
 
         for band in bands:
-            # NOTE: for this catalog all flux units are in nJy
+            # For this catalog all flux units are in nJy
             # this differs from the previous dm object catalog
 
             modifiers[f'psFlux_{band}'] = f'{band}_psf{FLUX}'
             modifiers[f'psFlux_flag_{band}'] = f'{band}_psf{FLUX}_flag'
-
             modifiers[f'psFluxErr_{band}'] = f'{band}_psf{FLUX}{ERR}'
 
             modifiers[f'psFlux_free_{band}'] = f'{band}_free_psf{FLUX}'
             modifiers[f'psFlux_flag_free_{band}'] = f'{band}_free_psf{FLUX}_flag'
-
             modifiers[f'psFluxErr_free_{band}'] = f'{band}_free_psf{FLUX}{ERR}'
 
 
@@ -966,23 +952,21 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
             modifiers[f'magerr_{band}_psf'] = (convert_flux_err_to_mag_err,
                                            f'{band}_psf{FLUX}',
                                            f'{band}_psf{FLUX}{ERR}')
-
             modifiers[f'mag_{band}_psf_free'] = (convert_nanoJansky_to_mag,
                                            f'{band}_free_psf{FLUX}')
-
             modifiers[f'magerr_{band}_psf_free'] = (convert_flux_err_to_mag_err,
                                            f'{band}_free_psf{FLUX}',
                                            f'{band}_free_psf{FLUX}{ERR}')
+
             modifiers[f'snr_{band}_psf'] = (np.divide,
                                                f'{band}_psf{FLUX}',
                                                f'{band}_psf{FLUX}{ERR}')
 
 
 
-            # double check if this is right - defaulting to cModel magnitude
+            # unspecified magnitudes are defaulting to cModel
             modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
                                            f'{band}_cModel{FLUX}')
-
             modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
                                            f'{band}_cModel{FLUX}',
                                            f'{band}_cModel{FLUX}{ERR}')
@@ -990,9 +974,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
             modifiers[f'cModelFlux_{band}'] = f'{band}_cModel{FLUX}'
             modifiers[f'cModelFluxErr_{band}'] = f'{band}_cModel{FLUX}{ERR}'
 
-
             modifiers[f'cModelFlux_flag_{band}'] = f'{band}_cModel_flag'
-
             modifiers[f'cModelFlux_free_{band}'] = f'{band}_free_cModel{FLUX}'
             modifiers[f'cModelFluxErr_free_{band}'] = f'{band}_free_cModel{FLUX}{ERR}'
 
@@ -1002,11 +984,9 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
             modifiers[f'mag_{band}_cModel'] = (convert_nanoJansky_to_mag,
                                                f'{band}_cModel{FLUX}')
-
             modifiers[f'magerr_{band}_cModel'] = (convert_flux_err_to_mag_err,
                                                   f'{band}_cModel{FLUX}',
                                                   f'{band}_cModel{FLUX}{ERR}')
-
             modifiers[f'snr_{band}_cModel'] = (np.divide,
                                                f'{band}_cModel{FLUX}',
                                                f'{band}_cModel{FLUX}{ERR}')
@@ -1015,17 +995,13 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
             modifiers[f'calibFlux_{band}'] = f'{band}_calib{FLUX}'
             modifiers[f'calibFluxErr_{band}'] = f'{band}_calib{FLUX}{ERR}'
-
-
             modifiers[f'calibFlux_flag_{band}'] = f'{band}_calib{FLUX}_flag'
 
             modifiers[f'mag_{band}_calib'] = (convert_nanoJansky_to_mag,
                                                f'{band}_calib{FLUX}')
-
             modifiers[f'magerr_{band}_calib'] = (convert_flux_err_to_mag_err,
                                                   f'{band}_calib{FLUX}',
                                                   f'{band}_calib{FLUX}{ERR}')
-
             modifiers[f'snr_{band}_calib'] = (np.divide,
                                                f'{band}_calib{FLUX}',
                                                f'{band}_calib{FLUX}{ERR}')
@@ -1038,15 +1014,14 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
             modifiers[f'mag_{band}_gaap'] = (convert_nanoJansky_to_mag,
                                                f'{band}_gaapOptimal{FLUX}')
-
             modifiers[f'magerr_{band}_gaap'] = (convert_flux_err_to_mag_err,
                                                   f'{band}_gaapOptimal{FLUX}',
                                                   f'{band}_gaapOptimal{FLUX}{ERR}')
-
             modifiers[f'snr_{band}_gaap'] = (np.divide,
                                                f'{band}_gaapOptimal{FLUX}',
                                                f'{band}_gaapOptimal{FLUX}{ERR}')
 
+            # individual apertures only currently supported for gaap
             for ap in aps:
                 modifiers[f'gaapFlux_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}'
                 modifiers[f'gaapFluxErr_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}{ERR}'
@@ -1059,8 +1034,6 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
                 modifiers[f'magerr_{ap}_{band}_gaap'] = (convert_flux_err_to_mag_err,
                                                    f'{band}_gaap{ap}{FLUX}',
                                                    f'{band}_gaap{ap}{FLUX}{ERR}')
-
-
 
 
             # Per-band shape information
@@ -1076,6 +1049,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
                 f'{band}_iyyPSF',
                 f'{band}_ixyPSF') # need to check if this holds 
 
+            # this is an example currently using HSM moments
             modifiers['shear_1_{band}'] = (shear1_from_moments,f'Ixx_pixel_{band}',f'Ixy_pixel_{band}',f'Iyy_pixel_{band}')
             modifiers['shear_2_{band}'] = (shear2_from_moments,f'Ixx_pixel_{band}',f'Ixy_pixel_{band}',f'Iyy_pixel_{band}')
         modifiers['shear_1'] = (shear1_from_moments,'shape_xx','shape_xy','shape_yy')
@@ -1191,6 +1165,7 @@ class DP02TruthMatchCatalog(DC2DMTractCatalog):
         cf. https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
         """
 
+        # need to update this once the match information is available
         quantity_modifiers = {
             "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
             "objectId": "match_objectId",
