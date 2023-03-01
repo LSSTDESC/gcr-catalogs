@@ -17,8 +17,9 @@ from GCR import BaseGenericCatalog
 from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
-           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog']
-__version__ = '2.0.1'
+           'BaseDC2ShearCatalog', 'CosmoDC2AddonCatalog', 'SkySim5000GalaxyCatalog',
+           'SkySimGalaxyCatalog']
+__version__ = '3.1.0'
 
 CHECK_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'catalog_configs/_cosmoDC2_check.yaml')
 
@@ -63,7 +64,8 @@ def _gen_position_angle(size_reference):
         _gen_position_angle._pos_angle = np.random.RandomState(123497).uniform(0, 180, size)
     return _gen_position_angle._pos_angle
 
-def _calc_ellipticity_1_dc2(ellipticity):
+
+def _calc_ellipticity_1(ellipticity):
     # position angle using ellipticity as reference for the size or
     # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0
@@ -72,26 +74,13 @@ def _calc_ellipticity_1_dc2(ellipticity):
     return ellipticity*np.cos(2.0*pos_angle)
 
 
-def _calc_ellipticity_2_dc2(ellipticity):
+def _calc_ellipticity_2(ellipticity):
     # position angle using ellipticity as reference for the size or
     # the array. The angle is converted from degrees to radians
     pos_angle = _gen_position_angle(ellipticity)*np.pi/180.0
     # use the correct conversion for ellipticity 2 from ellipticity
     # and position angle
     return ellipticity*np.sin(2.0*pos_angle)
-
-
-def _calc_ellipticity_1(ellipticity, pos_angle):
-    # convert to treecorr convention and from deg to radians
-    pos_angle = np.negative(pos_angle)*np.pi/180.0
-    return ellipticity*np.cos(2.0*pos_angle)
-
-
-def _calc_ellipticity_2(ellipticity, pos_angle):
-    # convert to treecorr convention and from deg to radians
-    pos_angle = np.negative(pos_angle)*np.pi/180.0
-    return ellipticity*np.sin(2.0*pos_angle)
-
 
 def _limit_magnification(mag):
     mag = np.where(mag < 0.2, 1.0, mag)
@@ -118,6 +107,7 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
     """
     CosmoDC2ParentClass: the parent class for
     CosmoDC2GalaxyCatalog, BaseDC2GalaxyCatalog, and BaseDC2ShearCatalog
+    SkySim5000GalaxyCatalog and SkySimGalaxyCatalog
     """
 
     def _subclass_init(self, catalog_root_dir, catalog_filename_template, **kwargs):
@@ -430,7 +420,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'uniqueHaloID',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'hostHaloMass'),
-            'is_central':    (lambda x: x.astype(bool), 'isCentral'),
+            'is_central':    (lambda x: x.astype(np.bool), 'isCentral'),
             'stellar_mass':  'totalMassStellar',
             'stellar_mass_disk':        'diskMassStellar',
             'stellar_mass_bulge':       'spheroidMassStellar',
@@ -438,26 +428,18 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
-            'position_angle_true_dc2':  (_gen_position_angle, 'morphology/positionAngle'),
-            'position_angle_true_phosim': 'morphology/positionAngle',
-            'position_angle_true':      (np.negative, 'morphology/positionAngle'),
+            'position_angle_true':      (_gen_position_angle, 'morphology/positionAngle'),
             'sersic_disk':              'morphology/diskSersicIndex',
             'sersic_bulge':             'morphology/spheroidSersicIndex',
             'ellipticity_true':         'morphology/totalEllipticity',
-            'ellipticity_disk_true':         'morphology/diskEllipticity',
-            'ellipticity_bulge_true':        'morphology/spheroidEllipticity',
-            'ellipticity_1_true_dc2':       (_calc_ellipticity_1_dc2, 'morphology/totalEllipticity'),
-            'ellipticity_2_true_dc2':       (_calc_ellipticity_2_dc2, 'morphology/totalEllipticity'),
-            'ellipticity_1_disk_true_dc2':  (_calc_ellipticity_1_dc2, 'morphology/diskEllipticity'),
-            'ellipticity_2_disk_true_dc2':  (_calc_ellipticity_2_dc2, 'morphology/diskEllipticity'),
-            'ellipticity_1_bulge_true_dc2': (_calc_ellipticity_1_dc2, 'morphology/spheroidEllipticity'),
-            'ellipticity_2_bulge_true_dc2': (_calc_ellipticity_2_dc2, 'morphology/spheroidEllipticity'),
-            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity', 'morphology/positionAngle'),
-            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity', 'morphology/positionAngle'),
-            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity', 'morphology/positionAngle'),
-            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity', 'morphology/positionAngle'),
-            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity', 'morphology/positionAngle'),
-            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity', 'morphology/positionAngle'),
+            'ellipticity_1_true':       (_calc_ellipticity_1, 'morphology/totalEllipticity'),
+            'ellipticity_2_true':       (_calc_ellipticity_2, 'morphology/totalEllipticity'),
+            'ellipticity_disk_true':    'morphology/diskEllipticity',
+            'ellipticity_1_disk_true':  (_calc_ellipticity_1, 'morphology/diskEllipticity'),
+            'ellipticity_2_disk_true':  (_calc_ellipticity_2, 'morphology/diskEllipticity'),
+            'ellipticity_bulge_true':   'morphology/spheroidEllipticity',
+            'ellipticity_1_bulge_true': (_calc_ellipticity_1, 'morphology/spheroidEllipticity'),
+            'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity'),
             'size_true': (
                 _calc_weighted_size,
                 'morphology/diskMajorAxisArcsec',
@@ -596,6 +578,69 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
                 quantity_modifiers['mag_{}_sdss_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'SDSS_filters/magnitude:SDSS_{}:observed'.format(band), 'magnification',)
         quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed:dustAtlas'.format(band.lower()), 'magnification',)
         quantity_modifiers['mag_{}_lsst_no_host_extinction'.format(band)] = (_calc_lensed_magnitude_with_limits, 'LSST_filters/magnitude:LSST_{}:observed'.format(band.lower()), 'magnification',)
+
+        return quantity_modifiers
+
+
+class SkySimGalaxyCatalog(CosmoDC2ParentClass):
+    """
+    SkySim galaxy catalog reader, inherited from CosmoDC2ParentClass
+    """
+
+    def _get_group_names(self, fh):
+        return [k for k in fh if k.isdigit()]
+
+    def _generate_quantity_modifiers(self):
+        quantity_modifiers = {
+            'galaxy_id' :    'galaxy_id',
+            'ra_true':       'ra',
+            'dec_true':      'dec',
+            'redshift':      'redshift',
+            'redshift_true': 'redshiftHubble',
+            'shear_1':       'shear1',
+            'shear_2':       'shear2',
+            'shear_2_phosim': (np.negative, 'shear2'),
+            'shear_2_treecorr':   'shear2',
+            'convergence': 'convergence',
+            'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
+            'halo_id':       'target_halo_id',
+            'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
+            'stellar_mass':  'obs_sm',
+            'size_disk_true':           'diskMajorAxisArcsec',
+            'size_bulge_true':          'spheroidMajorAxisArcsec',
+            'size_minor_disk_true':     'diskMinorAxisArcsec',
+            'size_minor_bulge_true':    'spheroidMinorAxisArcsec',
+            'position_angle_true':      (_gen_position_angle, 'positionAngle'),
+            'ellipticity_disk_true':    'diskEllipticity',
+            'ellipticity_bulge_true':   'spheroidEllipticity',
+            'position_x': (lambda x: x/self.cosmology.h, 'x'),
+            'position_y': (lambda x: x/self.cosmology.h, 'y'),
+            'position_z': (lambda x: x/self.cosmology.h, 'z'),
+            'velocity_x': 'vx',
+            'velocity_y': 'vy',
+            'velocity_z': 'vz',
+            'is_central': (lambda x: x == -1, 'source_galaxy_upid')
+        }
+
+        # add magnitudes
+        for band in 'ugrizyY':
+            if band != 'y' and band != 'Y':
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_obs_{}'.format(band), 'magnification',)
+                quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_obs_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_rest_{}'.format(band.upper())
+
+            if band != 'u' and band != 'Y':
+                quantity_modifiers['mag_{}_hsc'.format(band)] = (_calc_lensed_magnitude, 'HSC_obs_{}'.format(band), 'magnification',)
+                quantity_modifiers['mag_true_{}_hsc'.format(band)] = 'HSC_obs_{}'.format(band.lower())
+                quantity_modifiers['Mag_true_{}_hsc_z0'.format(band)] = 'HSC_rest_{}'.format(band.upper())
+                
+            quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_obs_{}'.format(band.lower()), 'magnification',)
+            quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_obs_{}'.format(band.lower())
+            quantity_modifiers['Mag_true_{}_lsst_z0'.format(band)] = 'LSST_rest_{}'.format(band.upper())
+
+            if band != 'Y':
+                quantity_modifiers['mag_{}'.format(band)] = quantity_modifiers['mag_{}_lsst'.format(band)]
+                quantity_modifiers['mag_true_{}'.format(band)] = quantity_modifiers['mag_true_{}_lsst'.format(band)]
 
         return quantity_modifiers
 
