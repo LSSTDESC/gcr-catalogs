@@ -826,7 +826,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
         super()._subclass_init(**kwargs)
 
-        self._schema = self._generate_schema_from_datafiles(self._datasets)
+        #self._schema = self._generate_schema_from_datafiles(self._datasets)
         self._quantity_modifiers = self._generate_modifiers(dm_schema_version=0, bands = None, pixel_scale=self.pixel_scale)
         self._quantity_info_dict = self._generate_info_dict(META_PATH)
         self._len = None
@@ -927,7 +927,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
 
         for ax in ['xx', 'yy', 'xy']:
             modifiers[f'I{ax}_pixel'] = f'shape_{ax}'
-            modifiers[f'I{ax}PSF_pixel'] = [f'r_i{ax}PSF']
+            modifiers[f'I{ax}PSF_pixel'] = f'r_i{ax}PSF'
 
         for band in bands:
             # For this catalog all flux units are in nJy
@@ -947,6 +947,7 @@ class DP02ObjectParquetCatalog(DC2DMTractCatalog):
             modifiers[f'magerr_{band}_psf'] = (convert_flux_err_to_mag_err,
                                            f'{band}_psf{FLUX}',
                                            f'{band}_psf{FLUX}{ERR}')
+
             modifiers[f'mag_{band}_psf_free'] = (convert_nanoJansky_to_mag,
                                            f'{band}_free_psf{FLUX}')
             modifiers[f'magerr_{band}_psf_free'] = (convert_flux_err_to_mag_err,
