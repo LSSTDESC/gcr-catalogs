@@ -1,6 +1,6 @@
 #  Use ^/ to indicate file path relative to GCR root dir
 
-subclass_name: cosmodc2.SkySimGalaxyCatalog
+subclass_name: cosmodc2.DiffSkyGalaxyCatalog
 
 catalog_root_dir:  ^/xgal/skysim/skysim_v3.1.0
 catalog_filename_template: skysim_z_{}_{}_cutout_{}.hdf5

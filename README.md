@@ -50,11 +50,16 @@ Confluence page (*DESC member only*).
 
 ### Extragalactic Catalogs and Add-ons
 
+#### SkySim/DiffSky
+*by Andrew Hearin, Eve Kovacs, Patricia Larsen, Esteban Rangel, Katrin Heitmann et al.*
+
+- `skysim5000_v3.1`: prototype of new SkySim catalog, produced with differentiable, forward modeling techniques, sky area (~400 sq. deg.)
+
 #### SkySim5000
 
 *by Andrew Hearin, Danila Korytov, Eve Kovacs, Esteban Rangel, Patricia Larsen, Joe Hollowed, Andrew Benson, Katrin Heitmann et al.*
 
-- `skysim5000_v1.1.2`: latest SkySim5000 catalog, full sky area (~5000 sq. deg.) for 0<z<1 only.
+- `skysim5000_v1.1.2`: latest SkySim5000 catalog, full sky area (~5000 sq. deg.)
   - `skysim5000_v1.1.1`: previous SkySim5000 catalog, full sky area (~5000 sq. deg.)
   - `skysim5000_v1.1.1_image`: same but only covers the image simulation sky area (~400 sq. deg.)
   - `skysim5000_v1.1.1_small`: same but only covers a small  sky area (~50 sq. deg.) for testing purposes
