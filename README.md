@@ -53,7 +53,7 @@ Confluence page (*DESC member only*).
 #### SkySim/DiffSky
 *by Andrew Hearin, Eve Kovacs, Patricia Larsen, Esteban Rangel, Katrin Heitmann et al.*
 
-- `skysim_v3.1`: prototype of new galaxy catalog, temporarily named skysim, but produced with differentiable, forward modeling techniques, sky area (~400 sq. deg.). Galaxy properties are different from the SkySim5000 catalog series.
+- `skysim_v3.1`: prototype of new galaxy catalog (also known as DiffSky) produced with differentiable, forward modeling techniques, sky area (~400 sq. deg.). Not to be confused with the SkySim5000 catalog series.
 
 #### SkySim5000
 

@@ -607,6 +607,8 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
     DiffSky galaxy catalog reader, inherited from CosmoDC2ParentClass
     Class for new generation of catalogs generated with JAX-based 
     forward modeling techniques.
+    This reader is used by SkySim v3+ (not SkySim5000) catalogs and the forthcoming
+    DiffSky series.
     """
 
     def _get_group_names(self, fh):
