@@ -149,6 +149,11 @@ class AlphaQGalaxyCatalog(BaseGenericCatalog):
 
         self.catalog_version = catalog_version
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
         # specify quantity modifiers
         self._quantity_modifiers = {
             'galaxy_id' :    'galaxyID',

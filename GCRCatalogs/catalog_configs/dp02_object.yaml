@@ -1,0 +1,9 @@
+subclass_name: dc2_object.DP02ObjectParquetCatalog
+base_dir: ^/rubin/DP0.2/objectTable
+filename_pattern: 'objectTable_tract_\d+\_DC2_2_2i_runs_DP0_2_v23_0_1_PREOPS-905_step3_\d+_\w+Z.parq$'
+
+pixel_scale: 0.2
+
+description: DP02 Run 
+creators: ['DESC DC2 Team + Rubin ops']
+

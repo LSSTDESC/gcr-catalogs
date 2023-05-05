@@ -49,6 +49,8 @@ class PZMagErrCatalog(BaseGenericCatalog):
         for band in ['u','g','r','i','z','y']:
             self._quantity_modifiers['mag_%s_photoz'%band] = 'scatmag_%s'%band
             self._quantity_modifiers['mag_err_%s_photoz'%band] = 'scaterr_%s'%band
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
         self._info_dict = {}
         self._info_dict['galaxy_id']={'units':'unitless',
                                  'description': 'ID of galaxy matching the entry '
@@ -102,12 +104,17 @@ class PZMagErrCatalog(BaseGenericCatalog):
         return pd.read_hdf(first(self._healpix_files.values())).columns.tolist()
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0
         for (zlo_this, hpx_this), file_path in self._healpix_files.items():
             d = {'healpix_pixel': hpx_this, 'redshift_block_lower': zlo_this}
             if native_filters is not None and not native_filters.check_scalar(d):
                 continue
-            df = pd.read_hdf(file_path)
-            yield lambda col: df[col].values # pylint: disable=cell-var-from-loop
+            if (count%self._size == self._rank):
+                count+=1
+                df = pd.read_hdf(file_path)
+                yield lambda col: df[col].values # pylint: disable=cell-var-from-loop
+            else:
+                count+=1
 
 
 class PZMagErrPDFsCatalog(BaseGenericCatalog):
@@ -144,7 +151,8 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
             'photoz_mode_ml_red_chi2': 'point_estimates/z_mode_ml_red_chi2',
             'photoz_odds': 'point_estimates/ODDS',
         }
-
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
         self._native_filter_quantities = {'healpix_pixel', 'redshift_block_lower'}
         self._info_dict={}
         self._info_dict['galaxy_id']={'units':'unitless',
@@ -198,14 +206,19 @@ class PZMagErrPDFsCatalog(BaseGenericCatalog):
         return first(self._datasets).keys()
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for (zlo_this, hpx_this), file_path in self._healpix_files.items():
             pix_block = {'healpix_pixel':hpx_this,
                          'redshift_block_lower': zlo_this}
             if native_filters and not native_filters.check_scalar(pix_block):
                 continue
-            dataset = PhotoZFileObject3(file_path, self._filename_re)
-            yield dataset.get
-            dataset.close() # to avoid OS complaining too many open files
+            if (count%self._size == self._rank):
+                count+=1
+                dataset = PhotoZFileObject3(file_path, self._filename_re)
+                yield dataset.get
+                dataset.close() # to avoid OS complaining too many open files
+            else:
+                count+=1
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""

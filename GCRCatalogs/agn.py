@@ -32,6 +32,11 @@ class AGNCatalog(BaseGenericCatalog):
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self.lightcone = kwargs.get('lightcone', True)
         self.sky_area = kwargs.get('sky_area', None)
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
 
     def __del__(self):
         self._handle.close()

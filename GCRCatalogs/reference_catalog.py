@@ -52,6 +52,10 @@ class ReferenceCatalogReader(BaseGenericCatalog):
 
         self._header_line_number = 0
         self._data_dtype = None
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
 
 
     def _iter_native_dataset(self, native_filters=None):

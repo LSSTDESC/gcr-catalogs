@@ -18,6 +18,11 @@ class AlphaQAddonCatalog(BaseGenericCatalog):
         self._addon_filename = kwargs['addon_filename']
         assert os.path.isfile(self._addon_filename), 'Addon file {} does not exist'.format(self._addon_filename)
         self._addon_group = kwargs['addon_group']
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
 
     def _generate_native_quantity_list(self):
         # Loads the additional data provided by the addon file

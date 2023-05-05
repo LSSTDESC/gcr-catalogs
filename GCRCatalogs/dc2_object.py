@@ -17,7 +17,7 @@ from .dc2_dm_catalog import DC2DMTractCatalog
 from .dc2_dm_catalog import convert_flux_to_mag, convert_flux_to_nanoJansky, convert_nanoJansky_to_mag, convert_flux_err_to_mag_err
 from .utils import decode
 
-__all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog']
+__all__ = ['DC2ObjectCatalog', 'DC2ObjectParquetCatalog','DP02ObjectParquetCatalog','DP02TruthMatchCatalog','CosmoDC2AddonCatalog']
 
 FILE_DIR = os.path.dirname(os.path.abspath(__file__))
 FILE_PATTERN = r'(?:merged|object)_tract_\d+\.hdf5$'
@@ -56,6 +56,26 @@ def convert_dm_ref_zp_flux_to_nanoJansky(flux, dm_ref_zp=27):
     calibrated_flux_to_nanoJansky = 10**((AB_mag_zp_wrt_nanoJansky - dm_ref_zp) / 2.5)
 
     return calibrated_flux_to_nanoJansky * flux
+
+def shear1_from_moments(Ixx,Ixy,Iyy,kind='eps'):
+    '''
+    Get shear components from second moments
+    '''
+    if kind=='eps':
+        denom = Ixx + Iyy + 2.*np.sqrt(Ixx*Iyy - Ixy**2)
+    elif kind=='chi':
+        denom = Ixx + Iyy
+    return (Ixx-Iyy)/denom
+
+def shear2_from_moments(Ixx,Ixy,Iyy,kind='eps'):
+    '''
+    Get shear components from second moments
+    '''
+    if kind=='eps':
+        denom = Ixx + Iyy + 2.*np.sqrt(Ixx*Iyy - Ixy**2)
+    elif kind=='chi':
+        denom = Ixx + Iyy
+    return  2*Ixy/denom
 
 
 def create_basic_flag_mask(*flags):
@@ -311,6 +331,9 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             self._quantity_modifiers = self._generate_modifiers(
                 self.pixel_scale, bands, has_modelfit_mag, has_modelfit_flux, has_modelfit_flag, dm_schema_version)
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+
         self._quantity_info_dict = self._generate_info_dict(META_PATH, bands)
         self._len = None
 
@@ -391,6 +414,7 @@ class DC2ObjectCatalog(BaseGenericCatalog):
             for ax in ['xx', 'yy', 'xy']:
                 modifiers['I{}_pixel_{}'.format(ax, band)] = '{}_base_SdssShape_{}'.format(band, ax)
                 modifiers['I{}PSF_pixel_{}'.format(ax, band)] = '{}_base_SdssShape_psf_{}'.format(band, ax)
+
 
             modifiers['psf_fwhm_{}'.format(band)] = (
                 lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
@@ -618,12 +642,17 @@ class DC2ObjectCatalog(BaseGenericCatalog):
         return set(self._schema).union(self._native_filter_quantities)
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for dataset in self._datasets:
             if (native_filters is None or
                     native_filters.check_scalar(dataset.tract_and_patch)):
-                yield dataset.get
-                if not self.use_cache:
-                    dataset.clear_cache()
+                if (count%self._size == self._rank):
+                    count+=1
+                    yield dataset.get
+                    if not self.use_cache:
+                        dataset.clear_cache()
+                else:
+                    count+=1
 
     def __len__(self):
         if self._len is None:
@@ -771,3 +800,418 @@ class DC2ObjectParquetCatalog(DC2DMTractCatalog):
                 f'{band}_base_SdssShape_psf_xy')
 
         return modifiers
+
+
+class DP02ObjectParquetCatalog(DC2DMTractCatalog):
+    r"""DC2 Object (Parquet) Catalog reader
+
+    Parameters
+    ----------
+    base_dir          (str): Directory of data files being served, required
+    filename_pattern  (str): The optional regex pattern of served data files
+    is_dpdd          (bool): File are already in DPDD-format.  No translation.
+
+    Attributes
+    ----------
+    base_dir          (str): The directory of data files being served
+    """
+
+    def _subclass_init(self, **kwargs):
+
+        self.FILE_PATTERN = r'objectTable_tract_\d+\_DC2_2_2i_runs_DP0_2_v23_0_1_PREOPS-905_step3_\d+_\w+Z.parq$'
+        self.META_PATH = META_PATH
+        self._default_pixel_scale = 0.2
+        self.pixel_scale = float(kwargs.get('pixel_scale', self._default_pixel_scale))
+
+
+        super()._subclass_init(**kwargs)
+
+        #self._schema = self._generate_schema_from_datafiles(self._datasets)
+        self._quantity_modifiers = self._generate_modifiers(dm_schema_version=0, bands = None, pixel_scale=self.pixel_scale)
+        self._quantity_info_dict = self._generate_info_dict(META_PATH)
+        self._len = None
+
+
+    def _detect_available_bands(self):
+        """
+        This method should return available bands in the catalog file.
+    
+        For the DP02 catalog columns `<band>_psfFlux` should exist. 
+        This function checks for `psFlux_<band>` columns.
+        If columns do not exist, it returns an empty list.
+        Note that band name may contain underscores. 
+        There are bands labelled, e.g. r_free in this output
+        """
+        return (
+            [col.partition('_')[0] for col in self._columns if col.endswith('_psfFlux')]
+        )
+
+    @staticmethod
+    def _generate_schema_from_datafiles(datasets):
+        """Return the native schema for given datasets
+
+        Args:
+            datasets (list): A list of tuples (<file path>, <key>)
+
+        Returns:
+            A dict of schema ({col_name: {'dtype': dtype}}) found in all data sets
+        """
+
+        schema = {}
+        for dataset in datasets:
+            schema.update(dataset.native_schema)
+
+        return schema
+
+    @staticmethod
+    def _generate_modifiers(dm_schema_version=0, bands=None, pixel_scale=0.2, **kwargs):  # pylint: disable=arguments-differ
+        """Creates a dictionary relating native and homogenized column names
+
+        Args:
+            pixel_scale (float): Scale of pixels in coadd images
+            bands       (list):  List of photometric bands as strings
+
+        Returns:
+            A dictionary of the form {<homogenized name>: <native name>, ...}
+        """
+
+        bands = bands or 'ugrizy'
+        FLUX = 'Flux'
+        ERR = 'Err'
+        aps = ['0p5','0p7','1p0','1p5','2p5','3p0']
+
+        # note: quantities which were previously general are now band-specific,
+        # defaulting to r-band
+        modifiers = {
+            'objectId': 'objectId', 
+            'parentObjectId': 'parentObjectId',
+            'ra':  'coord_ra', 
+            'dec':  'coord_dec',
+            'x': 'x', # centroid from sdss algorithm
+            'y': 'y',
+            'xErr': f'x{ERR}',
+            'yErr': f'y{ERR}',
+            'xy_flag': 'xy_flag',
+            'psNdata': 'r_psfFlux_area', # now band-specific 
+            'extendedness': 'refExtendedness', 
+            'blendedness': 'r_blendedness', # band-specific  
+        }
+
+        # example set of flags
+        not_good_flags = (
+        'r_blendedness_flag',
+        'r_cModel_flag',
+         'deblend_skipped',
+        'r_centroid_flag',
+        'r_hsmShapeRegauss_flag',
+        'r_pixelFlags_bad',
+        'r_pixelFlags_clippedCenter',
+        'r_pixelFlags_crCenter',
+        'r_pixelFlags_interpolatedCenter',
+        'r_pixelFlags_edge',
+        'r_pixelFlags_suspectCenter', 
+        'r_pixelFlags_saturatedCenter',
+        'r_pixelFlags_clipped'
+        )
+
+        modifiers['good'] = (create_basic_flag_mask, 'detect_isPrimary',) + not_good_flags
+        modifiers['clean'] = (
+            create_basic_flag_mask,
+            'deblend_skipped', 'detect_isPrimary',
+        ) + not_good_flags
+
+
+
+        # cross-band average, second moment values
+        modifiers['I_flag'] = 'shape_flag'
+
+        for ax in ['xx', 'yy', 'xy']:
+            modifiers[f'I{ax}_pixel'] = f'shape_{ax}'
+            modifiers[f'I{ax}PSF_pixel'] = f'r_i{ax}PSF'
+
+        for band in bands:
+            # For this catalog all flux units are in nJy
+            # this differs from the previous dm object catalog
+
+            modifiers[f'psFlux_{band}'] = f'{band}_psf{FLUX}'
+            modifiers[f'psFlux_flag_{band}'] = f'{band}_psf{FLUX}_flag'
+            modifiers[f'psFluxErr_{band}'] = f'{band}_psf{FLUX}{ERR}'
+
+            modifiers[f'psFlux_free_{band}'] = f'{band}_free_psf{FLUX}'
+            modifiers[f'psFlux_flag_free_{band}'] = f'{band}_free_psf{FLUX}_flag'
+            modifiers[f'psFluxErr_free_{band}'] = f'{band}_free_psf{FLUX}{ERR}'
+
+
+            modifiers[f'mag_{band}_psf'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_psf{FLUX}')
+            modifiers[f'magerr_{band}_psf'] = (convert_flux_err_to_mag_err,
+                                           f'{band}_psf{FLUX}',
+                                           f'{band}_psf{FLUX}{ERR}')
+
+            modifiers[f'mag_{band}_psf_free'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_free_psf{FLUX}')
+            modifiers[f'magerr_{band}_psf_free'] = (convert_flux_err_to_mag_err,
+                                           f'{band}_free_psf{FLUX}',
+                                           f'{band}_free_psf{FLUX}{ERR}')
+
+            modifiers[f'snr_{band}_psf'] = (np.divide,
+                                               f'{band}_psf{FLUX}',
+                                               f'{band}_psf{FLUX}{ERR}')
+
+
+
+            # unspecified magnitudes are defaulting to cModel
+            modifiers[f'mag_{band}'] = (convert_nanoJansky_to_mag,
+                                           f'{band}_cModel{FLUX}')
+            modifiers[f'magerr_{band}'] = (convert_flux_err_to_mag_err,
+                                           f'{band}_cModel{FLUX}',
+                                           f'{band}_cModel{FLUX}{ERR}')
+
+            modifiers[f'cModelFlux_{band}'] = f'{band}_cModel{FLUX}'
+            modifiers[f'cModelFluxErr_{band}'] = f'{band}_cModel{FLUX}{ERR}'
+
+            modifiers[f'cModelFlux_flag_{band}'] = f'{band}_cModel_flag'
+            modifiers[f'cModelFlux_free_{band}'] = f'{band}_free_cModel{FLUX}'
+            modifiers[f'cModelFluxErr_free_{band}'] = f'{band}_free_cModel{FLUX}{ERR}'
+
+
+            modifiers[f'cModelFlux_flag_free_{band}'] = f'{band}_free_cModel_flag'
+
+
+            modifiers[f'mag_{band}_cModel'] = (convert_nanoJansky_to_mag,
+                                               f'{band}_cModel{FLUX}')
+            modifiers[f'magerr_{band}_cModel'] = (convert_flux_err_to_mag_err,
+                                                  f'{band}_cModel{FLUX}',
+                                                  f'{band}_cModel{FLUX}{ERR}')
+            modifiers[f'snr_{band}_cModel'] = (np.divide,
+                                               f'{band}_cModel{FLUX}',
+                                               f'{band}_cModel{FLUX}{ERR}')
+
+
+
+            modifiers[f'calibFlux_{band}'] = f'{band}_calib{FLUX}'
+            modifiers[f'calibFluxErr_{band}'] = f'{band}_calib{FLUX}{ERR}'
+            modifiers[f'calibFlux_flag_{band}'] = f'{band}_calib{FLUX}_flag'
+
+            modifiers[f'mag_{band}_calib'] = (convert_nanoJansky_to_mag,
+                                               f'{band}_calib{FLUX}')
+            modifiers[f'magerr_{band}_calib'] = (convert_flux_err_to_mag_err,
+                                                  f'{band}_calib{FLUX}',
+                                                  f'{band}_calib{FLUX}{ERR}')
+            modifiers[f'snr_{band}_calib'] = (np.divide,
+                                               f'{band}_calib{FLUX}',
+                                               f'{band}_calib{FLUX}{ERR}')
+
+
+
+            modifiers[f'gaapFlux_{band}'] = f'{band}_gaapOptimal{FLUX}'
+            modifiers[f'gaapFluxErr_{band}'] = f'{band}_gaapOptimal{FLUX}{ERR}'
+            modifiers[f'gaapFlux_flag_{band}'] = f'{band}_gaap{FLUX}_flag'
+
+            modifiers[f'mag_{band}_gaap'] = (convert_nanoJansky_to_mag,
+                                               f'{band}_gaapOptimal{FLUX}')
+            modifiers[f'magerr_{band}_gaap'] = (convert_flux_err_to_mag_err,
+                                                  f'{band}_gaapOptimal{FLUX}',
+                                                  f'{band}_gaapOptimal{FLUX}{ERR}')
+            modifiers[f'snr_{band}_gaap'] = (np.divide,
+                                               f'{band}_gaapOptimal{FLUX}',
+                                               f'{band}_gaapOptimal{FLUX}{ERR}')
+
+            # individual apertures only currently supported for gaap
+            for ap in aps:
+                modifiers[f'gaapFlux_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}'
+                modifiers[f'gaapFluxErr_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}{ERR}'
+                modifiers[f'gaapFlux_flag_{ap}_{band}'] = f'{band}_gaap{ap}{FLUX}_flag_bigPsf'
+                modifiers[f'snr_{ap}_{band}_gaap'] = (np.divide,
+                                                   f'{band}_gaap{ap}{FLUX}',
+                                                   f'{band}_gaap{ap}{FLUX}{ERR}')
+                modifiers[f'mag_{ap}_{band}_gaap'] = (convert_nanoJansky_to_mag,
+                                                   f'{band}_gaap{ap}{FLUX}')
+                modifiers[f'magerr_{ap}_{band}_gaap'] = (convert_flux_err_to_mag_err,
+                                                   f'{band}_gaap{ap}{FLUX}',
+                                                   f'{band}_gaap{ap}{FLUX}{ERR}')
+
+
+            # Per-band shape information
+            modifiers[f'I_flag_{band}'] = f'{band}_i_flag'
+
+            for ax in ['xx', 'yy', 'xy']:
+                modifiers[f'I{ax}_pixel_{band}'] = f'{band}_i{ax}'
+                modifiers[f'I{ax}PSF_pixel_{band}'] = f'{band}_i{ax}PSF'
+
+            modifiers[f'psf_fwhm_{band}'] = (
+                lambda xx, yy, xy: pixel_scale * 2.355 * (xx * yy - xy * xy) ** 0.25,
+                f'{band}_ixxPSF',
+                f'{band}_iyyPSF',
+                f'{band}_ixyPSF') # need to check if this holds 
+
+            # this is an example currently using HSM moments
+            modifiers['shear_1_{band}'] = (shear1_from_moments,f'Ixx_pixel_{band}',f'Ixy_pixel_{band}',f'Iyy_pixel_{band}')
+            modifiers['shear_2_{band}'] = (shear2_from_moments,f'Ixx_pixel_{band}',f'Ixy_pixel_{band}',f'Iyy_pixel_{band}')
+        modifiers['shear_1'] = (shear1_from_moments,'shape_xx','shape_xy','shape_yy')
+        modifiers['shear_2'] = (shear2_from_moments,'shape_xx','shape_xy','shape_yy')
+
+
+        return modifiers
+
+
+class DP02TruthMatchCatalog(DC2DMTractCatalog):
+    r"""
+    DC2 Truth-Match (parquet) Catalog reader
+
+    This reader is intended for reading the truth-match catalog that is in
+    parquet format and partitioned by tracts.
+
+    Two options, `as_object_addon` and `as_truth_table` further control,
+    respectively, whether the returned table contains only rows that match
+    to the object catalog (`as_object_addon=True`), or only unique truth
+    entries (`as_truth_table=True`).
+
+    When `as_object_addon` is set, most column names will also be decorated
+    with a `_truth` postfix.
+
+    The underlying truth-match catalog files contain fluxes but not magnitudes.
+    The reader provides translation to magnitude (using `_flux_to_mag`) for
+    convenience. No other translation is applied.
+
+    Parameters
+    ----------
+    base_dir            (str): Directory of data files being served, required
+    filename_pattern    (str): The optional regex pattern of served data files
+    as_object_addon    (bool): If set, return rows in the the same row order as object catalog
+    as_truth_table     (bool): If set, remove duplicated truth rows
+    as_matchdc2_schema (bool): If set, use column names in Javi's matchDC2 catalog.
+    """
+    def _subclass_init(self, **kwargs):
+        self.META_PATH = META_PATH
+        self.FILE_PATTERN = r'match_ref_truth_summary_objectTable_tract_\d+\_DC2_u_ctslater_matchObjectToTruth_w22_20220527T164747Z.parq'
+
+        super()._subclass_init(**dict(kwargs, is_dpdd=True))  # set is_dpdd=True to obtain bare modifiers
+
+        self._as_object_addon = bool(kwargs.get("as_object_addon"))
+        self._as_truth_table = bool(kwargs.get("as_truth_table"))
+        self._as_matchdc2_schema = bool(kwargs.get("as_matchdc2_schema"))
+        if self._as_matchdc2_schema:
+            self._as_object_addon = True
+
+        if self._as_object_addon and self._as_truth_table:
+            raise ValueError("Reader options `as_object_addon` and `as_truth_table` cannot both be set to True.")
+
+        if self._as_matchdc2_schema:
+            self._use_matchdc2_quantity_modifiers()
+            return
+
+        flux_cols = [k for k in self._quantity_modifiers if k.startswith("flux_")]
+        for col in flux_cols:
+            self._quantity_modifiers["mag_" + col.partition("_")[2]] = (convert_nanoJansky_to_mag, col)
+
+        if self._as_object_addon:
+            no_postfix = ("truth_type", "match_objectId", "match_sep", "is_good_match", "is_nearest_neighbor", "is_unique_truth_entry")
+            self._quantity_modifiers = {
+                (k + ("" if k in no_postfix else "_truth")): (v or k) for k, v in self._quantity_modifiers.items()
+            }
+
+
+    def _detect_available_bands(self):
+        return ["_".join(col.split("_")[1:-1]) for col in self._columns if col.startswith('flux_') and col.endswith('_noMW')]
+
+    def _obtain_native_data_dict(self, native_quantities_needed, native_quantity_getter):
+        """
+        When `as_object_addon` or `as_truth_table` is set, we need to filter the table
+        based on `match_objectId` or `is_unique_truth_entry` before the data is returned .
+        To achieve such, we have to overwrite this method to inject the additional columns
+        and to apply the masks.
+        """
+        native_quantities_needed = set(native_quantities_needed)
+        if self._as_object_addon:
+            native_quantities_needed.add("match_objectId")
+        elif self._as_truth_table:
+            native_quantities_needed.add("is_unique_truth_entry")
+
+        columns = list(native_quantities_needed)
+        d = native_quantity_getter.read_columns(columns, as_dict=False)
+        if self._as_object_addon:
+            n = np.count_nonzero(d["match_objectId"].values > -1)
+            return {c: d[c].values[:n] for c in columns}
+        elif self._as_truth_table:
+            mask = d["is_unique_truth_entry"].values
+            return {c: d[c].values[mask] for c in columns}
+        return {c: d[c].values for c in columns}
+
+
+    def __len__(self):
+        if self._len is None:
+            # pylint: disable=attribute-defined-outside-init
+            if self._as_object_addon:
+                self._len = sum(
+                    np.count_nonzero(d["match_objectId"] > -1)
+                    for d in self.get_quantities(["match_objectId"], return_iterator=True)
+                )
+            elif self._as_truth_table:
+                self._len = sum(
+                    np.count_nonzero(d["is_unique_truth_entry"])
+                    for d in self.get_quantities(["is_unique_truth_entry"], return_iterator=True)
+                )
+            else:
+                self._len = sum(len(dataset) for dataset in self._datasets)
+        return self._len
+    def _use_matchdc2_quantity_modifiers(self):
+        """
+        To recreate column names in dc2_matched_table.py
+        cf. https://github.com/fjaviersanchez/MatchDC2/blob/master/python/matchDC2.py
+        """
+
+        # need to update this once the match information is available
+        quantity_modifiers = {
+            "truthId": (lambda i, t: np.where(t < 3, i, "-1").astype(np.int64), "id", "truth_type"),
+            "objectId": "match_objectId",
+            "is_matched": "is_good_match",
+            "is_star": (lambda t: t > 1, "truth_type"),
+            "ra": "ra",
+            "dec": "dec",
+            "redshift_true": "redshift",
+            "dist": "match_sep",
+        }
+
+        for col in self._columns:
+            if col.startswith("flux_") and col.endswith("_noMW"):
+                quantity_modifiers["mag_" + col.split("_")[1] + "_lsst"] = (convert_nanoJansky_to_mag, col)
+
+        quantity_modifiers['galaxy_match_mask'] = (lambda t, m: (t == 1) & m, "truth_type", "is_good_match")
+        quantity_modifiers['star_match_mask'] = (lambda t, m: (t == 2) & m, "truth_type", "is_good_match")
+
+        # put these into self for `self.add_derived_quantity` to work
+        self._quantity_modifiers = quantity_modifiers
+        self._native_quantities = set(self._columns)
+
+        for col in list(quantity_modifiers):
+            if col in ("is_matched", "is_star", "galaxy_match_mask", "star_match_mask"):
+                continue
+            for t in ("galaxy", "star"):
+                self.add_derived_quantity(
+                    "{}_{}".format(col, t),
+                    lambda d, m: np.ma.array(d, mask=m),
+                    col,
+                    "{}_match_mask".format(t),
+                )
+    def _get_quantity_info_dict(self, quantity, default=None):
+        """
+        Befere calling the parent method, check if `quantity` has an added "_truth" postfix
+        due to the `if self._as_object_addon:...` part in _subclass_init. If so, remove the postfix.
+        """
+        if (
+            quantity not in self._quantity_info_dict and
+            quantity in self._quantity_modifiers and
+            quantity.endswith("_truth")
+        ):
+            quantity = quantity[:-6]
+        return super()._get_quantity_info_dict(quantity, default)
+
+
+
+class CosmoDC2AddonCatalog(DP02ObjectParquetCatalog):
+    def _get_group_names(self, fh): # pylint: disable=W0613
+        return [self.get_catalog_info('addon_group')]
+
+    
+    

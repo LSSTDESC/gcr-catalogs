@@ -174,6 +174,9 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         else:
             self._native_filter_quantities = {'block'}
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+
         self._quantity_modifiers = self._generate_quantity_modifiers()
         self.halo_mass_def = kwargs.get('halo_mass_def', 'FoF, b=0.168')
 
@@ -386,15 +389,21 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
             key_to_dict = lambda key: dict(zip(('redshift_block_lower', 'healpix_pixel'), key))
         else:
             key_to_dict = lambda key: {'block': key}
+
+        count = 0
         for key, file_path in self._file_list.items():
             d = key_to_dict(key)
             if native_filters is not None and not native_filters.check_scalar(d):
                 continue
-            with h5py.File(file_path, 'r') as fh:
-                for group in self._get_group_names(fh):
-                    # pylint: disable=W0640
-                    if len(fh[group]):
-                        yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)][()]
+            if (count%self._size == self._rank):
+                count+=1
+                with h5py.File(file_path, 'r') as fh:
+                    for group in self._get_group_names(fh):
+                        # pylint: disable=W0640
+                        if len(fh[group]):
+                            yield lambda native_quantity: fh['{}/{}'.format(group, native_quantity)][()]
+            else:
+                count+=1
 
     def _get_quantity_info_dict(self, quantity, default=None):
         q_mod = self.get_quantity_modifier(quantity)

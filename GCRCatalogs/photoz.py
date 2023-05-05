@@ -61,6 +61,11 @@ class PhotoZCatalog(BaseGenericCatalog):
             'photoz_pdf': '_FULL_PDF',
         }
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
+        if self._size != 1:
+            raise RuntimeError("parallel read is not supported")
+
         self._native_filter_quantities = {'tract', 'patch'}
         self._info_dict = {}
         self._info_dict['galaxy_id']={'units':'unitless',
@@ -256,6 +261,8 @@ class PhotoZCatalog2(BaseGenericCatalog):
             'photoz_odds': 'point_estimates/ODDS',
         }
 
+        self._rank = int(kwargs.get('mpi_rank', 0))
+        self._size = int(kwargs.get('mpi_size', 1))
         self._native_filter_quantities = {'tract', 'patch'}
         self._info_dict = {}
         self._info_dict['galaxy_id']={'units':'unitless',
@@ -293,12 +300,17 @@ class PhotoZCatalog2(BaseGenericCatalog):
         return first(self._datasets).pdf_bins
 
     def _iter_native_dataset(self, native_filters=None):
+        count = 0 
         for dataset in self._datasets:
             tract_patch = {'tract': dataset.tract, 'patch': dataset.patch}
             if native_filters and not native_filters.check_scalar(tract_patch):
                 continue
-            yield dataset.get
-            dataset.close() # to avoid OS complaining too many open files
+            if (count%self._size == self._rank):
+                count+=1
+                yield dataset.get
+                dataset.close() # to avoid OS complaining too many open files
+            else:
+                count+=1
 
     def close_all_file_handles(self):
         """Clear all cached file handles"""

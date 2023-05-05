@@ -1,0 +1,42 @@
+objectId: {"type": "int64", "unit": "none", "description": "Unique object ID"}
+parentObjectId: {"type": "int64", "unit": "none", "description": "Parent object ID"}
+good: {"type": "bool", "unit": "none", "description": "True if the source has no flagged pixels"}
+clean: {"type": "bool", "unit": "none", "description": " True if the source has no flagged pixels (i.e., `good`) and is not skipped by the deblender"}
+blendedness: {"type": "float64", "unit": "none", "description": "Measure of how flux is affected by neighbors (1 - I_child/I_parent; see Sec.4.9.11 of doi:10.1093/pasj/psx080)"}
+extendedness: {"type": "float64", "unit": "none", "description": "0 for stars; 1 for extended objects"}
+ra: {"type": "float64", "unit": "degree", "description": "Right Ascension"}
+dec: {"type": "float64", "unit": "degree", "description": "Declination"}
+x: {"type": "float64", "unit": "pixel", "description": "2D centroid location (x coordinate)"}
+"y": {"type": "float64", "unit": "pixel", "description": "2D centroid location (y coordinate)"}
+xErr: {"type": "float32", "unit": "pixel", "description": "Error value for `x`"}
+yErr: {"type": "float32", "unit": "pixel", "description": "Error value for `y`"}
+xy_flag: {"type": "bool", "unit": "none", "description": "Flag for issues with `x` and `y`"}
+tract: {"type": "int64", "unit": "none", "description": "Tract ID in Sky Map"}
+patch: {"type": "string", "unit": "none", "description": "Patch ID in Sky Map (as a string, `x,y`)"}
+Ixx_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of source intensity, averaged across bands"}
+Ixx_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of source intensity in <band>"}
+Iyy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity, averaged across bands"}
+Iyy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of source intensity in <band>"}
+Ixy_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity, averaged across bands"}
+Ixy_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of source intensity in <band>"}
+I_flag: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx_pixel`, `Ixy_pixel`, and `Iyy_pixel`"}
+I_flag_<band>: {"type": "bool", "unit": "none", "description": "Flag for issues with `Ixx_pixel_<band>`, `Ixy_pixel_<band>`, and `Iyy_pixel_<band>`"}
+IxxPSF_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of PSFy, averaged across bands"}
+IxxPSF_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xx) of PSF in <band>"}
+IyyPSF_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of PSFy, averaged across bands"}
+IyyPSF_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (yy) of PSF in <band>"}
+IxyPSF_pixel: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of PSFy, averaged across bands"}
+IxyPSF_pixel_<band>: {"type": "float64", "unit": "sq. pixel", "description": "Adaptive second moment (xy) of PSF in <band>"}
+psf_fwhm_<band>: {"type": "float64", "unit": "arcsec", "description": "PSF FWHM calculated from `base_SdssShape`"}
+psNdata: {"type": "float32", "unit": "none", "description": "Number of data points (pixels) used to fit the model"}
+psFlux_<band>: {"type": "float64", "unit": "nJy", "description": "Point-source model flux in <band>"}
+psFluxErr_<band>: {"type": "float64", "unit": "nJy", "description": "Error value for `psFlux_<band>`"}
+psFlux_flag_<band>: {"type": "bool", "unit": "none", "description": "Flag for issues with `psFlux_<band>`"}
+mag_<band>: {"type": "float64", "unit": "AB mag", "description": "Point-source model magnitude in <band>"}
+magerr_<band>: {"type": "float64", "unit": "AB mag", "description": "Error value for `mag_<band>`"}
+cModelFlux_<band>: {"type": "float64", "unit": "nJy", "description": "Composite model (cModel) flux in <band>"}
+cModelFluxErr_<band>: {"type": "float64", "unit": "nJy", "description": "Error value for `cModelFlux_<band>`"}
+cModelFlux_flag_<band>: {"type": "bool", "unit": "none", "description": "Flag for issues with `cModelFlux_<band>`"}
+mag_<band>_cModel: {"type": "float64", "unit": "AB mag", "description": "cModel magnitude in <band>"}
+magerr_<band>_cModel: {"type": "float64", "unit": "AB mag", "description": "Error value for `mag_<band>_cModel`"}
+snr_<band>_cModel: {"type": "float64", "unit": "none", "description": "Signal-to-noise ratio for cModel magnitude in <band>"}
