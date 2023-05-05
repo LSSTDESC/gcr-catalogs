@@ -1,0 +1,9 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+based_on: skysim5000_v1.2
+
+healpix_pixels: [9559,  9686,  9687,  9814,  9815,  9816,  9942,  9943, 10070, 10071, 10072, 10198, 10199, 10200, 10326, 10327, 10450]
+sky_area: 57.071968
+
+description: |
+    This is a small test version of the 5000 sq. deg. extra-galactic catalog for LSST-DESC.
