@@ -1,0 +1,32 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: cosmodc2.DiffSkyGalaxyCatalog
+
+catalog_root_dir:  /global/cfs/cdirs/lsst/groups/CS/diffsky_v0.1.0/pscan_39991
+catalog_filename_template: diffsky_z_{}_{}_cutout_{}.hdf5
+
+healpix_pixels: [9687, 9814, 9815, 9816, 9942, 9943, 10070, 10071]
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+lightcone: true
+
+version: "0.1.0"
+
+check_md5: false
+check_size: false
+check_cosmology: false
+ensure_meta_consistent: false
+sky_area: 26.88
+
+creators: ['Andrew Hearin', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Katrin Heitmann']
+
+description: |
+    This is the 13.4 sq. deg. test extra-galactic catalog for LSST DESC that has been created with fully forward modeled SEDs  
+
+include_in_default_catalog_list: false
