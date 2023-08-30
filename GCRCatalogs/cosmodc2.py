@@ -629,7 +629,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'target_halo_id',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
-            'stellar_mass':  'obs_sm',
+            'stellar_mass':  'um_source_galaxy_obs_sm',
             'size_disk_true':           'diskMajorAxisArcsec',
             'size_bulge_true':          'spheroidMajorAxisArcsec',
             'size_minor_disk_true':     'diskMinorAxisArcsec',
@@ -643,7 +643,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
             'velocity_x': 'vx',
             'velocity_y': 'vy',
             'velocity_z': 'vz',
-            'is_central': (lambda x: x == -1, 'source_galaxy_upid')
+            'is_central': (lambda x: x == -1, 'um_source_galaxy_upid')
         }
 
         # add magnitudes
