@@ -12,7 +12,7 @@ with open(os.path.join(os.path.dirname(__file__), 'GCRCatalogs', 'version.py')) 
     exec(f.read())  # pylint: disable=W0122
 
 setup(
-    name='GCRCatalogs',
+    name='lsstdesc-gcr-catalogs',
     version=__version__,  # pylint: disable=E0602 # noqa: F821
     description='Catalog repo for LSST DESC',
     url='https://github.com/LSSTDESC/gcr-catalogs',
