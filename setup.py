@@ -21,6 +21,7 @@ setup(
     maintainer='Yao-Yuan Mao',
     maintainer_email='yymao.astro@gmail.com',
     license='MIT',
+    license_files = ('LICENSE',),
     classifiers=[
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
@@ -33,5 +34,5 @@ setup(
     extras_require={
         'full': ['h5py', 'healpy', 'pandas', 'pyarrow', 'tables'],
     },
-    package_data={'GCRCatalogs': ['catalog_configs/*.yaml', 'site_config/*.yaml']},
+    package_data={'GCRCatalogs': ['catalog_configs/*.yaml', 'site_config/*.yaml', 'SCHEMA.md']},
 )
