@@ -436,8 +436,8 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'stellar_mass':  'totalMassStellar',
             'stellar_mass_disk':        'diskMassStellar',
             'stellar_mass_bulge':       'spheroidMassStellar',
-            'size_disk_true':           'morphology/diskMajorAxisArcsec',
-            'size_bulge_true':          'morphology/spheroidMajorAxisArcsec',
+            'size_disk_true':           'morphology/diskHalfLightRadiusArcsec',
+            'size_bulge_true':          'morphology/spheroidHalfLightRadiusArcsec',
             'size_minor_disk_true':     'morphology/diskMinorAxisArcsec',
             'size_minor_bulge_true':    'morphology/spheroidMinorAxisArcsec',
             'position_angle_true_dc2':  (_gen_position_angle, 'morphology/positionAngle'),
@@ -462,19 +462,20 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
             'ellipticity_2_bulge_true': (_calc_ellipticity_2, 'morphology/spheroidEllipticity', 'morphology/positionAngle'),
             'size_true': (
                 _calc_weighted_size,
-                'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMajorAxisArcsec',
+                'morphology/diskHalfLightRadiusArcsec',
+                'morphology/spheroidHalfLightRadiusArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
             ),
             'size_minor_true': (
                 _calc_weighted_size_minor,
-                'morphology/diskMajorAxisArcsec',
-                'morphology/spheroidMajorAxisArcsec',
+                'morphology/diskHalfLightRadiusArcsec',
+                'morphology/spheroidHalfLightRadiusArcsec',
                 'LSST_filters/diskLuminositiesStellar:LSST_r:rest',
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
                 'morphology/totalEllipticity',
             ),
+            
             'bulge_to_total_ratio_i': (
                 lambda x, y: x/(x+y),
                 'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed',
@@ -607,8 +608,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
     DiffSky galaxy catalog reader, inherited from CosmoDC2ParentClass
     Class for new generation of catalogs generated with JAX-based 
     forward modeling techniques.
-    This reader is used by SkySim v3+ (not SkySim5000) catalogs and the forthcoming
-    DiffSky series.
+    This reader is used by the skysim_v3, diffsky and roman_rubin_2023 catalog series
     """
 
     def _get_group_names(self, fh):
@@ -629,12 +629,13 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
             'magnification': (lambda mag: np.where(mag < 0.2, 1.0, mag), 'magnification'),
             'halo_id':       'target_halo_id',
             'halo_mass':     (lambda x: x/self.cosmology.h, 'target_halo_mass'),
-            'stellar_mass':  'obs_sm',
-            'size_disk_true':           'diskMajorAxisArcsec',
-            'size_bulge_true':          'spheroidMajorAxisArcsec',
-            'size_minor_disk_true':     'diskMinorAxisArcsec',
-            'size_minor_bulge_true':    'spheroidMinorAxisArcsec',
-            'position_angle_true':      (_gen_position_angle, 'positionAngle'),
+            'stellar_mass':  (lambda x: np.power(10, x), 'logsm_obs'),
+            'bulge_to_total_ratio':     'bulge_frac',
+            'size_disk_true':           'diskHalfLightRadiusArcsec',
+            'size_bulge_true':          'spheroidHalfLightRadiusArcsec',
+            'position_angle_true_phosim': 'positionAngle',
+            'position_angle_true':      (np.negative, 'positionAngle'),
+            'ellipticity_true':         'totalEllipticity',
             'ellipticity_disk_true':    'diskEllipticity',
             'ellipticity_bulge_true':   'spheroidEllipticity',
             'position_x': (lambda x: x/self.cosmology.h, 'x'),
@@ -643,8 +644,14 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
             'velocity_x': 'vx',
             'velocity_y': 'vy',
             'velocity_z': 'vz',
-            'is_central': (lambda x: x == -1, 'source_galaxy_upid')
         }
+
+        #check for quantity options to ensure backwards compatibility
+        hsc_list = [q for q in self._native_quantities if 'hsc' in q]
+        if 'um_source_galaxy_upid' in self._native_quantities:
+            quantity_modifiers['is_central'] = (lambda x: x == -1, 'um_source_galaxy_upid')
+        else:
+            quantity_modifiers['is_central'] = (lambda x: x == -1, 'source_galaxy_upid')
 
         # add magnitudes
         for band in 'ugrizyY':
@@ -654,7 +661,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
                 quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_obs_{}'.format(band.lower())
                 quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_rest_{}'.format(band.upper())
 
-            if band != 'u' and band != 'Y':
+            if band != 'u' and band != 'Y' and hsc_list:
                 quantity_modifiers['mag_{}_hsc'.format(band)] = (_calc_lensed_magnitude, 'HSC_obs_{}'.format(band),
                 'magnification',)
                 quantity_modifiers['mag_true_{}_hsc'.format(band)] = 'HSC_obs_{}'.format(band.lower())
