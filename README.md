@@ -50,10 +50,10 @@ Confluence page (*DESC member only*).
 
 ### Extragalactic Catalogs and Add-ons
 
-#### SkySim/DiffSky
+#### DiffSky Series
 *by Andrew Hearin, Eve Kovacs, Patricia Larsen, Esteban Rangel, Katrin Heitmann et al.*
 
-- `skysim_v3.1`: prototype of new galaxy catalog (also known as DiffSky) produced with differentiable, forward modeling techniques, sky area (~400 sq. deg.). Not to be confused with the SkySim5000 catalog series.
+- `roman_rubin_v1.1.1_elais`: This catalog was produced for the joint roman-desc image simulations using differentiable, forward modeling techniques. Predictions for the galaxy SEDs are based on their star-formation hsitories. Sky area covers the ELAIS field and is ~110 sq. deg. 
 
 #### SkySim5000
 
