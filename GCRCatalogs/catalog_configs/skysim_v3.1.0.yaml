@@ -25,6 +25,9 @@ sky_area: 439.78986
 creators: ['Andrew Hearin', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Katrin Heitmann']
 
 description: |
-    This is the 440 sq. deg. (DC2 area) extra-galactic catalog for LSST DESC that has been created with fully forward modeled SEDs  
+    This is the 440 sq. deg. (DC2 area) extra-galactic catalog for LSST DESC that has been created with fully forward modeled SEDs. 
 
-include_in_default_catalog_list: true
+include_in_default_catalog_list: false
+
+deprecated: Use roman_rubin_2023_v1.1.1_elais instead.
+
