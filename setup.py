@@ -32,7 +32,7 @@ setup(
     packages=find_packages(),
     install_requires=['requests', 'pyyaml', 'numpy', 'astropy', 'GCR>=0.9.2'],
     extras_require={
-        'full': ['h5py', 'healpy', 'pandas', 'pyarrow', 'tables'],
+        'full': ['h5py', 'healpy', 'pandas', 'pyarrow'],
     },
     package_data={'GCRCatalogs': ['catalog_configs/*.yaml', 'site_config/*.yaml', 'SCHEMA.md']},
 )
