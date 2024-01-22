@@ -1,0 +1,32 @@
+#  Use ^/ to indicate file path relative to GCR root dir
+
+subclass_name: cosmodc2.DiffSkyGalaxyCatalog
+
+catalog_root_dir:   ^/xgal/roman-rubin/roman_rubin_2023_v1.1.3
+catalog_filename_template: roman_rubin_2023_z_{}_{}_cutout_{}.hdf5
+
+healpix_pixels: [9921, 9922, 9923, 9924, 9925, 10050, 10051, 10052, 10053, 10177, 10178, 10179, 10180, 10181, 10305, 10306, 10307, 10308, 10429, 10430, 10431, 10432, 10549, 10550, 10551, 10552, 10665, 10666, 10667, 10668, 10777, 10778, 10779]
+
+cosmology:
+    H0: 71.0
+    Om0: 0.2648
+    Ob0: 0.0448
+    sigma8: 0.8
+    n_s: 0.963
+
+lightcone: true
+
+version: "1.1.3"
+
+check_md5: false
+check_size: false
+check_cosmology: false
+ensure_meta_consistent: false
+sky_area: 110.7868
+
+creators: ['Andrew Hearin', 'Eve Kovacs', 'Esteban Rangel', 'Patricia Larsen', 'Katrin Heitmann']
+
+description: |
+    This is the 110 sq. deg. extra-galactic catalog covering the ELAIS field for the Roman-Rubin image simulations for LSST DESC that has been created with fully forward modeled SEDs  
+
+include_in_default_catalog_list: true
