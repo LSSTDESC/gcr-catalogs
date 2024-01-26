@@ -17,4 +17,4 @@ sky_area: 439.78986
 description: |
     This is the DC2 image simulation area ofthe extra-galactic catalog for LSST DESC
 
-deprecated: Use roman_rubin_2023_v1.1.1_elais instead.
+deprecated: Use roman_rubin_2023_v1.1.3_elais instead.
