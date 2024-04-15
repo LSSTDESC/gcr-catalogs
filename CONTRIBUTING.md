@@ -68,7 +68,8 @@ Tyically, the location of the file (or the directory where the files are stored)
 You should use the keyword that is consistent with what is implemented in the reader. 
 
 When specifying the path for the location keyword, the path should always start with `^/`, where `^` represents the 
-top-level of the shared directory. You can find what `^` will be translated to [here](https://github.com/LSSTDESC/gcr-catalogs/blob/master/GCRCatalogs/site_config/site_rootdir.yaml). 
+top level of the shared directory. You can find what `^` will be translated to in 
+[`site_rootdir.yaml`](https://github.com/LSSTDESC/gcr-catalogs/blob/master/GCRCatalogs/site_config/site_rootdir.yaml). 
 
 ### Recommended keywords
 
