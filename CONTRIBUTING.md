@@ -4,12 +4,13 @@
 
 Consider the following when you prepare the catalog files that you plan to add to `GCRCatalogs`. 
 
-- File format: We strongly recoommend that you store the file in the Apache Parquet format.
+- File format: While GCRCatalogs can support any file format,
+  we strongly recoommend that the files are stored in the Apache Parquet format.
   Both astropy and pandas support reading and writing Parquet files.
 - File partition: For large data sets, the files should be partitioned to enable parallel access.
   Most commonly we partition the data by sky areas, but the choice of course would depend on the specific data content.  
 - Data schema: Make sure the schema (including column names, types, and units) are in the same schema
-  that the users should be use (that is, no further transformation of column names, types, and units would be needed). 
+  that the users should be using (that is, no further transformation of column names, types, and units would be needed). 
 
 Once you have your data files ready, the data files should be copied to a specific location on NERSC
 that all DESC members can access. 
