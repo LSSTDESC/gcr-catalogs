@@ -64,7 +64,7 @@ See the "Reserved Keywords" section below for more information on these keywords
 ### Location keywords
 
 Tyically, the location of the file (or the directory where the files are stored) is specified by one of the following keywords:
-`base_dir`, `catalog_root_dir`, `filename` (there are a few other possiblities or historic reasons). 
+`base_dir`, `catalog_root_dir`, `filename` (there are a few other possiblities for historic reasons). 
 You should use the keyword that is consistent with what is implemented in the reader. 
 
 When specifying the path for the location keyword, the path should always start with `^/`, where `^` represents the 
