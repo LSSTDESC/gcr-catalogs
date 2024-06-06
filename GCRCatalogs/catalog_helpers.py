@@ -40,7 +40,8 @@ def load_yaml_buf(b):
 
 
 # catalog loading helper functions
-def import_subclass(subclass_path, package=None, required_base_class=None):
+def import_subclass(subclass_path, package="GCRCatalogs",
+                    required_base_class=None):
     """
     Imports and returns a subclass.
     *subclass_path* must be in the form of module.subclass.

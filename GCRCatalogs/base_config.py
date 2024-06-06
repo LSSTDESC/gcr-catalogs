@@ -1,9 +1,14 @@
 from collections.abc import Mapping
+import warnings
 import copy
 from GCR import BaseGenericCatalog
+from .utils import is_string_like
 from .catalog_helpers import import_subclass
 
-__all__ = ['BaseConfig', 'load_catalog_from_config_dict']
+__all__ = ['BaseConfig', 'BaseConfigManager', 'load_catalog_from_config_dict']
+
+_GITHUB_REPO = "LSSTDESC/gcr-catalogs"
+_GITHUB_ISSUE_URL = f"https://github.com/{_GITHUB_REPO}/issues"
 
 
 class BaseConfig(Mapping):
@@ -104,6 +109,35 @@ class BaseConfig(Mapping):
     def online_alias_check(self):
         raise NotImplementedError("Subclass must implement online_alias_check")
 
+    def load_catalog(self, config_overwrite=None):
+        if self.is_pseudo:
+            raise RuntimeError(
+                """This is a pseudo entry that does not have an associated
+                   reader and cannot be loaded."""
+                f"""Use GCRCatalogs.get_catalog_config({self.rootname}) to
+                    see the content of this config file."""
+            )
+        if self.is_deprecated:
+            deprecation_msg = self[self.DEPRECATED_KEY]
+            if is_string_like(deprecation_msg):
+                deprecation_msg = deprecation_msg.strip() + "\n"
+            else:
+                deprecation_msg = ""
+            warnings.warn(
+                f"""`{self.rootname}` has been deprecated and may be removed
+                    in the future.\n{deprecation_msg}"""
+                f"""If your analysis requires this specific catalog, please
+                    open an issue at {_GITHUB_ISSUE_URL}""",
+            )
+        self.online_alias_check()
+        if config_overwrite:
+            if any(map(config_overwrite.get, self.REFERENCE_KEYS)):
+                raise ValueError("`config_overwrite` cannot specify " + " or ".join(self.REFERENCE_KEYS))
+            config_dict = dict(self._resolved_content, **config_overwrite)
+        else:
+            config_dict = self._resolved_content
+        return load_catalog_from_config_dict(config_dict)
+
 
 class BaseConfigManager(Mapping):
 
@@ -152,8 +186,8 @@ class BaseConfigManager(Mapping):
         It is used to detect recursive reference, and also to satisty the
         required call signature.
 
-        *past_refs* is an optional argument for this function's internal use to
-        detect recursive reference,
+        *past_refs* is an optional argument for this function's internal use
+        to detect recursive reference,
         """
         if past_refs is None and config_name is not None:
             past_refs = [config_name]
@@ -258,7 +292,8 @@ class BaseConfigManager(Mapping):
     @property
     def default_catalog_configs(self):
         return self.get_configs(resolve_content=True,
-                                include_default_only=True, include_pseudo=False)
+                                include_default_only=True,
+                                include_pseudo=False)
 
     @property
     def catalog_list(self):

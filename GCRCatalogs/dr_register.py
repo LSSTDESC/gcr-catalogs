@@ -57,16 +57,19 @@ class DrConfig(BaseConfig):
                                       self._mgr._owner_type))
             if self._mgr._owner:
                 filters.append(Filter("dataset.owner", "==", self._mgr._owner))
-            d = self._mgr._query.find_datasets(property_names=["dataset.access_api_configuration"],
-                                                  filters=filters)
-            self._content_ = load_yaml_buf(d["dataset.access_api_configuration"][0])
+            d = self._mgr._query.find_datasets(
+                property_names=["dataset.access_api_configuration"],
+                filters=filters
+            )
+            self._content_ = load_yaml_buf(
+                d["dataset.access_api_configuration"][0]
+            )
         return self._content_
 
+    # Information kept in a database can't get out of sync the way it
+    # can with cloned repos
     def online_alias_check(self):
-        if not self.is_alias:
-            return
-        # Not clear what to do here.  Can we get out of sync as can happen
-        # with local GCRCatalogs installation?
+        pass
 
 
 class DrConfigManager(BaseConfigManager):
