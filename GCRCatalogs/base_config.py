@@ -140,11 +140,10 @@ class BaseConfig(Mapping):
 
 
 class BaseConfigManager(Mapping):
-
-    # Subclass is responsible for getting all catalog configs, indexed by
-    # catalog name, in its __init__ function and storing in
-    # .self._configs.   Or else it will need its
-    # own implementation of a bunch of things.
+    '''
+    Any subclass is responsible for finding all catalogs in its __init__
+    function and storing in  .self._configs, indexed by catalog name.
+    '''
     def __init__(self):
         self._configs = dict()
 
@@ -171,8 +170,6 @@ class BaseConfigManager(Mapping):
     def configs(self):
         return self._configs.values()
 
-    # Should be possible to just copy implementation from ConfigManager
-    # Everything specific to subclass is in <class>._content()
     def resolve_reference(self, config_dict, config_name=None, past_refs=None):
         """
         This function is a "resolver" function that is used to resolve

@@ -1,6 +1,3 @@
-# import os
-# import warnings                       # might not need
-# import copy
 from .base_config import BaseConfigManager, BaseConfig
 from .catalog_helpers import load_yaml_buf
 from .root_dir_manager import RootDirManager
@@ -11,7 +8,7 @@ from dataregistry.query import Filter
 class DrConfig(BaseConfig):
 
     def __init__(self, name, dataset_id, manager, resolvers=None,
-                 aliased_to=None):
+                 alias_id=None):
         """
         representation of a config coming from dataregistry
 
@@ -19,22 +16,20 @@ class DrConfig(BaseConfig):
         name      string     name as known to user, registered in either
                              dataset table or dataset_alias table
         dataset_id int       dataset_id for this dataset (if an alias,
-                             it's the id of dataset it refers to)
+                             it's the id of dataset it refers to or None)
         manager    DrConfigManager object
         resolvers  list of function references with signature
                    `resolver(config_dit, config_name)` returning config dict
-        aliased_to int    if not None, name is actually an alias name,
-                          aliased to something in the dataset table.
-                          aliased_to is that row's dataset_id
-                          NOTE: also need to handle case of alias pointing
-                                to another alias
+        alias_id int    if not None, this config is an alias and this is
+                        its id in dataset_alias_table
+
         """
         self.name = name
         self.rootname = name
         self.lower = self.name.lower()  # in case we need it
         self.id = dataset_id
         self._mgr = manager
-        self.aliased_to = aliased_to
+        self.alias_id = alias_id
 
         self._resolvers = None
         self._content_ = None
@@ -50,20 +45,30 @@ class DrConfig(BaseConfig):
     @property
     def _content(self):
         if self._content_ is None:
-            # Fetch config content from db
-            filters = [Filter("dataset.dataset_id", "==", self.id)]
-            if self._mgr._owner_type:
-                filters.append(Filter("dataset.owner_type", "==",
-                                      self._mgr._owner_type))
-            if self._mgr._owner:
-                filters.append(Filter("dataset.owner", "==", self._mgr._owner))
-            d = self._mgr._query.find_datasets(
-                property_names=["dataset.access_api_configuration"],
-                filters=filters
-            )
+            if self.id:
+                tbl = "dataset"
+                filters = [Filter(f"{tbl}.{tbl}_id", "==", self.id)]
+                if self._mgr._owner_type:
+                    filters.append(Filter(f"{tbl}.owner_type", "==",
+                                          self._mgr._owner_type))
+                if self._mgr._owner:
+                    filters.append(Filter(f"{tbl}.owner", "==",
+                                          self._mgr._owner))
+                d = self._mgr._query.find_datasets(
+                    property_names=[f"{tbl}.access_api_configuration"],
+                    filters=filters
+                )
+            else:
+                tbl = "dataset_alias"
+                filters = [Filter(f"{tbl}.{tbl}_id", "==", self.alias_id)]
+                d = self._mgr._query.find_aliases(
+                    property_names=[f"{tbl}.access_api_configuration"],
+                    filter=filters
+                )
             self._content_ = load_yaml_buf(
-                d["dataset.access_api_configuration"][0]
+                d[f"{tbl}.access_api_configuration"][0]
             )
+
         return self._content_
 
     # Information kept in a database can't get out of sync the way it
@@ -96,23 +101,39 @@ class DrConfigManager(BaseConfigManager):
             filters.append(Filter("owner", "==", self._owner))
         order_by = ["dataset.name"]
         d = self._query.find_datasets(property_names=properties,
-                                      filters=filters,
-                                      order_by=order_by)
-        name_set = set(d['dataset.name'])
-        names_len = len(d['dataset.name'])
+                                      filters=filters)
+        #                              order_by=order_by)
+        name_set = set(d["dataset.name"])
+        names_len = len(d["dataset.name"])
         if names_len > len(name_set):
             raise RuntimeError("Catalog names are not unique")
 
-        # Also find all aliases which refer to GCRCatalogs
-        # datasets and save.
-
-        # Make a dict with values of type DrConfig.  They will initially
-        # have content set to None.  May want to cut on value of status
-
         for i in range(names_len):
-            name = d['dataset.name'][i]
-            self._configs[name] = DrConfig(name, d['dataset.dataset_id'][i],
+            name = d["dataset.name"][i]
+            self._configs[name] = DrConfig(name, d["dataset.dataset_id"][i],
                                            self)
+
+        # Now get aliases
+        filters = [Filter("dataset_alias.access_api", "==", "GCRCatalogs")]
+        properties = ["dataset_alias.alias", "dataset_alias.dataset_id",
+                      "dataset_alias.ref_alias_id"]
+        d = self._query.find_aliases(property_names=properties,
+                                     filters=filters)
+        alias_set = set(d["dataset_alias.alias"])
+        if alias_set.intersection(name_set):
+            raise RuntimeError("Catalog names including aliases are not unique")
+        for i in range(len(d["dataset_alias.alias"])):
+            name = d["dataset_alias.alias"][i]
+            id = d["dataset_alias.dataset_id"][i]
+            if id:
+                self._configs[name] = DrConfig(name, id, self)
+            else:
+                ref_id = d["dataset_alias.ref_alias_id"][i]
+                self._configs[name] = DrConfig(name, None, self,
+                                               ref_alias_id = ref_id)
+    def normalize_name(self, name):
+        # Currently don't need to do anything to name for data registry
+        return name
 
 
 class DrConfigRegister(RootDirManager, DrConfigManager):
