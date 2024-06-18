@@ -8,8 +8,8 @@ import warnings
 from distutils.version import StrictVersion # pylint: disable=no-name-in-module,import-error
 import numpy as np
 import h5py
-from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .cosmology import FlatLambdaCDM
 from .utils import md5, decode
 
 __all__ = ['AlphaQGalaxyCatalog']

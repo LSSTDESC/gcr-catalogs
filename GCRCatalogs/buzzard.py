@@ -7,8 +7,8 @@ import re
 import functools
 import numpy as np
 from astropy.io import fits
-from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .cosmology import FlatLambdaCDM
 
 __all__ = ['BuzzardGalaxyCatalog']
 
@@ -61,13 +61,7 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
 
         self.cache = dict() if use_cache else None
 
-        cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
-        cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
-        self.cosmology = FlatLambdaCDM(**cosmo_astropy)
-        for k, v in cosmology.items():
-            if k not in cosmo_astropy_allowed:
-                setattr(self.cosmology, k, v)
-
+        self.cosmology = FlatLambdaCDM(**cosmology)
         self.halo_mass_def = halo_mass_def
         self.lightcone = bool(lightcone)
         self.sky_area  = float(sky_area or np.nan)

@@ -12,8 +12,8 @@ import yaml
 import numpy as np
 import h5py
 import healpy as hp
-from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .cosmology import FlatLambdaCDM
 from .utils import md5, first, decode
 
 __all__ = ['CosmoDC2GalaxyCatalog', 'BaseDC2GalaxyCatalog', 'BaseDC2SnapshotGalaxyCatalog',
@@ -137,16 +137,9 @@ class CosmoDC2ParentClass(BaseGenericCatalog):
         )
         self._healpix_files = self._file_list # for backward compatibility
 
+        self.cosmology = None
         if 'cosmology' in kwargs:
-            cosmology = kwargs['cosmology']
-            cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
-            cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
-            self.cosmology = FlatLambdaCDM(**cosmo_astropy)
-            for k, v in cosmology.items():
-                if k not in cosmo_astropy_allowed:
-                    setattr(self.cosmology, k, v)
-        else:
-            self.cosmology = None
+            self.cosmology = FlatLambdaCDM(**kwargs['cosmology'])
 
         self.version = kwargs.get('version', '0.0.0')
         if StrictVersion(__version__) < self.version:
@@ -475,7 +468,7 @@ class CosmoDC2GalaxyCatalog(CosmoDC2ParentClass):
                 'LSST_filters/spheroidLuminositiesStellar:LSST_r:rest',
                 'morphology/totalEllipticity',
             ),
-            
+
             'bulge_to_total_ratio_i': (
                 lambda x, y: x/(x+y),
                 'SDSS_filters/spheroidLuminositiesStellar:SDSS_i:observed',
@@ -606,7 +599,7 @@ class SkySim5000GalaxyCatalog(CosmoDC2GalaxyCatalog):
 class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
     """
     DiffSky galaxy catalog reader, inherited from CosmoDC2ParentClass
-    Class for new generation of catalogs generated with JAX-based 
+    Class for new generation of catalogs generated with JAX-based
     forward modeling techniques.
     This reader is used by the skysim_v3, diffsky and roman_rubin_2023 catalog series
     """
@@ -656,7 +649,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
         # add magnitudes
         for band in 'ugrizyY':
             if band != 'y' and band != 'Y':
-                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_obs_{}'.format(band), 
+                quantity_modifiers['mag_{}_sdss'.format(band)] = (_calc_lensed_magnitude, 'SDSS_obs_{}'.format(band),
                                                                   'magnification',)
                 quantity_modifiers['mag_true_{}_sdss'.format(band)] = 'SDSS_obs_{}'.format(band.lower())
                 quantity_modifiers['Mag_true_{}_sdss_z0'.format(band)] = 'SDSS_rest_{}'.format(band.upper())
@@ -666,7 +659,7 @@ class DiffSkyGalaxyCatalog(CosmoDC2ParentClass):
                 'magnification',)
                 quantity_modifiers['mag_true_{}_hsc'.format(band)] = 'HSC_obs_{}'.format(band.lower())
                 quantity_modifiers['Mag_true_{}_hsc_z0'.format(band)] = 'HSC_rest_{}'.format(band.upper())
-                
+
             quantity_modifiers['mag_{}_lsst'.format(band)] = (_calc_lensed_magnitude, 'LSST_obs_{}'.format(band.lower(
             )), 'magnification',)
             quantity_modifiers['mag_true_{}_lsst'.format(band)] = 'LSST_obs_{}'.format(band.lower())
