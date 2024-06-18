@@ -82,6 +82,7 @@ class DrConfigManager(BaseConfigManager):
     Analog of ConfigManager when configs are stored in the Data Registry
     '''
     _ACCESS_API = "GCRCatalogs"
+
     def __init__(self, dr_root=None, dr_schema=None,
                  dr_site=None, owner_type=None, owner=None):
         super().__init__()
@@ -99,7 +100,7 @@ class DrConfigManager(BaseConfigManager):
             filters.append(Filter("owner_type", "==", self._owner_type))
         if self._owner:
             filters.append(Filter("owner", "==", self._owner))
-        order_by = ["dataset.name"]
+        # order_by = ["dataset.name"]
         d = self._query.find_datasets(property_names=properties,
                                       filters=filters)
         #                              order_by=order_by)
@@ -130,7 +131,8 @@ class DrConfigManager(BaseConfigManager):
             else:
                 ref_id = d["dataset_alias.ref_alias_id"][i]
                 self._configs[name] = DrConfig(name, None, self,
-                                               ref_alias_id = ref_id)
+                                               ref_alias_id=ref_id)
+
     def normalize_name(self, name):
         # Currently don't need to do anything to name for data registry
         return name
@@ -140,7 +142,10 @@ class DrConfigRegister(RootDirManager, DrConfigManager):
 
     def __init__(self, site_config_path=None, user_config_name=None,
                  dr_root=None, dr_schema=None, dr_site=None,
-                 owner_type="production", owner="production"):
+                 owner_type=None, owner=None):
+        if dr_schema.find("production") > -1:
+            owner_type = "production"
+            owner = "production"
         DrConfigManager.__init__(self, dr_root=dr_root, dr_schema=dr_schema,
                                  dr_site=dr_site, owner_type=owner_type,
                                  owner=owner)

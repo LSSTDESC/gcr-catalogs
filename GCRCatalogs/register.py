@@ -346,14 +346,46 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
 
 class ConfigSource():
     config_source = None
+    dr_source = None
+    file_source = None
 
-    def set_config_source(user_config_name=None, dr=False,
-                          dr_root=None, dr_schema=None, dr_site=None):
+    def set_config_source(dr=False, dr_root=None, dr_schema="production",
+                          dr_site=None):
+        """
+        Set up (or recover set up for) the specified source of config
+        information: either from the yaml files in the gcr-catalogs repo
+        or from the dataregistry.
+
+        Parameters
+        ----------
+        dr        boolean  True if dataregistry is the source; False otherwise
+
+        The remaining parameters only apply to the dataregistry source
+
+        dr_root   str   Top of file hierarchy.  If None, the dataregistry
+                        default will be used
+        dr_schema str   Schema to use; typically "production" or the
+                        dataregistry default
+        dr_site   str   If None, the usual protocol for dataregistry will
+                        be used to find the value
+
+        If the user returns to the dataregistry source after using the file
+        source, values for dr_root, dr_schema and dr_site will be ignored.
+        The original values will still be used.
+        """
         if dr:
-            reg = DrConfigRegister(_SITE_CONFIG_PATH, dr_root=dr_root,
-                                   dr_schema=dr_schema, dr_site=dr_site)
+            if not ConfigSource.dr_source:
+                ConfigSource.dr_source = DrConfigRegister(_SITE_CONFIG_PATH,
+                                                          dr_root=dr_root,
+                                                          dr_schema=dr_schema,
+                                                          dr_site=dr_site)
+            reg = ConfigSource.dr_source
+
         else:
-            reg = ConfigRegister(_CONFIG_DIRPATH, _SITE_CONFIG_PATH)
+            if not ConfigSource.file_source:
+                ConfigSource.file_source = ConfigRegister(_CONFIG_DIRPATH,
+                                                          _SITE_CONFIG_PATH)
+            reg = ConfigSource.file_source
         ConfigSource.config_source = reg
 
     def get_config_source():
