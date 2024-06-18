@@ -1,5 +1,22 @@
 # Contributing to GCRCatalogs
 
+## Preparing catalog files
+
+Consider the following when you prepare the catalog files that you plan to add to `GCRCatalogs`. 
+
+- File format: While GCRCatalogs can support any file format,
+  we strongly recoommend that the files are stored in the Apache Parquet format.
+  Both astropy and pandas support reading and writing Parquet files.
+- File partition: For large data sets, the files should be partitioned to enable parallel access.
+  Most commonly we partition the data by sky areas, but the choice of course would depend on the specific data content.  
+- Data schema: Make sure the schema (including column names, types, and units) are in the same schema
+  that the users should be using (that is, no further transformation of column names, types, and units would be needed). 
+
+Once you have your data files ready, the data files should be copied to a specific location on NERSC
+that all DESC members can access. 
+You can do that by opening an issue at https://github.com/LSSTDESC/desc-help/issues. 
+After your data files are copied, note the location as you will need it when specifying the catalog config (see below).
+
 ## Preparing a catalog reader
 
 If you are writing a new reader, please see this [guide](https://github.com/yymao/generic-catalog-reader#usage)
@@ -7,7 +24,9 @@ for an overview and an example of a minimal reader.
 The guide will explain that your reader must be a subclass of the `BaseGenericCatalog` parent class
 and that you will need to supply a minimum of 3 methods to specify how to read in the underlying file.
 
-You can also supply a translation dictionary between the native quantities in your
+The best practice is to ensure the schema (including column names, types, and units) of your data files
+is identical to what you expect the users will be using. 
+However, if really needed, you can also supply a translation dictionary between the native quantities in your
 catalog and the quantities that are presented to the user via the `GCRCatalogs` interface.
 
 You may want to look at existing readers in this repository as additional examples.
@@ -24,6 +43,7 @@ Each yaml config file should specify the reader class to use and all input argum
 For example, if the reader class asks for `catalog_root_dir` as an input argument to specify the location of the
 catalog files, you need to include `catalog_root_dir` as a keyword in the corresponding yaml config file,
 and set it to the correct location.
+
 All keywords in the yaml config file will be passed to the reader class.
 
 Below is a list of required, recommended, or reserved keywords that may appear in a yaml config file.
@@ -40,6 +60,16 @@ subclass_name: <reader_module_name>.<ReaderClassName>
 - `based_on`:  `subclass_name` is not required but will be used if supplied.
 
 See the "Reserved Keywords" section below for more information on these keywords.
+
+### Location keywords
+
+Tyically, the location of the file (or the directory where the files are stored) is specified by one of the following keywords:
+`base_dir`, `catalog_root_dir`, `filename` (there are a few other possiblities for historic reasons). 
+You should use the keyword that is consistent with what is implemented in the reader. 
+
+When specifying the path for the location keyword, the path should always start with `^/`, where `^` represents the 
+top level of the shared directory. You can find what `^` will be translated to in 
+[`site_rootdir.yaml`](https://github.com/LSSTDESC/gcr-catalogs/blob/master/GCRCatalogs/site_config/site_rootdir.yaml). 
 
 ### Recommended keywords
 
