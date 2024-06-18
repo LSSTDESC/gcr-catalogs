@@ -5,8 +5,8 @@ from __future__ import division, print_function
 import os
 import functools
 from astropy.io import fits
-from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .cosmology import FlatLambdaCDM
 
 __all__ = ['RedmapperCatalog', 'RedMapperLegacyCatalog']
 
@@ -40,13 +40,9 @@ class RedmapperCatalog(BaseGenericCatalog):
 
         self._catalog_path_template = {k: os.path.join(catalog_root_dir, v) for k, v in catalog_path_template.items()}
 
-        cosmology = kwargs.get('cosmology', {})
-        cosmo_astropy_allowed = FlatLambdaCDM.__init__.__code__.co_varnames[1:]
-        cosmo_astropy = {k: v for k, v in cosmology.items() if k in cosmo_astropy_allowed}
-        self.cosmology = FlatLambdaCDM(**cosmo_astropy)
-        for k, v in cosmology.items():
-            if k not in cosmo_astropy_allowed:
-                setattr(self.cosmology, k, v)
+        self.cosmology = None
+        if 'cosmology' in kwargs:
+            self.cosmology = FlatLambdaCDM(**kwargs['cosmology'])
 
         self.lightcone = kwargs.get('lightcone')
         self.sky_area = kwargs.get('sky_area')

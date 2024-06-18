@@ -76,7 +76,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
     def _get_quantity_info_dict(self, quantity, default=None):
         return self._info_dict.get(quantity,default)
-    
+
     def _generate_native_quantity_list(self):
         return list(self._quantity_modifiers.values()) + list(self._native_filter_quantities)
 
@@ -143,7 +143,7 @@ class PhotoZCatalog(BaseGenericCatalog):
 
                 slice_this = slice(*meta_patch['slice'])
                 def native_quantity_getter(native_quantity):
-                    # pylint: disable=W0640
+                    # pylint: disable=W0640,E0606
                     # variables (df and slice_this) intentionally defined in loop
                     if native_quantity == '_FULL_PDF':
                         return df.iloc[slice_this, :self._n_pdf_bins].values

@@ -9,8 +9,8 @@ import warnings
 from functools import partial
 import numpy as np
 import pandas as pd
-from astropy.cosmology import FlatLambdaCDM
 from GCR import BaseGenericCatalog
+from .cosmology import FlatLambdaCDM
 
 __all__ = ['InstanceCatalog']
 
