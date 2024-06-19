@@ -2,6 +2,7 @@ import os
 import warnings
 import yaml             # now needed only for error reporting
 import requests         # now needed only for error reporting
+from collections import namedtuple
 from .root_dir_manager import RootDirManager
 from .catalog_helpers import load_yaml_local, load_yaml
 from .base_config import BaseConfig, BaseConfigManager
@@ -344,10 +345,13 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     )
 
 
+_dr_params = namedtuple("Dr_params", ["dr_root", "dr_schema", "dr_site"])
+
+
 class ConfigSource():
     config_source = None
-    dr_source = None
     file_source = None
+    dr_sources = []
 
     def set_config_source(dr=False, dr_root=None, dr_schema="production",
                           dr_site=None):
@@ -374,19 +378,41 @@ class ConfigSource():
         The original values will still be used.
         """
         if dr:
-            if not ConfigSource.dr_source:
-                ConfigSource.dr_source = DrConfigRegister(_SITE_CONFIG_PATH,
-                                                          dr_root=dr_root,
-                                                          dr_schema=dr_schema,
-                                                          dr_site=dr_site)
-            reg = ConfigSource.dr_source
-
+            dr_params = _dr_params(dr_root, dr_schema, dr_site)
+            for  elt in ConfigSource.dr_sources:
+                if elt[1] == dr_params:
+                    ConfigSource.config_source = elt[0]
+                    return elt[0]
+            # No existing config source with these parameters so make
+            # a new one
+            reg = DrConfigRegister(_SITE_CONFIG_PATH,
+                                   dr_root=dr_root,
+                                   dr_schema=dr_schema,
+                                   dr_site=dr_site)
+            ConfigSource.dr_sources.append((reg, dr_params))
+            ConfigSource.config_source = reg
+            return reg
         else:
             if not ConfigSource.file_source:
                 ConfigSource.file_source = ConfigRegister(_CONFIG_DIRPATH,
                                                           _SITE_CONFIG_PATH)
             reg = ConfigSource.file_source
-        ConfigSource.config_source = reg
+            ConfigSource.config_source = reg
+            return reg
 
     def get_config_source():
         return ConfigSource.config_source
+
+    def resume_config_source(config_source):
+        if isinstance(config_source, ConfigRegister):
+            ConfigSource.config_source = config_source
+            return config_source
+        elif isinstance(config_source, DrConfigRegister):
+            for elt in ConfigSource.dr_sources:
+                if config_source == elt[0]:
+                    ConfigSource.config_source = config_source
+                    return config_source
+            else:
+                raise ValueError("Unknown config source")
+        else:
+            raise ValueError("Improper argument to ConfigSource.resume_config_source")
