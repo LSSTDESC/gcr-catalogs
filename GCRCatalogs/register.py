@@ -6,14 +6,18 @@ from collections import namedtuple
 from .root_dir_manager import RootDirManager
 from .catalog_helpers import load_yaml_local, load_yaml
 from .base_config import BaseConfig, BaseConfigManager
-from .dr_register import DrConfigRegister
+try:
+    from .dr_register import DrConfigRegister
+    DR_AVAILABLE = True
+except ModuleNotFoundError:
+    DR_AVAILABLE = False
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default",
     "reset_root_dir", "get_available_catalogs", "get_reader_list",
     "get_catalog_config", "has_catalog", "load_catalog", "retrieve_paths",
     "get_site_list", "set_root_dir_by_site", "get_available_catalog_names",
-    "get_public_catalog_names", "ConfigSource"]
+    "get_public_catalog_names", "ConfigSource", "DR_AVAILABLE"]
 
 _GITHUB_REPO = "LSSTDESC/gcr-catalogs"
 _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatalogs"
@@ -112,7 +116,10 @@ class ConfigRegister(RootDirManager, ConfigManager):
 # module-level functions that access/manipulate ConfigSource.config_source
 def check_for_reg():
     if not ConfigSource.config_source:
-        raise RuntimeError("Registery has not been established. Call ConfigSource.set_config_source first")
+        if not DR_AVAILABLE:
+            ConfigSource.set_config_source()
+        else:
+            raise RuntimeError("Registery has not been established. Call ConfigSource.set_config_source first")
 
 
 def get_root_dir():
