@@ -298,8 +298,9 @@ def has_catalog(catalog_name, include_pseudo=False):
     Checks if *catalog_name* exists
     """
     check_for_reg()
-    return catalog_name in ConfigSource.config_source._configs and (
-        include_pseudo or not ConfigSource.config_source._configs[catalog_name].is_pseudo
+    lower_name = catalog_name.lower()
+    return lower_name in ConfigSource.config_source._configs and (
+        include_pseudo or not ConfigSource.config_source._configs[lower_name].is_pseudo
     )
 
 
