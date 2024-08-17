@@ -289,7 +289,7 @@ def get_catalog_config(catalog_name, raw_config=False):
     If *raw_config* set to `True`, do not resolve references (alias, based_on)
     """
     check_for_reg()
-    config = ConfigSource.config_source._configs[catalog_name]
+    config = ConfigSource.config_source._configs[catalog_name.lower()]
     return config.content if raw_config else config.resolved_content
 
 
@@ -321,7 +321,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     catalog : instance of a subclass of BaseGenericCatalog
     """
     check_for_reg()
-    return ConfigSource.config_source._configs[catalog_name].load_catalog(config_overwrite)
+    return ConfigSource.config_source._configs[catalog_name.lower()].load_catalog(config_overwrite)
 
 
 def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
