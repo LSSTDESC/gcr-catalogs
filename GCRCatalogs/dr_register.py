@@ -1,12 +1,14 @@
-_DR_AVAILABLE = False
+DR_AVAILABLE = False
 try:
     from dataregistry import DataRegistry
     from dataregistry.query import Filter
-    _DR_AVAILABLE = True
+    DR_AVAILABLE = True
+    __all__ = ['DR_AVAILABLE', 'DrConfig', 'DrConfigRegister']
 except ModuleNotFoundError:
-    _DR_AVALIABLE = False
+    DR_AVALIABLE = False
+    __all__ = ['DR_AVAILABLE']
 
-if _DR_AVAILABLE:
+if DR_AVAILABLE:
     from .base_config import BaseConfigManager, BaseConfig
     from .catalog_helpers import load_yaml_buf
     from .root_dir_manager import RootDirManager

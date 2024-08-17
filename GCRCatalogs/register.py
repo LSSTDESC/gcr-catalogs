@@ -6,11 +6,9 @@ from collections import namedtuple
 from .root_dir_manager import RootDirManager
 from .catalog_helpers import load_yaml_local, load_yaml
 from .base_config import BaseConfig, BaseConfigManager
-try:
+from .dr_register import DR_AVAILABLE
+if DR_AVAILABLE:
     from .dr_register import DrConfigRegister
-    DR_AVAILABLE = True
-except ModuleNotFoundError:
-    DR_AVAILABLE = False
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default",
@@ -34,8 +32,8 @@ class Config(BaseConfig):
         self.path = os.path.join(config_dir, config_path)
         self.basename = os.path.basename(self.path)
         rootname, self.ext = os.path.splitext(self.basename)
-        name = self.rootname.lower()
-        super.__init__(name=name, rootname=rootname)
+        name = rootname.lower()
+        super().__init__(name=name, rootname=rootname)
 
         if resolvers:
             self.set_resolvers(*resolvers)
@@ -381,7 +379,7 @@ class ConfigSource():
         source, values for dr_root, dr_schema and dr_site will be ignored.
         The original values will still be used.
         """
-        if dr:
+        if dr and DR_AVAILABLE:
             dr_params = _dr_params(dr_root, dr_schema, dr_site)
             for  elt in ConfigSource.dr_sources:
                 if elt[1] == dr_params:
