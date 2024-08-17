@@ -33,12 +33,9 @@ class Config(BaseConfig):
     def __init__(self, config_path, config_dir="", resolvers=None):
         self.path = os.path.join(config_dir, config_path)
         self.basename = os.path.basename(self.path)
-        self.rootname, self.ext = os.path.splitext(self.basename)
-        self.name = self.rootname.lower()
-
-        self._resolvers = None
-        self._content_ = None
-        self._resolved_content_ = None
+        rootname, self.ext = os.path.splitext(self.basename)
+        name = self.rootname.lower()
+        super.__init__(name=name, rootname=rootname)
 
         if resolvers:
             self.set_resolvers(*resolvers)
@@ -296,7 +293,7 @@ def get_catalog_config(catalog_name, raw_config=False):
     If *raw_config* set to `True`, do not resolve references (alias, based_on)
     """
     check_for_reg()
-    config = ConfigSource.config_source[catalog_name]
+    config = ConfigSource.config_source._configs[catalog_name]
     return config.content if raw_config else config.resolved_content
 
 
@@ -306,7 +303,7 @@ def has_catalog(catalog_name, include_pseudo=False):
     """
     check_for_reg()
     return catalog_name in ConfigSource.config_source and (
-        include_pseudo or not ConfigSource.config_source[catalog_name].is_pseudo
+        include_pseudo or not ConfigSource.config_source._configs[catalog_name].is_pseudo
     )
 
 
@@ -327,7 +324,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     catalog : instance of a subclass of BaseGenericCatalog
     """
     check_for_reg()
-    return ConfigSource.config_source[catalog_name].load_catalog(config_overwrite)
+    return ConfigSource.config_source._configs[catalog_name].load_catalog(config_overwrite)
 
 
 def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
@@ -354,12 +351,12 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
 
 _dr_params = namedtuple("Dr_params", ["dr_root", "dr_schema", "dr_site"])
 
-
 class ConfigSource():
     config_source = None
     file_source = None
     dr_sources = []
 
+    @staticmethod
     def set_config_source(dr=False, dr_root=None, dr_schema="production",
                           dr_site=None):
         """
@@ -407,9 +404,11 @@ class ConfigSource():
             ConfigSource.config_source = reg
             return reg
 
+    @staticmethod
     def get_config_source():
         return ConfigSource.config_source
 
+    @staticmethod
     def resume_config_source(config_source):
         if isinstance(config_source, ConfigRegister):
             ConfigSource.config_source = config_source

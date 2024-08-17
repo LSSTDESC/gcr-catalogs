@@ -22,6 +22,13 @@ class BaseConfig(Mapping):
     ADDON_KEY = "addon_for"
     PUBLIC_RELEASE_KEY = "public_release"
 
+    def __init__(self, name=None, rootname=None):
+        self.name = name
+        self.rootname = rootname
+        self._resolved_content_ = None
+        self._resolvers = None
+        self._content_ = None
+
     def set_resolvers(self, *resolvers):
         """
         Each resolver will be called with two arguments:
