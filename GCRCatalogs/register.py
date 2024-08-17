@@ -7,8 +7,6 @@ from .root_dir_manager import RootDirManager
 from .catalog_helpers import load_yaml_local, load_yaml
 from .base_config import BaseConfig, BaseConfigManager
 from .dr_register import DR_AVAILABLE
-if DR_AVAILABLE:
-    from .dr_register import DrConfigRegister
 
 __all__ = [
     "get_root_dir", "set_root_dir", "remove_root_dir_default",
@@ -380,6 +378,8 @@ class ConfigSource():
         The original values will still be used.
         """
         if dr and DR_AVAILABLE:
+            from .dr_register import DrConfigRegister
+
             dr_params = _dr_params(dr_root, dr_schema, dr_site)
             for  elt in ConfigSource.dr_sources:
                 if elt[1] == dr_params:
@@ -411,12 +411,16 @@ class ConfigSource():
         if isinstance(config_source, ConfigRegister):
             ConfigSource.config_source = config_source
             return config_source
-        elif isinstance(config_source, DrConfigRegister):
-            for elt in ConfigSource.dr_sources:
-                if config_source == elt[0]:
-                    ConfigSource.config_source = config_source
-                    return config_source
-            else:
-                raise ValueError("Unknown config source")
+
+        if DR_AVAILABLE:
+            from .dr_register import DrConfigRegister
+
+            if isinstance(config_source, DrConfigRegister):
+                for elt in ConfigSource.dr_sources:
+                    if config_source == elt[0]:
+                        ConfigSource.config_source = config_source
+                        return config_source
+                else:
+                    raise ValueError("Unknown config source")
         else:
             raise ValueError("Improper argument to ConfigSource.resume_config_source")
