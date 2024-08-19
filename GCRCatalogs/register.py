@@ -289,7 +289,7 @@ def get_catalog_config(catalog_name, raw_config=False):
     If *raw_config* set to `True`, do not resolve references (alias, based_on)
     """
     check_for_reg()
-    config = ConfigSource.config_source[catalog_name]
+    config = ConfigSource.config_source[catalog_name]  # pylint: disable=unsubscriptable-object
     return config.content if raw_config else config.resolved_content
 
 
