@@ -300,7 +300,7 @@ def has_catalog(catalog_name, include_pseudo=False):
     check_for_reg()
     lower_name = catalog_name.lower()
     return lower_name in ConfigSource.config_source._configs and (
-        include_pseudo or not ConfigSource.config_source._configs[lower_name].is_pseudo
+        include_pseudo or not ConfigSource.config_source._configs[lower_name].is_pseudo  # pylint: disable=unsubscriptable-object
     )
 
 
@@ -321,7 +321,7 @@ def load_catalog(catalog_name, config_overwrite=None):
     catalog : instance of a subclass of BaseGenericCatalog
     """
     check_for_reg()
-    return ConfigSource.config_source[catalog_name].load_catalog(config_overwrite)
+    return ConfigSource.config_source[catalog_name].load_catalog(config_overwrite)  # pylint: disable=unsubscriptable-object
 
 
 def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
