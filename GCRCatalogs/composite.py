@@ -5,7 +5,9 @@ import warnings
 
 from GCR import CompositeSpecs, CompositeCatalog
 
-from .register import load_catalog, load_catalog_from_config_dict, has_catalog
+# from .register import load_catalog, load_catalog_from_config_dict, has_catalog
+from .register import load_catalog, has_catalog
+from .base_config import load_catalog_from_config_dict
 
 
 class CompositeReader(CompositeCatalog):

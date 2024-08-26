@@ -3,6 +3,7 @@ test_register.py
 """
 import pytest
 import GCRCatalogs
+GCRCatalogs.ConfigSource.set_config_source()
 
 # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='module')

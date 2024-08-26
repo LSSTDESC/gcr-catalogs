@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 import GCRCatalogs
+GCRCatalogs.ConfigSource.set_config_source()
 
 # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='module')
