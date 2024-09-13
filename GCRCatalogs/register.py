@@ -21,6 +21,9 @@ _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
+_CONFIG_SOURCE_ENV = "GCR_CONFIG_SOURCE"
+_DR_SCHEMA_ENV = "GCR_DR_SCHEMA"
+_DR_SCHEMA_DEFAULT = "production"
 
 
 # Classes
@@ -111,8 +114,25 @@ def check_for_reg():
     if not ConfigSource.config_source:
         if not DR_AVAILABLE:
             ConfigSource.set_config_source()
+            return
         else:
-            raise RuntimeError("Registery has not been established. Call ConfigSource.set_config_source first")
+            msg = f'''
+Set env variable {_CONFIG_SOURCE_ENV} to acceptable value
+("dataregistry" or "files") or call ConfigSource.set_config_source'''
+            # See if user has set environment variable to select source
+            source = os.getenv(_CONFIG_SOURCE_ENV, None)
+            if not source:
+                raise RuntimeError("Registry source has not been established." + msg)
+            if source == "dataregistry":
+                dr_schema = os.getenv(_DR_SCHEMA_ENV, _DR_SCHEMA_DEFAULT)
+                ConfigSource.set_config_source(True, dr_schema=dr_schema)
+                return
+            elif source == "files":
+                ConfigSource.set_config_source(False)
+                return
+            else:
+                raise RuntimeError(
+                    f"Unknown value {source} for GCR_CONFIG_SOURCE." + msg)
 
 
 def get_root_dir():
@@ -348,13 +368,14 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
 
 _dr_params = namedtuple("Dr_params", ["dr_root", "dr_schema", "dr_site"])
 
+
 class ConfigSource():
     config_source = None
     file_source = None
     dr_sources = []
 
     @staticmethod
-    def set_config_source(dr=False, dr_root=None, dr_schema="production",
+    def set_config_source(dr=False, dr_root=None, dr_schema=_DR_SCHEMA_DEFAULT,
                           dr_site=None):
         """
         Set up (or recover set up for) the specified source of config
@@ -382,7 +403,7 @@ class ConfigSource():
             from .dr_register import DrConfigRegister
 
             dr_params = _dr_params(dr_root, dr_schema, dr_site)
-            for  elt in ConfigSource.dr_sources:
+            for elt in ConfigSource.dr_sources:
                 if elt[1] == dr_params:
                     ConfigSource.config_source = elt[0]
                     return elt[0]
