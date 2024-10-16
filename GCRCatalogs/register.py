@@ -23,7 +23,7 @@ _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
 _SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
 _CONFIG_SOURCE_ENV = "GCR_CONFIG_SOURCE"
 _DR_SCHEMA_ENV = "GCR_DR_SCHEMA"
-_DR_SCHEMA_DEFAULT = "production"
+_DR_SCHEMA_DEFAULT = "lsst_desc_production"
 
 
 # Classes
