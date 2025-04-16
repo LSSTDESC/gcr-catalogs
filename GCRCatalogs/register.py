@@ -124,11 +124,10 @@ Set env variable {_CONFIG_SOURCE_ENV} to acceptable value
             if not source:
                 raise RuntimeError("Registry source has not been established." + msg)
             if source == "dataregistry":
-                dr_schema = os.getenv(_DR_SCHEMA_ENV, _DR_SCHEMA_DEFAULT)
-                ConfigSource.set_config_source(True, dr_schema=dr_schema)
+                ConfigSource.set_config_source(dr=True)
                 return
             elif source == "files":
-                ConfigSource.set_config_source(False)
+                ConfigSource.set_config_source(dr=False)
                 return
             else:
                 raise RuntimeError(
@@ -315,12 +314,20 @@ def get_catalog_config(catalog_name, raw_config=False):
 
 def has_catalog(catalog_name, include_pseudo=False):
     """
-    Checks if *catalog_name* exists
+    Checks if *catalog_name* exists.  Look for either exact match of
+    catalog name (used in Data Registry) or lowercased version.
     """
     check_for_reg()
     lower_name = catalog_name.lower()
-    return lower_name in ConfigSource.config_source._configs and (
-        include_pseudo or not ConfigSource.config_source._configs[lower_name].is_pseudo  # pylint: disable=unsubscriptable-object
+    if lower_name in ConfigSource.config_source._configs:
+        the_name = lower_name
+    elif catalog_name in ConfigSource.config_source._configs:
+        the_name = catalog_name
+    else:
+        return False
+
+    return (include_pseudo or (
+            not ConfigSource.config_source._configs[the_name].is_pseudo)  # pylint: disable=unsubscriptable-object
     )
 
 
@@ -366,7 +373,8 @@ def retrieve_paths(name_startswith=None, name_contains=None, **kwargs):
     )
 
 
-_dr_params = namedtuple("Dr_params", ["dr_root", "dr_schema", "dr_site"])
+_dr_params = namedtuple("Dr_params", ["dr_root", "dr_namespace",
+                                      "dr_schema", "dr_site"])
 
 
 class ConfigSource():
@@ -375,7 +383,9 @@ class ConfigSource():
     dr_sources = []
 
     @staticmethod
-    def set_config_source(dr=False, dr_root=None, dr_schema=_DR_SCHEMA_DEFAULT,
+    def set_config_source(dr=False, dr_root=None,
+                          dr_namespace=None,
+                          dr_schema=None,
                           dr_site=None):
         """
         Set up (or recover set up for) the specified source of config
@@ -387,22 +397,23 @@ class ConfigSource():
         dr        boolean  True if dataregistry is the source; False otherwise
 
         The remaining parameters only apply to the dataregistry source
-
         dr_root   str   Top of file hierarchy.  If None, the dataregistry
                         default will be used
-        dr_schema str   Schema to use; typically "production" or the
-                        dataregistry default
+        dr_namespace  str   Defaults to "None", interpreted as using default
+                        namespace
+        dr_schema str   Schema to use. Defaults to "None", which is interpreted
+                        as using query mode = "production"
         dr_site   str   If None, the usual protocol for dataregistry will
                         be used to find the value
 
         If the user returns to the dataregistry source after using the file
-        source, values for dr_root, dr_schema and dr_site will be ignored.
-        The original values will still be used.
+        source, values for dr_root, dr_namespace, dr_schema and dr_site will
+        be ignored. The original values will still be used.
         """
         if dr and DR_AVAILABLE:
             from .dr_register import DrConfigRegister
 
-            dr_params = _dr_params(dr_root, dr_schema, dr_site)
+            dr_params = _dr_params(dr_root, dr_namespace, dr_schema, dr_site)
             for elt in ConfigSource.dr_sources:
                 if elt[1] == dr_params:
                     ConfigSource.config_source = elt[0]
@@ -411,7 +422,6 @@ class ConfigSource():
             # a new one
             reg = DrConfigRegister(_SITE_CONFIG_PATH,
                                    dr_root=dr_root,
-                                   dr_schema=dr_schema,
                                    dr_site=dr_site)
             ConfigSource.dr_sources.append((reg, dr_params))
             ConfigSource.config_source = reg

@@ -100,7 +100,8 @@ if DR_AVAILABLE:
 
             self._owner_type = owner_type
             self._owner = owner
-            dr_reg = DataRegistry(schema=dr_schema, root_dir=dr_root, site=dr_site)
+            dr_reg = DataRegistry(root_dir=dr_root, site=dr_site,
+                                  query_mode="production")
 
             # Find ids, names of all datasets registered with value for access_api
             # set to GCRCatalogs.
@@ -157,7 +158,7 @@ if DR_AVAILABLE:
         def __init__(self, site_config_path=None, user_config_name=None,
                      dr_root=None, dr_schema=None, dr_site=None,
                      owner_type=None, owner=None):
-            if dr_schema.find("production") > -1:
+            if dr_schema is None or dr_schema.find("production") > -1:
                 owner_type = "production"
                 owner = "production"
             DrConfigManager.__init__(self, dr_root=dr_root, dr_schema=dr_schema,
