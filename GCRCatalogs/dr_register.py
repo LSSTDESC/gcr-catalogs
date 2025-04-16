@@ -158,10 +158,7 @@ if DR_AVAILABLE:
         def __init__(self, site_config_path=None, user_config_name=None,
                      dr_root=None, dr_schema=None, dr_site=None,
                      owner_type=None, owner=None):
-            if dr_schema is None:
-                owner_type = "production"
-                owner = "production"
-            elif dr_schema.find("production") > -1:
+            if dr_schema is None or dr_schema.find("production") > -1:
                 owner_type = "production"
                 owner = "production"
             DrConfigManager.__init__(self, dr_root=dr_root, dr_schema=dr_schema,
