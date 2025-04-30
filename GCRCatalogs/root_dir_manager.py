@@ -4,6 +4,24 @@ from .user_config_mgr import UserConfigManager
 from .catalog_helpers import load_yaml_local
 from .utils import is_string_like
 
+_DESC_SITE_ENV = "DESC_GCR_SITE"
+
+def get_site_name():
+    """
+        Return a string which, when executing at a recognized site with
+        well-known name, will include the name for that site
+        """
+
+    site_from_env = os.getenv(_DESC_SITE_ENV, "")
+    if site_from_env:
+        return site_from_env
+
+    if os.getenv("NERSC_HOST", ""):
+        site_from_node = 'nersc'
+    else:
+        site_from_node = None
+    return site_from_node
+
 
 class RootDirManager:
     _ROOT_DIR_SIGNAL = "^/"
@@ -20,7 +38,6 @@ class RootDirManager:
         "meta_path",
     )
     _DICT_LIST_KEYS = ("catalogs",)
-    _DESC_SITE_ENV = "DESC_GCR_SITE"
     _NO_DEFAULT_ROOT_WARN = """
        Default root dir has not been set; catalogs may not be found.
 
@@ -64,34 +81,19 @@ class RootDirManager:
 
         # Try to set self._root_dir_from_site
         if self._site_config:
-            site_info = self._get_site_info()
-            if site_info:
+            site_name = get_site_name()
+            if site_name:
                 for k, v in self._site_config.items():
-                    if k in site_info:
-                        self._default_root_dir = v
+                    if k in site_name:
+                        self._default_root_dir = v['root_dir']
                         break
-
-    def _get_site_info(self):
-        """
-        Return a string which, when executing at a recognized site with
-        well-known name, will include the name for that site
-        """
-        site_from_env = os.getenv(self._DESC_SITE_ENV, "")
-        if site_from_env:
-            return site_from_env
-
-        if os.getenv("NERSC_HOST", ""):
-            site_from_node = 'nersc'
-        else:
-            site_from_node = None
-        return site_from_node
 
     @property
     def root_dir(self):
         current_root_dir = self._custom_root_dir or self._default_root_dir
         if not current_root_dir:
             site_string = ' '.join(self.site_list)
-            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(self._DESC_SITE_ENV, site_string))
+            warnings.warn(self._NO_DEFAULT_ROOT_WARN.format(_DESC_SITE_ENV, site_string))
 
         return current_root_dir
 
@@ -193,7 +195,7 @@ class RootDirManager:
         root_dir = self.root_dir
         return bool(
             root_dir and
-            os.path.abspath(root_dir) in self._site_config.values() and
+            os.path.abspath(root_dir) in [v['root_dir'] for v in self._site_config.values()] and
             os.path.isdir(root_dir) and
             os.access(root_dir, os.R_OK)
         )
