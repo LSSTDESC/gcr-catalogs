@@ -9,7 +9,7 @@ Those parameters and how to modify them are described below.
 Defaults for certain other parameters are dependent on where you're running.
 Currently recognized sites in the GCRCatalogs sense are "nersc", "in2p3"
 and "nersc_public". If you are running at NERSC, GCRCatalogs will detect that
-and use the value 'nersc'.
+and use the value "nersc".
 
 ### How and When to Set Site
 
@@ -45,7 +45,7 @@ in the DESC Data Registry database. GCRCatalogs needs to know whether to
 use the files or the Data Registry as the source of this metadata. By
 default GCRCatalogs will use the site to determine a value, currently
 "dataregistry" when the site is "nersc" and "files" otherwise. One
-may override this value by
+may override this value by using either of the following methods:
 
 - setting the environment variable `GCR_CONFIG_SOURCE` to the desired
   value before using GCRCatalogs
@@ -53,4 +53,3 @@ may override this value by
   (in order to use files) or
   `GCRCatalogs.ConfigSource.set_config_source(dr=True)`
   to use the Data Registry
-or "files"
