@@ -53,9 +53,9 @@ Confluence page (*DESC member only*).
 #### DiffSky Series
 *by Andrew Hearin, Eve Kovacs, Patricia Larsen, Esteban Rangel, Katrin Heitmann et al.*
 
-- `roman_rubin_v1.1.3_elais`: This catalog is a variant of roman_rubin_v1.1.2_elais that uses an improved tuning of the SED model parameters. The resulting luminosity distributions are in better agreement with the validation data (COSMOS 2020 and DESCQA tests). 
+- `roman_rubin_v1.1.3_elais`: This catalog is a variant of roman_rubin_v1.1.2_elais that uses an improved tuning of the SED model parameters. The resulting luminosity distributions are in better agreement with the validation data (COSMOS 2020 and DESCQA tests).
 
-- `roman_rubin_v1.1.2_elais`: This catalog was produced for the joint roman-desc image simulations using differentiable, forward modeling techniques. Predictions for the galaxy SEDs are based on their star-formation hsitories. Sky area covers the ELAIS field and is ~110 sq. deg. 
+- `roman_rubin_v1.1.2_elais`: This catalog was produced for the joint roman-desc image simulations using differentiable, forward modeling techniques. Predictions for the galaxy SEDs are based on their star-formation hsitories. Sky area covers the ELAIS field and is ~110 sq. deg.
 
 - `roman_rubin_v1.1.1_elais`: DEPRECATED. This catalog was produced for the joint roman-desc image simulations using differentiable, forward modeling techniques. This catalog is deprecated as it contains a serious bug resulting in satellite galaxies that are too bright.
 
@@ -186,6 +186,10 @@ Note: DR3 processing is not fully completed; a few tracts are missing. Here `dr3
 
 - `dc2_eimages_run1.2i_visit-181898`: one visit of e-images for Run 1.2i
 - `dc2_eimages_run1.2p_visit-181898`: one visit of e-images for Run 1.2p
+
+## GCRCatalogs Configuration
+
+See details [here](./Configuration.md)
 
 ## Using GCRCatalogs at NERSC
 

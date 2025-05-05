@@ -1,0 +1,11 @@
+nersc:
+  root_dir: /global/cfs/cdirs/lsst/shared
+  config_source: dataregistry
+
+in2p3:
+  root_dir: /sps/lsst/groups/desc/shared
+  config_source: files
+
+nersc_public:
+  root_dir: /global/cfs/cdirs/lsst/gsharing
+  config_source: files

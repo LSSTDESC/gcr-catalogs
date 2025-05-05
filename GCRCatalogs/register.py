@@ -3,7 +3,7 @@ import warnings
 import yaml             # now needed only for error reporting
 import requests         # now needed only for error reporting
 from collections import namedtuple
-from .root_dir_manager import RootDirManager
+from .root_dir_manager import RootDirManager, get_site_name
 from .catalog_helpers import load_yaml_local, load_yaml
 from .base_config import BaseConfig, BaseConfigManager
 from .dr_register import DR_AVAILABLE
@@ -20,7 +20,8 @@ _GITHUB_URL = f"https://raw.githubusercontent.com/{_GITHUB_REPO}/master/GCRCatal
 _HERE = os.path.dirname(__file__)
 _CONFIG_DIRNAME = "catalog_configs"
 _CONFIG_DIRPATH = os.path.join(_HERE, _CONFIG_DIRNAME)
-_SITE_CONFIG_PATH = os.path.join(_HERE, "site_config", "site_rootdir.yaml")
+_SITE_CONFIG_DIR = os.path.join(_HERE, "site_config")
+_SITE_CONFIG_INFO_PATH = os.path.join(_SITE_CONFIG_DIR, "site_info.yaml")
 _CONFIG_SOURCE_ENV = "GCR_CONFIG_SOURCE"
 _DR_SCHEMA_ENV = "GCR_DR_SCHEMA"
 _DR_SCHEMA_DEFAULT = "lsst_desc_production"
@@ -111,6 +112,15 @@ class ConfigRegister(RootDirManager, ConfigManager):
 
 # module-level functions that access/manipulate ConfigSource.config_source
 def check_for_reg():
+    '''
+    Look to see if config source has already been established. If not,
+    attempt to establish it (must be either "dataregistry" or "files")
+    * if dataregistry code can't be imported, choose files
+    * else if environment variable GCR_CONFIG_SOURCE has a value, use that
+    * else try to make sensible choice based on site. Per-site default
+      values are stored in a file.   For null or unrecognized site, issue
+      warning and use "files"
+    '''
     if not ConfigSource.config_source:
         if not DR_AVAILABLE:
             ConfigSource.set_config_source()
@@ -118,11 +128,29 @@ def check_for_reg():
         else:
             msg = f'''
 Set env variable {_CONFIG_SOURCE_ENV} to acceptable value
-("dataregistry" or "files") or call ConfigSource.set_config_source'''
+("dataregistry" or "files"), revise file {_SITE_CONFIG_INFO_PATH} or
+call ConfigSource.set_config_source with acceptable value'''
             # See if user has set environment variable to select source
             source = os.getenv(_CONFIG_SOURCE_ENV, None)
             if not source:
-                raise RuntimeError("Registry source has not been established." + msg)
+                # Attempt to establish source from site
+
+                def get_config_source_from_site():
+                    site = get_site_name()
+                    if site and os.path.isfile(_SITE_CONFIG_INFO_PATH):
+                        site_config = load_yaml_local(_SITE_CONFIG_INFO_PATH)
+                        for k, v in site_config.items():
+                            if k in site:
+                                return v["config_source"]
+                    return None
+
+                source = get_config_source_from_site()
+            if not source:
+                warnings.warn(
+                    "Unable to determine config source. Defaulting to 'files'"
+                )
+                source = "files"
+
             if source == "dataregistry":
                 ConfigSource.set_config_source(dr=True)
                 return
@@ -131,7 +159,7 @@ Set env variable {_CONFIG_SOURCE_ENV} to acceptable value
                 return
             else:
                 raise RuntimeError(
-                    f"Unknown value {source} for GCR_CONFIG_SOURCE." + msg)
+                    f"Unknown value '{source}' for config source ." + msg)
 
 
 def get_root_dir():
@@ -420,7 +448,7 @@ class ConfigSource():
                     return elt[0]
             # No existing config source with these parameters so make
             # a new one
-            reg = DrConfigRegister(_SITE_CONFIG_PATH,
+            reg = DrConfigRegister(site_config_path=_SITE_CONFIG_INFO_PATH,
                                    dr_root=dr_root,
                                    dr_site=dr_site)
             ConfigSource.dr_sources.append((reg, dr_params))
@@ -428,8 +456,9 @@ class ConfigSource():
             return reg
         else:
             if not ConfigSource.file_source:
-                ConfigSource.file_source = ConfigRegister(_CONFIG_DIRPATH,
-                                                          _SITE_CONFIG_PATH)
+                ConfigSource.file_source = ConfigRegister(
+                    _CONFIG_DIRPATH,
+                    site_config_path=_SITE_CONFIG_INFO_PATH)
             reg = ConfigSource.file_source
             ConfigSource.config_source = reg
             return reg
