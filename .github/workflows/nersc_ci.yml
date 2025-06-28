@@ -1,0 +1,49 @@
+name: Trigger NERSC CI
+
+on:
+  push:
+    branches:
+      - nersc_ci
+  workflow_dispatch:
+
+env:
+  # URL to source repository on GitHub.
+  GITHUB_SOURCE_REPO: https://github.com/LSSTDESC/gcr-catalogs.git
+  # Branch to work with.
+  GITHUB_SOURCE_BRANCH: nersc_ci
+  
+  # URL to target repository on GitLab and its project number.
+  GITLAB_TARGET_REPO: https://software.nersc.gov/mcalpine/gcr-catalogs.git
+  GITLAB_TARGET_PROJECT_NUMBER: 453
+  
+  # URL to mirror repository on GitLab and its project number.
+  GITLAB_MIRROR_REPO: https://software.nersc.gov/mcalpine/mirror-gcr-catalogs.git
+  GITLAB_MIRROR_PROJECT_NUMBER: 454
+  
+  # URL to status repository on GitLab, its project number, and tag.
+  GITLAB_STATUS_REPO: https://software.nersc.gov/mcalpine/status-gcr-catalogs.git
+  GITLAB_STATUS_PROJECT_NUMBER: 455
+  GITLAB_STATUS_CONTEXT: NERSC
+  
+jobs:
+  trigger-mirror-repo-ci:
+  
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Trigger mirror repository CI workflow, passing variables as we go.
+      - run: >-
+           curl -X POST --fail 
+           --form "variables[GITLAB_STATUS_REPO]=$GITLAB_STATUS_REPO"
+           --form "variables[GITLAB_TARGET_REPO]=$GITLAB_TARGET_REPO"
+           --form "variables[GITLAB_MIRROR_REPO]=$GITLAB_MIRROR_REPO"
+           --form "variables[GITHUB_SOURCE_REPO]=$GITHUB_SOURCE_REPO"
+           --form "variables[GITHUB_SOURCE_BRANCH]=$GITHUB_SOURCE_BRANCH"
+           --form "variables[GITLAB_TARGET_PROJECT_NUMBER]=$GITLAB_TARGET_PROJECT_NUMBER"
+           --form "variables[GITLAB_MIRROR_PROJECT_NUMBER]=$GITLAB_MIRROR_PROJECT_NUMBER"
+           --form "variables[GITLAB_STATUS_PROJECT_NUMBER]=$GITLAB_STATUS_PROJECT_NUMBER"
+           --form "variables[GITLAB_STATUS_CONTEXT]=$GITLAB_STATUS_CONTEXT"
+           --form "variables[GITHUB_SHA]=${{ github.sha }}"
+           --form token=${{ secrets.MIRROR_TRIGGER_TOKEN }}
+           --form ref=main
+           https://software.nersc.gov/api/v4/projects/$GITLAB_MIRROR_PROJECT_NUMBER/trigger/pipeline
