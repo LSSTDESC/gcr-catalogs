@@ -83,5 +83,5 @@ class RedmagicCatalog(BaseGenericCatalog):
         data = FitsFile(self._file_name).data[column]
         if native_quantity:
             data = data[:, int(native_quantity.pop(0))]
-        return data.byteswap().newbyteorder()
-
+        swapped = data.byteswap()
+        return swapped.view(swapped.dtype.newbyteorder())
