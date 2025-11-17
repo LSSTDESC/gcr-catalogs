@@ -4,7 +4,7 @@ test_protoDC2.py
 import pytest
 from astropy.cosmology import FlatLambdaCDM
 import GCRCatalogs
-GCRCatalogs.ConfigSource.set_config_source()
+GCRCatalogs.ConfigSource.set_config_source(dr=False)
 
 # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='module')

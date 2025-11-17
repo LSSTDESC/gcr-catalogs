@@ -3,7 +3,7 @@ test_catalogs.py
 """
 import pytest
 import GCRCatalogs
-GCRCatalogs.ConfigSource.set_config_source()
+GCRCatalogs.ConfigSource.set_config_source(dr=False)
 
 all_catalogs = list(GCRCatalogs.get_available_catalogs(include_default_only=False))
 
