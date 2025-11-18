@@ -255,4 +255,5 @@ class BuzzardGalaxyCatalog(BaseGenericCatalog):
         data = self._open_dataset(healpix, subset).data[column]
         if native_quantity:
             data = data[:,int(native_quantity.pop(0))]
-        return data.byteswap().newbyteorder()
+        swapped = data.byteswap()
+        return swapped.view(swapped.dtype.newbyteorder())

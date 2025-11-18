@@ -3,7 +3,7 @@ test_reader_modules.py
 """
 import pytest
 import GCRCatalogs
-GCRCatalogs.ConfigSource.set_config_source()
+GCRCatalogs.ConfigSource.set_config_source(dr=False)
 from GCRCatalogs.catalog_helpers import import_subclass
 
 
