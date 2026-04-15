@@ -2,6 +2,8 @@
 conftest.py
 """
 
+from pathlib import Path
+
 def pytest_addoption(parser):
     parser.addoption(
         "--no-catalog", action="store_true", default=False, help="skip tests that need catalogs"
@@ -12,6 +14,6 @@ _SKIP_IF_NO_CATALOG = {
     'test_catalogs.py',
 }
 
-def pytest_ignore_collect(path, config):
-    if config.getoption('--no-catalog') and path.basename in _SKIP_IF_NO_CATALOG:
+def pytest_ignore_collect(collection_path: Path, config):
+    if config.getoption('--no-catalog') and collection_path.name in _SKIP_IF_NO_CATALOG:
         return True
